@@ -21,3 +21,40 @@ kospasti/
 │   └── utils/          # Helper functions (API formatters, etc.)
 ├── .gitignore
 └── README.md
+
+🌿 Branching Strategy
+- main: Production-ready code (Stabil).
+- staging: Pre-production testing.
+- feature/[nama-fitur]: Untuk pengembangan fitur baru (contoh: feature/magic-link).
+- bugfix/[nama-bug]: Untuk perbaikan masalah (contoh: bugfix/payment-error).
+
+---
+
+### 3. Template `.gitignore`
+Agar file "sampah" atau data rahasia tidak ikut ter- *upload* ke GitHub, buat file bernama `.gitignore` dan isi dengan standar *Node.js/Web Project* ini:
+
+```text
+# dependencies
+/node_modules
+/.pnp
+.pnp.js
+
+# testing
+/coverage
+
+# production
+/build
+/dist
+
+# misc
+.DS_Store
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.env
+
+# logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
