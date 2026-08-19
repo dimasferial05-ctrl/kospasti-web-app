@@ -1,7 +1,3 @@
-### 3. Template `.gitignore`
-Agar file "sampah" atau data rahasia tidak ikut ter- *upload* ke GitHub, buat file bernama `.gitignore` dan isi dengan standar *Node.js/Web Project* ini:
-
-```text
 # dependencies
 /node_modules
 /.pnp
