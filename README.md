@@ -10,15 +10,16 @@ Menyelesaikan masalah ketidakpastian data kamar kos dengan menghubungkan pencari
 2. **Magic Link via WA:** Pembaruan status 1-klik untuk pemilik kos (tanpa *login/install*).
 3. **Instant Booking & E-Wallet:** Mengamankan kamar dari jarak jauh dengan aman.
 
-## 📂 Folder Structure (Draft)
+## 📂 Folder Structure (Next.js App Router)
 ```text
 kospasti/
+├── prisma/             # SQLite database & Prisma schema
 ├── public/             # Static assets (images, icons)
 ├── src/
-│   ├── components/     # Reusable UI components (buttons, cards)
-│   ├── pages/          # Application routes (Search, Booking, Owner Dashboard)
-│   ├── styles/         # Global styling and CSS modules
-│   └── utils/          # Helper functions (API formatters, etc.)
+│   ├── app/            # Next.js App Router (Pages & API routes)
+│   ├── components/     # shadcn/ui & Reusable React components
+│   ├── lib/            # Utility functions & Prisma client
+│   └── styles/         # Tailwind CSS globals
 ├── .gitignore
 └── README.md
 
