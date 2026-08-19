@@ -26,3 +26,7 @@ Agar file "sampah" atau data rahasia tidak ikut ter- *upload* ke GitHub, buat fi
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+# Next.js build output
+/.next
+/out
