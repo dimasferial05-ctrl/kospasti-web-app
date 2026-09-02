@@ -22,8 +22,9 @@ kospasti/
 │   └── styles/         # Tailwind CSS globals
 ├── .gitignore
 └── README.md
+```
 
-🌿 Branching Strategy
+## 🌿 Branching Strategy
 - main: Production-ready code (Stabil).
 - staging: Pre-production testing.
 - feature/[nama-fitur]: Untuk pengembangan fitur baru (contoh: feature/magic-link).
