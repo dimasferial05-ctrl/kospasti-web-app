@@ -9,3 +9,48 @@ datasource db {
   provider = "sqlite"
   url      = env("DATABASE_URL")
 }
+
+model Owner {
+  id              String      @id @default(uuid())
+  name            String
+  whatsapp_number String      @unique
+  created_at      DateTime    @default(now())
+  updated_at      DateTime    @updatedAt
+  properties      Property[]
+  magic_links     MagicLink[]
+}
+
+model Property {
+  id              String    @id @default(uuid())
+  name            String
+  price_per_month Int
+  available_rooms Int       @default(0)
+  gender_type     String
+  facilities      String
+  image_url       String?
+  last_updated    DateTime  @default(now()) @updatedAt
+  owner_id        String
+  owner           Owner     @relation(fields: [owner_id], references: [id], onDelete: Cascade)
+  bookings        Booking[]
+}
+
+model MagicLink {
+  id         String   @id @default(uuid())
+  token      String   @unique
+  expires_at DateTime
+  is_used    Boolean  @default(false)
+  created_at DateTime @default(now())
+  owner_id   String
+  owner      Owner    @relation(fields: [owner_id], references: [id], onDelete: Cascade)
+}
+
+model Booking {
+  id               String   @id @default(uuid())
+  student_name     String
+  student_whatsapp String
+  move_in_date     DateTime
+  status           String   @default("PENDING")
+  created_at       DateTime @default(now())
+  property_id      String
+  property         Property @relation(fields: [property_id], references: [id], onDelete: Cascade)
+}
