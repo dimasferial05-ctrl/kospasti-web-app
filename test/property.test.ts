@@ -119,6 +119,7 @@ describe("Property Model / API", () => {
         prisma.property.create({
           data: {
             name: "Kos Tanpa Fasilitas & Harga",
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
           } as any,
         })
       ).rejects.toThrow();

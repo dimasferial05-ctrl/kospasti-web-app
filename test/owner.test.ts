@@ -66,6 +66,7 @@ describe("Owner Model / API", () => {
         prisma.owner.create({
           data: {
             name: "Owner Tanpa WA",
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
           } as any,
         })
       ).rejects.toThrow();
