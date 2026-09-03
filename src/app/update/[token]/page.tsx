@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Minus, Plus, Loader2, XCircle, ArrowLeft, Home } from "lucide-react";
+import { Minus, Plus, Loader2, XCircle, CheckCircle, ArrowLeft, Home } from "lucide-react";
 
 interface Property {
   id: string;
@@ -27,6 +27,7 @@ export default function UpdateRoomPage() {
   const [selectedPropertyIndex, setSelectedPropertyIndex] = useState<number>(0);
   const [roomCount, setRoomCount] = useState<number>(0);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  const [isSuccess, setIsSuccess] = useState<boolean>(false);
 
   useEffect(() => {
     if (!token) return;
@@ -108,7 +109,7 @@ export default function UpdateRoomPage() {
       const result = await response.json();
 
       if (response.ok && result.success) {
-        alert("Data berhasil disimpan!");
+        setIsSuccess(true);
       } else {
         alert(result.error || "Gagal menyimpan data.");
       }
@@ -150,6 +151,32 @@ export default function UpdateRoomPage() {
             <Button
               variant="outline"
               className="w-full flex items-center justify-center gap-2 border-red-200 text-red-800 hover:bg-red-100/80 hover:text-red-900"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              Kembali ke Beranda
+            </Button>
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  // 3. Success State
+  if (isSuccess) {
+    return (
+      <div className="flex-1 flex flex-col items-center justify-center p-4 min-h-[60vh] w-full">
+        <div className="bg-green-50 border border-green-200 rounded-xl p-8 text-center max-w-sm w-full shadow-xs flex flex-col items-center">
+          <CheckCircle className="w-20 h-20 text-green-500 mb-4 stroke-[1.75]" />
+          <h2 className="text-xl font-bold text-green-900 mb-2">
+            Pembaruan Berhasil!
+          </h2>
+          <p className="text-sm text-slate-600 mb-6 leading-relaxed">
+            Data sisa kamar kos Anda telah diperbarui ke sistem. Silakan tutup halaman ini dan kembali ke WhatsApp.
+          </p>
+          <Link href="/" className="w-full">
+            <Button
+              variant="outline"
+              className="w-full flex items-center justify-center gap-2 border-green-200 text-green-800 hover:bg-green-100/80 hover:text-green-900"
             >
               <ArrowLeft className="w-4 h-4" />
               Kembali ke Beranda
