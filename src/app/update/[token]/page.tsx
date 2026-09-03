@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Minus, Plus, Loader2, AlertCircle, ArrowLeft, Home } from "lucide-react";
+import { Minus, Plus, Loader2, XCircle, ArrowLeft, Home } from "lucide-react";
 
 interface Property {
   id: string;
@@ -133,19 +133,29 @@ export default function UpdateRoomPage() {
 
   // 2. Error State
   if (error || !propertyData) {
+    const errorMessage = error || "Data properti tidak ditemukan.";
+
     return (
-      <div className="flex-1 flex flex-col items-center justify-center min-h-[60vh] text-center p-6">
-        <div className="w-16 h-16 rounded-full bg-red-50 flex items-center justify-center text-red-500 mb-4">
-          <AlertCircle className="w-8 h-8" />
+      <div className="flex-1 flex flex-col items-center justify-center p-4 min-h-[60vh] w-full">
+        <div className="bg-red-50 border border-red-200 rounded-xl p-6 text-center max-w-sm w-full shadow-xs flex flex-col items-center">
+          <XCircle className="w-16 h-16 text-red-500 mb-4 stroke-[1.75]" />
+          <h2 className="text-xl font-bold text-red-900 mb-2">Akses Ditolak</h2>
+          <p className="text-sm font-medium text-red-700 mb-3 leading-snug">
+            {errorMessage}
+          </p>
+          <p className="text-xs text-slate-500 mb-6 leading-relaxed">
+            Tautan ini mungkin sudah kedaluwarsa atau pernah digunakan. Silakan hubungi admin untuk mendapatkan tautan baru.
+          </p>
+          <Link href="/" className="w-full">
+            <Button
+              variant="outline"
+              className="w-full flex items-center justify-center gap-2 border-red-200 text-red-800 hover:bg-red-100/80 hover:text-red-900"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              Kembali ke Beranda
+            </Button>
+          </Link>
         </div>
-        <h2 className="text-xl font-bold text-slate-900 mb-2">Tautan Bermasalah</h2>
-        <p className="text-sm text-red-600 mb-6 max-w-xs">{error || "Data tidak ditemukan."}</p>
-        <Link href="/">
-          <Button variant="outline" className="flex items-center gap-2">
-            <ArrowLeft className="w-4 h-4" />
-            Kembali ke Beranda
-          </Button>
-        </Link>
       </div>
     );
   }
