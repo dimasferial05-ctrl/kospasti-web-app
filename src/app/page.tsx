@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { SearchFilter, FilterValues } from "@/components/shared/SearchFilter";
 import { KosPropertyCard } from "@/components/shared/KosPropertyCard";
-import { Loader2, AlertCircle } from "lucide-react";
+import { Loader2, AlertCircle, SearchX } from "lucide-react";
 
 interface PropertyItem {
   id: string;
@@ -116,12 +116,13 @@ export default function Home() {
         )}
 
         {!isLoading && !error && properties.length === 0 && (
-          <div className="py-12 flex flex-col items-center justify-center text-center gap-2 text-slate-500 bg-slate-50 rounded-xl border border-slate-200 p-6">
-            <p className="text-base font-semibold text-slate-700">
-              Tidak ada kos yang ditemukan
-            </p>
-            <p className="text-xs text-slate-500">
-              Coba ubah kata kunci atau filter pencarian Anda.
+          <div className="flex flex-col items-center justify-center p-12 text-center bg-white rounded-xl border border-slate-200 border-dashed mt-4">
+            <SearchX className="w-16 h-16 text-slate-300 mb-4" />
+            <h3 className="text-base font-semibold text-slate-800 mb-1">
+              Kos Tidak Ditemukan
+            </h3>
+            <p className="text-xs text-slate-500 max-w-xs leading-relaxed">
+              Maaf, tidak ada kos yang sesuai dengan kriteria pencarian atau filter Anda. Silakan coba atur ulang filter pencarian.
             </p>
           </div>
         )}

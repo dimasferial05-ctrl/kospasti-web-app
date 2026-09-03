@@ -17,7 +17,7 @@ describe("Home Page Component (/)", () => {
     expect(firstLine).toMatch(/^["']use client["'];?$/);
   });
 
-  it("merender komponen filter dan status loading pada saat inisialisasi", () => {
+  it("merender komponen filter dan status loading pada saat inisialisasi tanpa memunculkan empty state", () => {
     // Mock global fetch agar tidak melakukan real network request
     global.fetch = vi.fn().mockImplementation(() =>
       new Promise(() => {
@@ -33,7 +33,29 @@ describe("Home Page Component (/)", () => {
     expect(html).toContain("Tipe Kos");
     expect(html).toContain("Cari Kos");
 
-    // Loading indicator
+    // Loading indicator should appear
     expect(html).toContain("Memuat daftar kos...");
+
+    // Empty state should NOT appear while loading
+    expect(html).not.toContain("Kos Tidak Ditemukan");
+  });
+
+  it("memiliki struktur Empty State yang sesuai dengan spesifikasi UI", () => {
+    const filePath = path.resolve(__dirname, "../src/app/page.tsx");
+    const content = fs.readFileSync(filePath, "utf-8");
+
+    // Pastikan mengimpor SearchX dari lucide-react
+    expect(content).toContain("SearchX");
+    expect(content).toContain("from \"lucide-react\"");
+
+    // Pastikan memiliki teks Empty State sesuai spesifikasi
+    expect(content).toContain("Kos Tidak Ditemukan");
+    expect(content).toContain(
+      "Maaf, tidak ada kos yang sesuai dengan kriteria pencarian atau filter Anda."
+    );
+
+    // Pastikan styling dashed border & responsive container ada
+    expect(content).toContain("border-dashed");
+    expect(content).toContain("text-slate-300");
   });
 });
