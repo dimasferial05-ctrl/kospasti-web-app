@@ -26,6 +26,7 @@ export default function UpdateRoomPage() {
   const [propertyData, setPropertyData] = useState<PropertyData | null>(null);
   const [selectedPropertyIndex, setSelectedPropertyIndex] = useState<number>(0);
   const [roomCount, setRoomCount] = useState<number>(0);
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
   useEffect(() => {
     if (!token) return;
@@ -77,6 +78,45 @@ export default function UpdateRoomPage() {
     setSelectedPropertyIndex(index);
     if (propertyData?.properties[index]) {
       setRoomCount(propertyData.properties[index].available_rooms ?? 0);
+    }
+  };
+
+  const handleSubmit = async () => {
+    const targetProperty =
+      propertyData?.properties[selectedPropertyIndex] ||
+      propertyData?.properties[0];
+
+    if (!token || !targetProperty) {
+      alert("Data properti atau token tidak valid.");
+      return;
+    }
+
+    try {
+      setIsSubmitting(true);
+      const response = await fetch("/api/magic-link/update", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          token,
+          propertyId: targetProperty.id,
+          availableRooms: roomCount,
+        }),
+      });
+
+      const result = await response.json();
+
+      if (response.ok && result.success) {
+        alert("Data berhasil disimpan!");
+      } else {
+        alert(result.error || "Gagal menyimpan data.");
+      }
+    } catch (err) {
+      console.error("Gagal mengirim data pembaruan:", err);
+      alert("Gagal menyimpan data. Terjadi kesalahan jaringan.");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -205,14 +245,23 @@ export default function UpdateRoomPage() {
         </p>
       </div>
 
-      {/* Submit Button Placeholder */}
+      {/* Submit Button */}
       <div className="w-full pt-6">
         <Button
           type="button"
           size="lg"
-          className="w-full h-12 text-base font-semibold bg-slate-900 text-white hover:bg-slate-800 rounded-xl shadow-md transition-all active:scale-[0.99]"
+          onClick={handleSubmit}
+          disabled={isSubmitting}
+          className="w-full h-12 text-base font-semibold bg-slate-900 text-white hover:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed rounded-xl shadow-md transition-all active:scale-[0.99] flex items-center justify-center gap-2"
         >
-          Simpan Data
+          {isSubmitting ? (
+            <>
+              <Loader2 className="w-5 h-5 animate-spin" />
+              <span>Menyimpan...</span>
+            </>
+          ) : (
+            "Simpan Data"
+          )}
         </Button>
       </div>
     </div>
