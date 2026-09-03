@@ -119,22 +119,43 @@ export async function POST(request: Request) {
       );
     }
 
-    // Pembaruan data menggunakan transaksi atomik
-    await prisma.$transaction([
-      prisma.property.update({
-        where: { id: trimmedPropertyId },
-        data: {
-          available_rooms: availableRooms,
-          updated_at: new Date(),
-        },
-      }),
-      prisma.magicLink.update({
-        where: { token: trimmedToken },
-        data: {
-          is_used: true,
-        },
-      }),
-    ]);
+    // Pembaruan data menggunakan transaksi atomik dengan Optimistic Concurrency Control
+    try {
+      await prisma.$transaction(async (tx) => {
+        const magicLinkResult = await tx.magicLink.updateMany({
+          where: {
+            token: trimmedToken,
+            is_used: false,
+          },
+          data: {
+            is_used: true,
+          },
+        });
+
+        if (magicLinkResult.count === 0) {
+          throw new Error("TOKEN_ALREADY_USED");
+        }
+
+        await tx.property.update({
+          where: { id: trimmedPropertyId },
+          data: {
+            available_rooms: availableRooms,
+            updated_at: new Date(),
+          },
+        });
+      });
+    } catch (txError: unknown) {
+      if (txError instanceof Error && txError.message === "TOKEN_ALREADY_USED") {
+        return NextResponse.json(
+          {
+            success: false,
+            error: "Token sudah pernah digunakan",
+          },
+          { status: 401 }
+        );
+      }
+      throw txError;
+    }
 
     return NextResponse.json(
       {

@@ -322,4 +322,78 @@ describe("POST /api/magic-link/update", () => {
     expect(data.success).toBe(false);
     expect(data.error).toBe("Properti tidak ditemukan untuk pemilik token ini");
   });
+
+  it("mencegah race condition ketika dua request dengan token yang sama dieksekusi secara bersamaan (Optimistic Concurrency Control)", async () => {
+    const owner = await prisma.owner.create({
+      data: {
+        name: "Ibu Concurrency",
+        whatsapp_number: "628999888777",
+      },
+    });
+
+    const property = await prisma.property.create({
+      data: {
+        name: "Kos Concurrency Safe",
+        price_per_month: 950000,
+        available_rooms: 10,
+        gender_type: "CAMPUR",
+        facilities: "WiFi, Parkir",
+        owner_id: owner.id,
+      },
+    });
+
+    const token = "token-concurrent-test";
+    await prisma.magicLink.create({
+      data: {
+        token,
+        owner_id: owner.id,
+        expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000),
+        is_used: false,
+      },
+    });
+
+    const req1 = new Request("http://localhost:3000/api/magic-link/update", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        token,
+        propertyId: property.id,
+        availableRooms: 5,
+      }),
+    });
+
+    const req2 = new Request("http://localhost:3000/api/magic-link/update", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        token,
+        propertyId: property.id,
+        availableRooms: 3,
+      }),
+    });
+
+    // Jalankan kedua request secara konkuren
+    const [res1, res2] = await Promise.all([POST(req1), POST(req2)]);
+    const statuses = [res1.status, res2.status];
+
+    // Tepat satu request harus sukses (200) dan satu harus gagal (401)
+    expect(statuses).toContain(200);
+    expect(statuses).toContain(401);
+
+    const successfulRes = res1.status === 200 ? res1 : res2;
+    const failedRes = res1.status === 401 ? res1 : res2;
+
+    const successData = await successfulRes.json();
+    const failedData = await failedRes.json();
+
+    expect(successData.success).toBe(true);
+    expect(failedData.success).toBe(false);
+    expect(failedData.error).toBe("Token sudah pernah digunakan");
+
+    // Pastikan token berstatus is_used: true
+    const finalMagicLink = await prisma.magicLink.findUnique({
+      where: { token },
+    });
+    expect(finalMagicLink?.is_used).toBe(true);
+  });
 });
