@@ -64,7 +64,9 @@ export default function UpdateRoomPage() {
   }, [token]);
 
   const handleDecrement = () => {
-    setRoomCount((prev) => Math.max(0, prev - 1));
+    if (roomCount > 0) {
+      setRoomCount((prev) => Math.max(0, prev - 1));
+    }
   };
 
   const handleIncrement = () => {
@@ -156,7 +158,7 @@ export default function UpdateRoomPage() {
               onClick={handleDecrement}
               disabled={roomCount <= 0}
               aria-label="Kurangi Kamar"
-              className="w-14 h-14 rounded-2xl border-2 border-slate-300 hover:bg-slate-200 active:scale-95 disabled:opacity-30 disabled:hover:bg-transparent transition-all flex items-center justify-center shadow-xs"
+              className="w-14 h-14 rounded-2xl border-2 border-slate-300 hover:bg-slate-200 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-transparent transition-all flex items-center justify-center shadow-xs"
             >
               <Minus className="w-6 h-6 stroke-[2.5]" />
             </Button>
