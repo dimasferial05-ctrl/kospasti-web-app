@@ -119,6 +119,112 @@ describe("GET /api/properties", () => {
       const time2 = new Date(result.data[1].last_updated).getTime();
       expect(time1).toBeGreaterThan(time2);
     });
+
+    describe("Penyaringan (Filtering)", () => {
+      let ownerId: string;
+
+      beforeEach(async () => {
+        const owner = await prisma.owner.create({
+          data: {
+            name: "Ibu Hajah",
+            whatsapp_number: "628999888777",
+          },
+        });
+        ownerId = owner.id;
+
+        await prisma.property.createMany({
+          data: [
+            {
+              name: "Kos Mawar Putra",
+              price_per_month: 500000,
+              available_rooms: 2,
+              gender_type: "PUTRA",
+              facilities: "Kasur",
+              owner_id: ownerId,
+            },
+            {
+              name: "Kos Mawar Putri Indah",
+              price_per_month: 800000,
+              available_rooms: 4,
+              gender_type: "PUTRI",
+              facilities: "WiFi, Kasur",
+              owner_id: ownerId,
+            },
+            {
+              name: "Kos Melati Campur Exclusive",
+              price_per_month: 1200000,
+              available_rooms: 1,
+              gender_type: "CAMPUR",
+              facilities: "AC, WiFi, Kasur",
+              owner_id: ownerId,
+            },
+          ],
+        });
+      });
+
+      it("menyaring kos berdasarkan nama secara parsial (?name=mawar)", async () => {
+        const request = new Request("http://localhost:3000/api/properties?name=mawar");
+        const response = await GET(request);
+        const result = await response.json();
+
+        expect(response.status).toBe(200);
+        expect(result.data).toHaveLength(2);
+        expect(result.data.every((p: { name: string }) => p.name.toLowerCase().includes("mawar"))).toBe(true);
+      });
+
+      it("menyaring kos berdasarkan batas harga tertinggi (?maxPrice=800000)", async () => {
+        const request = new Request("http://localhost:3000/api/properties?maxPrice=800000");
+        const response = await GET(request);
+        const result = await response.json();
+
+        expect(response.status).toBe(200);
+        expect(result.data).toHaveLength(2);
+        expect(result.data.every((p: { price_per_month: number }) => p.price_per_month <= 800000)).toBe(true);
+      });
+
+      it("menyaring kos berdasarkan tipe gender (?genderType=PUTRI)", async () => {
+        const request = new Request("http://localhost:3000/api/properties?genderType=PUTRI");
+        const response = await GET(request);
+        const result = await response.json();
+
+        expect(response.status).toBe(200);
+        expect(result.data).toHaveLength(1);
+        expect(result.data[0].name).toBe("Kos Mawar Putri Indah");
+        expect(result.data[0].gender_type).toBe("PUTRI");
+      });
+
+      it("tidak menyaring tipe gender jika ?genderType=ALL", async () => {
+        const request = new Request("http://localhost:3000/api/properties?genderType=ALL");
+        const response = await GET(request);
+        const result = await response.json();
+
+        expect(response.status).toBe(200);
+        expect(result.data).toHaveLength(3);
+      });
+
+      it("menggabungkan beberapa parameter sekaligus (?name=mawar&maxPrice=600000&genderType=PUTRA)", async () => {
+        const request = new Request(
+          "http://localhost:3000/api/properties?name=mawar&maxPrice=600000&genderType=PUTRA"
+        );
+        const response = await GET(request);
+        const result = await response.json();
+
+        expect(response.status).toBe(200);
+        expect(result.data).toHaveLength(1);
+        expect(result.data[0].name).toBe("Kos Mawar Putra");
+        expect(result.data[0].price_per_month).toBe(500000);
+        expect(result.data[0].gender_type).toBe("PUTRA");
+      });
+
+      it("mengabaikan maxPrice jika input bukan angka valid", async () => {
+        const request = new Request("http://localhost:3000/api/properties?maxPrice=abc");
+        const response = await GET(request);
+        const result = await response.json();
+
+        expect(response.status).toBe(200);
+        expect(result.data).toHaveLength(3);
+      });
+    });
   });
 
   describe("Skenario Gagal", () => {
