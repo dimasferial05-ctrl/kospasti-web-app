@@ -96,4 +96,50 @@ describe("POST /api/magic-link/generate", () => {
     expect(savedMagicLink?.owner_id).toBe(owner.id);
     expect(savedMagicLink?.is_used).toBe(false);
   });
+
+  it("menonaktifkan token lama yang belum digunakan saat generate token baru untuk owner yang sama", async () => {
+    const owner = await prisma.owner.create({
+      data: {
+        name: "Pak Bambang Multi Token",
+        whatsapp_number: "628999111222",
+      },
+    });
+
+    // Buat token pertama yang belum digunakan
+    const firstToken = await prisma.magicLink.create({
+      data: {
+        token: "token-pertama-lama-12345",
+        expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000),
+        is_used: false,
+        owner_id: owner.id,
+      },
+    });
+
+    // Request pembuatan token baru
+    const request = new Request("http://localhost:3000/api/magic-link/generate", {
+      method: "POST",
+      body: JSON.stringify({ ownerId: owner.id }),
+      headers: { "Content-Type": "application/json" },
+    });
+
+    const response = await POST(request);
+    const data = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(data.success).toBe(true);
+
+    // Cek bahwa token pertama sekarang telah diinvalisir (is_used = true)
+    const updatedFirstToken = await prisma.magicLink.findUnique({
+      where: { id: firstToken.id },
+    });
+    expect(updatedFirstToken?.is_used).toBe(true);
+
+    // Cek bahwa token baru yang dihasilkan bernilai is_used = false
+    const newToken = data.magicLink.split("/update/")[1];
+    const savedNewToken = await prisma.magicLink.findUnique({
+      where: { token: newToken },
+    });
+    expect(savedNewToken?.is_used).toBe(false);
+  });
 });
+

@@ -39,6 +39,17 @@ export async function POST(request: Request) {
     // Generate unique random token
     const token = crypto.randomBytes(32).toString("hex");
 
+    // Invalidate any existing unused tokens for this owner to ensure only one active token
+    await prisma.magicLink.updateMany({
+      where: {
+        owner_id: owner.id,
+        is_used: false,
+      },
+      data: {
+        is_used: true,
+      },
+    });
+
     // Save to database
     await prisma.magicLink.create({
       data: {
