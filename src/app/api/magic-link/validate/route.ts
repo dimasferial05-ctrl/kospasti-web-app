@@ -22,8 +22,15 @@ export async function GET(request: Request) {
       where: { token: trimmedToken },
       include: {
         owner: {
-          include: {
-            properties: true,
+          select: {
+            name: true,
+            properties: {
+              select: {
+                id: true,
+                name: true,
+                available_rooms: true,
+              },
+            },
           },
         },
       },
@@ -65,11 +72,7 @@ export async function GET(request: Request) {
         message: "Token valid",
         data: {
           ownerName: magicLink.owner.name,
-          properties: magicLink.owner.properties.map((property) => ({
-            id: property.id,
-            name: property.name,
-            available_rooms: property.available_rooms,
-          })),
+          properties: magicLink.owner.properties,
         },
       },
       { status: 200 }
