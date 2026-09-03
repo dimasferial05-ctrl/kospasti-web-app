@@ -36,7 +36,8 @@ export default function UpdateRoomPage() {
         setError(null);
 
         const response = await fetch(
-          `/api/magic-link/validate?token=${encodeURIComponent(token)}`
+          `/api/magic-link/validate?token=${encodeURIComponent(token)}`,
+          { cache: "no-store" }
         );
         const result = await response.json();
 
