@@ -76,4 +76,26 @@ describe("Property Detail Page Component (/kos/[id])", () => {
     // Info Pemilik
     expect(content).toContain("Dikelola oleh");
   });
+
+  it("menangani kondisi kamar habis (isFull) pada tombol Sticky Bottom Bar", () => {
+    const filePath = path.resolve(__dirname, "../src/app/kos/[id]/page.tsx");
+    const content = fs.readFileSync(filePath, "utf-8");
+
+    // Menghitung variabel isFull berdasarkan available_rooms === 0
+    expect(content).toContain("property.available_rooms === 0");
+
+    // Tombol memiliki properti disabled={isFull}
+    expect(content).toContain("disabled={isFull}");
+
+    // Tombol memiliki teks dinamis 'Kamar Penuh' vs 'Amankan Kamar'
+    expect(content).toContain("isFull ? \"Kamar Penuh\" : \"Amankan Kamar\"");
+
+    // Tombol memiliki kelas visual dinamis abu-abu dan cursor-not-allowed vs biru
+    expect(content).toContain("bg-slate-400 cursor-not-allowed");
+    expect(content).toContain("bg-blue-600 hover:bg-blue-700");
+
+    // Pesan peringatan opsional jika isFull bernilai true
+    expect(content).toContain("Mohon maaf, semua kamar telah terisi.");
+  });
 });
+

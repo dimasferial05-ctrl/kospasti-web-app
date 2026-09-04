@@ -105,6 +105,7 @@ export default function PropertyDetailPage() {
   }
 
   const formattedPrice = `Rp ${property.price_per_month.toLocaleString("id-ID")}`;
+  const isFull = property.available_rooms === 0;
   const isAvailable = property.available_rooms > 0;
   const normalizedGender = property.gender_type?.toUpperCase() || "";
   const genderBadgeStyle = (() => {
@@ -254,20 +255,25 @@ export default function PropertyDetailPage() {
               {formattedPrice}{" "}
               <span className="text-xs font-normal text-slate-500">/ bln</span>
             </p>
+            {isFull && (
+              <p className="text-[10px] text-rose-500 font-medium">
+                Mohon maaf, semua kamar telah terisi.
+              </p>
+            )}
           </div>
           <button
             type="button"
-            disabled={!isAvailable}
+            disabled={isFull}
             onClick={() =>
               console.log("Amankan Kamar diklik untuk ID:", property.id)
             }
-            className={`px-6 py-2 rounded-lg font-bold transition-colors ${
-              isAvailable
-                ? "bg-blue-600 hover:bg-blue-700 text-white cursor-pointer"
-                : "bg-slate-300 text-slate-500 cursor-not-allowed"
+            className={`px-6 py-2 rounded-lg font-bold text-white transition-colors ${
+              isFull
+                ? "bg-slate-400 cursor-not-allowed"
+                : "bg-blue-600 hover:bg-blue-700 cursor-pointer"
             }`}
           >
-            Amankan Kamar
+            {isFull ? "Kamar Penuh" : "Amankan Kamar"}
           </button>
         </div>
       </div>
