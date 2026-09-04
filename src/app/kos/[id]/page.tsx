@@ -138,7 +138,7 @@ export default function PropertyDetailPage() {
 
   if (isLoading) {
     return (
-      <div className="py-24 flex flex-col items-center justify-center gap-3 text-slate-500">
+      <div className="max-w-md mx-auto min-h-screen bg-white shadow-sm p-4 py-24 flex flex-col items-center justify-center gap-3 text-slate-500">
         <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
         <p className="text-sm font-medium">Memuat detail kamar...</p>
       </div>
@@ -147,7 +147,7 @@ export default function PropertyDetailPage() {
 
   if (error || !property) {
     return (
-      <div className="py-16 flex flex-col items-center justify-center text-center gap-4">
+      <div className="max-w-md mx-auto min-h-screen bg-white shadow-sm p-4 py-16 flex flex-col items-center justify-center text-center gap-4">
         <div className="w-16 h-16 rounded-full bg-rose-50 text-rose-500 flex items-center justify-center">
           <AlertCircle className="w-8 h-8" />
         </div>
@@ -193,7 +193,7 @@ export default function PropertyDetailPage() {
     : [];
 
   return (
-    <div className="min-h-screen bg-slate-50 pb-24 -m-4 flex flex-col">
+    <div className="max-w-md mx-auto min-h-screen bg-slate-50 pb-24 flex flex-col relative shadow-sm">
       {/* Header Bar */}
       <div className="sticky top-0 z-30 bg-white/80 backdrop-blur-md border-b border-slate-200/80 px-4 py-3 flex items-center gap-3">
         <Link
