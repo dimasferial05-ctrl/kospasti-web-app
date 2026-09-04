@@ -32,7 +32,7 @@ describe("Manage Bookings Page (/admin/bookings)", () => {
     expect(html).toContain("Memuat riwayat transaksi...");
   });
 
-  it("memiliki struktur tabel Enterprise dengan header kolom lengkap", () => {
+  it("memiliki struktur tabel Enterprise dengan header kolom lengkap termasuk Aksi", () => {
     const filePath = path.resolve(
       __dirname,
       "../src/app/admin/bookings/page.tsx"
@@ -49,9 +49,10 @@ describe("Manage Bookings Page (/admin/bookings)", () => {
     expect(content).toContain("Nama Kos");
     expect(content).toContain("Tgl Masuk");
     expect(content).toContain("Status");
+    expect(content).toContain("Aksi");
   });
 
-  it("memiliki logika badge status transaksi (SUCCESS hijau, PENDING kuning)", () => {
+  it("memiliki logika badge status transaksi (SUCCESS hijau, PENDING kuning, REJECTED merah)", () => {
     const filePath = path.resolve(
       __dirname,
       "../src/app/admin/bookings/page.tsx"
@@ -62,6 +63,23 @@ describe("Manage Bookings Page (/admin/bookings)", () => {
     expect(content).toContain("bg-green-100 text-green-700");
     expect(content).toContain('status === "PENDING"');
     expect(content).toContain("bg-yellow-100 text-yellow-700");
+    expect(content).toContain('status === "REJECTED"');
+    expect(content).toContain("bg-rose-100 text-rose-700");
+  });
+
+  it("memiliki tombol aksi Setujui dan Tolak untuk transaksi berstatus PENDING", () => {
+    const filePath = path.resolve(
+      __dirname,
+      "../src/app/admin/bookings/page.tsx"
+    );
+    const content = fs.readFileSync(filePath, "utf-8");
+
+    expect(content).toContain("Setujui");
+    expect(content).toContain("Tolak");
+    expect(content).toContain("handleUpdateStatus");
+    expect(content).toContain('method: "PATCH"');
+    expect(content).toContain("PATCH");
+    expect(content).toContain("/api/admin/bookings/");
   });
 
   it("menampilkan potongan ID transaksi dan format tanggal lokal id-ID", () => {
