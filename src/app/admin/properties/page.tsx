@@ -8,6 +8,7 @@ interface PropertyAdminItem {
   name: string;
   available_rooms: number;
   owner?: {
+    id: string;
     name: string;
     whatsapp_number: string;
   } | null;
@@ -17,6 +18,7 @@ export default function ManagePropertiesPage() {
   const [properties, setProperties] = useState<PropertyAdminItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [loadingId, setLoadingId] = useState<string | null>(null);
 
   useEffect(() => {
     fetch("/api/admin/properties")
@@ -32,19 +34,40 @@ export default function ManagePropertiesPage() {
       .finally(() => setIsLoading(false));
   }, []);
 
-  // Fungsi untuk membuat dan menyalin Magic Link
-  const handleCopyLink = (propertyId: string) => {
-    // Asumsi format Magic Link mengarah ke rute /update/[token_atau_id]
-    const magicLink = `${window.location.origin}/update/${propertyId}`;
+  // Fungsi untuk membuat dan menyalin Magic Link via API
+  const handleCopyLink = async (ownerId: string | undefined, propertyId: string) => {
+    if (!ownerId) {
+      alert("Owner tidak ditemukan untuk properti ini.");
+      return;
+    }
 
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-      navigator.clipboard.writeText(magicLink).then(() => {
+    try {
+      setLoadingId(propertyId);
+      const res = await fetch("/api/magic-link/generate", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ ownerId }),
+      });
+
+      const data = await res.json();
+
+      if (data.success && data.magicLink) {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          await navigator.clipboard.writeText(data.magicLink);
+        }
         setCopiedId(propertyId);
         setTimeout(() => setCopiedId(null), 2000); // Reset notifikasi setelah 2 detik
-      });
-    } else {
-      setCopiedId(propertyId);
-      setTimeout(() => setCopiedId(null), 2000);
+      } else {
+        console.error("Gagal membuat magic link:", data.error);
+        alert(data.error || "Gagal membuat magic link");
+      }
+    } catch (err) {
+      console.error("Error generating magic link:", err);
+      alert("Terjadi kesalahan koneksi saat membuat magic link.");
+    } finally {
+      setLoadingId(null);
     }
   };
 
@@ -110,10 +133,16 @@ export default function ManagePropertiesPage() {
                 </td>
                 <td className="p-4 text-right">
                   <button
-                    onClick={() => handleCopyLink(prop.id)}
-                    className="inline-flex items-center gap-2 bg-slate-900 hover:bg-slate-800 text-white px-4 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer"
+                    disabled={loadingId === prop.id}
+                    onClick={() => handleCopyLink(prop.owner?.id, prop.id)}
+                    className="inline-flex items-center gap-2 bg-slate-900 hover:bg-slate-800 disabled:opacity-50 text-white px-4 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer"
                   >
-                    {copiedId === prop.id ? (
+                    {loadingId === prop.id ? (
+                      <>
+                        <Loader2 className="w-3.5 h-3.5 animate-spin text-white" />
+                        <span>Membuat Link...</span>
+                      </>
+                    ) : copiedId === prop.id ? (
                       <>
                         <CheckCircle2 className="text-green-400" size={14} />
                         <span>Tersalin!</span>

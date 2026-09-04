@@ -57,11 +57,13 @@ describe("GET /api/admin/properties", () => {
 
       // Pastikan urutan berdasarkan nama 'asc' (Kos Anggrek Nyaman duluan daripada Kos Bunga Melati)
       expect(result.data[0].name).toBe("Kos Anggrek Nyaman");
+      expect(result.data[0].owner.id).toBe(owner2.id);
       expect(result.data[0].owner.name).toBe("Pak Bambang");
       expect(result.data[0].owner.whatsapp_number).toBe("089876543210");
       expect(result.data[0].available_rooms).toBe(0);
 
       expect(result.data[1].name).toBe("Kos Bunga Melati");
+      expect(result.data[1].owner.id).toBe(owner1.id);
       expect(result.data[1].owner.name).toBe("Ibu Rahayu");
       expect(result.data[1].owner.whatsapp_number).toBe("081234567890");
       expect(result.data[1].available_rooms).toBe(2);

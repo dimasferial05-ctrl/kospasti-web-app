@@ -65,7 +65,7 @@ describe("Manage Properties Page (/admin/properties)", () => {
     expect(content).toContain("Kamar");
   });
 
-  it("memiliki fungsi handleCopyLink untuk menyalin Magic Link ke clipboard dan feedback 'Tersalin!'", () => {
+  it("memiliki fungsi handleCopyLink untuk memanggil API generate Magic Link dan menyalin ke clipboard dengan feedback 'Tersalin!'", () => {
     const filePath = path.resolve(
       __dirname,
       "../src/app/admin/properties/page.tsx"
@@ -73,7 +73,8 @@ describe("Manage Properties Page (/admin/properties)", () => {
     const content = fs.readFileSync(filePath, "utf-8");
 
     expect(content).toContain("handleCopyLink");
-    expect(content).toContain("`${window.location.origin}/update/${propertyId}`");
+    expect(content).toContain("/api/magic-link/generate");
+    expect(content).toContain("ownerId");
     expect(content).toContain("navigator.clipboard.writeText");
     expect(content).toContain("setCopiedId(propertyId)");
     expect(content).toContain("setCopiedId(null)");

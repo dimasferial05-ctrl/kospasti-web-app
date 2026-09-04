@@ -7,6 +7,7 @@ export async function GET() {
       include: {
         owner: {
           select: {
+            id: true,
             name: true,
             whatsapp_number: true,
           },
