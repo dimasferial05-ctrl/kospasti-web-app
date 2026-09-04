@@ -4,6 +4,17 @@ import crypto from "crypto";
 
 export async function POST(request: Request) {
   try {
+    const authHeader = request.headers.get("authorization");
+    if (authHeader !== "Bearer 778899") {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Unauthorized: Akses ditolak. Token autentikasi admin tidak valid.",
+        },
+        { status: 401 }
+      );
+    }
+
     const body = await request.json().catch(() => null);
 
     if (!body || !body.ownerId || typeof body.ownerId !== "string" || !body.ownerId.trim()) {

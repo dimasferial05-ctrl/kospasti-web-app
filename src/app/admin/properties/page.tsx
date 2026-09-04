@@ -51,6 +51,7 @@ export default function ManagePropertiesPage() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          Authorization: "Bearer 778899",
         },
         body: JSON.stringify({ ownerId }),
       });

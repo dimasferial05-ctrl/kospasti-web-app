@@ -103,4 +103,15 @@ describe("Manage Properties Page (/admin/properties)", () => {
     expect(content).toContain('fetch("/api/admin/properties"');
     expect(content).toContain('Authorization: "Bearer 778899"');
   });
+
+  it("menyertakan header Authorization Bearer token saat memanggil API /api/magic-link/generate", () => {
+    const filePath = path.resolve(
+      __dirname,
+      "../src/app/admin/properties/page.tsx"
+    );
+    const content = fs.readFileSync(filePath, "utf-8");
+
+    expect(content).toContain('fetch("/api/magic-link/generate"');
+    expect(content).toContain('Authorization: "Bearer 778899"');
+  });
 });
