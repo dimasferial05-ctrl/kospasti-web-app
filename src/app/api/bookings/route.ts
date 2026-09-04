@@ -52,37 +52,30 @@ export async function POST(request: Request) {
     }
 
     const result = await prisma.$transaction(async (tx) => {
-      // A. Cek Ketersediaan Kamar
-      const property = await tx.property.findUnique({
-        where: { id: propertyId.trim() },
+      // 1. Kurangi kamar langsung DENGAN SYARAT kamar masih > 0
+      const updatedProperty = await tx.property.updateMany({
+        where: {
+          id: propertyId.trim(),
+          available_rooms: { gt: 0 },
+        },
+        data: {
+          available_rooms: { decrement: 1 },
+        },
       });
 
-      if (!property) {
-        throw new Error("Properti tidak ditemukan");
+      // 2. Jika count 0, berarti ID salah atau kamar sudah 0 detik itu juga
+      if (updatedProperty.count === 0) {
+        throw new Error("Kamar sudah penuh atau tidak ditemukan");
       }
 
-      if (property.available_rooms <= 0) {
-        throw new Error("Kamar sudah penuh");
-      }
-
-      // B. Buat Data Booking Baru (Status PENDING)
+      // 3. Buat Data Booking jika update kamar di atas berhasil
       const newBooking = await tx.booking.create({
         data: {
-          property_id: property.id,
+          property_id: propertyId.trim(),
           student_name: studentName.trim(),
           student_whatsapp: waNumber.trim(),
           move_in_date: parsedDate,
           status: "PENDING",
-        },
-      });
-
-      // C. Kurangi Sisa Kamar (Decrement)
-      await tx.property.update({
-        where: { id: property.id },
-        data: {
-          available_rooms: {
-            decrement: 1,
-          },
         },
       });
 
@@ -102,6 +95,7 @@ export async function POST(request: Request) {
   } catch (error: unknown) {
     const errorMessage = error instanceof Error ? error.message : "";
     if (
+      errorMessage === "Kamar sudah penuh atau tidak ditemukan" ||
       errorMessage === "Kamar sudah penuh" ||
       errorMessage === "Properti tidak ditemukan" ||
       errorMessage.includes("Kamar sudah penuh")

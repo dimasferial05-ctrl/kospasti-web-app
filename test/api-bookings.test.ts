@@ -147,7 +147,7 @@ describe("POST /api/bookings", () => {
 
       expect(response.status).toBe(400);
       expect(result.success).toBe(false);
-      expect(result.error).toBe("Properti tidak ditemukan");
+      expect(result.error).toBe("Kamar sudah penuh atau tidak ditemukan");
     });
 
     it("memblokir pesanan (400) jika available_rooms pada properti sudah 0 untuk mencegah kamar minus", async () => {
@@ -185,7 +185,7 @@ describe("POST /api/bookings", () => {
 
       expect(response.status).toBe(400);
       expect(result.success).toBe(false);
-      expect(result.error).toBe("Kamar sudah penuh");
+      expect(result.error).toBe("Kamar sudah penuh atau tidak ditemukan");
 
       // Pastikan available_rooms tetap 0 dan tidak bertambah baris di booking
       const checkProperty = await prisma.property.findUnique({
