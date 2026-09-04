@@ -42,6 +42,7 @@ export default function PropertyDetailPage() {
   const [studentName, setStudentName] = useState("");
   const [waNumber, setWaNumber] = useState("");
   const [moveInDate, setMoveInDate] = useState("");
+  const [minDate, setMinDate] = useState("");
 
   const handleBookingSubmit = async () => {
     // 1. Validasi Sederhana
@@ -84,6 +85,12 @@ export default function PropertyDetailPage() {
       setIsSubmitting(false);
     }
   };
+
+  useEffect(() => {
+    // Mendapatkan format YYYY-MM-DD hari ini di sisi client
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setMinDate(new Date().toISOString().split("T")[0]);
+  }, []);
 
   useEffect(() => {
     let isMounted = true;
@@ -371,7 +378,7 @@ export default function PropertyDetailPage() {
                 </label>
                 <input
                   type="date"
-                  min={new Date().toISOString().split("T")[0]}
+                  min={minDate}
                   value={moveInDate}
                   onChange={(e) => setMoveInDate(e.target.value)}
                   className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-slate-800"

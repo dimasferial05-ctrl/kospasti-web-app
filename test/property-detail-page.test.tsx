@@ -128,7 +128,8 @@ describe("Property Detail Page Component (/kos/[id])", () => {
     expect(content).toContain('type="tel"');
     expect(content).toContain('placeholder="Nomor WhatsApp (Contoh: 0812...)"');
     expect(content).toContain('type="date"');
-    expect(content).toContain("min={new Date().toISOString().split(\"T\")[0]}");
+    expect(content).toContain("min={minDate}");
+    expect(content).toContain("setMinDate");
 
     // Tombol aksi modal
     expect(content).toContain("Batal");
