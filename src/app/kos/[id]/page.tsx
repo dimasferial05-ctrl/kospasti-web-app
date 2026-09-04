@@ -36,6 +36,11 @@ export default function PropertyDetailPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [studentName, setStudentName] = useState("");
+  const [waNumber, setWaNumber] = useState("");
+  const [moveInDate, setMoveInDate] = useState("");
+
   useEffect(() => {
     let isMounted = true;
 
@@ -264,9 +269,7 @@ export default function PropertyDetailPage() {
           <button
             type="button"
             disabled={isFull}
-            onClick={() =>
-              console.log("Amankan Kamar diklik untuk ID:", property.id)
-            }
+            onClick={() => setIsModalOpen(true)}
             className={`px-6 py-2 rounded-lg font-bold text-white transition-colors ${
               isFull
                 ? "bg-slate-400 cursor-not-allowed"
@@ -277,6 +280,82 @@ export default function PropertyDetailPage() {
           </button>
         </div>
       </div>
+
+      {/* Booking Form Modal */}
+      {isModalOpen && (
+        <div className="fixed inset-0 z-[60] bg-black/60 flex items-end sm:items-center justify-center p-0 sm:p-4">
+          <div className="bg-white w-full max-w-md p-6 rounded-t-2xl sm:rounded-2xl shadow-xl flex flex-col gap-4">
+            <div>
+              <h3 className="text-lg font-bold text-slate-900">
+                Lengkapi Data Diri
+              </h3>
+              <p className="text-xs text-slate-500 mt-0.5">
+                Data ini akan dikirimkan ke Pemilik Kos
+              </p>
+            </div>
+
+            <div className="flex flex-col gap-4 mt-2">
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">
+                  Nama Lengkap
+                </label>
+                <input
+                  type="text"
+                  placeholder="Nama Lengkap"
+                  value={studentName}
+                  onChange={(e) => setStudentName(e.target.value)}
+                  className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-slate-800"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">
+                  Nomor WhatsApp
+                </label>
+                <input
+                  type="tel"
+                  placeholder="Nomor WhatsApp (Contoh: 0812...)"
+                  value={waNumber}
+                  onChange={(e) => setWaNumber(e.target.value)}
+                  className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-slate-800"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">
+                  Rencana Tanggal Masuk
+                </label>
+                <input
+                  type="date"
+                  min={new Date().toISOString().split("T")[0]}
+                  value={moveInDate}
+                  onChange={(e) => setMoveInDate(e.target.value)}
+                  className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-slate-800"
+                />
+              </div>
+
+              <div className="flex gap-3 mt-4">
+                <button
+                  type="button"
+                  onClick={() => setIsModalOpen(false)}
+                  className="w-full py-2.5 px-4 rounded-lg bg-slate-200 text-slate-700 font-medium hover:bg-slate-300 transition-colors cursor-pointer text-sm"
+                >
+                  Batal
+                </button>
+                <button
+                  type="button"
+                  onClick={() =>
+                    console.log({ studentName, waNumber, moveInDate })
+                  }
+                  className="w-full py-2.5 px-4 rounded-lg bg-blue-600 text-white font-medium hover:bg-blue-700 transition-colors cursor-pointer text-sm"
+                >
+                  Lanjut Pembayaran
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
