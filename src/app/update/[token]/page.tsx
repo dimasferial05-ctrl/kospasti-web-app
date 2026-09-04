@@ -229,20 +229,19 @@ export default function UpdateRoomPage() {
         <div className="w-full max-w-xs bg-slate-50/80 border border-slate-200/80 rounded-3xl p-6 my-4 shadow-sm flex flex-col items-center">
           <div className="flex items-center justify-center gap-6 w-full my-4">
             {/* Minus Button */}
-            <Button
+            <button
               type="button"
-              variant="outline"
               onClick={handleDecrement}
               disabled={roomCount <= 0}
               aria-label="Kurangi Kamar"
-              className="w-14 h-14 rounded-2xl border-2 border-slate-300 hover:bg-slate-200 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-transparent transition-all flex items-center justify-center shadow-xs"
+              className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl border-2 border-slate-300 bg-white text-slate-700 hover:bg-slate-100 hover:border-slate-400 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-white disabled:hover:border-slate-300 transition-all flex items-center justify-center shadow-xs cursor-pointer select-none"
             >
               <Minus className="w-6 h-6 stroke-[2.5]" />
-            </Button>
+            </button>
 
             {/* Room Count Display */}
             <div className="flex flex-col items-center min-w-[4ch]">
-              <span className="text-6xl font-black text-slate-900 tracking-tight select-none tabular-nums">
+              <span className="text-5xl sm:text-6xl font-black text-slate-900 tracking-tight select-none tabular-nums">
                 {roomCount}
               </span>
               <span className="text-xs uppercase font-semibold text-slate-400 mt-1 tracking-wider">
@@ -251,15 +250,14 @@ export default function UpdateRoomPage() {
             </div>
 
             {/* Plus Button */}
-            <Button
+            <button
               type="button"
-              variant="outline"
               onClick={handleIncrement}
               aria-label="Tambah Kamar"
-              className="w-14 h-14 rounded-2xl border-2 border-slate-300 hover:bg-slate-200 active:scale-95 transition-all flex items-center justify-center shadow-xs"
+              className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl border-2 border-slate-300 bg-white text-slate-700 hover:bg-slate-100 hover:border-slate-400 active:scale-95 transition-all flex items-center justify-center shadow-xs cursor-pointer select-none"
             >
               <Plus className="w-6 h-6 stroke-[2.5]" />
-            </Button>
+            </button>
           </div>
 
           {/* Availability Status Badge */}
@@ -284,12 +282,11 @@ export default function UpdateRoomPage() {
 
       {/* Submit Button */}
       <div className="w-full pt-6">
-        <Button
+        <button
           type="button"
-          size="lg"
           onClick={handleSubmit}
           disabled={isSubmitting}
-          className="w-full h-12 text-base font-semibold bg-slate-900 text-white hover:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed rounded-xl shadow-md transition-all active:scale-[0.99] flex items-center justify-center gap-2"
+          className="w-full h-12 text-base font-semibold bg-slate-900 text-white hover:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed rounded-xl shadow-md transition-all active:scale-[0.99] flex items-center justify-center gap-2 cursor-pointer select-none"
         >
           {isSubmitting ? (
             <>
@@ -299,7 +296,7 @@ export default function UpdateRoomPage() {
           ) : (
             "Simpan Data"
           )}
-        </Button>
+        </button>
       </div>
     </div>
   );
