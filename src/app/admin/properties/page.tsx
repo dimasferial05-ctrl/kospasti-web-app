@@ -21,14 +21,24 @@ export default function ManagePropertiesPage() {
   const [loadingId, setLoadingId] = useState<string | null>(null);
 
   useEffect(() => {
+    const token = typeof window !== "undefined" ? sessionStorage.getItem("adminAuth") : "";
     fetch("/api/admin/properties", {
       headers: {
-        Authorization: "Bearer 778899",
+        Authorization: `Bearer ${token || ""}`,
       },
     })
-      .then((res) => res.json())
+      .then(async (res) => {
+        if (res.status === 401) {
+          if (typeof window !== "undefined") {
+            sessionStorage.removeItem("adminAuth");
+            window.location.reload();
+          }
+          return null;
+        }
+        return res.json();
+      })
       .then((data) => {
-        if (data.success && Array.isArray(data.data)) {
+        if (data && data.success && Array.isArray(data.data)) {
           setProperties(data.data);
         }
       })
@@ -47,14 +57,23 @@ export default function ManagePropertiesPage() {
 
     try {
       setLoadingId(propertyId);
+      const token = typeof window !== "undefined" ? sessionStorage.getItem("adminAuth") : "";
       const res = await fetch("/api/magic-link/generate", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: "Bearer 778899",
+          Authorization: `Bearer ${token || ""}`,
         },
         body: JSON.stringify({ ownerId }),
       });
+
+      if (res.status === 401) {
+        if (typeof window !== "undefined") {
+          sessionStorage.removeItem("adminAuth");
+          window.location.reload();
+        }
+        return;
+      }
 
       const data = await res.json();
 

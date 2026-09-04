@@ -13,7 +13,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   useEffect(() => {
     if (typeof window !== "undefined") {
       const auth = sessionStorage.getItem("adminAuth");
-      if (auth === "true") setIsAuthenticated(true);
+      if (auth) setIsAuthenticated(true);
     }
   }, []);
 
@@ -21,7 +21,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     e.preventDefault();
     if (pin === "778899") { // PIN Hardcoded sederhana untuk MVP
       if (typeof window !== "undefined") {
-        sessionStorage.setItem("adminAuth", "true");
+        sessionStorage.setItem("adminAuth", pin);
       }
       setIsAuthenticated(true);
       setError("");
