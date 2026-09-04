@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import {
   Loader2,
@@ -29,6 +29,7 @@ interface PropertyDetail {
 }
 
 export default function PropertyDetailPage() {
+  const router = useRouter();
   const params = useParams();
   const id = params?.id as string;
 
@@ -37,9 +38,52 @@ export default function PropertyDetailPage() {
   const [error, setError] = useState<string | null>(null);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [studentName, setStudentName] = useState("");
   const [waNumber, setWaNumber] = useState("");
   const [moveInDate, setMoveInDate] = useState("");
+
+  const handleBookingSubmit = async () => {
+    // 1. Validasi Sederhana
+    if (!studentName || !waNumber || !moveInDate) {
+      alert("Mohon lengkapi semua data diri Anda.");
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      // 2. Panggil API Booking
+      const response = await fetch("/api/bookings", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          propertyId: id, // id diambil dari parameter URL
+          studentName,
+          waNumber,
+          moveInDate,
+        }),
+      });
+
+      const responseData = await response.json();
+
+      // 3. Cek Status Respons
+      if (!response.ok) {
+        throw new Error(responseData.error || "Gagal melakukan pemesanan.");
+      }
+
+      // 4. Redirect ke Halaman Checkout QRIS
+      router.push(`/checkout/${responseData.data.bookingId}`);
+    } catch (error: unknown) {
+      alert(
+        error instanceof Error
+          ? error.message
+          : "Gagal melakukan pemesanan."
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   useEffect(() => {
     let isMounted = true;
@@ -344,12 +388,11 @@ export default function PropertyDetailPage() {
                 </button>
                 <button
                   type="button"
-                  onClick={() =>
-                    console.log({ studentName, waNumber, moveInDate })
-                  }
-                  className="w-full py-2.5 px-4 rounded-lg bg-blue-600 text-white font-medium hover:bg-blue-700 transition-colors cursor-pointer text-sm"
+                  disabled={isSubmitting}
+                  onClick={handleBookingSubmit}
+                  className="w-full py-2.5 px-4 rounded-lg bg-blue-600 text-white font-medium hover:bg-blue-700 disabled:opacity-75 disabled:cursor-not-allowed transition-colors cursor-pointer text-sm flex items-center justify-center gap-2"
                 >
-                  Lanjut Pembayaran
+                  {isSubmitting ? "Memproses..." : "Lanjut Pembayaran"}
                 </button>
               </div>
             </div>

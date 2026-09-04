@@ -13,6 +13,9 @@ async function main() {
 
   console.log("🧹 Cleaned up existing records.");
 
+  const oneWeekLater = new Date();
+  oneWeekLater.setDate(oneWeekLater.getDate() + 7);
+
   // 1. Owner 1: Pak Bambang (Kos Putra)
   const owner1 = await prisma.owner.create({
     data: {
@@ -30,9 +33,19 @@ async function main() {
           },
         ],
       },
+      magic_links: {
+        create: [
+          {
+            token: "magic-bambang-123",
+            expires_at: oneWeekLater,
+            is_used: false,
+          },
+        ],
+      },
     },
     include: {
       properties: true,
+      magic_links: true,
     },
   });
 
@@ -53,9 +66,19 @@ async function main() {
           },
         ],
       },
+      magic_links: {
+        create: [
+          {
+            token: "magic-sri-456",
+            expires_at: oneWeekLater,
+            is_used: false,
+          },
+        ],
+      },
     },
     include: {
       properties: true,
+      magic_links: true,
     },
   });
 
@@ -76,16 +99,26 @@ async function main() {
           },
         ],
       },
+      magic_links: {
+        create: [
+          {
+            token: "magic-hendra-789",
+            expires_at: oneWeekLater,
+            is_used: false,
+          },
+        ],
+      },
     },
     include: {
       properties: true,
+      magic_links: true,
     },
   });
 
-  console.log("✅ Seeded owners and properties:");
-  console.log(` - ${owner1.name} -> ${owner1.properties.map((p) => `${p.name} (Sisa ${p.available_rooms} kamar)`).join(", ")}`);
-  console.log(` - ${owner2.name} -> ${owner2.properties.map((p) => `${p.name} (Sisa ${p.available_rooms} kamar)`).join(", ")}`);
-  console.log(` - ${owner3.name} -> ${owner3.properties.map((p) => `${p.name} (Sisa ${p.available_rooms} kamar)`).join(", ")}`);
+  console.log("✅ Seeded owners and properties with magic links:");
+  console.log(` - ${owner1.name} -> ${owner1.properties.map((p) => `${p.name} (Sisa ${p.available_rooms} kamar, ID: ${p.id})`).join(", ")} | Token: magic-bambang-123`);
+  console.log(` - ${owner2.name} -> ${owner2.properties.map((p) => `${p.name} (Sisa ${p.available_rooms} kamar, ID: ${p.id})`).join(", ")} | Token: magic-sri-456`);
+  console.log(` - ${owner3.name} -> ${owner3.properties.map((p) => `${p.name} (Sisa ${p.available_rooms} kamar, ID: ${p.id})`).join(", ")} | Token: magic-hendra-789`);
 
   console.log("✨ Seeding completed successfully!");
 }

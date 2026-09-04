@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useCallback } from "react";
+import Link from "next/link";
 import { SearchFilter, FilterValues } from "@/components/shared/SearchFilter";
 import { KosPropertyCard } from "@/components/shared/KosPropertyCard";
 import { Loader2, AlertCircle, SearchX } from "lucide-react";
@@ -130,21 +131,26 @@ export default function Home() {
         {!isLoading && !error && properties.length > 0 && (
           <div className="flex flex-col gap-4">
             {properties.map((property) => (
-              <KosPropertyCard
+              <Link
                 key={property.id}
-                name={property.name}
-                price={property.price_per_month}
-                availableRooms={property.available_rooms}
-                genderType={property.gender_type}
-                facilities={property.facilities}
-                imageUrl={property.image_url}
-                ownerName={property.owner?.name || "Pemilik Kos"}
-                lastUpdated={
-                  property.last_updated ||
-                  property.updated_at ||
-                  new Date().toISOString()
-                }
-              />
+                href={`/kos/${property.id}`}
+                className="block transition-transform hover:scale-[1.02]"
+              >
+                <KosPropertyCard
+                  name={property.name}
+                  price={property.price_per_month}
+                  availableRooms={property.available_rooms}
+                  genderType={property.gender_type}
+                  facilities={property.facilities}
+                  imageUrl={property.image_url}
+                  ownerName={property.owner?.name || "Pemilik Kos"}
+                  lastUpdated={
+                    property.last_updated ||
+                    property.updated_at ||
+                    new Date().toISOString()
+                  }
+                />
+              </Link>
             ))}
           </div>
         )}
