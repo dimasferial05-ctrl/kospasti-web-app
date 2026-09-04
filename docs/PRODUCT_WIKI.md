@@ -877,34 +877,34 @@ Owner (1)
 
 ### Milestone 1 — Foundation
 - [x] Repository setup (GitHub, Wiki, Kanban Board)
-- [ ] Project setup (Next.js App Router, Prisma, SQLite)
-- [ ] Base UI configuration (Tailwind CSS, shadcn/ui, Lucide Icons)
+- [x] Project setup (Next.js App Router, Prisma, SQLite)
+- [x] Base UI configuration (Tailwind CSS, shadcn/ui, Lucide Icons)
 
 ### Milestone 2 — Core Feature
-- [ ] Pembuatan API untuk validasi Magic Link & Update Counter
-- [ ] Pembuatan UI Halaman Utama (Search, Filter, Detail Kos)
-- [ ] Integrasi UI Halaman Booking & Dummy Payment (QRIS)
+- [x] Pembuatan API untuk validasi Magic Link & Update Counter
+- [x] Pembuatan UI Halaman Utama (Search, Filter, Detail Kos)
+- [x] Integrasi UI Halaman Booking & Dummy Payment (QRIS)
 
 ### Milestone 3 — Prototype
-- [ ] Core user flow bekerja penuh (dari klik link WA hingga update UI Web)
-- [ ] Memasukkan *Seed Data* (Data kos & ibu kos buatan untuk testing)
-- [ ] Implementasi *Basic error states* (Link expired, Kos penuh, Gagal bayar)
+- [x] Core user flow bekerja penuh (dari klik link WA hingga update UI Web)
+- [x] Memasukkan *Seed Data* (Data kos & ibu kos buatan untuk testing)
+- [x] Implementasi *Basic error states* (Link expired, Kos penuh, Gagal bayar)
 
 ### Milestone 4 — User Testing
-- [ ] Merekrut partisipan (3 Mahasiswa dan 2 Ibu Kos / proxy lansia)
-- [ ] Menjalankan skenario *testing* (Skenario update kamar & Skenario booking)
-- [ ] Mendokumentasikan temuan (*feedback* dan hambatan UX)
+- [x] Merekrut partisipan (3 Mahasiswa dan 2 Ibu Kos / proxy lansia)
+- [x] Menjalankan skenario *testing* (Skenario update kamar & Skenario booking)
+- [x] Mendokumentasikan temuan (*feedback* dan hambatan UX)
 
 ### Milestone 5 — Iteration
-- [ ] Memperbaiki *bug* kritis (*Crash* atau *Error 500*)
-- [ ] Memperbarui UI/UX prototipe (misal: memperbesar tombol jika lansia masih kesulitan)
-- [ ] Re-test singkat sebelum status produk dikunci (MVP Ready)
+- [x] Memperbaiki *bug* kritis (*Crash* atau *Error 500*)
+- [x] Memperbarui UI/UX prototipe (misal: memperbesar tombol jika lansia masih kesulitan)
+- [x] Re-test singkat sebelum status produk dikunci (MVP Ready)
 
 ## Release Criteria
-- [ ] *Core user flow* (alur utama pengguna) dapat berjalan dari awal hingga akhir tanpa hambatan.
-- [ ] Tidak ada *critical bugs* yang mengganggu manipulasi data.
-- [ ] Prototipe dapat dites (*testable*) dan responsif di *browser* HP secara langsung.
-- [ ] Seluruh dokumentasi produk sudah *up-to-date*.
+- [x] *Core user flow* (alur utama pengguna) dapat berjalan dari awal hingga akhir tanpa hambatan.
+- [x] Tidak ada *critical bugs* yang mengganggu manipulasi data.
+- [x] Prototipe dapat dites (*testable*) dan responsif di *browser* HP secara langsung.
+- [x] Seluruh dokumentasi produk sudah *up-to-date*.
 
 ## Version
 Current: `0.1.0`
