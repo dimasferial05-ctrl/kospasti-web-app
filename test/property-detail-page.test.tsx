@@ -8,6 +8,9 @@ import PropertyDetailPage from "../src/app/kos/[id]/page";
 // Mock next/navigation
 vi.mock("next/navigation", () => ({
   useParams: () => ({ id: "uuid-kos-123" }),
+  useRouter: () => ({
+    push: vi.fn(),
+  }),
 }));
 
 describe("Property Detail Page Component (/kos/[id])", () => {
@@ -132,6 +135,35 @@ describe("Property Detail Page Component (/kos/[id])", () => {
     expect(content).toContain("setIsModalOpen(false)");
     expect(content).toContain("Lanjut Pembayaran");
   });
+
+  it("memiliki fungsi handleBookingSubmit untuk memanggil API booking dan redirect ke checkout", () => {
+    const filePath = path.resolve(__dirname, "../src/app/kos/[id]/page.tsx");
+    const content = fs.readFileSync(filePath, "utf-8");
+
+    // Router & submit state setup
+    expect(content).toContain("useRouter");
+    expect(content).toContain("isSubmitting");
+    expect(content).toContain("setIsSubmitting");
+
+    // Validasi form
+    expect(content).toContain("!studentName || !waNumber || !moveInDate");
+    expect(content).toContain("alert(\"Mohon lengkapi semua data diri Anda.\")");
+
+    // Panggilan API /api/bookings
+    expect(content).toContain("fetch(\"/api/bookings\"");
+    expect(content).toContain("propertyId: id");
+    expect(content).toContain("studentName");
+    expect(content).toContain("waNumber");
+    expect(content).toContain("moveInDate");
+
+    // Redirect ke checkout
+    expect(content).toContain("router.push(`/checkout/${responseData.data.bookingId}`)");
+
+    // Button states
+    expect(content).toContain("disabled={isSubmitting}");
+    expect(content).toContain("isSubmitting ? \"Memproses...\" : \"Lanjut Pembayaran\"");
+  });
 });
+
 
 
