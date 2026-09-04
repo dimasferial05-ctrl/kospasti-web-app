@@ -50,7 +50,7 @@ describe("Admin Layout & Protection Component (/admin/layout)", () => {
 
     // Cek PIN Hardcoded
     expect(content).toContain('"778899"');
-    expect(content).toContain("sessionStorage.setItem(\"adminAuth\", \"true\")");
+    expect(content).toContain("sessionStorage.setItem(\"adminAuth\", pin)");
     expect(content).toContain("sessionStorage.getItem(\"adminAuth\")");
 
     // Pesan error jika salah
