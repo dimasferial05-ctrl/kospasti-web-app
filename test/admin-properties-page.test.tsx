@@ -92,4 +92,15 @@ describe("Manage Properties Page (/admin/properties)", () => {
     expect(content).toContain("properties.length === 0");
     expect(content).toContain("Belum ada data kos.");
   });
+
+  it("menyertakan header Authorization Bearer token saat memanggil API /api/admin/properties", () => {
+    const filePath = path.resolve(
+      __dirname,
+      "../src/app/admin/properties/page.tsx"
+    );
+    const content = fs.readFileSync(filePath, "utf-8");
+
+    expect(content).toContain('fetch("/api/admin/properties"');
+    expect(content).toContain('Authorization: "Bearer 778899"');
+  });
 });

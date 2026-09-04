@@ -2,15 +2,50 @@ import { describe, it, expect, beforeEach, vi } from "vitest";
 import { GET } from "../src/app/api/admin/properties/route";
 import { prisma } from "../src/lib/prisma";
 import { clearDatabase } from "./helpers";
+import { NextRequest } from "next/server";
 
 describe("GET /api/admin/properties", () => {
+  const createAuthorizedRequest = () => {
+    return new NextRequest("http://localhost:3000/api/admin/properties", {
+      headers: {
+        authorization: "Bearer 778899",
+      },
+    });
+  };
+
   beforeEach(async () => {
     await clearDatabase();
     vi.restoreAllMocks();
   });
 
+  describe("Skenario Autentikasi / Keamanan", () => {
+    it("mengembalikan status 401 Unauthorized jika header Authorization tidak disertakan", async () => {
+      const request = new NextRequest("http://localhost:3000/api/admin/properties");
+      const response = await GET(request);
+      const result = await response.json();
+
+      expect(response.status).toBe(401);
+      expect(result.success).toBe(false);
+      expect(result.error).toContain("Unauthorized");
+    });
+
+    it("mengembalikan status 401 Unauthorized jika token PIN salah", async () => {
+      const request = new NextRequest("http://localhost:3000/api/admin/properties", {
+        headers: {
+          authorization: "Bearer 000000",
+        },
+      });
+      const response = await GET(request);
+      const result = await response.json();
+
+      expect(response.status).toBe(401);
+      expect(result.success).toBe(false);
+      expect(result.error).toContain("Unauthorized");
+    });
+  });
+
   describe("Skenario Sukses", () => {
-    it("berhasil mengambil seluruh properti beserta relasi owner (termasuk whatsapp_number) diurutkan berdasarkan nama", async () => {
+    it("berhasil mengambil seluruh properti beserta relasi owner (termasuk whatsapp_number) diurutkan berdasarkan nama saat terautentikasi", async () => {
       const owner1 = await prisma.owner.create({
         data: {
           name: "Ibu Rahayu",
@@ -47,7 +82,7 @@ describe("GET /api/admin/properties", () => {
         },
       });
 
-      const response = await GET();
+      const response = await GET(createAuthorizedRequest());
       const result = await response.json();
 
       expect(response.status).toBe(200);
@@ -70,7 +105,7 @@ describe("GET /api/admin/properties", () => {
     });
 
     it("mengembalikan array kosong jika belum ada data kos di database", async () => {
-      const response = await GET();
+      const response = await GET(createAuthorizedRequest());
       const result = await response.json();
 
       expect(response.status).toBe(200);
@@ -86,7 +121,7 @@ describe("GET /api/admin/properties", () => {
         new Error("Database connection lost")
       );
 
-      const response = await GET();
+      const response = await GET(createAuthorizedRequest());
       const result = await response.json();
 
       expect(response.status).toBe(500);

@@ -1,8 +1,21 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
+    const authHeader = request.headers.get("authorization");
+    if (authHeader !== "Bearer 778899") {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Unauthorized: Akses ditolak. Token autentikasi admin tidak valid.",
+        },
+        {
+          status: 401,
+        }
+      );
+    }
+
     const properties = await prisma.property.findMany({
       include: {
         owner: {

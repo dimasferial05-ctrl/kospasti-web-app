@@ -21,7 +21,11 @@ export default function ManagePropertiesPage() {
   const [loadingId, setLoadingId] = useState<string | null>(null);
 
   useEffect(() => {
-    fetch("/api/admin/properties")
+    fetch("/api/admin/properties", {
+      headers: {
+        Authorization: "Bearer 778899",
+      },
+    })
       .then((res) => res.json())
       .then((data) => {
         if (data.success && Array.isArray(data.data)) {
