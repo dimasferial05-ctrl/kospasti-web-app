@@ -97,5 +97,41 @@ describe("Property Detail Page Component (/kos/[id])", () => {
     // Pesan peringatan opsional jika isFull bernilai true
     expect(content).toContain("Mohon maaf, semua kamar telah terisi.");
   });
+
+  it("memiliki struktur Booking Form Modal yang lengkap dan responsif", () => {
+    const filePath = path.resolve(__dirname, "../src/app/kos/[id]/page.tsx");
+    const content = fs.readFileSync(filePath, "utf-8");
+
+    // Modal state
+    expect(content).toContain("isModalOpen");
+    expect(content).toContain("studentName");
+    expect(content).toContain("waNumber");
+    expect(content).toContain("moveInDate");
+
+    // Pemicu modal pada tombol Amankan Kamar
+    expect(content).toContain("setIsModalOpen(true)");
+
+    // Overlay modal dan kartu responsif (bottom sheet pada mobile, center pada desktop)
+    expect(content).toContain("fixed inset-0 z-[60] bg-black/60");
+    expect(content).toContain("flex items-end sm:items-center justify-center");
+    expect(content).toContain("rounded-t-2xl sm:rounded-2xl");
+
+    // Judul dan deskripsi modal
+    expect(content).toContain("Lengkapi Data Diri");
+    expect(content).toContain("Data ini akan dikirimkan ke Pemilik Kos");
+
+    // Input data diri
+    expect(content).toContain('placeholder="Nama Lengkap"');
+    expect(content).toContain('type="tel"');
+    expect(content).toContain('placeholder="Nomor WhatsApp (Contoh: 0812...)"');
+    expect(content).toContain('type="date"');
+    expect(content).toContain("min={new Date().toISOString().split(\"T\")[0]}");
+
+    // Tombol aksi modal
+    expect(content).toContain("Batal");
+    expect(content).toContain("setIsModalOpen(false)");
+    expect(content).toContain("Lanjut Pembayaran");
+  });
 });
+
 
