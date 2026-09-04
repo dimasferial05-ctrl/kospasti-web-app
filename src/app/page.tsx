@@ -96,65 +96,67 @@ export default function Home() {
   }, []);
 
   return (
-    <div className="flex flex-col gap-4 pb-8">
-      {/* Search & Filter Component */}
-      <SearchFilter onSearch={fetchProperties} />
+    <main className="max-w-md mx-auto min-h-screen bg-white shadow-sm relative w-full p-4 flex flex-col">
+      <div className="flex flex-col gap-4 pb-8">
+        {/* Search & Filter Component */}
+        <SearchFilter onSearch={fetchProperties} />
 
-      {/* Property List Section */}
-      <div className="flex flex-col gap-4">
-        {isLoading && (
-          <div className="py-12 flex flex-col items-center justify-center gap-3 text-slate-500">
-            <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
-            <p className="text-sm font-medium">Memuat daftar kos...</p>
-          </div>
-        )}
+        {/* Property List Section */}
+        <div className="flex flex-col gap-4">
+          {isLoading && (
+            <div className="py-12 flex flex-col items-center justify-center gap-3 text-slate-500">
+              <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
+              <p className="text-sm font-medium">Memuat daftar kos...</p>
+            </div>
+          )}
 
-        {!isLoading && error && (
-          <div className="p-4 bg-rose-50 border border-rose-200 rounded-xl text-rose-600 flex items-center gap-2 text-sm">
-            <AlertCircle className="w-5 h-5 shrink-0" />
-            <span>{error}</span>
-          </div>
-        )}
+          {!isLoading && error && (
+            <div className="p-4 bg-rose-50 border border-rose-200 rounded-xl text-rose-600 flex items-center gap-2 text-sm">
+              <AlertCircle className="w-5 h-5 shrink-0" />
+              <span>{error}</span>
+            </div>
+          )}
 
-        {!isLoading && !error && properties.length === 0 && (
-          <div className="flex flex-col items-center justify-center p-12 text-center bg-white rounded-xl border border-slate-200 border-dashed mt-4">
-            <SearchX className="w-16 h-16 text-slate-300 mb-4" />
-            <h3 className="text-base font-semibold text-slate-800 mb-1">
-              Kos Tidak Ditemukan
-            </h3>
-            <p className="text-xs text-slate-500 max-w-xs leading-relaxed">
-              Maaf, tidak ada kos yang sesuai dengan kriteria pencarian atau filter Anda. Silakan coba atur ulang filter pencarian.
-            </p>
-          </div>
-        )}
+          {!isLoading && !error && properties.length === 0 && (
+            <div className="flex flex-col items-center justify-center p-12 text-center bg-white rounded-xl border border-slate-200 border-dashed mt-4">
+              <SearchX className="w-16 h-16 text-slate-300 mb-4" />
+              <h3 className="text-base font-semibold text-slate-800 mb-1">
+                Kos Tidak Ditemukan
+              </h3>
+              <p className="text-xs text-slate-500 max-w-xs leading-relaxed">
+                Maaf, tidak ada kos yang sesuai dengan kriteria pencarian atau filter Anda. Silakan coba atur ulang filter pencarian.
+              </p>
+            </div>
+          )}
 
-        {!isLoading && !error && properties.length > 0 && (
-          <div className="flex flex-col gap-4">
-            {properties.map((property) => (
-              <Link
-                key={property.id}
-                href={`/kos/${property.id}`}
-                className="block transition-transform hover:scale-[1.02]"
-              >
-                <KosPropertyCard
-                  name={property.name}
-                  price={property.price_per_month}
-                  availableRooms={property.available_rooms}
-                  genderType={property.gender_type}
-                  facilities={property.facilities}
-                  imageUrl={property.image_url}
-                  ownerName={property.owner?.name || "Pemilik Kos"}
-                  lastUpdated={
-                    property.last_updated ||
-                    property.updated_at ||
-                    new Date().toISOString()
-                  }
-                />
-              </Link>
-            ))}
-          </div>
-        )}
+          {!isLoading && !error && properties.length > 0 && (
+            <div className="flex flex-col gap-4">
+              {properties.map((property) => (
+                <Link
+                  key={property.id}
+                  href={`/kos/${property.id}`}
+                  className="block transition-transform hover:scale-[1.02]"
+                >
+                  <KosPropertyCard
+                    name={property.name}
+                    price={property.price_per_month}
+                    availableRooms={property.available_rooms}
+                    genderType={property.gender_type}
+                    facilities={property.facilities}
+                    imageUrl={property.image_url}
+                    ownerName={property.owner?.name || "Pemilik Kos"}
+                    lastUpdated={
+                      property.last_updated ||
+                      property.updated_at ||
+                      new Date().toISOString()
+                    }
+                  />
+                </Link>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
-    </div>
+    </main>
   );
 }

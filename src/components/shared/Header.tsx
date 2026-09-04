@@ -1,6 +1,16 @@
+"use client";
+
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 export function Header() {
+  const pathname = usePathname();
+
+  // Sembunyikan header pada seluruh rute /admin
+  if (pathname?.startsWith("/admin")) {
+    return null;
+  }
+
   return (
     <header className="sticky top-0 z-50 w-full bg-white border-b border-slate-200 px-4 py-3">
       <div className="max-w-md mx-auto flex items-center justify-between">
