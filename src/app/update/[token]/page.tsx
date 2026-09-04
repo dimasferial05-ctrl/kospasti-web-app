@@ -191,7 +191,7 @@ export default function UpdateRoomPage() {
 
   // 3. Main Counter / Success State
   return (
-    <div className="flex-1 flex flex-col justify-between py-6 px-2">
+    <div className="flex-1 flex flex-col justify-between py-6 px-4 max-w-sm mx-auto w-full">
       <div className="flex flex-col items-center">
         {/* Owner Greeting & Header */}
         <div className="w-full text-center mb-6">
@@ -286,7 +286,7 @@ export default function UpdateRoomPage() {
           type="button"
           onClick={handleSubmit}
           disabled={isSubmitting}
-          className="w-full h-12 text-base font-semibold bg-slate-900 text-white hover:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed rounded-xl shadow-md transition-all active:scale-[0.99] flex items-center justify-center gap-2 cursor-pointer select-none"
+          className="w-full h-14 text-base font-semibold bg-slate-900 text-white hover:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed rounded-xl shadow-md transition-all active:scale-[0.99] flex items-center justify-center gap-2 cursor-pointer select-none"
         >
           {isSubmitting ? (
             <>
