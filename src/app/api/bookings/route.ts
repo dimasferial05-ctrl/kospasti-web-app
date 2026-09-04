@@ -40,6 +40,17 @@ export async function POST(request: Request) {
       );
     }
 
+    const waRegex = /^(?:\+62|62|0)8[0-9]{8,11}$/;
+    if (!waRegex.test(waNumber.trim())) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Format nomor WhatsApp tidak valid",
+        },
+        { status: 400 }
+      );
+    }
+
     const parsedDate = new Date(moveInDate.trim());
     if (isNaN(parsedDate.getTime())) {
       return NextResponse.json(

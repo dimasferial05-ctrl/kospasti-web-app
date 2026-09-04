@@ -51,6 +51,14 @@ export default function PropertyDetailPage() {
       return;
     }
 
+    const waRegex = /^(?:\+62|62|0)8[0-9]{8,11}$/;
+    if (!waRegex.test(waNumber.trim())) {
+      alert(
+        "Format nomor WhatsApp tidak valid. Harap masukkan nomor yang benar (contoh: 0812...)."
+      );
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
@@ -367,7 +375,7 @@ export default function PropertyDetailPage() {
                   type="tel"
                   placeholder="Nomor WhatsApp (Contoh: 0812...)"
                   value={waNumber}
-                  onChange={(e) => setWaNumber(e.target.value)}
+                  onChange={(e) => setWaNumber(e.target.value.replace(/[^0-9+]/g, ""))}
                   className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-slate-800"
                 />
               </div>

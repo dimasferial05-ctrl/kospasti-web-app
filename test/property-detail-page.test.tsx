@@ -149,6 +149,8 @@ describe("Property Detail Page Component (/kos/[id])", () => {
     // Validasi form
     expect(content).toContain("!studentName || !waNumber || !moveInDate");
     expect(content).toContain("alert(\"Mohon lengkapi semua data diri Anda.\")");
+    expect(content).toContain("waRegex");
+    expect(content).toContain("Format nomor WhatsApp tidak valid");
 
     // Panggilan API /api/bookings
     expect(content).toContain("fetch(\"/api/bookings\"");

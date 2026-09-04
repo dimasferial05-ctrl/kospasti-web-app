@@ -117,7 +117,7 @@ describe("POST /api/bookings", () => {
         body: JSON.stringify({
           propertyId: "prop-1",
           studentName: "Budi",
-          waNumber: "081234",
+          waNumber: "081234567890",
           moveInDate: "tanggal-ngawur",
         }),
       });
@@ -130,6 +130,36 @@ describe("POST /api/bookings", () => {
       expect(result.error).toContain("Format tanggal moveInDate tidak valid");
     });
 
+    it("menolak request (400) jika format waNumber tidak valid (mengandung huruf, terlalu pendek/panjang, atau format salah)", async () => {
+      const invalidNumbers = [
+        "0812abcd3456", // mengandung huruf
+        "08123",        // terlalu pendek
+        "1234567890",   // tidak diawali 08, 628, atau +628
+        "abcdefghijk",  // hanya huruf
+        "0812345678901234", // terlalu panjang (>13 digit dari 08)
+      ];
+
+      for (const invalidWa of invalidNumbers) {
+        const request = new Request("http://localhost/api/bookings", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            propertyId: "prop-1",
+            studentName: "Budi",
+            waNumber: invalidWa,
+            moveInDate: "2026-09-10",
+          }),
+        });
+
+        const response = await POST(request);
+        const result = await response.json();
+
+        expect(response.status).toBe(400);
+        expect(result.success).toBe(false);
+        expect(result.error).toBe("Format nomor WhatsApp tidak valid");
+      }
+    });
+
     it("menolak request (400) jika properti tidak ditemukan", async () => {
       const request = new Request("http://localhost/api/bookings", {
         method: "POST",
@@ -137,7 +167,7 @@ describe("POST /api/bookings", () => {
         body: JSON.stringify({
           propertyId: "non-existent-prop-id",
           studentName: "Budi",
-          waNumber: "081234",
+          waNumber: "081234567890",
           moveInDate: "2026-09-10",
         }),
       });
@@ -212,7 +242,7 @@ describe("POST /api/bookings", () => {
         body: JSON.stringify({
           propertyId: "prop-id",
           studentName: "Budi",
-          waNumber: "081234",
+          waNumber: "081234567890",
           moveInDate: "2026-09-10",
         }),
       });
