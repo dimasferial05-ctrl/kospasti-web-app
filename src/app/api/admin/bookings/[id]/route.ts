@@ -78,18 +78,41 @@ export async function PATCH(
       );
     }
 
-    const updatedBooking = await prisma.booking.update({
-      where: { id: id.trim() },
-      data: {
-        status: status,
-      },
-      include: {
-        property: {
-          select: {
-            name: true,
+    const updatedBooking = await prisma.$transaction(async (tx) => {
+      const updated = await tx.booking.update({
+        where: { id: id.trim() },
+        data: {
+          status: status,
+        },
+        include: {
+          property: {
+            select: {
+              name: true,
+            },
           },
         },
-      },
+      });
+
+      const isOldActive = ["PENDING", "SUCCESS", "CONFIRMED"].includes(existingBooking.status);
+      const isNewActive = ["PENDING", "SUCCESS", "CONFIRMED"].includes(status);
+
+      if (isOldActive && !isNewActive && existingBooking.property_id) {
+        await tx.property.update({
+          where: { id: existingBooking.property_id },
+          data: {
+            available_rooms: { increment: 1 },
+          },
+        });
+      } else if (!isOldActive && isNewActive && existingBooking.property_id) {
+        await tx.property.update({
+          where: { id: existingBooking.property_id },
+          data: {
+            available_rooms: { decrement: 1 },
+          },
+        });
+      }
+
+      return updated;
     });
 
     return NextResponse.json(

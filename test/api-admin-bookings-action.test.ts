@@ -129,7 +129,7 @@ describe("PATCH /api/admin/bookings/[id]", () => {
       expect(updated?.status).toBe("SUCCESS");
     });
 
-    it("berhasil memperbarui status booking menjadi REJECTED", async () => {
+    it("berhasil memperbarui status booking menjadi REJECTED dan mengembalikan available_rooms (+1)", async () => {
       const owner = await prisma.owner.create({
         data: {
           name: "Pak Bambang",
@@ -168,6 +168,52 @@ describe("PATCH /api/admin/bookings/[id]", () => {
 
       const updated = await prisma.booking.findUnique({ where: { id: booking.id } });
       expect(updated?.status).toBe("REJECTED");
+
+      // Pastikan kamar dikembalikan (1 -> 2)
+      const updatedProp = await prisma.property.findUnique({ where: { id: property.id } });
+      expect(updatedProp?.available_rooms).toBe(2);
+    });
+
+    it("mengurangi available_rooms (-1) jika booking yang sebelumnya REJECTED diaktifkan kembali menjadi SUCCESS", async () => {
+      const owner = await prisma.owner.create({
+        data: {
+          name: "Pak Bambang",
+          whatsapp_number: "081298765432",
+        },
+      });
+
+      const property = await prisma.property.create({
+        data: {
+          name: "Kos Garuda",
+          price_per_month: 1000000,
+          available_rooms: 2,
+          gender_type: "PUTRA",
+          facilities: "AC",
+          owner_id: owner.id,
+        },
+      });
+
+      const booking = await prisma.booking.create({
+        data: {
+          student_name: "Doni Pratama",
+          student_whatsapp: "085555444333",
+          move_in_date: new Date("2026-10-02"),
+          status: "REJECTED",
+          property_id: property.id,
+        },
+      });
+
+      const request = createAuthorizedRequest(booking.id, { status: "SUCCESS" });
+      const response = await PATCH(request, { params: Promise.resolve({ id: booking.id }) });
+      const result = await response.json();
+
+      expect(response.status).toBe(200);
+      expect(result.success).toBe(true);
+      expect(result.data.status).toBe("SUCCESS");
+
+      // Pastikan kamar berkurang (2 -> 1)
+      const updatedProp = await prisma.property.findUnique({ where: { id: property.id } });
+      expect(updatedProp?.available_rooms).toBe(1);
     });
   });
 
