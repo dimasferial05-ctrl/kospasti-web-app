@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Loader2, Check, X } from "lucide-react";
+import { Loader2, Check, X, Download } from "lucide-react";
+import { formatBookingsToCSV } from "@/lib/csv-export";
 
 interface BookingAdminItem {
   id: string;
@@ -21,6 +22,7 @@ export default function ManageBookingsPage() {
   const router = useRouter();
   const [bookings, setBookings] = useState<BookingAdminItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isExporting, setIsExporting] = useState(false);
   const [updatingId, setUpdatingId] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
@@ -47,6 +49,36 @@ export default function ManageBookingsPage() {
   useEffect(() => {
     fetchBookings();
   }, []);
+
+  const handleExportCSV = async () => {
+    if (bookings.length === 0) {
+      alert("Belum ada data riwayat transaksi untuk diekspor.");
+      return;
+    }
+
+    try {
+      setIsExporting(true);
+      // Small timeout to allow spinner to render smoothly
+      await new Promise((resolve) => setTimeout(resolve, 200));
+
+      const csvContent = formatBookingsToCSV(bookings);
+      const blob = new Blob(["\uFEFF" + csvContent], { type: "text/csv;charset=utf-8;" });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      const dateStr = new Date().toISOString().slice(0, 10).replace(/-/g, "");
+      link.setAttribute("href", url);
+      link.setAttribute("download", `Laporan_KosPasti_${dateStr}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error("Gagal mengekspor CSV:", err);
+      alert("Terjadi kesalahan saat mengekspor data ke format CSV.");
+    } finally {
+      setIsExporting(false);
+    }
+  };
 
   const handleUpdateStatus = async (bookingId: string, newStatus: string) => {
     try {
@@ -123,11 +155,27 @@ export default function ManageBookingsPage() {
 
   return (
     <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-      <div className="p-6 border-b border-slate-200 bg-slate-50">
-        <h2 className="text-xl font-bold text-slate-800">Riwayat Booking Mahasiswa</h2>
-        <p className="text-sm text-slate-500">
-          Pantau transaksi pemesanan kamar secara real-time.
-        </p>
+      <div className="p-6 border-b border-slate-200 bg-slate-50 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h2 className="text-xl font-bold text-slate-800">Riwayat Booking Mahasiswa</h2>
+          <p className="text-sm text-slate-500">
+            Pantau transaksi pemesanan kamar secara real-time.
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={handleExportCSV}
+          disabled={isExporting || bookings.length === 0}
+          className="inline-flex items-center justify-center gap-2 px-3.5 py-2 bg-white border border-slate-200 text-slate-700 hover:bg-slate-100 hover:text-slate-900 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg text-sm font-semibold shadow-xs transition-all cursor-pointer"
+          title="Unduh laporan riwayat booking ke format CSV"
+        >
+          {isExporting ? (
+            <Loader2 className="w-4 h-4 animate-spin text-slate-600" />
+          ) : (
+            <Download className="w-4 h-4 text-slate-600" />
+          )}
+          <span>{isExporting ? "Mengekspor..." : "Export CSV"}</span>
+        </button>
       </div>
 
       {errorMessage && (
