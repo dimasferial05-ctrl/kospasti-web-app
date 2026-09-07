@@ -4,6 +4,7 @@ import { clearDatabase } from "./helpers";
 import { deleteUploadedFile } from "../src/lib/upload";
 import { DELETE as deleteAdminMedia } from "../src/app/api/admin/media/[id]/route";
 import { PATCH as patchPropertyThumbnail } from "../src/app/api/admin/properties/[id]/thumbnail/route";
+import { GET as getPublicProperties } from "../src/app/api/properties/route";
 import { NextRequest } from "next/server";
 import fs from "fs";
 import path from "path";
@@ -250,6 +251,44 @@ describe("Fitur Manajemen Media di Halaman Edit Properti (Issue #93)", () => {
 
       expect(content).toContain("thumbIndex > 0");
       expect(content).toContain("list.unshift(thumb)");
+    });
+  });
+
+  describe("5. GET /api/properties (Beranda / Listing Publik)", () => {
+    it("memprioritaskan property.image_url (thumbnail terpilih) di atas media[0]", async () => {
+      const owner = await prisma.owner.create({
+        data: {
+          name: "Owner Beranda Test",
+          whatsapp_number: "081234567890",
+        },
+      });
+
+      await prisma.property.create({
+        data: {
+          name: "Kos Thumbnail Khusus",
+          price_per_month: 850000,
+          available_rooms: 2,
+          gender_type: "CAMPUR",
+          facilities: "WiFi, Kasur",
+          // User memilih foto kedua sebagai thumbnail
+          image_url: "/uploads/properties/foto-kedua-thumbnail.jpg",
+          owner_id: owner.id,
+          media: {
+            create: [
+              { url: "/uploads/properties/foto-pertama.jpg", type: "IMAGE" },
+              { url: "/uploads/properties/foto-kedua-thumbnail.jpg", type: "IMAGE" },
+            ],
+          },
+        },
+      });
+
+      const response = await getPublicProperties();
+      const result = await response.json();
+
+      expect(response.status).toBe(200);
+      expect(result.success).toBe(true);
+      expect(result.data).toHaveLength(1);
+      expect(result.data[0].image_url).toBe("/uploads/properties/foto-kedua-thumbnail.jpg");
     });
   });
 });
