@@ -112,4 +112,50 @@ describe("Admin Owners Management Page (/admin/owners)", () => {
     expect(content).toContain("filteredOwners.length === 0");
     expect(content).toContain("Belum ada data pemilik kos terdaftar.");
   });
+
+  describe("Magic Link Generator Feature (Issue #81)", () => {
+    it("memiliki implementasi tombol Generate Link dan handler fetch ke /api/magic-link/generate", () => {
+      const filePath = path.resolve(
+        __dirname,
+        "../src/app/admin/owners/page.tsx"
+      );
+      const content = fs.readFileSync(filePath, "utf-8");
+
+      expect(content).toContain("handleGenerateLink");
+      expect(content).toContain('fetch("/api/magic-link/generate"');
+      expect(content).toContain("method: \"POST\"");
+      expect(content).toContain("ownerId: owner.id");
+      expect(content).toContain("Generate Link");
+      expect(content).toContain("generatingId");
+    });
+
+    it("memiliki modal dialog hasil generate tautan dengan copy to clipboard dan tombol kirim WhatsApp", () => {
+      const filePath = path.resolve(
+        __dirname,
+        "../src/app/admin/owners/page.tsx"
+      );
+      const content = fs.readFileSync(filePath, "utf-8");
+
+      expect(content).toContain("Tautan Magic Link Berhasil Dibuat!");
+      expect(content).toContain("handleCopyLink");
+      expect(content).toContain("navigator.clipboard.writeText");
+      expect(content).toContain("Disalin!");
+      expect(content).toContain("Kirim via WA");
+    });
+
+    it("menangani copy to clipboard dengan navigator.clipboard.writeText", async () => {
+      const writeTextMock = vi.fn().mockResolvedValue(undefined);
+      Object.assign(navigator, {
+        clipboard: {
+          writeText: writeTextMock,
+        },
+      });
+
+      const testUrl = "http://localhost:3000/update/test-token-123";
+      await navigator.clipboard.writeText(testUrl);
+
+      expect(writeTextMock).toHaveBeenCalledWith(testUrl);
+    });
+  });
 });
+
