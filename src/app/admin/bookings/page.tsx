@@ -62,7 +62,7 @@ export default function ManageBookingsPage() {
       await new Promise((resolve) => setTimeout(resolve, 200));
 
       const csvContent = formatBookingsToCSV(bookings);
-      const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+      const blob = new Blob(["\uFEFF" + csvContent], { type: "text/csv;charset=utf-8;" });
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement("a");
       const dateStr = new Date().toISOString().slice(0, 10).replace(/-/g, "");

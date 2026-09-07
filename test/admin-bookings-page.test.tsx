@@ -147,7 +147,7 @@ describe("Manage Bookings Page (/admin/bookings)", () => {
       );
       const content = fs.readFileSync(filePath, "utf-8");
 
-      expect(content).toContain("new Blob([csvContent]");
+      expect(content).toContain('new Blob(["\\uFEFF" + csvContent]');
       expect(content).toContain("window.URL.createObjectURL");
       expect(content).toContain("window.URL.revokeObjectURL");
       expect(content).toContain('document.createElement("a")');
