@@ -72,6 +72,8 @@ describe("Admin Layout & Protection Component (/admin/layout)", () => {
     expect(content).toContain("Dashboard");
     expect(content).toContain('href="/admin/properties"');
     expect(content).toContain("Kelola Properti");
+    expect(content).toContain('href="/admin/owners"');
+    expect(content).toContain("Pemilik Kos");
     expect(content).toContain('href="/admin/bookings"');
     expect(content).toContain("Data Transaksi");
 
