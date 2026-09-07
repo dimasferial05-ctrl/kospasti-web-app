@@ -453,7 +453,8 @@ export default function AdminOwnersPage() {
                         <button
                           type="button"
                           onClick={() => handleOpenEditModal(owner)}
-                          className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 border border-slate-200 rounded-lg transition-colors cursor-pointer"
+                          disabled={generatingId !== null || isDeletingOwner}
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 disabled:opacity-50 disabled:cursor-not-allowed border border-slate-200 rounded-lg transition-colors cursor-pointer"
                           title="Edit Data Pemilik"
                         >
                           <Pencil className="w-3.5 h-3.5 text-slate-600" />
@@ -464,7 +465,7 @@ export default function AdminOwnersPage() {
                         <button
                           type="button"
                           onClick={() => handleGenerateLink(owner)}
-                          disabled={generatingId !== null}
+                          disabled={generatingId !== null || isDeletingOwner}
                           className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 disabled:opacity-50 disabled:cursor-not-allowed border border-indigo-200 rounded-lg transition-colors cursor-pointer"
                           title="Buat Magic Link Baru"
                         >
@@ -499,7 +500,8 @@ export default function AdminOwnersPage() {
                             });
                             setDeleteOwnerError(null);
                           }}
-                          className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-rose-600 bg-white hover:bg-rose-50 border border-rose-200 rounded-lg transition-colors cursor-pointer"
+                          disabled={generatingId !== null || isDeletingOwner}
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-rose-600 bg-white hover:bg-rose-50 disabled:opacity-50 disabled:cursor-not-allowed border border-rose-200 rounded-lg transition-colors cursor-pointer"
                           title="Hapus Pemilik"
                         >
                           <Trash2 className="w-3.5 h-3.5 text-rose-600" />
@@ -530,6 +532,7 @@ export default function AdminOwnersPage() {
         <div
           role="dialog"
           aria-modal="true"
+          aria-labelledby="add-owner-modal-title"
           className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fadeIn"
           onClick={() => {
             if (!isSubmittingAdd) {
@@ -549,7 +552,7 @@ export default function AdminOwnersPage() {
                   <UserPlus className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-bold text-slate-900">
+                  <h3 id="add-owner-modal-title" className="text-lg font-bold text-slate-900">
                     Tambah Pemilik Kos Baru
                   </h3>
                   <p className="text-xs text-slate-500">
@@ -581,10 +584,11 @@ export default function AdminOwnersPage() {
               )}
 
               <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-slate-700">
+                <label htmlFor="add-owner-name" className="text-xs font-semibold text-slate-700">
                   Nama Pemilik <span className="text-rose-500">*</span>
                 </label>
                 <input
+                  id="add-owner-name"
                   type="text"
                   required
                   placeholder="Contoh: Ibu Hj. Siti Aminah"
@@ -597,10 +601,11 @@ export default function AdminOwnersPage() {
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-slate-700">
+                <label htmlFor="add-owner-whatsapp" className="text-xs font-semibold text-slate-700">
                   Nomor WhatsApp <span className="text-rose-500">*</span>
                 </label>
                 <input
+                  id="add-owner-whatsapp"
                   type="text"
                   required
                   placeholder="Contoh: 081234567890"
@@ -658,6 +663,7 @@ export default function AdminOwnersPage() {
         <div
           role="dialog"
           aria-modal="true"
+          aria-labelledby="edit-owner-modal-title"
           className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fadeIn"
           onClick={() => {
             if (!isSubmittingEdit) {
@@ -677,7 +683,7 @@ export default function AdminOwnersPage() {
                   <Pencil className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-bold text-slate-900">
+                  <h3 id="edit-owner-modal-title" className="text-lg font-bold text-slate-900">
                     Edit Data Pemilik Kos
                   </h3>
                   <p className="text-xs text-slate-500">
@@ -709,10 +715,11 @@ export default function AdminOwnersPage() {
               )}
 
               <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-slate-700">
+                <label htmlFor="edit-owner-name" className="text-xs font-semibold text-slate-700">
                   Nama Pemilik <span className="text-rose-500">*</span>
                 </label>
                 <input
+                  id="edit-owner-name"
                   type="text"
                   required
                   placeholder="Nama Pemilik Kos"
@@ -725,10 +732,11 @@ export default function AdminOwnersPage() {
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-slate-700">
+                <label htmlFor="edit-owner-whatsapp" className="text-xs font-semibold text-slate-700">
                   Nomor WhatsApp <span className="text-rose-500">*</span>
                 </label>
                 <input
+                  id="edit-owner-whatsapp"
                   type="text"
                   required
                   placeholder="08xxxxxxxxxx"
@@ -783,6 +791,7 @@ export default function AdminOwnersPage() {
         <div
           role="dialog"
           aria-modal="true"
+          aria-labelledby="delete-owner-modal-title"
           className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fadeIn"
           onClick={() => {
             if (!isDeletingOwner) {
@@ -801,7 +810,7 @@ export default function AdminOwnersPage() {
                 <Trash2 className="w-5 h-5" />
               </div>
               <div>
-                <h3 className="font-bold text-slate-800 text-base">Hapus Pemilik Kos</h3>
+                <h3 id="delete-owner-modal-title" className="font-bold text-slate-800 text-base">Hapus Pemilik Kos</h3>
                 <p className="text-xs text-slate-500">Tindakan ini tidak dapat dibatalkan.</p>
               </div>
             </div>

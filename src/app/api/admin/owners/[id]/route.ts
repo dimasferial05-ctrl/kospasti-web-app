@@ -2,14 +2,20 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { deleteUploadedFile } from "@/lib/upload";
 
+function validateAdminAuth(request: NextRequest): boolean {
+  const adminToken = request.cookies.get("admin_token")?.value;
+  const validToken = process.env.ADMIN_TOKEN || "kospasti_admin_authenticated";
+  return Boolean(adminToken && adminToken === validToken);
+}
+
+const WA_REGEX = /^[0-9+]{8,15}$/;
+
 export async function PATCH(
   request: NextRequest,
   context: { params: Promise<{ id: string }> | { id: string } }
 ) {
   try {
-    const adminToken = request.cookies.get("admin_token")?.value;
-    const validToken = process.env.ADMIN_TOKEN || "kospasti_admin_authenticated";
-    if (!adminToken || adminToken !== validToken) {
+    if (!validateAdminAuth(request)) {
       return NextResponse.json(
         {
           success: false,
@@ -66,6 +72,17 @@ export async function PATCH(
         );
       }
       const trimmedWhatsapp = whatsapp_number.trim();
+
+      if (!WA_REGEX.test(trimmedWhatsapp)) {
+        return NextResponse.json(
+          {
+            success: false,
+            error:
+              "Format nomor WhatsApp tidak valid. Gunakan 8-15 digit angka atau format internasional (+62...).",
+          },
+          { status: 400 }
+        );
+      }
 
       // Cek duplikasi nomor WhatsApp pada pemilik lain
       if (trimmedWhatsapp !== existingOwner.whatsapp_number) {
@@ -134,9 +151,7 @@ export async function DELETE(
   context: { params: Promise<{ id: string }> | { id: string } }
 ) {
   try {
-    const adminToken = request.cookies.get("admin_token")?.value;
-    const validToken = process.env.ADMIN_TOKEN || "kospasti_admin_authenticated";
-    if (!adminToken || adminToken !== validToken) {
+    if (!validateAdminAuth(request)) {
       return NextResponse.json(
         {
           success: false,
