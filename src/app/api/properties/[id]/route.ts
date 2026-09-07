@@ -28,6 +28,7 @@ export async function GET(
             whatsapp_number: true,
           },
         },
+        media: true,
       },
     });
 

@@ -107,6 +107,21 @@ describe("Manage Properties Page (/admin/properties)", () => {
     expect(content).toContain('value="CAMPUR"');
   });
 
+  it("memiliki input multi-upload media (gambar & video) dan FormData submit", () => {
+    const filePath = path.resolve(
+      __dirname,
+      "../src/app/admin/properties/page.tsx"
+    );
+    const content = fs.readFileSync(filePath, "utf-8");
+
+    expect(content).toContain('type="file"');
+    expect(content).toContain("multiple");
+    expect(content).toContain("accept=");
+    expect(content).toContain("handleFileChange");
+    expect(content).toContain("new FormData()");
+    expect(content).toContain("selectedFiles.forEach");
+  });
+
   it("memiliki logika badge ketersediaan kamar (hijau jika > 0, merah jika 0)", () => {
     const filePath = path.resolve(
       __dirname,

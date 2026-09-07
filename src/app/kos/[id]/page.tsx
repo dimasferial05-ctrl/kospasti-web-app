@@ -10,7 +10,17 @@ import {
   Check,
   Home,
   User,
+  ChevronLeft,
+  ChevronRight,
+  Play,
+  Camera,
 } from "lucide-react";
+
+interface PropertyMediaItem {
+  id?: string;
+  url: string;
+  type: string; // "IMAGE" | "VIDEO"
+}
 
 interface PropertyDetail {
   id: string;
@@ -20,6 +30,7 @@ interface PropertyDetail {
   gender_type: string;
   facilities: string;
   image_url?: string | null;
+  media?: PropertyMediaItem[];
   description?: string | null;
   updated_at?: string;
   owner?: {
@@ -36,6 +47,9 @@ export default function PropertyDetailPage() {
   const [property, setProperty] = useState<PropertyDetail | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Gallery state
+  const [activeIndex, setActiveIndex] = useState(0);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -113,6 +127,7 @@ export default function PropertyDetailPage() {
         if (isMounted) {
           if (json.success && json.data) {
             setProperty(json.data);
+            setActiveIndex(0);
           } else {
             setError(json.error || "Kos tidak ditemukan");
           }
@@ -168,6 +183,25 @@ export default function PropertyDetailPage() {
     );
   }
 
+  const mediaList: PropertyMediaItem[] =
+    property.media && property.media.length > 0
+      ? property.media
+      : property.image_url
+      ? [{ url: property.image_url, type: "IMAGE" }]
+      : [];
+
+  const prevSlide = () => {
+    if (mediaList.length <= 1) return;
+    setActiveIndex((prev) => (prev === 0 ? mediaList.length - 1 : prev - 1));
+  };
+
+  const nextSlide = () => {
+    if (mediaList.length <= 1) return;
+    setActiveIndex((prev) => (prev === mediaList.length - 1 ? 0 : prev + 1));
+  };
+
+  const currentMedia = mediaList[activeIndex] || null;
+
   const formattedPrice = `Rp ${property.price_per_month.toLocaleString("id-ID")}`;
   const isFull = property.available_rooms === 0;
   const isAvailable = property.available_rooms > 0;
@@ -190,7 +224,7 @@ export default function PropertyDetailPage() {
         .split(",")
         .map((f) => f.trim())
         .filter(Boolean)
-    : [];
+      : [];
 
   return (
     <div className="max-w-md mx-auto min-h-screen bg-slate-50 pb-24 flex flex-col relative shadow-sm">
@@ -208,19 +242,104 @@ export default function PropertyDetailPage() {
         </h1>
       </div>
 
-      {/* Foto Utama */}
-      <div className="w-full h-64 relative bg-slate-200 overflow-hidden flex items-center justify-center">
-        {property.image_url ? (
-          /* eslint-disable-next-line @next/next/no-img-element */
-          <img
-            src={property.image_url}
-            alt={property.name}
-            className="w-full h-full object-cover"
-          />
-        ) : (
-          <div className="flex flex-col items-center justify-center text-slate-400 gap-2">
-            <Home className="w-12 h-12 stroke-[1.5]" />
-            <span className="text-xs">Tidak ada foto</span>
+      {/* Galeri / Carousel Media */}
+      <div className="w-full flex flex-col bg-slate-900">
+        {/* Main Viewer (Penampil Utama) */}
+        <div className="w-full h-72 relative bg-slate-200 overflow-hidden flex items-center justify-center group">
+          {currentMedia ? (
+            currentMedia.type === "VIDEO" ? (
+              <video
+                key={currentMedia.url}
+                src={currentMedia.url}
+                controls
+                playsInline
+                className="w-full h-full object-contain bg-black"
+              />
+            ) : (
+              /* eslint-disable-next-line @next/next/no-img-element */
+              <img
+                src={currentMedia.url}
+                alt={`${property.name} - ${activeIndex + 1}`}
+                className="w-full h-full object-cover"
+              />
+            )
+          ) : (
+            <div className="flex flex-col items-center justify-center text-slate-400 gap-2">
+              <Home className="w-12 h-12 stroke-[1.5]" />
+              <span className="text-xs">Tidak ada foto</span>
+            </div>
+          )}
+
+          {/* Tombol Navigasi Kiri / Kanan */}
+          {mediaList.length > 1 && (
+            <>
+              <button
+                type="button"
+                onClick={prevSlide}
+                aria-label="Media sebelumnya"
+                className="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-slate-950/60 hover:bg-slate-950/80 text-white flex items-center justify-center backdrop-blur-xs transition-all shadow-md cursor-pointer z-20"
+              >
+                <ChevronLeft className="w-5 h-5" />
+              </button>
+              <button
+                type="button"
+                onClick={nextSlide}
+                aria-label="Media berikutnya"
+                className="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-slate-950/60 hover:bg-slate-950/80 text-white flex items-center justify-center backdrop-blur-xs transition-all shadow-md cursor-pointer z-20"
+              >
+                <ChevronRight className="w-5 h-5" />
+              </button>
+
+              {/* Counter badge */}
+              <div className="absolute bottom-3 right-3 px-2.5 py-1 bg-black/60 backdrop-blur-xs text-white text-[11px] font-semibold rounded-full flex items-center gap-1.5 z-20">
+                {currentMedia?.type === "VIDEO" ? (
+                  <Play className="w-3 h-3 fill-white text-white" />
+                ) : (
+                  <Camera className="w-3 h-3" />
+                )}
+                <span>
+                  {activeIndex + 1} / {mediaList.length}
+                </span>
+              </div>
+            </>
+          )}
+        </div>
+
+        {/* Thumbnails Bar (Pilihan di Bawah Penampil Utama) */}
+        {mediaList.length > 1 && (
+          <div className="bg-slate-900/90 border-t border-slate-800 p-2.5 flex items-center gap-2 overflow-x-auto scrollbar-none">
+            {mediaList.map((item, idx) => (
+              <button
+                key={idx}
+                type="button"
+                onClick={() => setActiveIndex(idx)}
+                aria-label={`Lihat media ${idx + 1}`}
+                className={`relative w-16 h-16 shrink-0 rounded-lg overflow-hidden border-2 transition-all cursor-pointer ${
+                  activeIndex === idx
+                    ? "border-blue-500 ring-2 ring-blue-500/50 opacity-100 scale-100"
+                    : "border-slate-700 opacity-60 hover:opacity-100"
+                }`}
+              >
+                {item.type === "VIDEO" ? (
+                  <div className="w-full h-full bg-slate-800 flex items-center justify-center text-white relative">
+                    <video
+                      src={item.url}
+                      className="w-full h-full object-cover pointer-events-none"
+                    />
+                    <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+                      <Play className="w-4 h-4 fill-white text-white" />
+                    </div>
+                  </div>
+                ) : (
+                  /* eslint-disable-next-line @next/next/no-img-element */
+                  <img
+                    src={item.url}
+                    alt={`Thumbnail ${idx + 1}`}
+                    className="w-full h-full object-cover"
+                  />
+                )}
+              </button>
+            ))}
           </div>
         )}
       </div>
