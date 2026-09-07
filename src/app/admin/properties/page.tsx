@@ -210,6 +210,10 @@ export default function ManagePropertiesPage() {
         setProperties((prev) =>
           prev.map((p) => (p.id === editingProperty.id ? { ...p, image_url: mediaUrl } : p))
         );
+        setFormData((prev) => ({
+          ...prev,
+          image_url: mediaUrl && !mediaUrl.startsWith("/uploads/") ? mediaUrl : "",
+        }));
       } else {
         alert(resData.error || "Gagal mengatur thumbnail.");
       }
@@ -256,6 +260,10 @@ export default function ManagePropertiesPage() {
         setProperties((prev) =>
           prev.map((p) => (p.id === editingProperty.id ? updatedProperty : p))
         );
+        setFormData((prev) => ({
+          ...prev,
+          image_url: newImageUrl && !newImageUrl.startsWith("/uploads/") ? newImageUrl : "",
+        }));
       } else {
         alert(resData.error || "Gagal menghapus media.");
       }

@@ -4,6 +4,7 @@ import { clearDatabase } from "./helpers";
 import { deleteUploadedFile } from "../src/lib/upload";
 import { DELETE as deleteAdminMedia } from "../src/app/api/admin/media/[id]/route";
 import { PATCH as patchPropertyThumbnail } from "../src/app/api/admin/properties/[id]/thumbnail/route";
+import { PATCH as patchAdminProperty } from "../src/app/api/admin/properties/[id]/route";
 import { GET as getPublicProperties } from "../src/app/api/properties/route";
 import { NextRequest } from "next/server";
 import fs from "fs";
@@ -291,4 +292,68 @@ describe("Fitur Manajemen Media di Halaman Edit Properti (Issue #93)", () => {
       expect(result.data[0].image_url).toBe("/uploads/properties/foto-kedua-thumbnail.jpg");
     });
   });
+
+  describe("6. PATCH /api/admin/properties/[id] (Pencegahan Duplikasi Media saat Update)", () => {
+    it("tidak menduplikasi media jika image_url yang dikirim sudah ada di media properti", async () => {
+      const owner = await prisma.owner.create({
+        data: {
+          name: "Owner Deduplication Test",
+          whatsapp_number: "081288776655",
+        },
+      });
+
+      const property = await prisma.property.create({
+        data: {
+          name: "Kos Media Dedup",
+          price_per_month: 1000000,
+          available_rooms: 5,
+          gender_type: "CAMPUR",
+          facilities: "AC, TV",
+          image_url: "https://example.com/img1.jpg",
+          owner_id: owner.id,
+          media: {
+            create: [
+              { url: "https://example.com/img1.jpg", type: "IMAGE" },
+              { url: "https://example.com/img2.jpg", type: "IMAGE" },
+            ],
+          },
+        },
+        include: { media: true },
+      });
+
+      expect(property.media).toHaveLength(2);
+
+      // Simulasikan submit form update edit dengan image_url yang sudah ada di media
+      const request = new NextRequest(`http://localhost:3000/api/admin/properties/${property.id}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          cookie: "admin_token=kospasti_admin_authenticated",
+        },
+        body: JSON.stringify({
+          name: "Kos Media Dedup (Updated)",
+          image_url: "https://example.com/img2.jpg",
+        }),
+      });
+
+      const response = await patchAdminProperty(request, {
+        params: Promise.resolve({ id: property.id }),
+      });
+      const result = await response.json();
+
+      expect(response.status).toBe(200);
+      expect(result.success).toBe(true);
+
+      const allMedia = await prisma.propertyMedia.findMany({
+        where: { property_id: property.id },
+      });
+
+      // Media tidak boleh bertambah menjadi 3 karena sudah ada di database
+      expect(allMedia).toHaveLength(2);
+      expect(allMedia.map((m) => m.url)).toEqual(
+        expect.arrayContaining(["https://example.com/img1.jpg", "https://example.com/img2.jpg"])
+      );
+    });
+  });
 });
+
