@@ -153,4 +153,50 @@ describe("Admin Owners Management Page (/admin/owners)", () => {
       expect(writeTextMock).toHaveBeenCalledWith(testUrl);
     });
   });
+
+  describe("CRUD Pemilik Kos (Issue #97)", () => {
+    it("memiliki tombol dan modal form Tambah Pemilik Kos Baru", () => {
+      const filePath = path.resolve(
+        __dirname,
+        "../src/app/admin/owners/page.tsx"
+      );
+      const content = fs.readFileSync(filePath, "utf-8");
+
+      expect(content).toContain("Tambah Pemilik");
+      expect(content).toContain("Tambah Pemilik Kos Baru");
+      expect(content).toContain("handleAddOwner");
+      expect(content).toContain('method: "POST"');
+      expect(content).toContain('fetch("/api/admin/owners"');
+      expect(content).toContain("addFormData");
+    });
+
+    it("memiliki tombol dan modal form Edit Data Pemilik Kos", () => {
+      const filePath = path.resolve(
+        __dirname,
+        "../src/app/admin/owners/page.tsx"
+      );
+      const content = fs.readFileSync(filePath, "utf-8");
+
+      expect(content).toContain("Edit Data Pemilik Kos");
+      expect(content).toContain("handleOpenEditModal");
+      expect(content).toContain("handleUpdateOwner");
+      expect(content).toContain('method: "PATCH"');
+      expect(content).toContain("editFormData");
+    });
+
+    it("memiliki tombol dan modal konfirmasi Hapus Pemilik Kos beserta peringatan cascade properti", () => {
+      const filePath = path.resolve(
+        __dirname,
+        "../src/app/admin/owners/page.tsx"
+      );
+      const content = fs.readFileSync(filePath, "utf-8");
+
+      expect(content).toContain("Hapus Pemilik Kos");
+      expect(content).toContain("confirmDeleteOwnerAction");
+      expect(content).toContain('method: "DELETE"');
+      expect(content).toContain("Peringatan Data Terkait:");
+      expect(content).toContain("ikut terhapus");
+    });
+  });
 });
+
