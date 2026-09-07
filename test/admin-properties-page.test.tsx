@@ -3,6 +3,14 @@ import React from "react";
 import fs from "fs";
 import path from "path";
 import { renderToStaticMarkup } from "react-dom/server";
+
+// Mock next/navigation
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({
+    push: vi.fn(),
+  }),
+}));
+
 import ManagePropertiesPage from "../src/app/admin/properties/page";
 
 describe("Manage Properties Page (/admin/properties)", () => {
@@ -112,7 +120,7 @@ describe("Manage Properties Page (/admin/properties)", () => {
     expect(content).toContain("Kamar");
   });
 
-  it("memiliki fungsi handleSubmitForm untuk POST (create) dan PATCH (update) dengan menyertakan token autentikasi", () => {
+  it("memiliki fungsi handleSubmitForm untuk POST (create) dan PATCH (update) dengan memanggil endpoint API", () => {
     const filePath = path.resolve(
       __dirname,
       "../src/app/admin/properties/page.tsx"
@@ -123,9 +131,6 @@ describe("Manage Properties Page (/admin/properties)", () => {
     expect(content).toContain("/api/admin/properties/${editingProperty.id}");
     expect(content).toContain('"/api/admin/properties"');
     expect(content).toContain('method = isEdit ? "PATCH" : "POST"');
-    expect(content).toContain('sessionStorage.getItem("adminAuth")');
-    expect(content).toContain("Authorization:");
-    expect(content).toContain("Bearer ${token");
     expect(content).toContain("fetchProperties()");
   });
 
@@ -168,7 +173,7 @@ describe("Manage Properties Page (/admin/properties)", () => {
     expect(content).toContain("Belum ada data kos.");
   });
 
-  it("menangani status 401 Unauthorized dengan menghapus token sessionStorage dan me-reload halaman", () => {
+  it("menangani status 401 Unauthorized dengan me-redirect pengguna ke /admin/login", () => {
     const filePath = path.resolve(
       __dirname,
       "../src/app/admin/properties/page.tsx"
@@ -176,6 +181,6 @@ describe("Manage Properties Page (/admin/properties)", () => {
     const content = fs.readFileSync(filePath, "utf-8");
 
     expect(content).toContain("res.status === 401");
-    expect(content).toContain('sessionStorage.removeItem("adminAuth")');
+    expect(content).toContain('router.push("/admin/login")');
   });
 });

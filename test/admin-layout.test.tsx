@@ -4,7 +4,6 @@ import fs from "fs";
 import path from "path";
 import { renderToStaticMarkup } from "react-dom/server";
 import AdminLayout from "../src/app/admin/layout";
-import RootLayout from "../src/app/layout";
 import { Header } from "../src/components/shared/Header";
 
 // Mock next/navigation
@@ -13,6 +12,7 @@ vi.mock("next/navigation", () => ({
   usePathname: () => mockPathname,
   useRouter: () => ({
     push: vi.fn(),
+    refresh: vi.fn(),
   }),
 }));
 
@@ -29,36 +29,36 @@ describe("Admin Layout & Protection Component (/admin/layout)", () => {
     expect(firstLine).toMatch(/^["']use client["'];?$/);
   });
 
-  it("merender form login PIN jika belum terautentikasi (tampilan gelap)", () => {
+  it("merender children langsung tanpa sidebar ketika berada di /admin/login", () => {
+    mockPathname = "/admin/login";
+    const html = renderToStaticMarkup(
+      <AdminLayout>
+        <div id="login-child">Login Form Content</div>
+      </AdminLayout>
+    );
+
+    expect(html).toContain("Login Form Content");
+    expect(html).not.toContain("MAIN NAVIGATION");
+  });
+
+  it("merender Sidebar admin dan children untuk rute dashboard /admin", () => {
+    mockPathname = "/admin";
     const html = renderToStaticMarkup(
       <AdminLayout>
         <div>Admin Protected Content</div>
       </AdminLayout>
     );
 
-    // Harus menampilkan form login dan tidak menampilkan children jika belum auth
-    expect(html).toContain("Login Admin KosPasti");
-    expect(html).toContain("Masukkan PIN Admin");
-    expect(html).toContain("Masuk Ruang Tahta");
-    expect(html).toContain("bg-slate-900");
-    expect(html).not.toContain("Admin Protected Content");
+    expect(html).toContain("Admin Protected Content");
+    expect(html).toContain("KosPasti");
+    expect(html).toContain("ADMIN");
+    expect(html).toContain("Dashboard");
+    expect(html).toContain("Kelola Properti");
+    expect(html).toContain("Pemilik Kos");
+    expect(html).toContain("Data Transaksi");
   });
 
-  it("memiliki struktur dan logika validasi PIN '778899'", () => {
-    const filePath = path.resolve(__dirname, "../src/app/admin/layout.tsx");
-    const content = fs.readFileSync(filePath, "utf-8");
-
-    // Cek PIN Hardcoded
-    expect(content).toContain('"778899"');
-    expect(content).toContain("sessionStorage.setItem(\"adminAuth\", pin)");
-    expect(content).toContain("sessionStorage.getItem(\"adminAuth\")");
-
-    // Pesan error jika salah
-    expect(content).toContain("PIN salah. Akses ditolak.");
-    expect(content).toContain("text-red-500");
-  });
-
-  it("memiliki struktur Sidebar admin lengkap dengan navigasi dan tombol logout", () => {
+  it("memiliki struktur Sidebar admin lengkap dengan navigasi dan tombol logout API", () => {
     const filePath = path.resolve(__dirname, "../src/app/admin/layout.tsx");
     const content = fs.readFileSync(filePath, "utf-8");
 
@@ -77,9 +77,10 @@ describe("Admin Layout & Protection Component (/admin/layout)", () => {
     expect(content).toContain('href="/admin/bookings"');
     expect(content).toContain("Data Transaksi");
 
-    // Tombol Logout
+    // Tombol Logout & Endpoint
     expect(content).toContain("Logout");
-    expect(content).toContain("sessionStorage.removeItem(\"adminAuth\")");
+    expect(content).toContain('fetch("/api/admin/logout"');
+    expect(content).toContain('method: "POST"');
 
     // Main Content container desktop
     expect(content).toContain("ml-64");

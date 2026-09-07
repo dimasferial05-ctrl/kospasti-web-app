@@ -3,6 +3,14 @@ import React from "react";
 import fs from "fs";
 import path from "path";
 import { renderToStaticMarkup } from "react-dom/server";
+
+// Mock next/navigation
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({
+    push: vi.fn(),
+  }),
+}));
+
 import AdminDashboardOverview from "../src/app/admin/page";
 
 describe("Admin Dashboard Overview Page (/admin)", () => {
@@ -74,7 +82,7 @@ describe("Admin Dashboard Overview Page (/admin)", () => {
     expect(content).toContain("Area ini disiapkan untuk grafik analitik di masa mendatang");
   });
 
-  it("menyertakan header Authorization Bearer token dari sessionStorage saat memanggil API /api/admin/stats dan menangani status 401", () => {
+  it("memanggil API /api/admin/stats secara otomatis via cookie dan menangani redirect status 401 ke /admin/login", () => {
     const filePath = path.resolve(
       __dirname,
       "../src/app/admin/page.tsx"
@@ -82,10 +90,7 @@ describe("Admin Dashboard Overview Page (/admin)", () => {
     const content = fs.readFileSync(filePath, "utf-8");
 
     expect(content).toContain('fetch("/api/admin/stats"');
-    expect(content).toContain('sessionStorage.getItem("adminAuth")');
-    expect(content).toContain("Authorization:");
-    expect(content).toContain("Bearer ${token");
     expect(content).toContain("res.status === 401");
-    expect(content).toContain('sessionStorage.removeItem("adminAuth")');
+    expect(content).toContain('router.push("/admin/login")');
   });
 });

@@ -6,8 +6,8 @@ export async function PATCH(
   context: { params: Promise<{ id: string }> | { id: string } }
 ) {
   try {
-    const authHeader = request.headers.get("authorization");
-    if (authHeader !== "Bearer 778899") {
+    const adminToken = request.cookies.get("admin_token")?.value;
+    if (!adminToken) {
       return NextResponse.json(
         {
           success: false,

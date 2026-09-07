@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { useRouter } from "next/navigation";
 import {
   Link as LinkIcon,
   CheckCircle2,
@@ -51,6 +52,7 @@ const initialFormData: PropertyFormData = {
 };
 
 export default function ManagePropertiesPage() {
+  const router = useRouter();
   const [properties, setProperties] = useState<PropertyAdminItem[]>([]);
   const [owners, setOwners] = useState<OwnerOption[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -68,18 +70,10 @@ export default function ManagePropertiesPage() {
   // Fetch daftar properti
   const fetchProperties = useCallback(async () => {
     try {
-      const token = typeof window !== "undefined" ? sessionStorage.getItem("adminAuth") : "";
-      const res = await fetch("/api/admin/properties", {
-        headers: {
-          Authorization: `Bearer ${token || ""}`,
-        },
-      });
+      const res = await fetch("/api/admin/properties");
 
       if (res.status === 401) {
-        if (typeof window !== "undefined") {
-          sessionStorage.removeItem("adminAuth");
-          window.location.reload();
-        }
+        router.push("/admin/login");
         return;
       }
 
@@ -92,24 +86,16 @@ export default function ManagePropertiesPage() {
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [router]);
 
   // Fetch daftar pemilik kos (owner) untuk dropdown form
   const fetchOwners = useCallback(async () => {
     try {
       setIsLoadingOwners(true);
-      const token = typeof window !== "undefined" ? sessionStorage.getItem("adminAuth") : "";
-      const res = await fetch("/api/admin/owners", {
-        headers: {
-          Authorization: `Bearer ${token || ""}`,
-        },
-      });
+      const res = await fetch("/api/admin/owners");
 
       if (res.status === 401) {
-        if (typeof window !== "undefined") {
-          sessionStorage.removeItem("adminAuth");
-          window.location.reload();
-        }
+        router.push("/admin/login");
         return;
       }
 
@@ -122,7 +108,7 @@ export default function ManagePropertiesPage() {
     } finally {
       setIsLoadingOwners(false);
     }
-  }, []);
+  }, [router]);
 
   useEffect(() => {
     fetchProperties();
@@ -202,7 +188,6 @@ export default function ManagePropertiesPage() {
 
     try {
       setIsSubmitting(true);
-      const token = typeof window !== "undefined" ? sessionStorage.getItem("adminAuth") : "";
       const isEdit = !!editingProperty;
       const url = isEdit
         ? `/api/admin/properties/${editingProperty.id}`
@@ -223,16 +208,12 @@ export default function ManagePropertiesPage() {
         method,
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token || ""}`,
         },
         body: JSON.stringify(payload),
       });
 
       if (res.status === 401) {
-        if (typeof window !== "undefined") {
-          sessionStorage.removeItem("adminAuth");
-          window.location.reload();
-        }
+        router.push("/admin/login");
         return;
       }
 
@@ -261,21 +242,16 @@ export default function ManagePropertiesPage() {
 
     try {
       setLoadingId(propertyId);
-      const token = typeof window !== "undefined" ? sessionStorage.getItem("adminAuth") : "";
       const res = await fetch("/api/magic-link/generate", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token || ""}`,
         },
         body: JSON.stringify({ ownerId }),
       });
 
       if (res.status === 401) {
-        if (typeof window !== "undefined") {
-          sessionStorage.removeItem("adminAuth");
-          window.location.reload();
-        }
+        router.push("/admin/login");
         return;
       }
 
