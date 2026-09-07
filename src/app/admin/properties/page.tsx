@@ -71,6 +71,7 @@ export default function ManagePropertiesPage() {
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [loadingId, setLoadingId] = useState<string | null>(null);
   const [deletingPropertyId, setDeletingPropertyId] = useState<string | null>(null);
+  const [confirmDeleteModal, setConfirmDeleteModal] = useState<{ id: string; name: string } | null>(null);
 
   // State Modal Form (Tambah / Edit)
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -395,14 +396,16 @@ export default function ManagePropertiesPage() {
     }
   };
 
-  // Handler untuk menghapus properti
-  const handleDeleteProperty = async (id: string, name: string) => {
-    if (
-      !window.confirm(
-        `Apakah Anda yakin ingin menghapus properti "${name}"? Data dan media terkait akan dihapus secara permanen.`
-      )
-    )
-      return;
+  // Handler untuk membuka modal konfirmasi hapus properti
+  const handleDeleteProperty = (id: string, name: string) => {
+    setConfirmDeleteModal({ id, name });
+  };
+
+  // Handler eksekusi hapus properti setelah konfirmasi
+  const confirmDeleteProperty = async () => {
+    if (!confirmDeleteModal) return;
+    const { id } = confirmDeleteModal;
+    setConfirmDeleteModal(null);
 
     try {
       setDeletingPropertyId(id);
@@ -927,6 +930,55 @@ export default function ManagePropertiesPage() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Konfirmasi Hapus Properti */}
+      {confirmDeleteModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-xs animate-in fade-in duration-200">
+          <div className="bg-white rounded-2xl shadow-xl border border-slate-200 w-full max-w-sm overflow-hidden">
+            {/* Header */}
+            <div className="p-5 border-b border-slate-100 flex items-center gap-3 bg-rose-50/70">
+              <div className="w-10 h-10 rounded-xl bg-rose-100 text-rose-600 flex items-center justify-center shrink-0">
+                <Trash2 size={18} />
+              </div>
+              <div>
+                <h3 className="font-bold text-slate-800 text-base">Hapus Properti</h3>
+                <p className="text-xs text-slate-500">Tindakan ini tidak dapat dibatalkan.</p>
+              </div>
+            </div>
+
+            {/* Body */}
+            <div className="p-5">
+              <p className="text-sm text-slate-600 leading-relaxed">
+                Apakah Anda yakin ingin menghapus properti{" "}
+                <span className="font-bold text-slate-800">
+                  &ldquo;{confirmDeleteModal.name}&rdquo;
+                </span>
+                ? Semua data, media, dan booking terkait akan{" "}
+                <span className="text-rose-600 font-semibold">dihapus secara permanen</span>.
+              </p>
+            </div>
+
+            {/* Footer Buttons */}
+            <div className="px-5 pb-5 flex items-center justify-end gap-2.5">
+              <button
+                type="button"
+                onClick={() => setConfirmDeleteModal(null)}
+                className="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-xl transition-colors cursor-pointer border border-slate-200"
+              >
+                Batal
+              </button>
+              <button
+                type="button"
+                onClick={confirmDeleteProperty}
+                className="inline-flex items-center gap-2 bg-rose-600 hover:bg-rose-700 text-white px-5 py-2 text-xs font-semibold rounded-xl transition-all cursor-pointer shadow-sm"
+              >
+                <Trash2 size={13} />
+                <span>Ya, Hapus</span>
+              </button>
+            </div>
           </div>
         </div>
       )}
