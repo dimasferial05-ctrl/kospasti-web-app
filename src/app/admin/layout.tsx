@@ -36,9 +36,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       <div className="min-h-screen flex items-center justify-center bg-slate-900 p-4">
         <form onSubmit={handleLogin} className="bg-white p-8 rounded-xl shadow-2xl max-w-sm w-full text-center">
           <h2 className="text-2xl font-bold mb-6 text-slate-800">Login Admin KosPasti</h2>
-          <input 
-            type="password" 
-            placeholder="Masukkan PIN Admin" 
+          <input
+            type="password"
+            placeholder="Masukkan PIN Admin"
             className="w-full border border-slate-300 p-3 rounded-lg mb-4 text-center text-lg tracking-widest text-slate-900"
             value={pin}
             onChange={(e) => setPin(e.target.value)}
@@ -63,20 +63,20 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         <nav className="flex-1 p-4 space-y-2">
           <div className="text-xs font-semibold text-slate-500 mb-4 tracking-wider">MAIN NAVIGATION</div>
           <Link className="flex items-center gap-3 p-3 rounded-lg hover:bg-slate-800 hover:text-white transition-colors" href="/admin">
-            <LayoutDashboard size={20}/> Dashboard
+            <LayoutDashboard size={20} /> Dashboard
           </Link>
           <Link className="flex items-center gap-3 p-3 rounded-lg hover:bg-slate-800 hover:text-white transition-colors" href="/admin/properties">
-            <Building size={20}/> Kelola Properti
+            <Building size={20} /> Kelola Properti
           </Link>
           <Link className="flex items-center gap-3 p-3 rounded-lg hover:bg-slate-800 hover:text-white transition-colors" href="/admin/owners">
-            <Users size={20}/> Pemilik Kos
+            <Users size={20} /> Pemilik Kos
           </Link>
           <Link className="flex items-center gap-3 p-3 rounded-lg hover:bg-slate-800 hover:text-white transition-colors" href="/admin/bookings">
-            <FileText size={20}/> Data Transaksi
+            <FileText size={20} /> Data Transaksi
           </Link>
         </nav>
         <div className="p-4 border-t border-slate-800">
-          <button 
+          <button
             onClick={() => {
               if (typeof window !== "undefined") {
                 sessionStorage.removeItem("adminAuth");
@@ -85,7 +85,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             }}
             className="flex items-center gap-3 p-3 w-full rounded-lg hover:bg-red-500 hover:text-white transition-colors text-left cursor-pointer"
           >
-            <LogOut size={20}/> Logout
+            <LogOut size={20} /> Logout
           </button>
         </div>
       </aside>
