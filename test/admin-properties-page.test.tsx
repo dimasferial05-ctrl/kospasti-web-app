@@ -32,7 +32,7 @@ describe("Manage Properties Page (/admin/properties)", () => {
     expect(html).toContain("Memuat data properti...");
   });
 
-  it("memiliki struktur tabel Enterprise dengan header kolom lengkap", () => {
+  it("memiliki struktur tabel Enterprise dengan header kolom lengkap dan tombol Tambah Properti", () => {
     const filePath = path.resolve(
       __dirname,
       "../src/app/admin/properties/page.tsx"
@@ -45,11 +45,58 @@ describe("Manage Properties Page (/admin/properties)", () => {
       "Kelola properti terdaftar dan kirimkan magic link update kamar ke pemilik kos."
     );
 
+    // Tombol Tambah Properti
+    expect(content).toContain("Tambah Properti");
+    expect(content).toContain("handleOpenAddModal");
+
     // Header tabel
     expect(content).toContain("Nama Kos");
     expect(content).toContain("Nama Pemilik");
+    expect(content).toContain("Tipe Kos");
+    expect(content).toContain("Harga");
     expect(content).toContain("Kapasitas (Sisa)");
     expect(content).toContain("Aksi");
+  });
+
+  it("memiliki tombol Edit dan Copy Link pada setiap baris properti", () => {
+    const filePath = path.resolve(
+      __dirname,
+      "../src/app/admin/properties/page.tsx"
+    );
+    const content = fs.readFileSync(filePath, "utf-8");
+
+    expect(content).toContain("handleOpenEditModal");
+    expect(content).toContain("Edit");
+    expect(content).toContain("handleCopyLink");
+    expect(content).toContain("Copy Link");
+  });
+
+  it("memiliki komponen Modal Dialog Form dengan field lengkap untuk Tambah dan Edit Properti", () => {
+    const filePath = path.resolve(
+      __dirname,
+      "../src/app/admin/properties/page.tsx"
+    );
+    const content = fs.readFileSync(filePath, "utf-8");
+
+    // Modal state & elements
+    expect(content).toContain("isModalOpen");
+    expect(content).toContain("editingProperty");
+    expect(content).toContain("Tambah Properti Kos Baru");
+    expect(content).toContain("Edit Properti Kos");
+
+    // Form inputs
+    expect(content).toContain("Nama Kos");
+    expect(content).toContain("Pemilik Kos (Owner)");
+    expect(content).toContain("Harga / Bulan (Rp)");
+    expect(content).toContain("Tipe Kos");
+    expect(content).toContain("Jumlah Kamar Tersedia");
+    expect(content).toContain("Fasilitas");
+    expect(content).toContain("URL Gambar (Opsional)");
+
+    // Options for gender_type
+    expect(content).toContain('value="PUTRA"');
+    expect(content).toContain('value="PUTRI"');
+    expect(content).toContain('value="CAMPUR"');
   });
 
   it("memiliki logika badge ketersediaan kamar (hijau jika > 0, merah jika 0)", () => {
@@ -63,6 +110,35 @@ describe("Manage Properties Page (/admin/properties)", () => {
     expect(content).toContain("bg-green-100 text-green-700");
     expect(content).toContain("bg-red-100 text-red-700");
     expect(content).toContain("Kamar");
+  });
+
+  it("memiliki fungsi handleSubmitForm untuk POST (create) dan PATCH (update) dengan menyertakan token autentikasi", () => {
+    const filePath = path.resolve(
+      __dirname,
+      "../src/app/admin/properties/page.tsx"
+    );
+    const content = fs.readFileSync(filePath, "utf-8");
+
+    expect(content).toContain("handleSubmitForm");
+    expect(content).toContain("/api/admin/properties/${editingProperty.id}");
+    expect(content).toContain('"/api/admin/properties"');
+    expect(content).toContain('method = isEdit ? "PATCH" : "POST"');
+    expect(content).toContain('sessionStorage.getItem("adminAuth")');
+    expect(content).toContain("Authorization:");
+    expect(content).toContain("Bearer ${token");
+    expect(content).toContain("fetchProperties()");
+  });
+
+  it("mengambil data pemilik kos dari /api/admin/owners untuk mengisi dropdown pemilik kos", () => {
+    const filePath = path.resolve(
+      __dirname,
+      "../src/app/admin/properties/page.tsx"
+    );
+    const content = fs.readFileSync(filePath, "utf-8");
+
+    expect(content).toContain('fetch("/api/admin/owners"');
+    expect(content).toContain("fetchOwners");
+    expect(content).toContain("owners.map");
   });
 
   it("memiliki fungsi handleCopyLink untuk memanggil API generate Magic Link dan menyalin ke clipboard dengan feedback 'Tersalin!'", () => {
@@ -79,7 +155,6 @@ describe("Manage Properties Page (/admin/properties)", () => {
     expect(content).toContain("setCopiedId(propertyId)");
     expect(content).toContain("setCopiedId(null)");
     expect(content).toContain("Tersalin!");
-    expect(content).toContain("Copy Link");
   });
 
   it("menampilkan pesan empty state saat tidak ada data kos", () => {
@@ -93,32 +168,13 @@ describe("Manage Properties Page (/admin/properties)", () => {
     expect(content).toContain("Belum ada data kos.");
   });
 
-  it("menyertakan header Authorization Bearer token dari sessionStorage saat memanggil API /api/admin/properties dan menangani status 401", () => {
+  it("menangani status 401 Unauthorized dengan menghapus token sessionStorage dan me-reload halaman", () => {
     const filePath = path.resolve(
       __dirname,
       "../src/app/admin/properties/page.tsx"
     );
     const content = fs.readFileSync(filePath, "utf-8");
 
-    expect(content).toContain('fetch("/api/admin/properties"');
-    expect(content).toContain('sessionStorage.getItem("adminAuth")');
-    expect(content).toContain("Authorization:");
-    expect(content).toContain("Bearer ${token");
-    expect(content).toContain("res.status === 401");
-    expect(content).toContain('sessionStorage.removeItem("adminAuth")');
-  });
-
-  it("menyertakan header Authorization Bearer token dari sessionStorage saat memanggil API /api/magic-link/generate dan menangani status 401", () => {
-    const filePath = path.resolve(
-      __dirname,
-      "../src/app/admin/properties/page.tsx"
-    );
-    const content = fs.readFileSync(filePath, "utf-8");
-
-    expect(content).toContain('fetch("/api/magic-link/generate"');
-    expect(content).toContain('sessionStorage.getItem("adminAuth")');
-    expect(content).toContain("Authorization:");
-    expect(content).toContain("Bearer ${token");
     expect(content).toContain("res.status === 401");
     expect(content).toContain('sessionStorage.removeItem("adminAuth")');
   });
