@@ -336,11 +336,10 @@ export default function AdminOwnersPage() {
                 <button
                   type="button"
                   onClick={handleCopyLink}
-                  className={`inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-lg text-xs font-semibold transition-all shrink-0 cursor-pointer ${
-                    copied
+                  className={`inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-lg text-xs font-semibold transition-all shrink-0 cursor-pointer ${copied
                       ? "bg-emerald-600 text-white shadow-sm"
                       : "bg-slate-900 text-white hover:bg-slate-800"
-                  }`}
+                    }`}
                   title="Salin ke Clipboard"
                 >
                   {copied ? (
@@ -368,7 +367,7 @@ export default function AdminOwnersPage() {
             <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
               <a
                 href={`https://wa.me/${formatWhatsAppNumber(generatedModal.ownerPhone)}?text=${encodeURIComponent(
-                  `Halo ${generatedModal.ownerName}, berikut tautan untuk memperbarui data kamar kos Anda di KosPasti: ${generatedModal.link}`
+                  `Halo ${generatedModal.ownerName},\n\nBerikut adalah tautan rahasia (Magic Link) untuk mengakses dan memperbarui data properti kos Anda di platform KosPasti.\n\n🔗 Tautan: ${generatedModal.link}\n\n⚠️ Catatan: Tautan ini memberikan akses langsung tanpa login dan hanya berlaku selama 24 jam ke depan. Mohon jangan bagikan tautan ini kepada orang lain.\n\nTerima kasih!`
                 )}`}
                 target="_blank"
                 rel="noopener noreferrer"
