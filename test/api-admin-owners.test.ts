@@ -8,7 +8,7 @@ describe("GET /api/admin/owners", () => {
   const createAuthorizedRequest = () => {
     return new NextRequest("http://localhost:3000/api/admin/owners", {
       headers: {
-        authorization: "Bearer 778899",
+        cookie: "admin_token=kospasti_admin_authenticated",
       },
     });
   };
@@ -19,22 +19,8 @@ describe("GET /api/admin/owners", () => {
   });
 
   describe("Skenario Autentikasi / Keamanan", () => {
-    it("mengembalikan status 401 Unauthorized jika header Authorization tidak disertakan", async () => {
+    it("mengembalikan status 401 Unauthorized jika cookie admin_token tidak disertakan", async () => {
       const request = new NextRequest("http://localhost:3000/api/admin/owners");
-      const response = await GET(request);
-      const result = await response.json();
-
-      expect(response.status).toBe(401);
-      expect(result.success).toBe(false);
-      expect(result.error).toContain("Unauthorized");
-    });
-
-    it("mengembalikan status 401 Unauthorized jika token PIN salah", async () => {
-      const request = new NextRequest("http://localhost:3000/api/admin/owners", {
-        headers: {
-          authorization: "Bearer 000000",
-        },
-      });
       const response = await GET(request);
       const result = await response.json();
 

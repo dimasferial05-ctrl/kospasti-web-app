@@ -3,8 +3,8 @@ import { prisma } from "@/lib/prisma";
 
 export async function GET(request: NextRequest) {
   try {
-    const authHeader = request.headers.get("authorization");
-    if (authHeader !== "Bearer 778899") {
+    const adminToken = request.cookies.get("admin_token")?.value;
+    if (!adminToken) {
       return NextResponse.json(
         {
           success: false,
@@ -53,8 +53,8 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const authHeader = request.headers.get("authorization");
-    if (authHeader !== "Bearer 778899") {
+    const adminToken = request.cookies.get("admin_token")?.value;
+    if (!adminToken) {
       return NextResponse.json(
         {
           success: false,

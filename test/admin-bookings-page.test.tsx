@@ -3,6 +3,14 @@ import React from "react";
 import fs from "fs";
 import path from "path";
 import { renderToStaticMarkup } from "react-dom/server";
+
+// Mock next/navigation
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({
+    push: vi.fn(),
+  }),
+}));
+
 import ManageBookingsPage from "../src/app/admin/bookings/page";
 
 describe("Manage Bookings Page (/admin/bookings)", () => {
@@ -105,7 +113,7 @@ describe("Manage Bookings Page (/admin/bookings)", () => {
     expect(content).toContain("Belum ada riwayat transaksi.");
   });
 
-  it("menyertakan header Authorization Bearer token dari sessionStorage saat memanggil API /api/admin/bookings dan menangani status 401", () => {
+  it("memanggil API /api/admin/bookings dan menangani status 401 dengan redirect ke /admin/login", () => {
     const filePath = path.resolve(
       __dirname,
       "../src/app/admin/bookings/page.tsx"
@@ -113,10 +121,7 @@ describe("Manage Bookings Page (/admin/bookings)", () => {
     const content = fs.readFileSync(filePath, "utf-8");
 
     expect(content).toContain('fetch("/api/admin/bookings"');
-    expect(content).toContain('sessionStorage.getItem("adminAuth")');
-    expect(content).toContain("Authorization:");
-    expect(content).toContain("Bearer ${token");
     expect(content).toContain("res.status === 401");
-    expect(content).toContain('sessionStorage.removeItem("adminAuth")');
+    expect(content).toContain('router.push("/admin/login")');
   });
 });

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { Loader2, Check, X } from "lucide-react";
 
 interface BookingAdminItem {
@@ -17,24 +18,17 @@ interface BookingAdminItem {
 }
 
 export default function ManageBookingsPage() {
+  const router = useRouter();
   const [bookings, setBookings] = useState<BookingAdminItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [updatingId, setUpdatingId] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const fetchBookings = () => {
-    const token = typeof window !== "undefined" ? sessionStorage.getItem("adminAuth") : "";
-    fetch("/api/admin/bookings", {
-      headers: {
-        Authorization: `Bearer ${token || ""}`,
-      },
-    })
+    fetch("/api/admin/bookings")
       .then(async (res) => {
         if (res.status === 401) {
-          if (typeof window !== "undefined") {
-            sessionStorage.removeItem("adminAuth");
-            window.location.reload();
-          }
+          router.push("/admin/login");
           return null;
         }
         return res.json();
@@ -59,21 +53,16 @@ export default function ManageBookingsPage() {
       setUpdatingId(bookingId);
       setErrorMessage(null);
 
-      const token = typeof window !== "undefined" ? sessionStorage.getItem("adminAuth") : "";
       const res = await fetch(`/api/admin/bookings/${bookingId}`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token || ""}`,
         },
         body: JSON.stringify({ status: newStatus }),
       });
 
       if (res.status === 401) {
-        if (typeof window !== "undefined") {
-          sessionStorage.removeItem("adminAuth");
-          window.location.reload();
-        }
+        router.push("/admin/login");
         return;
       }
 
@@ -197,7 +186,7 @@ export default function ManageBookingsPage() {
                             <button
                               type="button"
                               onClick={() => handleUpdateStatus(booking.id, "SUCCESS")}
-                              className="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-md text-xs font-semibold flex items-center gap-1 shadow-xs transition active:scale-95"
+                              className="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-md text-xs font-semibold flex items-center gap-1 shadow-xs transition active:scale-95 cursor-pointer"
                               title="Setujui / Konfirmasi Booking"
                             >
                               <Check className="w-3.5 h-3.5 stroke-[2.5]" />
@@ -206,7 +195,7 @@ export default function ManageBookingsPage() {
                             <button
                               type="button"
                               onClick={() => handleUpdateStatus(booking.id, "REJECTED")}
-                              className="px-2.5 py-1 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 rounded-md text-xs font-semibold flex items-center gap-1 transition active:scale-95"
+                              className="px-2.5 py-1 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 rounded-md text-xs font-semibold flex items-center gap-1 transition active:scale-95 cursor-pointer"
                               title="Tolak Booking"
                             >
                               <X className="w-3.5 h-3.5 stroke-[2.5]" />

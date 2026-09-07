@@ -46,19 +46,10 @@ export default function AdminOwnersPage() {
   const [copied, setCopied] = useState(false);
 
   useEffect(() => {
-    const token = typeof window !== "undefined" ? sessionStorage.getItem("adminAuth") : "";
-
-    fetch("/api/admin/owners", {
-      headers: {
-        Authorization: `Bearer ${token || ""}`,
-      },
-    })
+    fetch("/api/admin/owners")
       .then(async (res) => {
         if (res.status === 401) {
-          if (typeof window !== "undefined") {
-            sessionStorage.removeItem("adminAuth");
-          }
-          router.push("/admin");
+          router.push("/admin/login");
           return null;
         }
         return res.json();
@@ -109,17 +100,20 @@ export default function AdminOwnersPage() {
   const handleGenerateLink = async (owner: OwnerItem) => {
     if (generatingId) return;
     setGeneratingId(owner.id);
-    const token = typeof window !== "undefined" ? sessionStorage.getItem("adminAuth") : "";
 
     try {
       const res = await fetch("/api/magic-link/generate", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token || ""}`,
         },
         body: JSON.stringify({ ownerId: owner.id }),
       });
+
+      if (res.status === 401) {
+        router.push("/admin/login");
+        return;
+      }
 
       const data = await res.json();
       if (res.ok && data.success && data.magicLink) {
@@ -336,10 +330,11 @@ export default function AdminOwnersPage() {
                 <button
                   type="button"
                   onClick={handleCopyLink}
-                  className={`inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-lg text-xs font-semibold transition-all shrink-0 cursor-pointer ${copied
+                  className={`inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-lg text-xs font-semibold transition-all shrink-0 cursor-pointer ${
+                    copied
                       ? "bg-emerald-600 text-white shadow-sm"
                       : "bg-slate-900 text-white hover:bg-slate-800"
-                    }`}
+                  }`}
                   title="Salin ke Clipboard"
                 >
                   {copied ? (
@@ -393,4 +388,3 @@ export default function AdminOwnersPage() {
     </div>
   );
 }
-

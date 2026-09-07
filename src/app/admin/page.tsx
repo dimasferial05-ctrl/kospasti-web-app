@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { Building, DoorOpen, Activity, Loader2 } from "lucide-react";
 
 interface AdminStats {
@@ -10,6 +11,7 @@ interface AdminStats {
 }
 
 export default function AdminDashboardOverview() {
+  const router = useRouter();
   const [stats, setStats] = useState<AdminStats>({
     properties: 0,
     rooms: 0,
@@ -18,18 +20,10 @@ export default function AdminDashboardOverview() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const token = typeof window !== "undefined" ? sessionStorage.getItem("adminAuth") : "";
-    fetch("/api/admin/stats", {
-      headers: {
-        Authorization: `Bearer ${token || ""}`,
-      },
-    })
+    fetch("/api/admin/stats")
       .then(async (res) => {
         if (res.status === 401) {
-          if (typeof window !== "undefined") {
-            sessionStorage.removeItem("adminAuth");
-            window.location.reload();
-          }
+          router.push("/admin/login");
           return null;
         }
         return res.json();
@@ -43,7 +37,7 @@ export default function AdminDashboardOverview() {
         console.error("Fetch stats error:", err);
       })
       .finally(() => setIsLoading(false));
-  }, []);
+  }, [router]);
 
   if (isLoading) {
     return (

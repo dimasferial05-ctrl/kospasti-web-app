@@ -86,7 +86,7 @@ describe("Admin Owners Management Page (/admin/owners)", () => {
     expect(content).toContain("Chat WA");
   });
 
-  it("menyertakan header Authorization Bearer token dari sessionStorage saat memanggil API /api/admin/owners dan menangani status 401", () => {
+  it("memanggil API /api/admin/owners dan menangani redirect status 401 ke /admin/login", () => {
     const filePath = path.resolve(
       __dirname,
       "../src/app/admin/owners/page.tsx"
@@ -94,12 +94,8 @@ describe("Admin Owners Management Page (/admin/owners)", () => {
     const content = fs.readFileSync(filePath, "utf-8");
 
     expect(content).toContain('fetch("/api/admin/owners"');
-    expect(content).toContain('sessionStorage.getItem("adminAuth")');
-    expect(content).toContain("Authorization:");
-    expect(content).toContain("Bearer ${token");
     expect(content).toContain("res.status === 401");
-    expect(content).toContain('sessionStorage.removeItem("adminAuth")');
-    expect(content).toContain('router.push("/admin")');
+    expect(content).toContain('router.push("/admin/login")');
   });
 
   it("menampilkan empty state ketika data tidak ditemukan atau kosong", () => {
@@ -158,4 +154,3 @@ describe("Admin Owners Management Page (/admin/owners)", () => {
     });
   });
 });
-

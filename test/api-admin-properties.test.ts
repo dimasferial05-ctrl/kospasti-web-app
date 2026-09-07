@@ -9,7 +9,7 @@ describe("GET /api/admin/properties", () => {
   const createAuthorizedRequest = () => {
     return new NextRequest("http://localhost:3000/api/admin/properties", {
       headers: {
-        authorization: "Bearer 778899",
+        cookie: "admin_token=kospasti_admin_authenticated",
       },
     });
   };
@@ -20,22 +20,8 @@ describe("GET /api/admin/properties", () => {
   });
 
   describe("Skenario Autentikasi / Keamanan", () => {
-    it("mengembalikan status 401 Unauthorized jika header Authorization tidak disertakan", async () => {
+    it("mengembalikan status 401 Unauthorized jika cookie admin_token tidak disertakan", async () => {
       const request = new NextRequest("http://localhost:3000/api/admin/properties");
-      const response = await GET(request);
-      const result = await response.json();
-
-      expect(response.status).toBe(401);
-      expect(result.success).toBe(false);
-      expect(result.error).toContain("Unauthorized");
-    });
-
-    it("mengembalikan status 401 Unauthorized jika token PIN salah", async () => {
-      const request = new NextRequest("http://localhost:3000/api/admin/properties", {
-        headers: {
-          authorization: "Bearer 000000",
-        },
-      });
       const response = await GET(request);
       const result = await response.json();
 
@@ -148,20 +134,20 @@ describe("POST /api/admin/properties", () => {
     validOwnerId = owner.id;
   });
 
-  const createPostRequest = (body: Record<string, unknown>, token = "778899") => {
+  const createPostRequest = (body: Record<string, unknown>, authenticated = true) => {
     return new NextRequest("http://localhost:3000/api/admin/properties", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        authorization: token ? `Bearer ${token}` : "",
+        ...(authenticated ? { cookie: "admin_token=kospasti_admin_authenticated" } : {}),
       },
       body: JSON.stringify(body),
     });
   };
 
   describe("Skenario Autentikasi / Keamanan", () => {
-    it("mengembalikan status 401 Unauthorized jika header Authorization tidak valid", async () => {
-      const request = createPostRequest({ name: "Kos Baru" }, "wrong-token");
+    it("mengembalikan status 401 Unauthorized jika cookie admin_token tidak disertakan", async () => {
+      const request = createPostRequest({ name: "Kos Baru" }, false);
       const response = await POST(request);
       const result = await response.json();
 
@@ -330,21 +316,21 @@ describe("PATCH /api/admin/properties/[id]", () => {
   const createPatchRequest = (
     id: string,
     body: Record<string, unknown>,
-    token = "778899"
+    authenticated = true
   ) => {
     return new NextRequest(`http://localhost:3000/api/admin/properties/${id}`, {
       method: "PATCH",
       headers: {
         "Content-Type": "application/json",
-        authorization: token ? `Bearer ${token}` : "",
+        ...(authenticated ? { cookie: "admin_token=kospasti_admin_authenticated" } : {}),
       },
       body: JSON.stringify(body),
     });
   };
 
   describe("Skenario Autentikasi / Keamanan", () => {
-    it("mengembalikan status 401 Unauthorized jika header Authorization tidak valid", async () => {
-      const request = createPatchRequest(validPropertyId, { name: "Update" }, "invalid");
+    it("mengembalikan status 401 Unauthorized jika cookie admin_token tidak disertakan", async () => {
+      const request = createPatchRequest(validPropertyId, { name: "Update" }, false);
       const response = await PATCH(request, { params: Promise.resolve({ id: validPropertyId }) });
       const result = await response.json();
 

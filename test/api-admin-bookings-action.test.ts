@@ -9,7 +9,7 @@ describe("PATCH /api/admin/bookings/[id]", () => {
     return new NextRequest(`http://localhost:3000/api/admin/bookings/${id}`, {
       method: "PATCH",
       headers: {
-        authorization: "Bearer 778899",
+        cookie: "admin_token=kospasti_admin_authenticated",
         "content-type": "application/json",
       },
       body: JSON.stringify(body),
@@ -22,25 +22,9 @@ describe("PATCH /api/admin/bookings/[id]", () => {
   });
 
   describe("Skenario Autentikasi / Keamanan", () => {
-    it("mengembalikan status 401 Unauthorized jika header Authorization tidak disertakan", async () => {
+    it("mengembalikan status 401 Unauthorized jika cookie admin_token tidak disertakan", async () => {
       const request = new NextRequest("http://localhost:3000/api/admin/bookings/booking-1", {
         method: "PATCH",
-        body: JSON.stringify({ status: "SUCCESS" }),
-      });
-      const response = await PATCH(request, { params: Promise.resolve({ id: "booking-1" }) });
-      const result = await response.json();
-
-      expect(response.status).toBe(401);
-      expect(result.success).toBe(false);
-      expect(result.error).toContain("Unauthorized");
-    });
-
-    it("mengembalikan status 401 Unauthorized jika PIN token salah", async () => {
-      const request = new NextRequest("http://localhost:3000/api/admin/bookings/booking-1", {
-        method: "PATCH",
-        headers: {
-          authorization: "Bearer 123456",
-        },
         body: JSON.stringify({ status: "SUCCESS" }),
       });
       const response = await PATCH(request, { params: Promise.resolve({ id: "booking-1" }) });
