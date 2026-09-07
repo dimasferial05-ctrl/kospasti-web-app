@@ -56,6 +56,29 @@ describe("CSV Export Helper (src/lib/csv-export.ts)", () => {
     expect(lines.length).toBe(2);
     expect(lines[1]).toContain('"book-456"');
     expect(lines[1]).toContain('"Siti Rahma"');
-    expect(lines[1]).toContain('"-"');
+    expect(lines[1]).toContain('"' + "'-" + '"');
+  });
+
+  it("mencegah CSV / Excel Formula Injection dengan memberikan karakter quote pada awalan = + - @", () => {
+    const mockBookings: BookingExportItem[] = [
+      {
+        id: "book-evil",
+        student_name: "=CMD|' /C calc'!A0",
+        student_whatsapp: "+628123456789",
+        move_in_date: "2026-09-01T00:00:00.000Z",
+        status: "@PENDING",
+        property: {
+          name: "-Kos Bahaya",
+        },
+      },
+    ];
+
+    const csv = formatBookingsToCSV(mockBookings);
+    const lines = csv.split("\n");
+
+    expect(lines[1]).toContain('"' + "'=CMD|' /C calc'!A0" + '"');
+    expect(lines[1]).toContain('"' + "'+628123456789" + '"');
+    expect(lines[1]).toContain('"' + "'-Kos Bahaya" + '"');
+    expect(lines[1]).toContain('"' + "'@PENDING" + '"');
   });
 });

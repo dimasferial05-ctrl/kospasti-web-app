@@ -27,7 +27,14 @@ export function formatBookingsToCSV(bookings: BookingExportItem[]): string {
 
   const escapeCSV = (value: string | number | null | undefined): string => {
     if (value === null || value === undefined) return '""';
-    const stringValue = String(value).replace(/"/g, '""');
+    let stringValue = String(value);
+
+    // Mencegah CSV / Excel Formula Injection (DDE Injection)
+    if (/^[=+\-@]/.test(stringValue)) {
+      stringValue = "'" + stringValue;
+    }
+
+    stringValue = stringValue.replace(/"/g, '""');
     return `"${stringValue}"`;
   };
 
