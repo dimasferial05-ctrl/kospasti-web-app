@@ -45,3 +45,7 @@ next-env.d.ts
 # sqlite
 *.db
 *.db-journal
+
+# temporary scratch files
+/scratch/
+
