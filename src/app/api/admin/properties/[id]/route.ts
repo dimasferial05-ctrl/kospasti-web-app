@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { saveUploadedFiles, detectMediaType } from "@/lib/upload";
 
 export async function PATCH(
   request: NextRequest,
@@ -37,6 +38,7 @@ export async function PATCH(
     // Periksa apakah properti ada di database
     const existingProperty = await prisma.property.findUnique({
       where: { id: propertyId.trim() },
+      include: { media: true },
     });
 
     if (!existingProperty) {
@@ -51,16 +53,81 @@ export async function PATCH(
       );
     }
 
-    const body = await request.json();
-    const {
-      name,
-      price_per_month,
-      available_rooms,
-      gender_type,
-      facilities,
-      image_url,
-      owner_id,
-    } = body;
+    const contentType = request.headers.get("content-type") || "";
+
+    let name: string | undefined;
+    let price_per_month: number | string | undefined;
+    let available_rooms: number | string | undefined;
+    let gender_type: string | undefined;
+    let facilities: string | undefined;
+    let image_url: string | null | undefined;
+    let owner_id: string | undefined;
+    const newMediaToCreate: { url: string; type: string }[] = [];
+
+    if (contentType.includes("multipart/form-data")) {
+      const formData = await request.formData();
+      if (formData.has("name")) name = (formData.get("name") as string) ?? undefined;
+      if (formData.has("price_per_month"))
+        price_per_month = (formData.get("price_per_month") as string) ?? undefined;
+      if (formData.has("available_rooms"))
+        available_rooms = (formData.get("available_rooms") as string) ?? undefined;
+      if (formData.has("gender_type"))
+        gender_type = (formData.get("gender_type") as string) ?? undefined;
+      if (formData.has("facilities"))
+        facilities = (formData.get("facilities") as string) ?? undefined;
+      if (formData.has("image_url"))
+        image_url = (formData.get("image_url") as string) ?? null;
+      if (formData.has("owner_id"))
+        owner_id = (formData.get("owner_id") as string) ?? undefined;
+
+      const filesFromMedia = formData.getAll("media");
+      const filesFromFiles = formData.getAll("files");
+      const allRawFiles = [...filesFromMedia, ...filesFromFiles];
+
+      const validFiles: File[] = [];
+      for (const item of allRawFiles) {
+        if (item && typeof item === "object" && "arrayBuffer" in item && (item as File).size > 0) {
+          validFiles.push(item as File);
+        } else if (typeof item === "string" && item.trim()) {
+          newMediaToCreate.push({
+            url: item.trim(),
+            type: detectMediaType(undefined, item.trim()),
+          });
+        }
+      }
+
+      if (validFiles.length > 0) {
+        const saved = await saveUploadedFiles(validFiles);
+        for (const item of saved) {
+          newMediaToCreate.push(item);
+        }
+      }
+    } else {
+      const body = await request.json();
+      name = body.name;
+      price_per_month = body.price_per_month;
+      available_rooms = body.available_rooms;
+      gender_type = body.gender_type;
+      facilities = body.facilities;
+      image_url = body.image_url;
+      owner_id = body.owner_id;
+
+      if (Array.isArray(body.media)) {
+        for (const m of body.media) {
+          if (typeof m === "string" && m.trim()) {
+            newMediaToCreate.push({
+              url: m.trim(),
+              type: detectMediaType(undefined, m.trim()),
+            });
+          } else if (m && typeof m === "object" && m.url) {
+            newMediaToCreate.push({
+              url: String(m.url).trim(),
+              type: m.type === "VIDEO" ? "VIDEO" : "IMAGE",
+            });
+          }
+        }
+      }
+    }
 
     const updateData: {
       name?: string;
@@ -70,6 +137,9 @@ export async function PATCH(
       facilities?: string;
       image_url?: string | null;
       owner_id?: string;
+      media?: {
+        create?: { url: string; type: string }[];
+      };
     } = {};
 
     if (name !== undefined) {
@@ -158,6 +228,12 @@ export async function PATCH(
 
     if (image_url !== undefined) {
       updateData.image_url = image_url ? String(image_url).trim() : null;
+      if (updateData.image_url && !newMediaToCreate.some((m) => m.url === updateData.image_url)) {
+        newMediaToCreate.push({
+          url: updateData.image_url,
+          type: detectMediaType(undefined, updateData.image_url),
+        });
+      }
     }
 
     if (owner_id !== undefined) {
@@ -192,6 +268,16 @@ export async function PATCH(
       updateData.owner_id = owner_id.trim();
     }
 
+    if (newMediaToCreate.length > 0) {
+      updateData.media = {
+        create: newMediaToCreate,
+      };
+      if (image_url === undefined && !existingProperty.image_url) {
+        updateData.image_url =
+          newMediaToCreate.find((m) => m.type === "IMAGE")?.url || newMediaToCreate[0]?.url;
+      }
+    }
+
     const updatedProperty = await prisma.property.update({
       where: { id: propertyId.trim() },
       data: updateData,
@@ -203,6 +289,7 @@ export async function PATCH(
             whatsapp_number: true,
           },
         },
+        media: true,
       },
     });
 

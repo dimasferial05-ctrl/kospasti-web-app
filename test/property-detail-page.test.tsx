@@ -80,6 +80,32 @@ describe("Property Detail Page Component (/kos/[id])", () => {
     expect(content).toContain("Dikelola oleh");
   });
 
+  it("memiliki komponen UI Galeri / Korsel dengan Main Viewer dan Thumbnail Navigator", () => {
+    const filePath = path.resolve(__dirname, "../src/app/kos/[id]/page.tsx");
+    const content = fs.readFileSync(filePath, "utf-8");
+
+    // Gallery state
+    expect(content).toContain("activeIndex");
+    expect(content).toContain("setActiveIndex");
+    expect(content).toContain("prevSlide");
+    expect(content).toContain("nextSlide");
+
+    // Video player support
+    expect(content).toContain('currentMedia.type === "VIDEO"');
+    expect(content).toContain("<video");
+    expect(content).toContain("controls");
+
+    // Navigation arrows
+    expect(content).toContain("ChevronLeft");
+    expect(content).toContain("ChevronRight");
+    expect(content).toContain("Media sebelumnya");
+    expect(content).toContain("Media berikutnya");
+
+    // Thumbnail navigation list
+    expect(content).toContain("mediaList.map");
+    expect(content).toContain("Lihat media");
+  });
+
   it("menangani kondisi kamar habis (isFull) pada tombol Sticky Bottom Bar", () => {
     const filePath = path.resolve(__dirname, "../src/app/kos/[id]/page.tsx");
     const content = fs.readFileSync(filePath, "utf-8");
@@ -167,6 +193,3 @@ describe("Property Detail Page Component (/kos/[id])", () => {
     expect(content).toContain("isSubmitting ? \"Memproses...\" : \"Lanjut Pembayaran\"");
   });
 });
-
-
-

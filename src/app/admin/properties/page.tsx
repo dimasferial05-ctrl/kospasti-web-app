@@ -11,12 +11,19 @@ import {
   X,
   Building2,
   AlertCircle,
+  FileText,
 } from "lucide-react";
 
 interface OwnerOption {
   id: string;
   name: string;
   whatsapp_number: string;
+}
+
+interface PropertyMediaItem {
+  id: string;
+  url: string;
+  type: string;
 }
 
 interface PropertyAdminItem {
@@ -27,6 +34,7 @@ interface PropertyAdminItem {
   gender_type: string;
   facilities: string;
   image_url?: string | null;
+  media?: PropertyMediaItem[];
   owner_id: string;
   owner?: OwnerOption | null;
 }
@@ -64,6 +72,7 @@ export default function ManagePropertiesPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingProperty, setEditingProperty] = useState<PropertyAdminItem | null>(null);
   const [formData, setFormData] = useState<PropertyFormData>(initialFormData);
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [formError, setFormError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -127,6 +136,7 @@ export default function ManagePropertiesPage() {
       facilities: "",
       image_url: "",
     });
+    setSelectedFiles([]);
     setFormError(null);
     setIsModalOpen(true);
   };
@@ -143,6 +153,7 @@ export default function ManagePropertiesPage() {
       facilities: prop.facilities || "",
       image_url: prop.image_url || "",
     });
+    setSelectedFiles([]);
     setFormError(null);
     setIsModalOpen(true);
   };
@@ -152,7 +163,19 @@ export default function ManagePropertiesPage() {
     setIsModalOpen(false);
     setEditingProperty(null);
     setFormData(initialFormData);
+    setSelectedFiles([]);
     setFormError(null);
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      const filesArray = Array.from(e.target.files);
+      setSelectedFiles((prev) => [...prev, ...filesArray]);
+    }
+  };
+
+  const removeSelectedFile = (index: number) => {
+    setSelectedFiles((prev) => prev.filter((_, i) => i !== index));
   };
 
   // Submit Handler (Tambah atau Edit)
@@ -194,22 +217,21 @@ export default function ManagePropertiesPage() {
         : "/api/admin/properties";
       const method = isEdit ? "PATCH" : "POST";
 
-      const payload = {
-        name: formData.name.trim(),
-        owner_id: formData.owner_id.trim(),
-        price_per_month: Number(formData.price_per_month),
-        available_rooms: Number(formData.available_rooms),
-        gender_type: formData.gender_type,
-        facilities: formData.facilities.trim(),
-        image_url: formData.image_url.trim() ? formData.image_url.trim() : null,
-      };
+      const data = new FormData();
+      data.append("name", formData.name.trim());
+      data.append("owner_id", formData.owner_id.trim());
+      data.append("price_per_month", formData.price_per_month);
+      data.append("available_rooms", formData.available_rooms);
+      data.append("gender_type", formData.gender_type);
+      data.append("facilities", formData.facilities.trim());
+      if (formData.image_url.trim()) {
+        data.append("image_url", formData.image_url.trim());
+      }
+      selectedFiles.forEach((file) => data.append("media", file));
 
       const res = await fetch(url, {
         method,
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(payload),
+        body: data,
       });
 
       if (res.status === 401) {
@@ -217,13 +239,13 @@ export default function ManagePropertiesPage() {
         return;
       }
 
-      const data = await res.json();
+      const resData = await res.json();
 
-      if (data && data.success) {
+      if (resData && resData.success) {
         handleCloseModal();
         await fetchProperties();
       } else {
-        setFormError(data.error || "Gagal menyimpan data properti.");
+        setFormError(resData.error || "Gagal menyimpan data properti.");
       }
     } catch (err) {
       console.error("Error submitting property form:", err);
@@ -567,6 +589,54 @@ export default function ManagePropertiesPage() {
                 <p className="text-[11px] text-slate-400 mt-1">
                   Gunakan tanda koma (,) untuk memisahkan antar fasilitas.
                 </p>
+              </div>
+
+              {/* Multi-Upload Media (Gambar & Video) */}
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                  Unggah Media (Gambar &amp; Video)
+                </label>
+                <input
+                  type="file"
+                  multiple
+                  accept="image/*,video/mp4,video/webm,video/*"
+                  onChange={handleFileChange}
+                  className="w-full text-xs text-slate-500 file:mr-3 file:py-2 file:px-3.5 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 border border-slate-200 rounded-xl p-1.5 bg-white cursor-pointer"
+                />
+                <p className="text-[11px] text-slate-400 mt-1">
+                  Unggah beberapa gambar dan video sekaligus (MP4, WebM, JPG, PNG).
+                </p>
+
+                {/* Selected files preview */}
+                {selectedFiles.length > 0 && (
+                  <div className="mt-2.5 space-y-1.5 max-h-32 overflow-y-auto">
+                    {selectedFiles.map((file, idx) => (
+                      <div
+                        key={idx}
+                        className="flex items-center justify-between bg-slate-50 border border-slate-200 rounded-lg px-3 py-1.5 text-xs"
+                      >
+                        <div className="flex items-center gap-2 truncate">
+                          <FileText size={14} className="text-blue-600 shrink-0" />
+                          <span className="truncate text-slate-700 font-medium">
+                            {file.name}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2 shrink-0">
+                          <span className="text-[10px] text-slate-400">
+                            {(file.size / (1024 * 1024)).toFixed(2)} MB
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => removeSelectedFile(idx)}
+                            className="text-red-500 hover:text-red-700 p-0.5 rounded cursor-pointer"
+                          >
+                            <X size={14} />
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
 
               {/* URL Gambar */}
