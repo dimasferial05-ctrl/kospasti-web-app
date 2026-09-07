@@ -32,7 +32,8 @@ export function formatBookingsToCSV(bookings: BookingExportItem[]): string {
   };
 
   const rows = bookings.map((b) => {
-    const whatsapp = b.student_whatsapp || b.whatsapp_number || "-";
+    const rawWhatsapp = b.student_whatsapp || b.whatsapp_number;
+    const whatsapp = rawWhatsapp ? `'${rawWhatsapp}` : "-";
     const propertyName = b.property?.name || "-";
     const moveInDate = b.move_in_date
       ? new Date(b.move_in_date).toLocaleDateString("id-ID")
@@ -49,8 +50,8 @@ export function formatBookingsToCSV(bookings: BookingExportItem[]): string {
       escapeCSV(moveInDate),
       escapeCSV(b.status),
       escapeCSV(createdAt),
-    ].join(",");
+    ].join(";");
   });
 
-  return [headers.join(","), ...rows].join("\n");
+  return [headers.join(";"), ...rows].join("\n");
 }

@@ -6,7 +6,7 @@ describe("CSV Export Helper (src/lib/csv-export.ts)", () => {
     const csv = formatBookingsToCSV([]);
     const lines = csv.split("\n");
     expect(lines[0]).toBe(
-      "ID Transaksi,Nama Mahasiswa,No WhatsApp,Nama Kos,Tgl Masuk,Status,Tanggal Booking"
+      "ID Transaksi;Nama Mahasiswa;No WhatsApp;Nama Kos;Tgl Masuk;Status;Tanggal Booking"
     );
   });
 
@@ -31,7 +31,7 @@ describe("CSV Export Helper (src/lib/csv-export.ts)", () => {
     expect(lines.length).toBe(2);
     expect(lines[1]).toContain('"book-123"');
     expect(lines[1]).toContain('"Budi ""Santoso"", S.Kom"');
-    expect(lines[1]).toContain('"081234567890"');
+    expect(lines[1]).toContain('"' + "'081234567890" + '"');
     expect(lines[1]).toContain('"Kos Melati, Indah"');
     expect(lines[1]).toContain('"SUCCESS"');
   });
