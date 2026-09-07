@@ -91,3 +91,25 @@ export async function saveUploadedFiles(
 
   return results;
 }
+
+/**
+ * Menghapus file fisik dari folder public jika URL merupakan file lokal (/uploads/...)
+ */
+export async function deleteUploadedFile(fileUrl: string): Promise<boolean> {
+  if (!fileUrl || !fileUrl.startsWith("/uploads/")) {
+    return false;
+  }
+
+  try {
+    const relativePath = fileUrl.replace(/^\//, "");
+    const absolutePath = path.join(process.cwd(), "public", relativePath);
+    if (fs.existsSync(absolutePath)) {
+      await fs.promises.unlink(absolutePath);
+      return true;
+    }
+  } catch (error) {
+    console.error("Gagal menghapus file fisik:", fileUrl, error);
+  }
+
+  return false;
+}

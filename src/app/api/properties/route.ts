@@ -53,9 +53,9 @@ export async function GET(request?: Request) {
     const properties = rawProperties.map((property) => ({
       ...property,
       image_url:
+        property.image_url ||
         property.media?.find((m) => m.type === "IMAGE")?.url ||
         property.media?.[0]?.url ||
-        property.image_url ||
         null,
       last_updated: property.updated_at,
     }));

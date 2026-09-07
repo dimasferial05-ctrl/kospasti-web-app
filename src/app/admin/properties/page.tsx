@@ -12,6 +12,9 @@ import {
   Building2,
   AlertCircle,
   FileText,
+  Trash2,
+  Star,
+  Play,
 } from "lucide-react";
 
 interface OwnerOption {
@@ -75,6 +78,8 @@ export default function ManagePropertiesPage() {
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [formError, setFormError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [deletingMediaId, setDeletingMediaId] = useState<string | null>(null);
+  const [settingThumbnailUrl, setSettingThumbnailUrl] = useState<string | null>(null);
 
   // Fetch daftar properti
   const fetchProperties = useCallback(async () => {
@@ -151,7 +156,10 @@ export default function ManagePropertiesPage() {
       available_rooms: prop.available_rooms !== undefined ? String(prop.available_rooms) : "0",
       gender_type: prop.gender_type || "CAMPUR",
       facilities: prop.facilities || "",
-      image_url: prop.image_url || "",
+      image_url:
+        prop.image_url && !prop.image_url.startsWith("/uploads/")
+          ? prop.image_url
+          : "",
     });
     setSelectedFiles([]);
     setFormError(null);
@@ -176,6 +184,95 @@ export default function ManagePropertiesPage() {
 
   const removeSelectedFile = (index: number) => {
     setSelectedFiles((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  // Handler untuk mengubah Thumbnail utama media
+  const handleSetThumbnail = async (mediaUrl: string) => {
+    if (!editingProperty) return;
+    try {
+      setSettingThumbnailUrl(mediaUrl);
+      const res = await fetch(`/api/admin/properties/${editingProperty.id}/thumbnail`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ media_url: mediaUrl }),
+      });
+
+      if (res.status === 401) {
+        router.push("/admin/login");
+        return;
+      }
+
+      const resData = await res.json();
+      if (resData && resData.success) {
+        setEditingProperty((prev) => (prev ? { ...prev, image_url: mediaUrl } : null));
+        setProperties((prev) =>
+          prev.map((p) => (p.id === editingProperty.id ? { ...p, image_url: mediaUrl } : p))
+        );
+        setFormData((prev) => ({
+          ...prev,
+          image_url: mediaUrl && !mediaUrl.startsWith("/uploads/") ? mediaUrl : "",
+        }));
+      } else {
+        alert(resData.error || "Gagal mengatur thumbnail.");
+      }
+    } catch (err) {
+      console.error("Error setting thumbnail:", err);
+      alert("Terjadi kesalahan koneksi saat mengatur thumbnail.");
+    } finally {
+      setSettingThumbnailUrl(null);
+    }
+  };
+
+  // Handler untuk menghapus satu media tersimpan
+  const handleDeleteExistingMedia = async (mediaId: string, mediaUrl: string) => {
+    if (!editingProperty) return;
+    if (!window.confirm("Apakah Anda yakin ingin menghapus media ini?")) return;
+
+    try {
+      setDeletingMediaId(mediaId);
+      const res = await fetch(`/api/admin/media/${mediaId}`, {
+        method: "DELETE",
+      });
+
+      if (res.status === 401) {
+        router.push("/admin/login");
+        return;
+      }
+
+      const resData = await res.json();
+      if (resData && resData.success) {
+        const updatedMedia = (editingProperty.media || []).filter((m) => m.id !== mediaId);
+        let newImageUrl = editingProperty.image_url;
+        if (editingProperty.image_url === mediaUrl) {
+          const nextImg = updatedMedia.find((m) => m.type === "IMAGE") || updatedMedia[0];
+          newImageUrl = nextImg ? nextImg.url : "";
+        }
+
+        const updatedProperty: PropertyAdminItem = {
+          ...editingProperty,
+          image_url: newImageUrl,
+          media: updatedMedia,
+        };
+
+        setEditingProperty(updatedProperty);
+        setProperties((prev) =>
+          prev.map((p) => (p.id === editingProperty.id ? updatedProperty : p))
+        );
+        setFormData((prev) => ({
+          ...prev,
+          image_url: newImageUrl && !newImageUrl.startsWith("/uploads/") ? newImageUrl : "",
+        }));
+      } else {
+        alert(resData.error || "Gagal menghapus media.");
+      }
+    } catch (err) {
+      console.error("Error deleting media:", err);
+      alert("Terjadi kesalahan koneksi saat menghapus media.");
+    } finally {
+      setDeletingMediaId(null);
+    }
   };
 
   // Submit Handler (Tambah atau Edit)
@@ -591,10 +688,109 @@ export default function ManagePropertiesPage() {
                 </p>
               </div>
 
+              {/* Media Tersimpan (Hanya Tampil saat Edit Properti) */}
+              {editingProperty && (
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <label className="block text-xs font-semibold text-slate-700">
+                      Media Tersimpan ({editingProperty.media?.length || 0})
+                    </label>
+                    <span className="text-[10px] text-slate-400">
+                      Klik bintang untuk jadikan thumbnail
+                    </span>
+                  </div>
+
+                  {editingProperty.media && editingProperty.media.length > 0 ? (
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5 p-2.5 bg-slate-50 border border-slate-200 rounded-xl max-h-48 overflow-y-auto">
+                      {editingProperty.media.map((item) => {
+                        const isThumbnail = editingProperty.image_url === item.url;
+                        const isDeleting = deletingMediaId === item.id;
+                        const isSetting = settingThumbnailUrl === item.url;
+
+                        return (
+                          <div
+                            key={item.id}
+                            className={`relative group rounded-lg overflow-hidden border ${
+                              isThumbnail
+                                ? "border-amber-400 ring-2 ring-amber-400/40"
+                                : "border-slate-200"
+                            } bg-black/5 aspect-video flex items-center justify-center`}
+                          >
+                            {item.type === "VIDEO" ? (
+                              <div className="w-full h-full relative bg-slate-800 flex items-center justify-center">
+                                <video
+                                  src={item.url}
+                                  className="w-full h-full object-cover pointer-events-none"
+                                />
+                                <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
+                                  <Play size={18} className="text-white fill-white" />
+                                </div>
+                              </div>
+                            ) : (
+                              /* eslint-disable-next-line @next/next/no-img-element */
+                              <img
+                                src={item.url}
+                                alt="Media property"
+                                className="w-full h-full object-cover"
+                              />
+                            )}
+
+                            {/* Badge Thumbnail */}
+                            {isThumbnail && (
+                              <div className="absolute top-1 left-1 px-1.5 py-0.5 bg-amber-500 text-white rounded text-[9px] font-bold flex items-center gap-1 shadow-xs z-10">
+                                <Star size={9} className="fill-white" />
+                                <span>Thumbnail</span>
+                              </div>
+                            )}
+
+                            {/* Action Overlay */}
+                            <div className="absolute inset-0 bg-slate-900/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-1.5 p-1 z-20">
+                              {!isThumbnail && (
+                                <button
+                                  type="button"
+                                  disabled={isSetting || isDeleting}
+                                  onClick={() => handleSetThumbnail(item.url)}
+                                  className="p-1.5 bg-amber-500 hover:bg-amber-600 disabled:opacity-50 text-white rounded-md text-[10px] font-semibold transition-colors flex items-center gap-1 cursor-pointer"
+                                  title="Jadikan Thumbnail Utama"
+                                >
+                                  {isSetting ? (
+                                    <Loader2 size={12} className="animate-spin" />
+                                  ) : (
+                                    <Star size={12} />
+                                  )}
+                                </button>
+                              )}
+
+                              <button
+                                type="button"
+                                disabled={isDeleting || isSetting}
+                                onClick={() => handleDeleteExistingMedia(item.id, item.url)}
+                                className="p-1.5 bg-rose-600 hover:bg-rose-700 disabled:opacity-50 text-white rounded-md text-[10px] font-semibold transition-colors flex items-center gap-1 cursor-pointer"
+                                title="Hapus Media"
+                              >
+                                {isDeleting ? (
+                                  <Loader2 size={12} className="animate-spin" />
+                                ) : (
+                                  <Trash2 size={12} />
+                                )}
+                              </button>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <div className="text-xs text-slate-400 italic bg-slate-50 border border-slate-200 rounded-xl p-3 text-center">
+                      Belum ada gambar atau video tersimpan untuk properti ini.
+                    </div>
+                  )}
+                </div>
+              )}
+
               {/* Multi-Upload Media (Gambar & Video) */}
               <div>
                 <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-                  Unggah Media (Gambar &amp; Video)
+                  Unggah Media Baru (Gambar &amp; Video)
                 </label>
                 <input
                   type="file"

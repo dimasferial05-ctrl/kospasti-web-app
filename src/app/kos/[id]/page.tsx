@@ -183,12 +183,20 @@ export default function PropertyDetailPage() {
     );
   }
 
-  const mediaList: PropertyMediaItem[] =
-    property.media && property.media.length > 0
-      ? property.media
-      : property.image_url
-      ? [{ url: property.image_url, type: "IMAGE" }]
-      : [];
+  const mediaList: PropertyMediaItem[] = (() => {
+    if (!property.media || property.media.length === 0) {
+      return property.image_url ? [{ url: property.image_url, type: "IMAGE" }] : [];
+    }
+    const list = [...property.media];
+    if (property.image_url) {
+      const thumbIndex = list.findIndex((m) => m.url === property.image_url);
+      if (thumbIndex > 0) {
+        const [thumb] = list.splice(thumbIndex, 1);
+        list.unshift(thumb);
+      }
+    }
+    return list;
+  })();
 
   const prevSlide = () => {
     if (mediaList.length <= 1) return;
