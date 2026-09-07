@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { LayoutDashboard, Building, FileText, LogOut } from "lucide-react";
+import { LayoutDashboard, Building, Users, FileText, LogOut } from "lucide-react";
 import Link from "next/link";
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -67,6 +67,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           </Link>
           <Link className="flex items-center gap-3 p-3 rounded-lg hover:bg-slate-800 hover:text-white transition-colors" href="/admin/properties">
             <Building size={20}/> Kelola Properti
+          </Link>
+          <Link className="flex items-center gap-3 p-3 rounded-lg hover:bg-slate-800 hover:text-white transition-colors" href="/admin/owners">
+            <Users size={20}/> Pemilik Kos
           </Link>
           <Link className="flex items-center gap-3 p-3 rounded-lg hover:bg-slate-800 hover:text-white transition-colors" href="/admin/bookings">
             <FileText size={20}/> Data Transaksi
