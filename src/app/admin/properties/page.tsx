@@ -156,7 +156,10 @@ export default function ManagePropertiesPage() {
       available_rooms: prop.available_rooms !== undefined ? String(prop.available_rooms) : "0",
       gender_type: prop.gender_type || "CAMPUR",
       facilities: prop.facilities || "",
-      image_url: prop.image_url || "",
+      image_url:
+        prop.image_url && !prop.image_url.startsWith("/uploads/")
+          ? prop.image_url
+          : "",
     });
     setSelectedFiles([]);
     setFormError(null);
@@ -203,7 +206,6 @@ export default function ManagePropertiesPage() {
 
       const resData = await res.json();
       if (resData && resData.success) {
-        setFormData((prev) => ({ ...prev, image_url: mediaUrl }));
         setEditingProperty((prev) => (prev ? { ...prev, image_url: mediaUrl } : null));
         setProperties((prev) =>
           prev.map((p) => (p.id === editingProperty.id ? { ...p, image_url: mediaUrl } : p))
@@ -242,7 +244,6 @@ export default function ManagePropertiesPage() {
         if (editingProperty.image_url === mediaUrl) {
           const nextImg = updatedMedia.find((m) => m.type === "IMAGE") || updatedMedia[0];
           newImageUrl = nextImg ? nextImg.url : "";
-          setFormData((prev) => ({ ...prev, image_url: newImageUrl || "" }));
         }
 
         const updatedProperty: PropertyAdminItem = {
@@ -694,9 +695,7 @@ export default function ManagePropertiesPage() {
                   {editingProperty.media && editingProperty.media.length > 0 ? (
                     <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5 p-2.5 bg-slate-50 border border-slate-200 rounded-xl max-h-48 overflow-y-auto">
                       {editingProperty.media.map((item) => {
-                        const isThumbnail =
-                          editingProperty.image_url === item.url ||
-                          formData.image_url === item.url;
+                        const isThumbnail = editingProperty.image_url === item.url;
                         const isDeleting = deletingMediaId === item.id;
                         const isSetting = settingThumbnailUrl === item.url;
 

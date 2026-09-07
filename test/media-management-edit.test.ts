@@ -234,4 +234,22 @@ describe("Fitur Manajemen Media di Halaman Edit Properti (Issue #93)", () => {
       expect(dbProp?.image_url).toBe("/uploads/properties/new-target-thumb.jpg");
     });
   });
+
+  describe("4. Logika UI Admin Panel & Halaman Detail Kos", () => {
+    it("memastikan URL upload lokal tidak dimasukkan ke input URL Gambar saat edit di admin", () => {
+      const filePath = path.resolve(__dirname, "../src/app/admin/properties/page.tsx");
+      const content = fs.readFileSync(filePath, "utf-8");
+
+      expect(content).toContain('!prop.image_url.startsWith("/uploads/")');
+      expect(content).toContain("const isThumbnail = editingProperty.image_url === item.url;");
+    });
+
+    it("memastikan gambar thumbnail selalu muncul di index pertama (paling depan) pada halaman detail kos", () => {
+      const filePath = path.resolve(__dirname, "../src/app/kos/[id]/page.tsx");
+      const content = fs.readFileSync(filePath, "utf-8");
+
+      expect(content).toContain("thumbIndex > 0");
+      expect(content).toContain("list.unshift(thumb)");
+    });
+  });
 });
