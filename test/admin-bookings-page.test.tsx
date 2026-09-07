@@ -124,4 +124,36 @@ describe("Manage Bookings Page (/admin/bookings)", () => {
     expect(content).toContain("res.status === 401");
     expect(content).toContain('router.push("/admin/login")');
   });
+
+  describe("Fitur Export CSV Laporan Transaksi", () => {
+    it("memiliki tombol Export CSV dengan ikon Download pada header halaman", () => {
+      const filePath = path.resolve(
+        __dirname,
+        "../src/app/admin/bookings/page.tsx"
+      );
+      const content = fs.readFileSync(filePath, "utf-8");
+
+      expect(content).toContain("Export CSV");
+      expect(content).toContain("handleExportCSV");
+      expect(content).toContain("formatBookingsToCSV");
+      expect(content).toContain("isExporting");
+      expect(content).toContain("Download");
+    });
+
+    it("mengimplementasikan pembuatan Blob, Object URL, dan trigger elemen download", () => {
+      const filePath = path.resolve(
+        __dirname,
+        "../src/app/admin/bookings/page.tsx"
+      );
+      const content = fs.readFileSync(filePath, "utf-8");
+
+      expect(content).toContain("new Blob([csvContent]");
+      expect(content).toContain("window.URL.createObjectURL");
+      expect(content).toContain("window.URL.revokeObjectURL");
+      expect(content).toContain('document.createElement("a")');
+      expect(content).toContain("link.click()");
+      expect(content).toContain("Laporan_KosPasti_");
+    });
+  });
 });
+
