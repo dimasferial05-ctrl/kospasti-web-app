@@ -54,3 +54,118 @@ export async function GET(request: NextRequest) {
     );
   }
 }
+
+export async function POST(request: NextRequest) {
+  try {
+    const adminToken = request.cookies.get("admin_token")?.value;
+    const validToken = process.env.ADMIN_TOKEN || "kospasti_admin_authenticated";
+    if (!adminToken || adminToken !== validToken) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Unauthorized: Akses ditolak. Token autentikasi admin tidak valid.",
+        },
+        {
+          status: 401,
+        }
+      );
+    }
+
+    const body = await request.json();
+    const { name, whatsapp_number } = body || {};
+
+    if (!name || typeof name !== "string" || name.trim() === "") {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Nama pemilik wajib diisi.",
+        },
+        {
+          status: 400,
+        }
+      );
+    }
+
+    if (
+      !whatsapp_number ||
+      typeof whatsapp_number !== "string" ||
+      whatsapp_number.trim() === ""
+    ) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Nomor WhatsApp wajib diisi.",
+        },
+        {
+          status: 400,
+        }
+      );
+    }
+
+    const trimmedName = name.trim();
+    const trimmedWhatsapp = whatsapp_number.trim();
+
+    // Cek duplikasi nomor whatsapp
+    const existingOwner = await prisma.owner.findUnique({
+      where: {
+        whatsapp_number: trimmedWhatsapp,
+      },
+    });
+
+    if (existingOwner) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Nomor WhatsApp sudah terdaftar.",
+        },
+        {
+          status: 409,
+        }
+      );
+    }
+
+    const newOwner = await prisma.owner.create({
+      data: {
+        name: trimmedName,
+        whatsapp_number: trimmedWhatsapp,
+      },
+      include: {
+        _count: {
+          select: {
+            properties: true,
+          },
+        },
+        properties: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+      },
+    });
+
+    return NextResponse.json(
+      {
+        success: true,
+        data: newOwner,
+      },
+      {
+        status: 201,
+      }
+    );
+  } catch (error: unknown) {
+    const errorMessage =
+      error instanceof Error ? error.message : "Terjadi kesalahan internal server";
+    console.error("Gagal menambahkan pemilik:", error);
+    return NextResponse.json(
+      {
+        success: false,
+        error: errorMessage,
+      },
+      {
+        status: 500,
+      }
+    );
+  }
+}
+
