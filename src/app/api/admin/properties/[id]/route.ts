@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { saveUploadedFiles, detectMediaType } from "@/lib/upload";
+import { saveUploadedFiles, detectMediaType, deleteUploadedFile } from "@/lib/upload";
 
 export async function PATCH(
   request: NextRequest,
@@ -316,6 +316,75 @@ export async function PATCH(
       {
         status: 500,
       }
+    );
+  }
+}
+
+export async function DELETE(
+  request: NextRequest,
+  context: { params: Promise<{ id: string }> | { id: string } }
+) {
+  try {
+    const adminToken = request.cookies.get("admin_token")?.value;
+    if (!adminToken) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Unauthorized: Akses ditolak. Token autentikasi admin tidak valid.",
+        },
+        { status: 401 }
+      );
+    }
+
+    const resolvedParams = await context.params;
+    const propertyId = resolvedParams.id;
+
+    if (!propertyId || typeof propertyId !== "string" || propertyId.trim() === "") {
+      return NextResponse.json(
+        { success: false, error: "Bad Request: ID properti tidak valid." },
+        { status: 400 }
+      );
+    }
+
+    // Cari properti beserta semua media-nya
+    const property = await prisma.property.findUnique({
+      where: { id: propertyId.trim() },
+      include: { media: true },
+    });
+
+    if (!property) {
+      return NextResponse.json(
+        { success: false, error: "Properti tidak ditemukan." },
+        { status: 404 }
+      );
+    }
+
+    // Hapus file fisik media dari storage server
+    const deletedUrls = new Set<string>();
+    for (const media of property.media) {
+      if (media.url && !deletedUrls.has(media.url)) {
+        await deleteUploadedFile(media.url);
+        deletedUrls.add(media.url);
+      }
+    }
+    // Hapus juga file image_url jika belum terhapus di atas
+    if (property.image_url && !deletedUrls.has(property.image_url)) {
+      await deleteUploadedFile(property.image_url);
+    }
+
+    // Hapus properti dari database (cascade akan hapus media & booking terkait)
+    await prisma.property.delete({
+      where: { id: propertyId.trim() },
+    });
+
+    return NextResponse.json({ success: true });
+  } catch (error: unknown) {
+    const errorMessage =
+      error instanceof Error ? error.message : "Terjadi kesalahan internal server";
+    console.error("Gagal menghapus properti:", error);
+    return NextResponse.json(
+      { success: false, error: errorMessage },
+      { status: 500 }
     );
   }
 }

@@ -70,6 +70,7 @@ export default function ManagePropertiesPage() {
   const [isLoadingOwners, setIsLoadingOwners] = useState(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [loadingId, setLoadingId] = useState<string | null>(null);
+  const [deletingPropertyId, setDeletingPropertyId] = useState<string | null>(null);
 
   // State Modal Form (Tambah / Edit)
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -394,6 +395,40 @@ export default function ManagePropertiesPage() {
     }
   };
 
+  // Handler untuk menghapus properti
+  const handleDeleteProperty = async (id: string, name: string) => {
+    if (
+      !window.confirm(
+        `Apakah Anda yakin ingin menghapus properti "${name}"? Data dan media terkait akan dihapus secara permanen.`
+      )
+    )
+      return;
+
+    try {
+      setDeletingPropertyId(id);
+      const res = await fetch(`/api/admin/properties/${id}`, {
+        method: "DELETE",
+      });
+
+      if (res.status === 401) {
+        router.push("/admin/login");
+        return;
+      }
+
+      const data = await res.json();
+      if (data && data.success) {
+        setProperties((prev) => prev.filter((p) => p.id !== id));
+      } else {
+        alert(data.error || "Gagal menghapus properti.");
+      }
+    } catch (err) {
+      console.error("Error deleting property:", err);
+      alert("Terjadi kesalahan koneksi saat menghapus properti.");
+    } finally {
+      setDeletingPropertyId(null);
+    }
+  };
+
   // Render Loading...
   if (isLoading) {
     return (
@@ -496,6 +531,24 @@ export default function ManagePropertiesPage() {
                       >
                         <Pencil size={13} />
                         <span>Edit</span>
+                      </button>
+                      <button
+                        disabled={deletingPropertyId === prop.id}
+                        onClick={() => handleDeleteProperty(prop.id, prop.name)}
+                        className="inline-flex items-center gap-1.5 bg-white hover:bg-rose-50 disabled:opacity-50 text-rose-600 px-3 py-2 rounded-lg text-xs font-semibold transition-all cursor-pointer border border-rose-200"
+                        title="Hapus Properti"
+                      >
+                        {deletingPropertyId === prop.id ? (
+                          <>
+                            <Loader2 size={13} className="animate-spin" />
+                            <span>Menghapus...</span>
+                          </>
+                        ) : (
+                          <>
+                            <Trash2 size={13} />
+                            <span>Hapus</span>
+                          </>
+                        )}
                       </button>
                       <button
                         disabled={loadingId === prop.id}
