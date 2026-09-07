@@ -326,7 +326,8 @@ export async function DELETE(
 ) {
   try {
     const adminToken = request.cookies.get("admin_token")?.value;
-    if (!adminToken) {
+    const validToken = process.env.ADMIN_TOKEN || "kospasti_admin_authenticated";
+    if (!adminToken || adminToken !== validToken) {
       return NextResponse.json(
         {
           success: false,
