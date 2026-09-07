@@ -2,7 +2,19 @@
 
 import { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
-import { Users, Search, MessageSquare, Loader2, Building2, Calendar } from "lucide-react";
+import {
+  Users,
+  Search,
+  MessageSquare,
+  Loader2,
+  Building2,
+  Calendar,
+  Link2,
+  Copy,
+  Check,
+  X,
+  CheckCircle2,
+} from "lucide-react";
 
 interface OwnerItem {
   id: string;
@@ -18,11 +30,20 @@ interface OwnerItem {
   }>;
 }
 
+interface GeneratedModalData {
+  link: string;
+  ownerName: string;
+  ownerPhone: string;
+}
+
 export default function AdminOwnersPage() {
   const router = useRouter();
   const [owners, setOwners] = useState<OwnerItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
+  const [generatingId, setGeneratingId] = useState<string | null>(null);
+  const [generatedModal, setGeneratedModal] = useState<GeneratedModalData | null>(null);
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     const token = typeof window !== "undefined" ? sessionStorage.getItem("adminAuth") : "";
@@ -85,6 +106,52 @@ export default function AdminOwnersPage() {
     }
   };
 
+  const handleGenerateLink = async (owner: OwnerItem) => {
+    if (generatingId) return;
+    setGeneratingId(owner.id);
+    const token = typeof window !== "undefined" ? sessionStorage.getItem("adminAuth") : "";
+
+    try {
+      const res = await fetch("/api/magic-link/generate", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token || ""}`,
+        },
+        body: JSON.stringify({ ownerId: owner.id }),
+      });
+
+      const data = await res.json();
+      if (res.ok && data.success && data.magicLink) {
+        setGeneratedModal({
+          link: data.magicLink,
+          ownerName: owner.name,
+          ownerPhone: owner.whatsapp_number,
+        });
+      } else {
+        alert(data.error || "Gagal membuat magic link");
+      }
+    } catch (err) {
+      console.error("Error generating magic link:", err);
+      alert("Terjadi kesalahan koneksi saat membuat magic link");
+    } finally {
+      setGeneratingId(null);
+    }
+  };
+
+  const handleCopyLink = async () => {
+    if (!generatedModal?.link) return;
+    try {
+      if (typeof navigator !== "undefined" && navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(generatedModal.link);
+      }
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      console.error("Failed to copy:", err);
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="p-8 text-slate-500 flex items-center gap-2">
@@ -144,6 +211,7 @@ export default function AdminOwnersPage() {
               {filteredOwners.map((owner) => {
                 const propertyCount =
                   owner._count?.properties ?? owner.properties?.length ?? 0;
+                const isGenerating = generatingId === owner.id;
 
                 return (
                   <tr key={owner.id} className="hover:bg-slate-50/80 transition-colors">
@@ -173,16 +241,32 @@ export default function AdminOwnersPage() {
                       </div>
                     </td>
                     <td className="p-4 text-right">
-                      <a
-                        href={`https://wa.me/${formatWhatsAppNumber(owner.whatsapp_number)}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 rounded-lg transition-colors cursor-pointer"
-                        title="Hubungi via WhatsApp"
-                      >
-                        <MessageSquare className="w-3.5 h-3.5 text-emerald-600" />
-                        <span>Chat WA</span>
-                      </a>
+                      <div className="flex items-center justify-end gap-2">
+                        <button
+                          type="button"
+                          onClick={() => handleGenerateLink(owner)}
+                          disabled={generatingId !== null}
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 disabled:opacity-50 disabled:cursor-not-allowed border border-indigo-200 rounded-lg transition-colors cursor-pointer"
+                          title="Buat Magic Link Baru"
+                        >
+                          {isGenerating ? (
+                            <Loader2 className="w-3.5 h-3.5 animate-spin text-indigo-600" />
+                          ) : (
+                            <Link2 className="w-3.5 h-3.5 text-indigo-600" />
+                          )}
+                          <span>{isGenerating ? "Memproses..." : "Generate Link"}</span>
+                        </button>
+                        <a
+                          href={`https://wa.me/${formatWhatsAppNumber(owner.whatsapp_number)}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 rounded-lg transition-colors cursor-pointer"
+                          title="Hubungi via WhatsApp"
+                        >
+                          <MessageSquare className="w-3.5 h-3.5 text-emerald-600" />
+                          <span>Chat WA</span>
+                        </a>
+                      </div>
                     </td>
                   </tr>
                 );
@@ -201,6 +285,112 @@ export default function AdminOwnersPage() {
           </table>
         </div>
       </div>
+
+      {/* Modal Tautan Magic Link */}
+      {generatedModal && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="magic-link-modal-title"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fadeIn"
+        >
+          <div className="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-100 space-y-5">
+            <div className="flex items-start justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center font-bold shrink-0">
+                  <CheckCircle2 className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 id="magic-link-modal-title" className="text-lg font-bold text-slate-900">
+                    Tautan Magic Link Berhasil Dibuat!
+                  </h3>
+                  <p className="text-xs text-slate-500">
+                    Untuk pemilik: <span className="font-semibold text-slate-700">{generatedModal.ownerName}</span>
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  setGeneratedModal(null);
+                  setCopied(false);
+                }}
+                className="text-slate-400 hover:text-slate-600 p-1 rounded-lg hover:bg-slate-100 transition-colors cursor-pointer"
+                aria-label="Tutup Modal"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-xs font-semibold text-slate-700">
+                URL Magic Link (Berlaku 24 Jam):
+              </label>
+              <div className="flex items-center gap-2">
+                <input
+                  type="text"
+                  readOnly
+                  value={generatedModal.link}
+                  className="w-full text-xs font-mono bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-slate-800 focus:outline-none select-all break-all"
+                />
+                <button
+                  type="button"
+                  onClick={handleCopyLink}
+                  className={`inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-lg text-xs font-semibold transition-all shrink-0 cursor-pointer ${copied
+                      ? "bg-emerald-600 text-white shadow-sm"
+                      : "bg-slate-900 text-white hover:bg-slate-800"
+                    }`}
+                  title="Salin ke Clipboard"
+                >
+                  {copied ? (
+                    <>
+                      <Check className="w-4 h-4 text-white" />
+                      <span>Disalin!</span>
+                    </>
+                  ) : (
+                    <>
+                      <Copy className="w-4 h-4" />
+                      <span>Salin</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+
+            <div className="p-3.5 bg-amber-50 rounded-xl border border-amber-200/80 text-xs text-amber-800 space-y-1">
+              <p className="font-semibold">Perhatian Keamanan:</p>
+              <p className="text-amber-700 leading-relaxed">
+                Tautan ini memberikan akses langsung bagi pemilik untuk memperbarui data kos tanpa login. Tautan lama otomatis kedaluwarsa.
+              </p>
+            </div>
+
+            <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
+              <a
+                href={`https://wa.me/${formatWhatsAppNumber(generatedModal.ownerPhone)}?text=${encodeURIComponent(
+                  `Halo ${generatedModal.ownerName},\n\nBerikut adalah tautan rahasia (Magic Link) untuk mengakses dan memperbarui data properti kos Anda di platform KosPasti.\n\n🔗 Tautan: ${generatedModal.link}\n\n⚠️ Catatan: Tautan ini memberikan akses langsung tanpa login dan hanya berlaku selama 24 jam ke depan. Mohon jangan bagikan tautan ini kepada orang lain.\n\nTerima kasih!`
+                )}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-semibold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 rounded-lg transition-colors cursor-pointer"
+              >
+                <MessageSquare className="w-3.5 h-3.5 text-emerald-600" />
+                <span>Kirim via WA</span>
+              </a>
+              <button
+                type="button"
+                onClick={() => {
+                  setGeneratedModal(null);
+                  setCopied(false);
+                }}
+                className="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-lg transition-colors cursor-pointer"
+              >
+                Tutup
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
+
