@@ -130,12 +130,12 @@ export default function Home() {
           )}
 
           {!isLoading && !error && properties.length > 0 && (
-            <div className="flex flex-col gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {properties.map((property) => (
                 <Link
                   key={property.id}
                   href={`/kos/${property.id}`}
-                  className="block transition-transform hover:scale-[1.02]"
+                  className="block h-full transition-transform hover:scale-[1.02]"
                 >
                   <KosPropertyCard
                     name={property.name}
