@@ -192,4 +192,25 @@ describe("Property Detail Page Component (/kos/[id])", () => {
     expect(content).toContain("disabled={isSubmitting}");
     expect(content).toContain("isSubmitting ? \"Memproses...\" : \"Lanjut Pembayaran\"");
   });
+
+  it("memiliki layout Split-View (Epic 6) untuk tampilan desktop dan sticky booking card", () => {
+    const filePath = path.resolve(__dirname, "../src/app/kos/[id]/page.tsx");
+    const content = fs.readFileSync(filePath, "utf-8");
+
+    // Acceptance Criteria 1 & 2: Kontainer utama dan Split-View flex-row pada desktop
+    expect(content).toContain("max-w-7xl mx-auto min-h-screen bg-slate-50 pb-24 lg:pb-12 px-0 lg:px-8 flex flex-col relative shadow-sm");
+    expect(content).toContain("flex flex-col lg:flex-row gap-6 lg:gap-8 lg:mt-8");
+
+    // Acceptance Criteria 2: Kolom kiri meluas mengisi sisa ruang (flex-1)
+    expect(content).toContain("flex-1 flex flex-col w-full");
+
+    // Acceptance Criteria 3 & 4: Kolom kanan selebar 400px dan sticky di desktop
+    expect(content).toContain("w-full lg:w-[400px] shrink-0");
+    expect(content).toContain("lg:sticky lg:top-24");
+    expect(content).toContain("lg:rounded-2xl");
+
+    // Acceptance Criteria 5: Tetap fixed di bawah pada HP (fixed bottom-0)
+    expect(content).toContain("fixed bottom-0 left-0 w-full");
+  });
 });
+
