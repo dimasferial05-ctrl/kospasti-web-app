@@ -153,7 +153,7 @@ export default function PropertyDetailPage() {
 
   if (isLoading) {
     return (
-      <div className="max-w-md mx-auto min-h-screen bg-white shadow-sm p-4 py-24 flex flex-col items-center justify-center gap-3 text-slate-500">
+      <div className="max-w-7xl mx-auto min-h-screen px-4 sm:px-6 lg:px-8 py-24 flex flex-col items-center justify-center gap-3 text-slate-500">
         <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
         <p className="text-sm font-medium">Memuat detail kamar...</p>
       </div>
@@ -162,7 +162,7 @@ export default function PropertyDetailPage() {
 
   if (error || !property) {
     return (
-      <div className="max-w-md mx-auto min-h-screen bg-white shadow-sm p-4 py-16 flex flex-col items-center justify-center text-center gap-4">
+      <div className="max-w-7xl mx-auto min-h-screen px-4 sm:px-6 lg:px-8 py-16 flex flex-col items-center justify-center text-center gap-4">
         <div className="w-16 h-16 rounded-full bg-rose-50 text-rose-500 flex items-center justify-center">
           <AlertCircle className="w-8 h-8" />
         </div>
@@ -235,19 +235,21 @@ export default function PropertyDetailPage() {
       : [];
 
   return (
-    <div className="max-w-md mx-auto min-h-screen bg-slate-50 pb-24 flex flex-col relative shadow-sm">
+    <div className="max-w-7xl mx-auto min-h-screen bg-slate-50 pb-24 flex flex-col relative">
       {/* Header Bar */}
-      <div className="sticky top-0 z-30 bg-white/80 backdrop-blur-md border-b border-slate-200/80 px-4 py-3 flex items-center gap-3">
-        <Link
-          href="/"
-          className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors"
-          aria-label="Kembali ke beranda"
-        >
-          <ArrowLeft className="w-4 h-4" />
-        </Link>
-        <h1 className="text-sm font-bold text-slate-800 truncate">
-          Detail Kos
-        </h1>
+      <div className="sticky top-0 z-30 bg-white/80 backdrop-blur-md border-b border-slate-200/80 py-3">
+        <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 flex items-center gap-3">
+          <Link
+            href="/"
+            className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors"
+            aria-label="Kembali ke beranda"
+          >
+            <ArrowLeft className="w-4 h-4" />
+          </Link>
+          <h1 className="text-sm font-bold text-slate-800 truncate">
+            Detail Kos
+          </h1>
+        </div>
       </div>
 
       {/* Galeri / Carousel Media */}
@@ -437,7 +439,7 @@ export default function PropertyDetailPage() {
 
       {/* Sticky Bottom Bar */}
       <div className="fixed bottom-0 left-0 w-full bg-white border-t border-slate-200 p-4 flex justify-between items-center z-50">
-        <div className="max-w-md mx-auto w-full flex justify-between items-center">
+        <div className="max-w-7xl mx-auto w-full flex justify-between items-center">
           <div>
             <p className="text-[10px] text-slate-400 font-medium">
               Harga per bulan
