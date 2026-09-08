@@ -96,7 +96,7 @@ export default function Home() {
   }, []);
 
   return (
-    <main className="max-w-md mx-auto min-h-screen bg-white shadow-sm relative w-full p-4 flex flex-col">
+    <main className="max-w-7xl mx-auto min-h-screen relative w-full px-4 sm:px-6 lg:px-8 py-6 flex flex-col">
       <div className="flex flex-col gap-4 pb-8">
         {/* Search & Filter Component */}
         <SearchFilter onSearch={fetchProperties} />
