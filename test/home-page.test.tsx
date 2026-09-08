@@ -59,6 +59,14 @@ describe("Home Page Component (/)", () => {
     expect(content).toContain("text-slate-300");
   });
 
+  it("membungkus setiap kartu kos dengan Link ke /kos/[id]", () => {
+    const filePath = path.resolve(__dirname, "../src/app/page.tsx");
+    const content = fs.readFileSync(filePath, "utf-8");
+
+    expect(content).toContain("import Link from \"next/link\"");
+    expect(content).toContain("href={`/kos/${property.id}`}");
+  });
+
   it("menggunakan layout CSS Grid responsif untuk daftar kos", () => {
     const filePath = path.resolve(__dirname, "../src/app/page.tsx");
     const content = fs.readFileSync(filePath, "utf-8");
