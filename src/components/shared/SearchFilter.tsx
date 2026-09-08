@@ -31,10 +31,10 @@ export function SearchFilter({ onSearch, initialValues }: SearchFilterProps) {
   return (
     <form
       onSubmit={handleSubmit}
-      className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-col gap-3"
+      className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-col lg:flex-row lg:items-end gap-3"
     >
       {/* Search Input by Name */}
-      <div className="relative">
+      <div className="relative w-full lg:flex-1">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
         <input
           type="text"
@@ -46,9 +46,9 @@ export function SearchFilter({ onSearch, initialValues }: SearchFilterProps) {
         />
       </div>
 
-      {/* 2-Column Grid: Price & Gender */}
-      <div className="grid grid-cols-2 gap-3">
-        <div>
+      {/* 2-Column Grid / Desktop Row: Price & Gender */}
+      <div className="grid grid-cols-2 lg:flex lg:flex-row gap-3 w-full lg:w-auto">
+        <div className="w-full lg:w-48">
           <label
             htmlFor="filter-price"
             className="block text-xs font-medium text-slate-600 mb-1"
@@ -68,7 +68,7 @@ export function SearchFilter({ onSearch, initialValues }: SearchFilterProps) {
           </select>
         </div>
 
-        <div>
+        <div className="w-full lg:w-48">
           <label
             htmlFor="filter-gender"
             className="block text-xs font-medium text-slate-600 mb-1"
@@ -92,7 +92,7 @@ export function SearchFilter({ onSearch, initialValues }: SearchFilterProps) {
       {/* Search Button */}
       <button
         type="submit"
-        className="w-full bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-medium py-2.5 px-4 rounded-lg text-sm transition-colors flex items-center justify-center gap-2 shadow-sm"
+        className="w-full lg:w-auto bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-medium py-2.5 px-6 rounded-lg text-sm transition-colors flex items-center justify-center gap-2 shadow-sm shrink-0 lg:h-[42px]"
       >
         <Search className="w-4 h-4" />
         <span>Cari Kos</span>

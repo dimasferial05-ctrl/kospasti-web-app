@@ -65,7 +65,21 @@ describe("SearchFilter Component", () => {
     const onSearchMock = vi.fn();
     const html = renderToStaticMarkup(<SearchFilter onSearch={onSearchMock} />);
 
-    expect(html).toContain("grid grid-cols-2 gap-3");
+    expect(html).toContain("grid grid-cols-2");
     expect(html).toContain("w-full");
+  });
+
+  it("menerapkan tata letak horizontal pada layar desktop (lg)", () => {
+    const filePath = path.resolve(
+      __dirname,
+      "../src/components/shared/SearchFilter.tsx"
+    );
+    const content = fs.readFileSync(filePath, "utf-8");
+
+    expect(content).toContain("lg:flex-row lg:items-end");
+    expect(content).toContain("lg:flex-1");
+    expect(content).toContain("lg:flex lg:flex-row gap-3 w-full lg:w-auto");
+    expect(content).toContain("lg:w-48");
+    expect(content).toContain("lg:w-auto");
   });
 });
