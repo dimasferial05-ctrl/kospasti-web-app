@@ -404,7 +404,7 @@ export default function AdminOwnersPage() {
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm">
+          <table className="w-full text-left text-sm min-w-[800px]">
             <thead className="bg-slate-100 text-slate-600 font-semibold uppercase text-xs tracking-wider">
               <tr>
                 <th className="p-4 border-b border-slate-200">Nama Pemilik</th>
