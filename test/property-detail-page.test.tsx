@@ -198,8 +198,8 @@ describe("Property Detail Page Component (/kos/[id])", () => {
     const content = fs.readFileSync(filePath, "utf-8");
 
     // Acceptance Criteria 1 & 2: Kontainer utama dan Split-View flex-row pada desktop
-    expect(content).toContain("max-w-7xl mx-auto min-h-screen bg-slate-50 pb-24 lg:pb-12 px-0 lg:px-8 lg:py-8 flex flex-col relative shadow-sm");
-    expect(content).toContain("flex flex-col lg:flex-row gap-6 lg:gap-8 lg:mt-4");
+    expect(content).toContain("max-w-7xl mx-auto min-h-screen bg-slate-50 pb-24 lg:pb-12 px-0 lg:px-8 flex flex-col relative shadow-sm");
+    expect(content).toContain("flex flex-col lg:flex-row gap-6 lg:gap-8 lg:mt-8");
 
     // Acceptance Criteria 2: Kolom kiri meluas mengisi sisa ruang (flex-1)
     expect(content).toContain("flex-1 flex flex-col w-full");

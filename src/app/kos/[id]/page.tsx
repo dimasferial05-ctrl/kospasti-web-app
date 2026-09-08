@@ -235,7 +235,7 @@ export default function PropertyDetailPage() {
       : [];
 
   return (
-    <div className="max-w-7xl mx-auto min-h-screen bg-slate-50 pb-24 lg:pb-12 px-0 lg:px-8 lg:py-8 flex flex-col relative shadow-sm">
+    <div className="max-w-7xl mx-auto min-h-screen bg-slate-50 pb-24 lg:pb-12 px-0 lg:px-8 flex flex-col relative shadow-sm">
       {/* Header Bar */}
       <div className="sticky top-0 z-30 bg-white/80 backdrop-blur-md border-b border-slate-200/80 py-3">
         <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 flex items-center gap-3">
@@ -253,7 +253,7 @@ export default function PropertyDetailPage() {
       </div>
 
       {/* Split-View Container */}
-      <div className="flex flex-col lg:flex-row gap-6 lg:gap-8 lg:mt-4">
+      <div className="flex flex-col lg:flex-row gap-6 lg:gap-8 lg:mt-8">
         {/* KOLOM KIRI (Galeri & Info Kos) */}
         <div className="flex-1 flex flex-col w-full">
           {/* Galeri / Carousel Media */}
