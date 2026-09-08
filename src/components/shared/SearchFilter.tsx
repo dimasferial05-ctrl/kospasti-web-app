@@ -92,7 +92,7 @@ export function SearchFilter({ onSearch, initialValues }: SearchFilterProps) {
       {/* Search Button */}
       <button
         type="submit"
-        className="w-full lg:w-auto bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-medium py-2.5 px-6 rounded-lg text-sm transition-colors flex items-center justify-center gap-2 shadow-sm shrink-0 lg:h-[42px]"
+        className="w-full lg:w-auto bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-medium py-2.5 px-6 rounded-lg text-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md active:translate-y-0 flex items-center justify-center gap-2 shadow-sm shrink-0 lg:h-[42px] cursor-pointer"
       >
         <Search className="w-4 h-4" />
         <span>Cari Kos</span>
