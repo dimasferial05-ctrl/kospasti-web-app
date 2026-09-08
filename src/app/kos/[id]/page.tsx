@@ -235,7 +235,7 @@ export default function PropertyDetailPage() {
       : [];
 
   return (
-    <div className="max-w-7xl mx-auto min-h-screen bg-slate-50 pb-24 flex flex-col relative">
+    <div className="max-w-7xl mx-auto min-h-screen bg-slate-50 pb-24 lg:pb-12 px-0 lg:px-8 lg:py-8 flex flex-col relative shadow-sm">
       {/* Header Bar */}
       <div className="sticky top-0 z-30 bg-white/80 backdrop-blur-md border-b border-slate-200/80 py-3">
         <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 flex items-center gap-3">
@@ -252,220 +252,232 @@ export default function PropertyDetailPage() {
         </div>
       </div>
 
-      {/* Galeri / Carousel Media */}
-      <div className="w-full flex flex-col bg-slate-900">
-        {/* Main Viewer (Penampil Utama) */}
-        <div className="w-full h-72 relative bg-slate-200 overflow-hidden flex items-center justify-center group">
-          {currentMedia ? (
-            currentMedia.type === "VIDEO" ? (
-              <video
-                key={currentMedia.url}
-                src={currentMedia.url}
-                controls
-                playsInline
-                className="w-full h-full object-contain bg-black"
-              />
-            ) : (
-              /* eslint-disable-next-line @next/next/no-img-element */
-              <img
-                src={currentMedia.url}
-                alt={`${property.name} - ${activeIndex + 1}`}
-                className="w-full h-full object-cover"
-              />
-            )
-          ) : (
-            <div className="flex flex-col items-center justify-center text-slate-400 gap-2">
-              <Home className="w-12 h-12 stroke-[1.5]" />
-              <span className="text-xs">Tidak ada foto</span>
-            </div>
-          )}
-
-          {/* Tombol Navigasi Kiri / Kanan */}
-          {mediaList.length > 1 && (
-            <>
-              <button
-                type="button"
-                onClick={prevSlide}
-                aria-label="Media sebelumnya"
-                className="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-slate-950/60 hover:bg-slate-950/80 text-white flex items-center justify-center backdrop-blur-xs transition-all shadow-md cursor-pointer z-20"
-              >
-                <ChevronLeft className="w-5 h-5" />
-              </button>
-              <button
-                type="button"
-                onClick={nextSlide}
-                aria-label="Media berikutnya"
-                className="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-slate-950/60 hover:bg-slate-950/80 text-white flex items-center justify-center backdrop-blur-xs transition-all shadow-md cursor-pointer z-20"
-              >
-                <ChevronRight className="w-5 h-5" />
-              </button>
-
-              {/* Counter badge */}
-              <div className="absolute bottom-3 right-3 px-2.5 py-1 bg-black/60 backdrop-blur-xs text-white text-[11px] font-semibold rounded-full flex items-center gap-1.5 z-20">
-                {currentMedia?.type === "VIDEO" ? (
-                  <Play className="w-3 h-3 fill-white text-white" />
-                ) : (
-                  <Camera className="w-3 h-3" />
-                )}
-                <span>
-                  {activeIndex + 1} / {mediaList.length}
-                </span>
-              </div>
-            </>
-          )}
-        </div>
-
-        {/* Thumbnails Bar (Pilihan di Bawah Penampil Utama) */}
-        {mediaList.length > 1 && (
-          <div className="bg-slate-900/90 border-t border-slate-800 p-2.5 flex items-center gap-2 overflow-x-auto scrollbar-none">
-            {mediaList.map((item, idx) => (
-              <button
-                key={idx}
-                type="button"
-                onClick={() => setActiveIndex(idx)}
-                aria-label={`Lihat media ${idx + 1}`}
-                className={`relative w-16 h-16 shrink-0 rounded-lg overflow-hidden border-2 transition-all cursor-pointer ${
-                  activeIndex === idx
-                    ? "border-blue-500 ring-2 ring-blue-500/50 opacity-100 scale-100"
-                    : "border-slate-700 opacity-60 hover:opacity-100"
-                }`}
-              >
-                {item.type === "VIDEO" ? (
-                  <div className="w-full h-full bg-slate-800 flex items-center justify-center text-white relative">
-                    <video
-                      src={item.url}
-                      className="w-full h-full object-cover pointer-events-none"
-                    />
-                    <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
-                      <Play className="w-4 h-4 fill-white text-white" />
-                    </div>
-                  </div>
+      {/* Split-View Container */}
+      <div className="flex flex-col lg:flex-row gap-6 lg:gap-8 lg:mt-4">
+        {/* KOLOM KIRI (Galeri & Info Kos) */}
+        <div className="flex-1 flex flex-col w-full">
+          {/* Galeri / Carousel Media */}
+          <div className="w-full flex flex-col bg-slate-900 lg:rounded-2xl overflow-hidden">
+            {/* Main Viewer (Penampil Utama) */}
+            <div className="w-full h-72 lg:h-96 relative bg-slate-200 overflow-hidden flex items-center justify-center group">
+              {currentMedia ? (
+                currentMedia.type === "VIDEO" ? (
+                  <video
+                    key={currentMedia.url}
+                    src={currentMedia.url}
+                    controls
+                    playsInline
+                    className="w-full h-full object-contain bg-black"
+                  />
                 ) : (
                   /* eslint-disable-next-line @next/next/no-img-element */
                   <img
-                    src={item.url}
-                    alt={`Thumbnail ${idx + 1}`}
+                    src={currentMedia.url}
+                    alt={`${property.name} - ${activeIndex + 1}`}
                     className="w-full h-full object-cover"
                   />
-                )}
-              </button>
-            ))}
-          </div>
-        )}
-      </div>
-
-      {/* Body Section */}
-      <div className="flex flex-col gap-3 p-4">
-        {/* Informasi Dasar */}
-        <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-xs flex flex-col gap-3">
-          <div className="flex items-start justify-between gap-2">
-            <span
-              className={`text-xs px-2.5 py-0.5 rounded-md font-semibold border ${genderBadgeStyle}`}
-            >
-              {property.gender_type}
-            </span>
-            {isAvailable ? (
-              <span className="bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-semibold px-2.5 py-0.5 rounded-md">
-                Tersedia {property.available_rooms} Kamar
-              </span>
-            ) : (
-              <span className="bg-rose-50 text-rose-700 border border-rose-200 text-xs font-semibold px-2.5 py-0.5 rounded-md">
-                Kamar Penuh
-              </span>
-            )}
-          </div>
-
-          <div>
-            <h2 className="text-xl font-bold text-slate-900 leading-tight">
-              {property.name}
-            </h2>
-            <p className="text-lg font-bold text-blue-600 mt-1">
-              {formattedPrice}{" "}
-              <span className="text-xs font-normal text-slate-500">
-                / bulan
-              </span>
-            </p>
-          </div>
-        </div>
-
-        {/* Fasilitas & Deskripsi */}
-        <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-xs flex flex-col gap-3">
-          <h3 className="text-sm font-bold text-slate-900">Fasilitas Kos</h3>
-          {facilitiesList.length > 0 ? (
-            <div className="grid grid-cols-2 gap-2">
-              {facilitiesList.map((facility, idx) => (
-                <div
-                  key={idx}
-                  className="flex items-center gap-2 text-xs text-slate-700 bg-slate-50 p-2 rounded-lg border border-slate-100"
-                >
-                  <Check className="w-4 h-4 text-emerald-600 shrink-0" />
-                  <span className="truncate">{facility}</span>
+                )
+              ) : (
+                <div className="flex flex-col items-center justify-center text-slate-400 gap-2">
+                  <Home className="w-12 h-12 stroke-[1.5]" />
+                  <span className="text-xs">Tidak ada foto</span>
                 </div>
-              ))}
-            </div>
-          ) : (
-            <p className="text-xs text-slate-500">
-              {property.facilities || "Tidak ada rincian fasilitas"}
-            </p>
-          )}
+              )}
 
-          {property.description && (
-            <div className="mt-2 pt-3 border-t border-slate-100">
-              <h4 className="text-xs font-bold text-slate-800 mb-1">
-                Deskripsi
-              </h4>
-              <p className="text-xs text-slate-600 leading-relaxed whitespace-pre-line">
-                {property.description}
-              </p>
-            </div>
-          )}
-        </div>
+              {/* Tombol Navigasi Kiri / Kanan */}
+              {mediaList.length > 1 && (
+                <>
+                  <button
+                    type="button"
+                    onClick={prevSlide}
+                    aria-label="Media sebelumnya"
+                    className="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-slate-950/60 hover:bg-slate-950/80 text-white flex items-center justify-center backdrop-blur-xs transition-all shadow-md cursor-pointer z-20"
+                  >
+                    <ChevronLeft className="w-5 h-5" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={nextSlide}
+                    aria-label="Media berikutnya"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-slate-950/60 hover:bg-slate-950/80 text-white flex items-center justify-center backdrop-blur-xs transition-all shadow-md cursor-pointer z-20"
+                  >
+                    <ChevronRight className="w-5 h-5" />
+                  </button>
 
-        {/* Info Pemilik */}
-        <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-xs flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center font-bold text-sm">
-              <User className="w-5 h-5" />
+                  {/* Counter badge */}
+                  <div className="absolute bottom-3 right-3 px-2.5 py-1 bg-black/60 backdrop-blur-xs text-white text-[11px] font-semibold rounded-full flex items-center gap-1.5 z-20">
+                    {currentMedia?.type === "VIDEO" ? (
+                      <Play className="w-3 h-3 fill-white text-white" />
+                    ) : (
+                      <Camera className="w-3 h-3" />
+                    )}
+                    <span>
+                      {activeIndex + 1} / {mediaList.length}
+                    </span>
+                  </div>
+                </>
+              )}
             </div>
-            <div>
-              <p className="text-[11px] text-slate-500">Dikelola oleh</p>
-              <p className="text-sm font-semibold text-slate-800">
-                {property.owner?.name || "Pemilik Kos"}
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
 
-      {/* Sticky Bottom Bar */}
-      <div className="fixed bottom-0 left-0 w-full bg-white border-t border-slate-200 p-4 flex justify-between items-center z-50">
-        <div className="max-w-7xl mx-auto w-full flex justify-between items-center">
-          <div>
-            <p className="text-[10px] text-slate-400 font-medium">
-              Harga per bulan
-            </p>
-            <p className="text-base font-bold text-slate-900">
-              {formattedPrice}{" "}
-              <span className="text-xs font-normal text-slate-500">/ bln</span>
-            </p>
-            {isFull && (
-              <p className="text-[10px] text-rose-500 font-medium">
-                Mohon maaf, semua kamar telah terisi.
-              </p>
+            {/* Thumbnails Bar (Pilihan di Bawah Penampil Utama) */}
+            {mediaList.length > 1 && (
+              <div className="bg-slate-900/90 border-t border-slate-800 p-2.5 flex items-center gap-2 overflow-x-auto scrollbar-none">
+                {mediaList.map((item, idx) => (
+                  <button
+                    key={idx}
+                    type="button"
+                    onClick={() => setActiveIndex(idx)}
+                    aria-label={`Lihat media ${idx + 1}`}
+                    className={`relative w-16 h-16 shrink-0 rounded-lg overflow-hidden border-2 transition-all cursor-pointer ${
+                      activeIndex === idx
+                        ? "border-blue-500 ring-2 ring-blue-500/50 opacity-100 scale-100"
+                        : "border-slate-700 opacity-60 hover:opacity-100"
+                    }`}
+                  >
+                    {item.type === "VIDEO" ? (
+                      <div className="w-full h-full bg-slate-800 flex items-center justify-center text-white relative">
+                        <video
+                          src={item.url}
+                          className="w-full h-full object-cover pointer-events-none"
+                        />
+                        <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+                          <Play className="w-4 h-4 fill-white text-white" />
+                        </div>
+                      </div>
+                    ) : (
+                      /* eslint-disable-next-line @next/next/no-img-element */
+                      <img
+                        src={item.url}
+                        alt={`Thumbnail ${idx + 1}`}
+                        className="w-full h-full object-cover"
+                      />
+                    )}
+                  </button>
+                ))}
+              </div>
             )}
           </div>
-          <button
-            type="button"
-            disabled={isFull}
-            onClick={() => setIsModalOpen(true)}
-            className={`px-6 py-2 rounded-lg font-bold text-white transition-colors ${
-              isFull
-                ? "bg-slate-400 cursor-not-allowed"
-                : "bg-blue-600 hover:bg-blue-700 cursor-pointer"
-            }`}
-          >
-            {isFull ? "Kamar Penuh" : "Amankan Kamar"}
-          </button>
+
+          {/* Body Section */}
+          <div className="flex flex-col gap-3 p-4 lg:px-0 lg:py-6">
+            {/* Informasi Dasar */}
+            <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-xs flex flex-col gap-3">
+              <div className="flex items-start justify-between gap-2">
+                <span
+                  className={`text-xs px-2.5 py-0.5 rounded-md font-semibold border ${genderBadgeStyle}`}
+                >
+                  {property.gender_type}
+                </span>
+                {isAvailable ? (
+                  <span className="bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-semibold px-2.5 py-0.5 rounded-md">
+                    Tersedia {property.available_rooms} Kamar
+                  </span>
+                ) : (
+                  <span className="bg-rose-50 text-rose-700 border border-rose-200 text-xs font-semibold px-2.5 py-0.5 rounded-md">
+                    Kamar Penuh
+                  </span>
+                )}
+              </div>
+
+              <div>
+                <h2 className="text-xl font-bold text-slate-900 leading-tight">
+                  {property.name}
+                </h2>
+                <p className="text-lg font-bold text-blue-600 mt-1">
+                  {formattedPrice}{" "}
+                  <span className="text-xs font-normal text-slate-500">
+                    / bulan
+                  </span>
+                </p>
+              </div>
+            </div>
+
+            {/* Fasilitas & Deskripsi */}
+            <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-xs flex flex-col gap-3">
+              <h3 className="text-sm font-bold text-slate-900">Fasilitas Kos</h3>
+              {facilitiesList.length > 0 ? (
+                <div className="grid grid-cols-2 gap-2">
+                  {facilitiesList.map((facility, idx) => (
+                    <div
+                      key={idx}
+                      className="flex items-center gap-2 text-xs text-slate-700 bg-slate-50 p-2 rounded-lg border border-slate-100"
+                    >
+                      <Check className="w-4 h-4 text-emerald-600 shrink-0" />
+                      <span className="truncate">{facility}</span>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-xs text-slate-500">
+                  {property.facilities || "Tidak ada rincian fasilitas"}
+                </p>
+              )}
+
+              {property.description && (
+                <div className="mt-2 pt-3 border-t border-slate-100">
+                  <h4 className="text-xs font-bold text-slate-800 mb-1">
+                    Deskripsi
+                  </h4>
+                  <p className="text-xs text-slate-600 leading-relaxed whitespace-pre-line">
+                    {property.description}
+                  </p>
+                </div>
+              )}
+            </div>
+
+            {/* Info Pemilik */}
+            <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-xs flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center font-bold text-sm">
+                  <User className="w-5 h-5" />
+                </div>
+                <div>
+                  <p className="text-[11px] text-slate-500">Dikelola oleh</p>
+                  <p className="text-sm font-semibold text-slate-800">
+                    {property.owner?.name || "Pemilik Kos"}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* KOLOM KANAN (Kartu Booking Sticky) */}
+        <div className="w-full lg:w-[400px] shrink-0">
+          <div className="fixed bottom-0 left-0 w-full bg-white border-t border-slate-200 p-4 flex justify-between items-center z-50 lg:static lg:block lg:p-6 lg:border lg:rounded-2xl lg:shadow-md lg:sticky lg:top-24">
+            {/* Inner Container */}
+            <div className="max-w-md mx-auto lg:max-w-none w-full flex justify-between lg:flex-col lg:gap-4 items-center lg:items-start">
+              <div className="lg:w-full">
+                <p className="text-[10px] lg:text-sm text-slate-400 font-medium">
+                  Harga per bulan
+                </p>
+                <p className="text-base lg:text-2xl font-bold text-slate-900">
+                  {formattedPrice}{" "}
+                  <span className="text-xs lg:text-sm font-normal text-slate-500">
+                    / bln
+                  </span>
+                </p>
+                {isFull && (
+                  <p className="text-[10px] lg:text-sm text-rose-500 font-medium mt-1">
+                    Mohon maaf, semua kamar telah terisi.
+                  </p>
+                )}
+              </div>
+
+              <button
+                type="button"
+                disabled={isFull}
+                onClick={() => setIsModalOpen(true)}
+                className={`px-6 py-2 lg:py-3 lg:w-full rounded-lg font-bold text-white transition-colors ${
+                  isFull
+                    ? "bg-slate-400 cursor-not-allowed"
+                    : "bg-blue-600 hover:bg-blue-700 cursor-pointer"
+                }`}
+              >
+                {isFull ? "Kamar Penuh" : "Amankan Kamar"}
+              </button>
+            </div>
+          </div>
         </div>
       </div>
 
