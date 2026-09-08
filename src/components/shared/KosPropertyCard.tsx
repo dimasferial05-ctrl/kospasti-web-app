@@ -58,15 +58,15 @@ export function KosPropertyCard({
   const isAvailable = availableRooms > 0;
 
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden flex flex-col hover:shadow-md transition-shadow h-full">
+    <div className="group bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden flex flex-col hover:shadow-lg transition-all duration-300 h-full">
       {/* Image Section */}
-      <div className="h-48 w-full relative overflow-hidden bg-slate-100 flex items-center justify-center">
+      <div className="aspect-[4/3] w-full relative overflow-hidden bg-slate-100 flex items-center justify-center">
         {imageUrl ? (
           /* eslint-disable-next-line @next/next/no-img-element */
           <img
             src={imageUrl}
             alt={name}
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
           />
         ) : (
           <div className="flex flex-col items-center justify-center text-slate-400 gap-1">

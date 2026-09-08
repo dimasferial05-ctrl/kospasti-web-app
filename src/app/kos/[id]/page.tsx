@@ -174,7 +174,7 @@ export default function PropertyDetailPage() {
         </div>
         <Link
           href="/"
-          className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors"
+          className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 hover:-translate-y-0.5 hover:shadow-md active:translate-y-0 transition-all duration-200"
         >
           <ArrowLeft className="w-4 h-4" />
           <span>Kembali ke Beranda</span>
@@ -468,10 +468,10 @@ export default function PropertyDetailPage() {
                 type="button"
                 disabled={isFull}
                 onClick={() => setIsModalOpen(true)}
-                className={`px-6 py-2 lg:py-3 lg:w-full rounded-lg font-bold text-white transition-colors ${
+                className={`px-6 py-2 lg:py-3 lg:w-full rounded-lg font-bold text-white transition-all duration-200 ${
                   isFull
                     ? "bg-slate-400 cursor-not-allowed"
-                    : "bg-blue-600 hover:bg-blue-700 cursor-pointer"
+                    : "bg-blue-600 hover:bg-blue-700 hover:-translate-y-0.5 hover:shadow-md active:translate-y-0 cursor-pointer"
                 }`}
               >
                 {isFull ? "Kamar Penuh" : "Amankan Kamar"}
@@ -546,7 +546,7 @@ export default function PropertyDetailPage() {
                   type="button"
                   disabled={isSubmitting}
                   onClick={handleBookingSubmit}
-                  className="w-full py-2.5 px-4 rounded-lg bg-blue-600 text-white font-medium hover:bg-blue-700 disabled:opacity-75 disabled:cursor-not-allowed transition-colors cursor-pointer text-sm flex items-center justify-center gap-2"
+                  className="w-full py-2.5 px-4 rounded-lg bg-blue-600 text-white font-medium hover:bg-blue-700 hover:-translate-y-0.5 hover:shadow-md active:translate-y-0 disabled:opacity-75 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-none transition-all duration-200 cursor-pointer text-sm flex items-center justify-center gap-2"
                 >
                   {isSubmitting ? "Memproses..." : "Lanjut Pembayaran"}
                 </button>

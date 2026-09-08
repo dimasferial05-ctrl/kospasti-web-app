@@ -75,4 +75,23 @@ describe("KosPropertyCard Component", () => {
     expect(html).toContain("WiFi, Kasur, Kamar Mandi Dalam");
     expect(html).toContain("PUTRA");
   });
+
+  it("menggunakan aspect-ratio aspect-[4/3] alih-alih tinggi tetap (h-48)", () => {
+    const html = renderToStaticMarkup(
+      <KosPropertyCard {...defaultProps} />
+    );
+    expect(html).toContain("aspect-[4/3]");
+    expect(html).not.toContain("h-48");
+  });
+
+  it("memiliki efek hover pada kartu dan animasi zoom-in pada gambar", () => {
+    const html = renderToStaticMarkup(
+      <KosPropertyCard {...defaultProps} />
+    );
+    expect(html).toContain("group");
+    expect(html).toContain("hover:shadow-lg");
+    expect(html).toContain("group-hover:scale-110");
+    expect(html).toContain("transition-transform");
+  });
 });
+
