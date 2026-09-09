@@ -12,11 +12,30 @@ export default function CheckoutPage() {
 
   const [isProcessing, setIsProcessing] = useState(false);
 
-  const handleSimulatePayment = () => {
+  const handleSimulatePayment = async () => {
     setIsProcessing(true);
-    setTimeout(() => {
+    try {
+      const res = await fetch(`/api/bookings/${bookingId}/pay`, {
+        method: "POST",
+      });
+
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => null);
+        throw new Error(
+          errorData?.error || "Gagal mengonfirmasi pembayaran"
+        );
+      }
+
       router.push(`/success/${bookingId}`);
-    }, 1500);
+    } catch (error: unknown) {
+      console.error(error);
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : "Terjadi kesalahan saat memproses pembayaran. Silakan coba lagi.";
+      alert(errorMessage);
+      setIsProcessing(false);
+    }
   };
 
   return (

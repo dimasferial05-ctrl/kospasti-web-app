@@ -76,7 +76,7 @@ describe("Checkout Page Component (/checkout/[bookingId])", () => {
 
     // Logika handleSimulatePayment
     expect(content).toContain("handleSimulatePayment");
-    expect(content).toContain("setTimeout");
+    expect(content).toContain("fetch(`/api/bookings/${bookingId}/pay`");
     expect(content).toContain("router.push(`/success/${bookingId}`)");
 
     // Tombol dinamis & disabled saat processing
