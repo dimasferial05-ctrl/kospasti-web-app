@@ -45,6 +45,7 @@ next-env.d.ts
 # sqlite
 *.db
 *.db-journal
+!prisma/dev.db
 
 # temporary scratch files
 /scratch/
