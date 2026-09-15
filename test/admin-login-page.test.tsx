@@ -29,16 +29,17 @@ describe("Admin Login Page (/admin/login)", () => {
     expect(firstLine).toMatch(/^["']use client["'];?$/);
   });
 
-  it("merender form login admin dengan input PIN dan tombol submit", () => {
+  it("merender form login admin dengan input email, password, dan tombol submit", () => {
     const html = renderToStaticMarkup(<AdminLoginPage />);
 
     expect(html).toContain("Login Admin KosPasti");
-    expect(html).toContain("Masukkan PIN Admin");
-    expect(html).toContain("Masuk Ruang Tahta");
-    expect(html).toContain("bg-slate-900");
+    expect(html).toContain("Email Admin");
+    expect(html).toContain("admin-email");
+    expect(html).toContain("admin-password");
+    expect(html).toContain("Masuk ke Dasbor Admin");
   });
 
-  it("memiliki handler fetch ke /api/admin/login dengan metode POST", () => {
+  it("memiliki handler fetch ke /api/admin/login dengan metode POST mengirim email & password", () => {
     const filePath = path.resolve(
       __dirname,
       "../src/app/admin/login/page.tsx"
@@ -47,7 +48,22 @@ describe("Admin Login Page (/admin/login)", () => {
 
     expect(content).toContain('fetch("/api/admin/login"');
     expect(content).toContain('method: "POST"');
-    expect(content).toContain("JSON.stringify({ pin })");
+    expect(content).toContain("email: trimmedEmail");
+    expect(content).toContain("password");
     expect(content).toContain('router.push("/admin")');
   });
+
+  it("menerapkan atribut aksesibilitas (aria-invalid, aria-describedby, dan role alert/aria-live)", () => {
+    const filePath = path.resolve(
+      __dirname,
+      "../src/app/admin/login/page.tsx"
+    );
+    const content = fs.readFileSync(filePath, "utf-8");
+
+    expect(content).toContain("aria-invalid={!!error}");
+    expect(content).toContain('aria-describedby={error ? "admin-login-error" : undefined}');
+    expect(content).toContain('role="alert"');
+    expect(content).toContain('aria-live="polite"');
+  });
 });
+
