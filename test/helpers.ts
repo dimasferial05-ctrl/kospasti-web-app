@@ -6,4 +6,5 @@ export async function clearDatabase() {
   await prisma.propertyMedia.deleteMany();
   await prisma.property.deleteMany();
   await prisma.owner.deleteMany();
+  await prisma.user.deleteMany();
 }
