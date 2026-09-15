@@ -85,8 +85,8 @@ async function main() {
   // 3. Owner 3: Pak Hendra Gunawan (Kos Campur)
   const owner3 = await prisma.owner.create({
     data: {
-      name: "Hendra Gunawan",
-      whatsapp_number: "6285712345678",
+      name: "Dimas Ferial Hidayat",
+      whatsapp_number: "6281315132327",
       properties: {
         create: [
           {

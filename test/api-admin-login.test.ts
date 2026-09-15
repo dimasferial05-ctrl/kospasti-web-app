@@ -8,7 +8,7 @@ describe("Admin Authentication API Endpoints (/api/admin/login & /api/admin/logo
   });
 
   describe("POST /api/admin/login", () => {
-    it("mengembalikan status 401 jika PIN tidak dikirimkan atau kosong", async () => {
+    it("mengembalikan status 401 jika email atau password tidak dikirimkan", async () => {
       const request = new Request("http://localhost:3000/api/admin/login", {
         method: "POST",
         body: JSON.stringify({}),
@@ -20,13 +20,16 @@ describe("Admin Authentication API Endpoints (/api/admin/login & /api/admin/logo
 
       expect(response.status).toBe(401);
       expect(data.success).toBe(false);
-      expect(data.error).toContain("PIN salah");
+      expect(data.error).toBe("Email atau password salah.");
     });
 
-    it("mengembalikan status 401 jika PIN salah", async () => {
+    it("mengembalikan status 401 jika email atau password salah", async () => {
       const request = new Request("http://localhost:3000/api/admin/login", {
         method: "POST",
-        body: JSON.stringify({ pin: "000000" }),
+        body: JSON.stringify({
+          email: "wrong@gmail.com",
+          password: "wrongpassword",
+        }),
         headers: { "Content-Type": "application/json" },
       });
 
@@ -35,13 +38,16 @@ describe("Admin Authentication API Endpoints (/api/admin/login & /api/admin/logo
 
       expect(response.status).toBe(401);
       expect(data.success).toBe(false);
-      expect(data.error).toContain("PIN salah. Akses ditolak.");
+      expect(data.error).toBe("Email atau password salah.");
     });
 
-    it("mengembalikan status 200 dan memasang cookie HTTP-Only admin_token jika PIN benar", async () => {
+    it("mengembalikan status 200 dan memasang cookie HTTP-Only admin_token jika email dan password benar", async () => {
       const request = new Request("http://localhost:3000/api/admin/login", {
         method: "POST",
-        body: JSON.stringify({ pin: "778899" }),
+        body: JSON.stringify({
+          email: "adminkospasti@gmail.com",
+          password: "kospasti123",
+        }),
         headers: { "Content-Type": "application/json" },
       });
 

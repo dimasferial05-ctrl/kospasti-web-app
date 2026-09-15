@@ -3,15 +3,17 @@ import { NextResponse } from "next/server";
 export async function POST(request: Request) {
   try {
     const body = await request.json().catch(() => null);
-    const pin = body?.pin;
+    const email = body?.email?.trim?.();
+    const password = body?.password;
 
-    const validPin = process.env.ADMIN_PIN || "778899";
+    const validEmail = process.env.ADMIN_EMAIL || "adminkospasti@gmail.com";
+    const validPassword = process.env.ADMIN_PASSWORD || "kospasti123";
 
-    if (!pin || pin !== validPin) {
+    if (!email || !password || email !== validEmail || password !== validPassword) {
       return NextResponse.json(
         {
           success: false,
-          error: "PIN salah. Akses ditolak.",
+          error: "Email atau password salah.",
         },
         { status: 401 }
       );
