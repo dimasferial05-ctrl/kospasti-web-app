@@ -52,4 +52,18 @@ describe("Admin Login Page (/admin/login)", () => {
     expect(content).toContain("password");
     expect(content).toContain('router.push("/admin")');
   });
+
+  it("menerapkan atribut aksesibilitas (aria-invalid, aria-describedby, dan role alert/aria-live)", () => {
+    const filePath = path.resolve(
+      __dirname,
+      "../src/app/admin/login/page.tsx"
+    );
+    const content = fs.readFileSync(filePath, "utf-8");
+
+    expect(content).toContain("aria-invalid={!!error}");
+    expect(content).toContain('aria-describedby={error ? "admin-login-error" : undefined}');
+    expect(content).toContain('role="alert"');
+    expect(content).toContain('aria-live="polite"');
+  });
 });
+

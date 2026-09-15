@@ -119,6 +119,8 @@ export default function AdminLoginPage() {
                 autoFocus
                 required
                 autoComplete="email"
+                aria-invalid={!!error}
+                aria-describedby={error ? "admin-login-error" : undefined}
                 className="w-full pl-11 pr-4 py-3 bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/80 rounded-xl text-sm font-medium text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-600/30 focus:border-blue-600 transition-all disabled:opacity-50"
               />
             </div>
@@ -145,6 +147,8 @@ export default function AdminLoginPage() {
                 disabled={isLoading}
                 required
                 autoComplete="current-password"
+                aria-invalid={!!error}
+                aria-describedby={error ? "admin-login-error" : undefined}
                 className="w-full pl-11 pr-11 py-3 bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/80 rounded-xl text-sm font-medium text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-600/30 focus:border-blue-600 transition-all disabled:opacity-50"
               />
               <button
@@ -166,7 +170,9 @@ export default function AdminLoginPage() {
           {/* Error Message */}
           {error && (
             <div
+              id="admin-login-error"
               role="alert"
+              aria-live="polite"
               className="p-3.5 bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900/50 text-red-600 dark:text-red-400 rounded-xl text-xs font-medium flex items-start gap-2.5 animate-fadeIn text-left"
             >
               <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-red-500" />
