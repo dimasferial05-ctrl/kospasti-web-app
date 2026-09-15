@@ -3,6 +3,7 @@ import { POST as registerPOST } from "../src/app/api/register/route";
 import { POST as loginPOST, userLoginAttempts } from "../src/app/api/login/route";
 import { prisma } from "../src/lib/prisma";
 import bcrypt from "bcryptjs";
+import { signUserToken, verifyUserToken } from "../src/lib/auth";
 
 describe("User Authentication API Endpoints (/api/register & /api/login)", () => {
   beforeEach(() => {
@@ -227,6 +228,16 @@ describe("User Authentication API Endpoints (/api/register & /api/login)", () =>
       expect(cookiesHeader).toBeDefined();
       expect(cookiesHeader).toContain("user_token=");
       expect(cookiesHeader?.toLowerCase()).toContain("httponly");
+
+      // Verifikasi bahwa user_token adalah JWT valid dengan payload yang sesuai
+      const tokenMatch = cookiesHeader?.match(/user_token=([^;]+)/);
+      expect(tokenMatch).toBeTruthy();
+      const token = tokenMatch ? tokenMatch[1] : "";
+      const decodedPayload = await verifyUserToken(token);
+      expect(decodedPayload).not.toBeNull();
+      expect(decodedPayload?.userId).toBe("user-123");
+      expect(decodedPayload?.email).toBe("budi@test.com");
+      expect(decodedPayload?.name).toBe("Budi Santoso");
     });
 
     it("mengembalikan status 429 jika melebihi batas percobaan gagal (rate limit)", async () => {
@@ -265,4 +276,30 @@ describe("User Authentication API Endpoints (/api/register & /api/login)", () =>
       expect(blockedRes.headers.get("Retry-After")).toBeDefined();
     });
   });
+
+  describe("JWT Auth Helper (signUserToken & verifyUserToken)", () => {
+    it("berhasil membuat dan memverifikasi token JWT yang valid", async () => {
+      const payload = {
+        userId: "user-456",
+        email: "siti@test.com",
+        name: "Siti Rahma",
+      };
+
+      const token = await signUserToken(payload);
+      expect(typeof token).toBe("string");
+      expect(token.split(".").length).toBe(3);
+
+      const verified = await verifyUserToken(token);
+      expect(verified).not.toBeNull();
+      expect(verified?.userId).toBe(payload.userId);
+      expect(verified?.email).toBe(payload.email);
+      expect(verified?.name).toBe(payload.name);
+    });
+
+    it("mengembalikan null jika token tidak valid atau corrupted", async () => {
+      const verified = await verifyUserToken("invalid.token.structure");
+      expect(verified).toBeNull();
+    });
+  });
 });
+

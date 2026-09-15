@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
-import crypto from "crypto";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
+import { signUserToken } from "@/lib/auth";
 
 // In-memory rate limiting untuk percobaan login gagal
 interface RateLimitRecord {
@@ -122,7 +122,11 @@ export async function POST(request: Request) {
     // 5. Login sukses: hapus riwayat percobaan gagal
     userLoginAttempts.delete(clientKey);
 
-    const sessionToken = crypto.randomUUID();
+    const sessionToken = await signUserToken({
+      userId: user.id,
+      email: user.email,
+      name: user.name,
+    });
 
     const response = NextResponse.json(
       {
@@ -144,7 +148,7 @@ export async function POST(request: Request) {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       path: "/",
-      maxAge: 86400, // 1 hari
+      maxAge: 7 * 24 * 60 * 60, // 7 hari
       sameSite: "lax",
     });
 
