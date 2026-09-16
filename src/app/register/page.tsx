@@ -49,6 +49,8 @@ export default function RegisterPage() {
 
     if (!whatsapp.trim()) {
       newErrors.whatsapp = "Nomor WhatsApp wajib diisi.";
+    } else if (whatsapp.trim().length < 10) {
+      newErrors.whatsapp = "Nomor WhatsApp tidak valid (minimal 10 digit).";
     }
 
     if (!email.trim()) {
@@ -246,9 +248,11 @@ export default function RegisterPage() {
                     id="register-whatsapp"
                     type="tel"
                     placeholder="0812xxxx..."
+                    maxLength={13}
                     value={whatsapp}
                     onChange={(e) => {
-                      setWhatsapp(e.target.value);
+                      const numericValue = e.target.value.replace(/\D/g, "");
+                      setWhatsapp(numericValue);
                       if (errors.whatsapp) setErrors((prev) => ({ ...prev, whatsapp: undefined }));
                     }}
                     disabled={isLoading}
