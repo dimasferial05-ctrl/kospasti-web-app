@@ -43,6 +43,7 @@ describe("Register Page UI (/register) - Issue #119", () => {
     expect(html).toContain("register-whatsapp");
     expect(html).toContain('type="tel"');
     expect(html).toContain('placeholder="0812xxxx..."');
+    expect(html).toMatch(/maxlength="13"/i);
 
     // Input Email
     expect(html).toContain("Email");
@@ -78,9 +79,11 @@ describe("Register Page UI (/register) - Issue #119", () => {
     // Cek Kosong
     expect(content).toContain("Nama lengkap wajib diisi.");
     expect(content).toContain("Nomor WhatsApp wajib diisi.");
+    expect(content).toContain("Nomor WhatsApp tidak valid (minimal 10 digit).");
     expect(content).toContain("Alamat email wajib diisi.");
 
-    // Cek Format Email
+    // Cek Format WhatsApp & Email
+    expect(content).toContain("replace(/\\D/g");
     expect(content).toContain("Format alamat email tidak valid.");
     expect(content).toMatch(/emailRegex/);
 
@@ -102,4 +105,15 @@ describe("Register Page UI (/register) - Issue #119", () => {
     expect(content).toContain("max-w-md");
     expect(content).toContain("rounded-2xl");
   });
+
+  it("memiliki integrasi HTTP fetch ke endpoint /api/register dan penanganan error", () => {
+    const filePath = path.resolve(__dirname, "../src/app/register/page.tsx");
+    const content = fs.readFileSync(filePath, "utf-8");
+
+    expect(content).toContain('fetch("/api/register"');
+    expect(content).toContain('method: "POST"');
+    expect(content).toContain("data?.error");
+    expect(content).toContain("setIsSuccess(true)");
+  });
 });
+

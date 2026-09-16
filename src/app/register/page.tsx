@@ -49,6 +49,8 @@ export default function RegisterPage() {
 
     if (!whatsapp.trim()) {
       newErrors.whatsapp = "Nomor WhatsApp wajib diisi.";
+    } else if (whatsapp.trim().length < 10) {
+      newErrors.whatsapp = "Nomor WhatsApp tidak valid (minimal 10 digit).";
     }
 
     if (!email.trim()) {
@@ -90,14 +92,33 @@ export default function RegisterPage() {
       setIsLoading(true);
       setErrors({});
 
-      // Simulasi proses registrasi client-side (akan disambungkan ke API backend di tahap berikutnya)
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      const response = await fetch("/api/register", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: name.trim(),
+          email: email.trim(),
+          password,
+          whatsapp: whatsapp.trim() || undefined,
+        }),
+      });
+
+      const data = await response.json().catch(() => null);
+
+      if (!response.ok) {
+        setErrors({
+          general: data?.error || "Pendaftaran gagal. Silakan coba lagi.",
+        });
+        return;
+      }
 
       setIsSuccess(true);
     } catch (err) {
       console.error("Registrasi gagal:", err);
       setErrors({
-        general: "Terjadi kesalahan saat memproses pendaftaran. Silakan coba lagi.",
+        general: "Terjadi kesalahan koneksi saat memproses pendaftaran. Silakan periksa jaringan Anda.",
       });
     } finally {
       setIsLoading(false);
@@ -227,9 +248,11 @@ export default function RegisterPage() {
                     id="register-whatsapp"
                     type="tel"
                     placeholder="0812xxxx..."
+                    maxLength={13}
                     value={whatsapp}
                     onChange={(e) => {
-                      setWhatsapp(e.target.value);
+                      const numericValue = e.target.value.replace(/\D/g, "");
+                      setWhatsapp(numericValue);
                       if (errors.whatsapp) setErrors((prev) => ({ ...prev, whatsapp: undefined }));
                     }}
                     disabled={isLoading}
