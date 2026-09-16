@@ -1,8 +1,35 @@
 import { NextResponse } from "next/server";
+import { cookies } from "next/headers";
 import { prisma } from "@/lib/prisma";
+import { verifyUserToken } from "@/lib/auth";
 
 export async function POST(request: Request) {
   try {
+    // 0. Autentikasi Pengguna: Sesi user_token wajib valid
+    const cookieStore = await cookies();
+    const userToken = cookieStore.get("user_token")?.value;
+
+    if (!userToken) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Unauthorized: Anda harus login terlebih dahulu untuk melakukan pemesanan kos.",
+        },
+        { status: 401 }
+      );
+    }
+
+    const userPayload = await verifyUserToken(userToken);
+    if (!userPayload) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Unauthorized: Sesi pengguna tidak valid atau telah kedaluwarsa. Silakan login kembali.",
+        },
+        { status: 401 }
+      );
+    }
+
     const body = await request.json().catch(() => null);
 
     if (!body) {
@@ -17,16 +44,26 @@ export async function POST(request: Request) {
 
     const { propertyId, studentName, waNumber, moveInDate } = body;
 
+    // Ambil data profil user dari DB jika data diri tidak disertakan di request body
+    const dbUser = await prisma.user.findUnique({
+      where: { id: userPayload.userId },
+      select: { name: true, whatsapp: true },
+    }).catch(() => null);
+
+    const resolvedStudentName = (typeof studentName === "string" && studentName.trim())
+      ? studentName.trim()
+      : (dbUser?.name || userPayload.name || "").trim();
+
+    const resolvedWaNumber = (typeof waNumber === "string" && waNumber.trim())
+      ? waNumber.trim()
+      : (dbUser?.whatsapp || userPayload.whatsapp || "").trim();
+
     if (
       !propertyId ||
       typeof propertyId !== "string" ||
       !propertyId.trim() ||
-      !studentName ||
-      typeof studentName !== "string" ||
-      !studentName.trim() ||
-      !waNumber ||
-      typeof waNumber !== "string" ||
-      !waNumber.trim() ||
+      !resolvedStudentName ||
+      !resolvedWaNumber ||
       !moveInDate ||
       typeof moveInDate !== "string" ||
       !moveInDate.trim()
@@ -34,14 +71,24 @@ export async function POST(request: Request) {
       return NextResponse.json(
         {
           success: false,
-          error: "Data booking tidak lengkap. propertyId, studentName, waNumber, dan moveInDate wajib diisi.",
+          error: "Data booking tidak lengkap. propertyId dan moveInDate wajib diisi serta profil akun harus memiliki Nama dan nomor WhatsApp.",
+        },
+        { status: 400 }
+      );
+    }
+
+    if (resolvedWaNumber.length > 15) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Panjang nomor WhatsApp melebihi batas maksimal (15 karakter)",
         },
         { status: 400 }
       );
     }
 
     const waRegex = /^(?:\+62|62|0)8[0-9]{8,11}$/;
-    if (!waRegex.test(waNumber.trim())) {
+    if (!waRegex.test(resolvedWaNumber)) {
       return NextResponse.json(
         {
           success: false,
@@ -83,10 +130,11 @@ export async function POST(request: Request) {
       const newBooking = await tx.booking.create({
         data: {
           property_id: propertyId.trim(),
-          student_name: studentName.trim(),
-          student_whatsapp: waNumber.trim(),
+          student_name: resolvedStudentName,
+          student_whatsapp: resolvedWaNumber,
           move_in_date: parsedDate,
           status: "PENDING",
+          user_id: userPayload.userId,
         },
       });
 

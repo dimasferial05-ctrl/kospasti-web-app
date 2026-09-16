@@ -2,17 +2,40 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { LogOut, Loader2, LogIn } from "lucide-react";
 
 interface HeaderProps {
   isLoggedIn?: boolean;
 }
 
-export function Header({ isLoggedIn = false }: HeaderProps) {
+export function Header({ isLoggedIn: initialIsLoggedIn = false }: HeaderProps) {
   const pathname = usePathname();
   const router = useRouter();
+  const [isLoggedIn, setIsLoggedIn] = useState(initialIsLoggedIn);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+
+  useEffect(() => {
+    setIsLoggedIn(initialIsLoggedIn);
+  }, [initialIsLoggedIn]);
+
+  useEffect(() => {
+    let isMounted = true;
+    fetch("/api/auth/me")
+      .then((res) => res.json())
+      .then((data) => {
+        if (isMounted && data) {
+          setIsLoggedIn(Boolean(data.authenticated));
+        }
+      })
+      .catch(() => {
+        // Abaikan jika fetch gagal
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [pathname]);
 
   // Sembunyikan header pada seluruh rute /admin
   if (pathname?.startsWith("/admin")) {
@@ -25,6 +48,7 @@ export function Header({ isLoggedIn = false }: HeaderProps) {
       await fetch("/api/logout", {
         method: "POST",
       });
+      setIsLoggedIn(false);
       router.push("/login");
       router.refresh();
     } catch (error) {

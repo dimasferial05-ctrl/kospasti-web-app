@@ -91,7 +91,8 @@ function LoginForm() {
       // Arahkan ke halaman tujuan (callbackUrl atau beranda) setelah jeda singkat
       setTimeout(() => {
         router.push(callbackUrl);
-      }, 1200);
+        router.refresh();
+      }, 1000);
     } catch (err) {
       console.error("Login gagal:", err);
       setErrors({

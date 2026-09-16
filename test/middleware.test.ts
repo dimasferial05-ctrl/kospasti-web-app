@@ -11,6 +11,7 @@ describe("Next.js Security Middleware (src/middleware.ts)", () => {
     expect(config.matcher).toContain("/register");
     expect(config.matcher).toContain("/profil/:path*");
     expect(config.matcher).toContain("/pesanan/:path*");
+    expect(config.matcher).toContain("/checkout/:path*");
   });
 
   describe("Proteksi Endpoint API Admin (/api/admin/*)", () => {
@@ -209,8 +210,18 @@ describe("Next.js Security Middleware (src/middleware.ts)", () => {
       expect(response.status).toBe(200);
     });
 
-    it("mengizinkan akses ke /pesanan jika pengguna sudah login (memiliki user_token)", () => {
-      const request = new NextRequest("http://localhost:3000/pesanan", {
+    it("mengalihkan ke /login dengan callbackUrl jika pengguna belum login mengakses /checkout/123", () => {
+      const request = new NextRequest("http://localhost:3000/checkout/123");
+      const response = middleware(request);
+
+      expect(response.status).toBe(307);
+      expect(response.headers.get("location")).toBe(
+        "http://localhost:3000/login?callbackUrl=%2Fcheckout%2F123"
+      );
+    });
+
+    it("mengizinkan akses ke /checkout jika pengguna sudah login (memiliki user_token)", () => {
+      const request = new NextRequest("http://localhost:3000/checkout/123", {
         headers: {
           cookie: "user_token=mock_jwt_token_user_123",
         },
@@ -221,3 +232,4 @@ describe("Next.js Security Middleware (src/middleware.ts)", () => {
     });
   });
 });
+

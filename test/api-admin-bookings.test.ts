@@ -50,6 +50,15 @@ describe("GET /api/admin/bookings", () => {
         },
       });
 
+      const user = await prisma.user.create({
+        data: {
+          name: "Budi Santoso Akun",
+          email: "budi.akun@example.com",
+          password: "hashedpassword123",
+          whatsapp: "081111111111",
+        },
+      });
+
       const booking1 = await prisma.booking.create({
         data: {
           student_name: "Budi Santoso",
@@ -57,6 +66,7 @@ describe("GET /api/admin/bookings", () => {
           move_in_date: new Date("2026-10-01"),
           status: "PENDING",
           property_id: property.id,
+          user_id: user.id,
           created_at: new Date("2026-09-01T10:00:00Z"),
         },
       });
@@ -90,6 +100,7 @@ describe("GET /api/admin/bookings", () => {
       expect(result.data[1].id).toBe(booking1.id);
       expect(result.data[1].student_name).toBe("Budi Santoso");
       expect(result.data[1].student_whatsapp).toBe("081111111111");
+      expect(result.data[1].user.name).toBe("Budi Santoso Akun");
       expect(result.data[1].status).toBe("PENDING");
       expect(result.data[1].property.name).toBe("Kos Melati Indah");
     });

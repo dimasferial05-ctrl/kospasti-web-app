@@ -53,23 +53,44 @@ export default function PropertyDetailPage() {
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isCheckingAuth, setIsCheckingAuth] = useState(false);
   const [studentName, setStudentName] = useState("");
   const [waNumber, setWaNumber] = useState("");
   const [moveInDate, setMoveInDate] = useState("");
   const [minDate, setMinDate] = useState("");
 
-  const handleBookingSubmit = async () => {
-    // 1. Validasi Sederhana
-    if (!studentName || !waNumber || !moveInDate) {
-      alert("Mohon lengkapi semua data diri Anda.");
-      return;
-    }
+  const handleOpenBookingModal = async () => {
+    try {
+      setIsCheckingAuth(true);
+      const res = await fetch("/api/auth/me");
+      const data = await res.json().catch(() => null);
+      if (!res.ok || !data?.authenticated) {
+        const callbackUrl = encodeURIComponent(`/kos/${id}`);
+        router.push(`/login?callbackUrl=${callbackUrl}`);
+        return;
+      }
 
-    const waRegex = /^(?:\+62|62|0)8[0-9]{8,11}$/;
-    if (!waRegex.test(waNumber.trim())) {
-      alert(
-        "Format nomor WhatsApp tidak valid. Harap masukkan nomor yang benar (contoh: 0812...)."
-      );
+      if (data.user?.name) {
+        setStudentName(data.user.name);
+      }
+      if (data.user?.whatsapp) {
+        setWaNumber(data.user.whatsapp);
+      }
+
+      setIsModalOpen(true);
+    } catch (err) {
+      console.error("Gagal memeriksa sesi pengguna:", err);
+      const callbackUrl = encodeURIComponent(`/kos/${id}`);
+      router.push(`/login?callbackUrl=${callbackUrl}`);
+    } finally {
+      setIsCheckingAuth(false);
+    }
+  };
+
+  const handleBookingSubmit = async () => {
+    // 1. Validasi Tanggal Masuk
+    if (!moveInDate) {
+      alert("Mohon pilih rencana tanggal masuk Anda.");
       return;
     }
 
@@ -82,13 +103,20 @@ export default function PropertyDetailPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           propertyId: id, // id diambil dari parameter URL
-          studentName,
-          waNumber,
+          studentName: studentName || undefined,
+          waNumber: waNumber || undefined,
           moveInDate,
         }),
       });
 
       const responseData = await response.json();
+
+      if (response.status === 401) {
+        alert("Sesi Anda belum login atau telah berakhir. Silakan login kembali.");
+        const callbackUrl = encodeURIComponent(`/kos/${id}`);
+        router.push(`/login?callbackUrl=${callbackUrl}`);
+        return;
+      }
 
       // 3. Cek Status Respons
       if (!response.ok) {
@@ -466,15 +494,19 @@ export default function PropertyDetailPage() {
 
               <button
                 type="button"
-                disabled={isFull}
-                onClick={() => setIsModalOpen(true)}
+                disabled={isFull || isCheckingAuth}
+                onClick={handleOpenBookingModal}
                 className={`px-6 py-2 lg:py-3 lg:w-full rounded-lg font-bold text-white transition-all duration-200 ${
-                  isFull
+                  isFull || isCheckingAuth
                     ? "bg-slate-400 cursor-not-allowed"
                     : "bg-blue-600 hover:bg-blue-700 hover:-translate-y-0.5 hover:shadow-md active:translate-y-0 cursor-pointer"
                 }`}
               >
-                {isFull ? "Kamar Penuh" : "Amankan Kamar"}
+                {isFull
+                  ? "Kamar Penuh"
+                  : isCheckingAuth
+                  ? "Memeriksa..."
+                  : "Amankan Kamar"}
               </button>
             </div>
           </div>
@@ -484,61 +516,61 @@ export default function PropertyDetailPage() {
       {/* Booking Form Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 z-[60] bg-black/60 flex items-end sm:items-center justify-center p-0 sm:p-4">
-          <div className="bg-white w-full max-w-md p-6 rounded-t-2xl sm:rounded-2xl shadow-xl flex flex-col gap-4">
+          <div className="bg-white w-full max-w-md p-6 rounded-t-2xl sm:rounded-2xl shadow-xl flex flex-col gap-4 animate-in fade-in zoom-in-95 duration-200">
             <div>
               <h3 className="text-lg font-bold text-slate-900">
-                Lengkapi Data Diri
+                Konfirmasi Pemesanan
               </h3>
               <p className="text-xs text-slate-500 mt-0.5">
-                Data ini akan dikirimkan ke Pemilik Kos
+                Pilih rencana tanggal mulai masuk untuk kamar kos ini.
               </p>
             </div>
 
-            <div className="flex flex-col gap-4 mt-2">
-              <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">
-                  Nama Lengkap
-                </label>
-                <input
-                  type="text"
-                  placeholder="Nama Lengkap"
-                  value={studentName}
-                  onChange={(e) => setStudentName(e.target.value)}
-                  className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-slate-800"
-                />
+            {/* User Profile Summary Card */}
+            <div className="bg-slate-50 border border-slate-200/80 rounded-xl p-3.5 flex flex-col gap-2">
+              <div className="flex items-center justify-between">
+                <span className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">
+                  Data Pemesan (Akun Anda)
+                </span>
+                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-blue-100 text-blue-700">
+                  Terverifikasi
+                </span>
               </div>
-
-              <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">
-                  Nomor WhatsApp
-                </label>
-                <input
-                  type="tel"
-                  placeholder="Nomor WhatsApp (Contoh: 0812...)"
-                  value={waNumber}
-                  onChange={(e) => setWaNumber(e.target.value.replace(/[^0-9+]/g, ""))}
-                  className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-slate-800"
-                />
+              <div className="flex items-center gap-3 pt-1">
+                <div className="w-9 h-9 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-xs shrink-0">
+                  <User className="w-4 h-4" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-bold text-slate-900 truncate">
+                    {studentName || "Pengguna"}
+                  </p>
+                  <p className="text-xs text-slate-500 truncate">
+                    {waNumber ? `WhatsApp: ${waNumber}` : "Nomor WhatsApp akun"}
+                  </p>
+                </div>
               </div>
+            </div>
 
+            <div className="flex flex-col gap-4 mt-1">
               <div>
                 <label className="block text-xs font-semibold text-slate-700 mb-1">
-                  Rencana Tanggal Masuk
+                  Rencana Tanggal Masuk <span className="text-rose-500">*</span>
                 </label>
                 <input
                   type="date"
                   min={minDate}
                   value={moveInDate}
                   onChange={(e) => setMoveInDate(e.target.value)}
-                  className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-slate-800"
+                  required
+                  className="w-full px-3.5 py-2.5 text-sm border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-slate-800 bg-white"
                 />
               </div>
 
-              <div className="flex gap-3 mt-4">
+              <div className="flex gap-3 mt-3">
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
-                  className="w-full py-2.5 px-4 rounded-lg bg-slate-200 text-slate-700 font-medium hover:bg-slate-300 transition-colors cursor-pointer text-sm"
+                  className="w-full py-2.5 px-4 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold transition-colors cursor-pointer text-sm"
                 >
                   Batal
                 </button>
@@ -546,7 +578,7 @@ export default function PropertyDetailPage() {
                   type="button"
                   disabled={isSubmitting}
                   onClick={handleBookingSubmit}
-                  className="w-full py-2.5 px-4 rounded-lg bg-blue-600 text-white font-medium hover:bg-blue-700 hover:-translate-y-0.5 hover:shadow-md active:translate-y-0 disabled:opacity-75 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-none transition-all duration-200 cursor-pointer text-sm flex items-center justify-center gap-2"
+                  className="w-full py-2.5 px-4 rounded-xl bg-blue-600 text-white font-semibold hover:bg-blue-700 hover:-translate-y-0.5 hover:shadow-md active:translate-y-0 disabled:opacity-75 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-none transition-all duration-200 cursor-pointer text-sm flex items-center justify-center gap-2"
                 >
                   {isSubmitting ? "Memproses..." : "Lanjut Pembayaran"}
                 </button>

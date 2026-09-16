@@ -2,15 +2,98 @@ import { describe, it, expect, beforeEach, vi } from "vitest";
 import { POST } from "../src/app/api/bookings/route";
 import { prisma } from "../src/lib/prisma";
 import { clearDatabase } from "./helpers";
+import * as nextHeaders from "next/headers";
+import { signUserToken } from "../src/lib/auth";
+
+vi.mock("next/headers", () => ({
+  cookies: vi.fn(),
+}));
 
 describe("POST /api/bookings", () => {
+  let validUserToken: string;
+
   beforeEach(async () => {
     await clearDatabase();
     vi.restoreAllMocks();
+
+    const user = await prisma.user.create({
+      data: {
+        name: "Budi Santoso",
+        email: "test@example.com",
+        password: "hashedpassword123",
+        whatsapp: "081234567890",
+      },
+    });
+
+    validUserToken = await signUserToken({
+      userId: user.id,
+      email: user.email,
+      name: user.name,
+      whatsapp: user.whatsapp,
+    });
+
+    (nextHeaders.cookies as unknown as ReturnType<typeof vi.fn>).mockResolvedValue({
+      get: vi.fn().mockImplementation((name: string) => {
+        if (name === "user_token") {
+          return { value: validUserToken };
+        }
+        return undefined;
+      }),
+    });
+  });
+
+  describe("Skenario Autentikasi Pengguna (401)", () => {
+    it("menolak request (401) jika cookie user_token tidak ada (belum login)", async () => {
+      (nextHeaders.cookies as unknown as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+        get: vi.fn().mockReturnValue(undefined),
+      });
+
+      const request = new Request("http://localhost/api/bookings", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          propertyId: "prop-123",
+          studentName: "Budi",
+          waNumber: "081234567890",
+          moveInDate: "2026-09-10",
+        }),
+      });
+
+      const response = await POST(request);
+      const result = await response.json();
+
+      expect(response.status).toBe(401);
+      expect(result.success).toBe(false);
+      expect(result.error).toContain("login terlebih dahulu");
+    });
+
+    it("menolak request (401) jika token pengguna tidak valid atau kedaluwarsa", async () => {
+      (nextHeaders.cookies as unknown as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+        get: vi.fn().mockReturnValue({ value: "invalid-token" }),
+      });
+
+      const request = new Request("http://localhost/api/bookings", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          propertyId: "prop-123",
+          studentName: "Budi",
+          waNumber: "081234567890",
+          moveInDate: "2026-09-10",
+        }),
+      });
+
+      const response = await POST(request);
+      const result = await response.json();
+
+      expect(response.status).toBe(401);
+      expect(result.success).toBe(false);
+      expect(result.error).toContain("tidak valid atau telah kedaluwarsa");
+    });
   });
 
   describe("Skenario Sukses", () => {
-    it("berhasil membuat booking baru dengan status PENDING, mengurangi available_rooms sebanyak 1, dan mengembalikan bookingId dengan status 201", async () => {
+    it("berhasil membuat booking baru dengan auto-fill data profil user dari DB jika body hanya berisi propertyId dan moveInDate", async () => {
       const owner = await prisma.owner.create({
         data: {
           name: "Pemilik Kos 1",
@@ -31,8 +114,6 @@ describe("POST /api/bookings", () => {
 
       const payload = {
         propertyId: property.id,
-        studentName: "Budi Santoso",
-        waNumber: "081234567890",
         moveInDate: "2026-09-10",
       };
 
@@ -59,6 +140,7 @@ describe("POST /api/bookings", () => {
       expect(createdBooking?.student_name).toBe("Budi Santoso");
       expect(createdBooking?.student_whatsapp).toBe("081234567890");
       expect(createdBooking?.property_id).toBe(property.id);
+      expect(createdBooking?.user_id).toBeDefined();
       expect(createdBooking?.status).toBe("PENDING");
       expect(createdBooking?.move_in_date).toEqual(new Date("2026-09-10"));
 
@@ -67,6 +149,51 @@ describe("POST /api/bookings", () => {
         where: { id: property.id },
       });
       expect(updatedProperty?.available_rooms).toBe(2);
+    });
+
+    it("berhasil membuat booking baru dengan data manual jika disertakan di payload", async () => {
+      const owner = await prisma.owner.create({
+        data: {
+          name: "Pemilik Kos 2",
+          whatsapp_number: "081122334466",
+        },
+      });
+
+      const property = await prisma.property.create({
+        data: {
+          name: "Kos Melati 2",
+          price_per_month: 1000000,
+          available_rooms: 2,
+          gender_type: "PUTRA",
+          facilities: "Kasur",
+          owner_id: owner.id,
+        },
+      });
+
+      const payload = {
+        propertyId: property.id,
+        studentName: "Custom Name",
+        waNumber: "081987654321",
+        moveInDate: "2026-09-15",
+      };
+
+      const request = new Request("http://localhost/api/bookings", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      const response = await POST(request);
+      const result = await response.json();
+
+      expect(response.status).toBe(201);
+      expect(result.success).toBe(true);
+
+      const createdBooking = await prisma.booking.findUnique({
+        where: { id: result.data.bookingId },
+      });
+      expect(createdBooking?.student_name).toBe("Custom Name");
+      expect(createdBooking?.student_whatsapp).toBe("081987654321");
     });
   });
 
@@ -86,13 +213,11 @@ describe("POST /api/bookings", () => {
       expect(result.error).toBeDefined();
     });
 
-    it("menolak request (400) jika data wajib (propertyId, studentName, waNumber, moveInDate) tidak lengkap atau kosong", async () => {
+    it("menolak request (400) jika propertyId atau moveInDate tidak lengkap atau kosong", async () => {
       const testCases = [
-        { studentName: "Budi", waNumber: "081234", moveInDate: "2026-09-10" }, // missing propertyId
-        { propertyId: "prop-1", waNumber: "081234", moveInDate: "2026-09-10" }, // missing studentName
-        { propertyId: "prop-1", studentName: "Budi", moveInDate: "2026-09-10" }, // missing waNumber
-        { propertyId: "prop-1", studentName: "Budi", waNumber: "081234" }, // missing moveInDate
-        { propertyId: "   ", studentName: "Budi", waNumber: "081234", moveInDate: "2026-09-10" }, // empty string propertyId
+        { moveInDate: "2026-09-10" }, // missing propertyId
+        { propertyId: "prop-1" }, // missing moveInDate
+        { propertyId: "   ", moveInDate: "2026-09-10" }, // empty string propertyId
       ];
 
       for (const payload of testCases) {
@@ -130,13 +255,33 @@ describe("POST /api/bookings", () => {
       expect(result.error).toContain("Format tanggal moveInDate tidak valid");
     });
 
+    it("menolak request (400) jika panjang waNumber melebihi batas maksimal 15 karakter", async () => {
+      const request = new Request("http://localhost/api/bookings", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          propertyId: "prop-1",
+          studentName: "Budi",
+          waNumber: "0812345678901234",
+          moveInDate: "2026-09-10",
+        }),
+      });
+
+      const response = await POST(request);
+      const result = await response.json();
+
+      expect(response.status).toBe(400);
+      expect(result.success).toBe(false);
+      expect(result.error).toContain("melebihi batas maksimal (15 karakter)");
+    });
+
     it("menolak request (400) jika format waNumber tidak valid (mengandung huruf, terlalu pendek/panjang, atau format salah)", async () => {
       const invalidNumbers = [
         "0812abcd3456", // mengandung huruf
         "08123",        // terlalu pendek
         "1234567890",   // tidak diawali 08, 628, atau +628
         "abcdefghijk",  // hanya huruf
-        "0812345678901234", // terlalu panjang (>13 digit dari 08)
+        "081234567890123", // 15 karakter tapi > 11 digit dari 08
       ];
 
       for (const invalidWa of invalidNumbers) {

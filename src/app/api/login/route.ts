@@ -126,6 +126,7 @@ export async function POST(request: Request) {
       userId: user.id,
       email: user.email,
       name: user.name,
+      whatsapp: user.whatsapp,
     });
 
     const response = NextResponse.json(
@@ -136,6 +137,7 @@ export async function POST(request: Request) {
           id: user.id,
           name: user.name,
           email: user.email,
+          whatsapp: user.whatsapp,
         },
       },
       { status: 200 }

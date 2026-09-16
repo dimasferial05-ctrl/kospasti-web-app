@@ -44,8 +44,8 @@ export function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL("/", request.url));
   }
 
-  // 4. Logika User: Proteksi Halaman Khusus Pengguna (Profil/Pesanan)
-  const protectedUserRoutes = ["/profil", "/pesanan"];
+  // 4. Logika User: Proteksi Halaman Khusus Pengguna (Profil/Pesanan/Checkout)
+  const protectedUserRoutes = ["/profil", "/pesanan", "/checkout"];
   const isProtectedUserRoute = protectedUserRoutes.some((route) =>
     pathname.startsWith(route)
   );
@@ -70,5 +70,7 @@ export const config = {
     "/register",
     "/profil/:path*",
     "/pesanan/:path*",
+    "/checkout/:path*",
   ],
 };
+
