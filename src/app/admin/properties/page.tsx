@@ -37,6 +37,9 @@ interface PropertyAdminItem {
   gender_type: string;
   facilities: string;
   image_url?: string | null;
+  address?: string | null;
+  latitude?: number | null;
+  longitude?: number | null;
   media?: PropertyMediaItem[];
   owner_id: string;
   owner?: OwnerOption | null;
@@ -50,6 +53,9 @@ interface PropertyFormData {
   gender_type: string;
   facilities: string;
   image_url: string;
+  address: string;
+  latitude: string;
+  longitude: string;
 }
 
 const initialFormData: PropertyFormData = {
@@ -60,6 +66,9 @@ const initialFormData: PropertyFormData = {
   gender_type: "CAMPUR",
   facilities: "",
   image_url: "",
+  address: "",
+  latitude: "",
+  longitude: "",
 };
 
 export default function ManagePropertiesPage() {
@@ -143,6 +152,9 @@ export default function ManagePropertiesPage() {
       gender_type: "CAMPUR",
       facilities: "",
       image_url: "",
+      address: "",
+      latitude: "",
+      longitude: "",
     });
     setSelectedFiles([]);
     setFormError(null);
@@ -163,6 +175,9 @@ export default function ManagePropertiesPage() {
         prop.image_url && !prop.image_url.startsWith("/uploads/")
           ? prop.image_url
           : "",
+      address: prop.address || "",
+      latitude: prop.latitude !== undefined && prop.latitude !== null ? String(prop.latitude) : "",
+      longitude: prop.longitude !== undefined && prop.longitude !== null ? String(prop.longitude) : "",
     });
     setSelectedFiles([]);
     setFormError(null);
@@ -324,6 +339,15 @@ export default function ManagePropertiesPage() {
       data.append("available_rooms", formData.available_rooms);
       data.append("gender_type", formData.gender_type);
       data.append("facilities", formData.facilities.trim());
+      if (formData.address.trim()) {
+        data.append("address", formData.address.trim());
+      }
+      if (formData.latitude.trim()) {
+        data.append("latitude", formData.latitude.trim());
+      }
+      if (formData.longitude.trim()) {
+        data.append("longitude", formData.longitude.trim());
+      }
       if (formData.image_url.trim()) {
         data.append("image_url", formData.image_url.trim());
       }
@@ -763,6 +787,61 @@ export default function ManagePropertiesPage() {
                 />
                 <p className="text-[11px] text-slate-400 mt-1">
                   Gunakan tanda koma (,) untuk memisahkan antar fasilitas.
+                </p>
+              </div>
+
+              {/* Alamat & Koordinat Peta Google Maps */}
+              <div className="p-3.5 bg-slate-50 border border-slate-200/80 rounded-xl space-y-3">
+                <div className="flex items-center justify-between">
+                  <label className="block text-xs font-bold text-slate-800">
+                    📍 Lokasi &amp; Koordinat Google Maps (Opsional)
+                  </label>
+                  <span className="text-[10px] text-emerald-600 font-semibold bg-emerald-50 px-2 py-0.5 rounded">
+                    Untuk Peta Kos
+                  </span>
+                </div>
+
+                <div>
+                  <label className="block text-[11px] font-semibold text-slate-600 mb-1">
+                    Alamat Lengkap / Patokan
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Contoh: Jl. Tebet Barat Dalam VII No. 12, Jakarta Selatan"
+                    value={formData.address}
+                    onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+                    className="w-full px-3 py-1.5 text-xs border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white"
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-[11px] font-semibold text-slate-600 mb-1">
+                      Latitude (Lintang)
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="Contoh: -6.2374"
+                      value={formData.latitude}
+                      onChange={(e) => setFormData({ ...formData, latitude: e.target.value })}
+                      className="w-full px-3 py-1.5 text-xs font-mono border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[11px] font-semibold text-slate-600 mb-1">
+                      Longitude (Bujur)
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="Contoh: 106.8526"
+                      value={formData.longitude}
+                      onChange={(e) => setFormData({ ...formData, longitude: e.target.value })}
+                      className="w-full px-3 py-1.5 text-xs font-mono border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white"
+                    />
+                  </div>
+                </div>
+                <p className="text-[10px] text-slate-400">
+                  💡 <strong>Tips:</strong> Buka Google Maps di browser, klik kanan pada lokasi kos, lalu pilih angka koordinat paling atas untuk disalin ke sini.
                 </p>
               </div>
 

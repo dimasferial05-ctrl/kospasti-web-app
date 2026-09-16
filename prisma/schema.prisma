@@ -28,6 +28,9 @@ model Property {
   gender_type     String
   facilities      String
   image_url       String?
+  address         String?
+  latitude        Float?
+  longitude       Float?
   created_at      DateTime        @default(now())
   updated_at      DateTime        @updatedAt
   owner_id        String

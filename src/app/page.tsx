@@ -101,6 +101,30 @@ export default function Home() {
         {/* Search & Filter Component */}
         <SearchFilter onSearch={fetchProperties} />
 
+        {/* Map Explorer Banner CTA */}
+        <div className="bg-gradient-to-r from-emerald-600 to-teal-700 rounded-2xl p-4 sm:p-5 text-white shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="flex items-center gap-3.5">
+            <div className="w-10 h-10 rounded-xl bg-white/15 backdrop-blur flex items-center justify-center text-xl shrink-0">
+              🗺️
+            </div>
+            <div>
+              <h3 className="font-bold text-sm sm:text-base">
+                Cari Kos Berdasarkan Lokasi Peta Interaktif
+              </h3>
+              <p className="text-xs text-emerald-100 mt-0.5">
+                Lihat sebaran kos di Google Maps, cek harga langsung dari marker, dan tentukan lokasi terdekat.
+              </p>
+            </div>
+          </div>
+          <Link
+            href="/map"
+            className="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 bg-white text-emerald-800 hover:bg-emerald-50 rounded-xl text-xs font-bold transition-all shadow-sm shrink-0"
+          >
+            <span>Buka Peta Kos</span>
+            <span>→</span>
+          </Link>
+        </div>
+
         {/* Property List Section */}
         <div className="flex flex-col gap-4">
           {isLoading && (
