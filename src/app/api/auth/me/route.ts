@@ -29,6 +29,7 @@ export async function GET() {
           id: payload.userId,
           name: payload.name,
           email: payload.email,
+          whatsapp: payload.whatsapp ?? null,
         },
       },
       { status: 200 }

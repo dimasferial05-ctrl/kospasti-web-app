@@ -9,9 +9,7 @@ export default defineConfig({
   },
   test: {
     fileParallelism: false,
-    env: {
-      DATABASE_URL: "file:./test.db",
-    },
+    setupFiles: ["test/setup-env.ts"],
     globalSetup: ["test/global-setup.ts"],
   },
 });

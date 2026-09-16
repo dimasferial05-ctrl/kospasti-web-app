@@ -16,6 +16,12 @@ interface BookingAdminItem {
   property?: {
     name: string;
   } | null;
+  user?: {
+    id?: string;
+    name?: string;
+    email?: string;
+    whatsapp?: string | null;
+  } | null;
 }
 
 export default function ManageBookingsPage() {
@@ -207,9 +213,11 @@ export default function ManageBookingsPage() {
                     {booking.id.split("-")[0]}... {/* Menampilkan potongan awal ID agar rapi */}
                   </td>
                   <td className="p-4">
-                    <div className="font-bold text-slate-800">{booking.student_name}</div>
+                    <div className="font-bold text-slate-800">
+                      {booking.user?.name || booking.student_name}
+                    </div>
                     <div className="text-xs text-slate-500">
-                      {booking.student_whatsapp || booking.whatsapp_number}
+                      {booking.user?.whatsapp || booking.student_whatsapp || booking.whatsapp_number || "-"}
                     </div>
                   </td>
                   <td className="p-4 font-medium text-slate-700">

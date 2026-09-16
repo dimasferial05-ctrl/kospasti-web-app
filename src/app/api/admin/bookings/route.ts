@@ -23,6 +23,14 @@ export async function GET(request: NextRequest) {
             name: true,
           },
         },
+        user: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            whatsapp: true,
+          },
+        },
       },
       orderBy: {
         created_at: "desc",

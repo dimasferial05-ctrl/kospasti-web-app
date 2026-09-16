@@ -43,6 +43,7 @@ describe("GET /api/auth/me", () => {
       userId: "user-uuid-123",
       email: "budi@example.com",
       name: "Budi Santoso",
+      whatsapp: "081234567890",
     });
 
     (nextHeaders.cookies as unknown as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
@@ -58,6 +59,7 @@ describe("GET /api/auth/me", () => {
       id: "user-uuid-123",
       email: "budi@example.com",
       name: "Budi Santoso",
+      whatsapp: "081234567890",
     });
   });
 });
