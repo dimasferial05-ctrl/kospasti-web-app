@@ -90,7 +90,7 @@ describe("Next.js Security Middleware (src/middleware.ts)", () => {
     });
   });
 
-  describe("Proteksi Halaman Auth Pengguna (/login & /register) - Issue #132", () => {
+  describe("Proteksi Halaman Auth Pengguna (/login & /register) - Issue #132 & #138", () => {
     it("mengizinkan akses ke /login jika pengguna belum login (tidak ada user_token)", () => {
       const request = new NextRequest("http://localhost:3000/login");
       const response = middleware(request);
@@ -105,7 +105,7 @@ describe("Next.js Security Middleware (src/middleware.ts)", () => {
       expect(response.status).toBe(200);
     });
 
-    it("mengalihkan ke halaman utama (/) jika pengguna yang sudah login mengakses /login", () => {
+    it("mengalihkan ke halaman utama (/) jika pengguna yang sudah login mengakses /login tanpa callbackUrl", () => {
       const request = new NextRequest("http://localhost:3000/login", {
         headers: {
           cookie: "user_token=mock_jwt_token_user_123",
@@ -115,6 +115,21 @@ describe("Next.js Security Middleware (src/middleware.ts)", () => {
 
       expect(response.status).toBe(307);
       expect(response.headers.get("location")).toBe("http://localhost:3000/");
+    });
+
+    it("mengalihkan ke callbackUrl jika pengguna yang sudah login mengakses /login dengan callbackUrl valid", () => {
+      const request = new NextRequest(
+        "http://localhost:3000/login?callbackUrl=%2Fpesanan%2F123",
+        {
+          headers: {
+            cookie: "user_token=mock_jwt_token_user_123",
+          },
+        }
+      );
+      const response = middleware(request);
+
+      expect(response.status).toBe(307);
+      expect(response.headers.get("location")).toBe("http://localhost:3000/pesanan/123");
     });
 
     it("mengalihkan ke halaman utama (/) jika pengguna yang sudah login mengakses /register", () => {
@@ -130,37 +145,57 @@ describe("Next.js Security Middleware (src/middleware.ts)", () => {
     });
   });
 
-  describe("Proteksi Halaman Khusus Pengguna (/profil & /pesanan) - Issue #132", () => {
-    it("mengalihkan ke /login jika pengguna belum login mengakses /profil", () => {
+  describe("Proteksi Halaman Khusus Pengguna (/profil & /pesanan) - Issue #132 & #138", () => {
+    it("mengalihkan ke /login dengan callbackUrl jika pengguna belum login mengakses /profil", () => {
       const request = new NextRequest("http://localhost:3000/profil");
       const response = middleware(request);
 
       expect(response.status).toBe(307);
-      expect(response.headers.get("location")).toContain("/login");
+      expect(response.headers.get("location")).toBe(
+        "http://localhost:3000/login?callbackUrl=%2Fprofil"
+      );
     });
 
-    it("mengalihkan ke /login jika pengguna belum login mengakses sub-rute /profil/edit", () => {
+    it("mengalihkan ke /login dengan callbackUrl jika pengguna belum login mengakses sub-rute /profil/edit", () => {
       const request = new NextRequest("http://localhost:3000/profil/edit");
       const response = middleware(request);
 
       expect(response.status).toBe(307);
-      expect(response.headers.get("location")).toContain("/login");
+      expect(response.headers.get("location")).toBe(
+        "http://localhost:3000/login?callbackUrl=%2Fprofil%2Fedit"
+      );
     });
 
-    it("mengalihkan ke /login jika pengguna belum login mengakses /pesanan", () => {
+    it("mengalihkan ke /login dengan callbackUrl jika pengguna belum login mengakses /pesanan", () => {
       const request = new NextRequest("http://localhost:3000/pesanan");
       const response = middleware(request);
 
       expect(response.status).toBe(307);
-      expect(response.headers.get("location")).toContain("/login");
+      expect(response.headers.get("location")).toBe(
+        "http://localhost:3000/login?callbackUrl=%2Fpesanan"
+      );
     });
 
-    it("mengalihkan ke /login jika pengguna belum login mengakses sub-rute /pesanan/123", () => {
+    it("mengalihkan ke /login dengan callbackUrl jika pengguna belum login mengakses sub-rute /pesanan/123", () => {
       const request = new NextRequest("http://localhost:3000/pesanan/123");
       const response = middleware(request);
 
       expect(response.status).toBe(307);
-      expect(response.headers.get("location")).toContain("/login");
+      expect(response.headers.get("location")).toBe(
+        "http://localhost:3000/login?callbackUrl=%2Fpesanan%2F123"
+      );
+    });
+
+    it("mengalihkan ke /login dengan query string ter-encode jika mengakses rute dengan query params", () => {
+      const request = new NextRequest(
+        "http://localhost:3000/pesanan?tab=active&page=2"
+      );
+      const response = middleware(request);
+
+      expect(response.status).toBe(307);
+      expect(response.headers.get("location")).toBe(
+        "http://localhost:3000/login?callbackUrl=%2Fpesanan%3Ftab%3Dactive%26page%3D2"
+      );
     });
 
     it("mengizinkan akses ke /profil jika pengguna sudah login (memiliki user_token)", () => {

@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, Suspense } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
   Mail,
   Lock,
@@ -21,8 +21,10 @@ interface FormErrors {
   general?: string;
 }
 
-export default function LoginPage() {
+function LoginForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const callbackUrl = searchParams?.get("callbackUrl") || "/";
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -86,9 +88,9 @@ export default function LoginPage() {
 
       setIsSuccess(true);
 
-      // Arahkan ke beranda setelah jeda singkat
+      // Arahkan ke halaman tujuan (callbackUrl atau beranda) setelah jeda singkat
       setTimeout(() => {
-        router.push("/");
+        router.push(callbackUrl);
       }, 1200);
     } catch (err) {
       console.error("Login gagal:", err);
@@ -298,3 +300,18 @@ export default function LoginPage() {
     </div>
   );
 }
+
+export default function LoginPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-[calc(100vh-64px)] flex items-center justify-center p-4 sm:p-6 bg-slate-50">
+          <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
+        </div>
+      }
+    >
+      <LoginForm />
+    </Suspense>
+  );
+}
+

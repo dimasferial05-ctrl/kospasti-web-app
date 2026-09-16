@@ -10,6 +10,9 @@ vi.mock("next/navigation", () => ({
     push: vi.fn(),
     refresh: vi.fn(),
   }),
+  useSearchParams: () => ({
+    get: vi.fn((key: string) => (key === "callbackUrl" ? "/pesanan" : null)),
+  }),
 }));
 
 import LoginPage from "../src/app/login/page";
@@ -85,7 +88,7 @@ describe("User Login Page UI (/login) - Issue #120", () => {
     expect(content).toContain("rounded-2xl");
   });
 
-  it("memiliki integrasi HTTP fetch ke endpoint /api/login dan penanganan error", () => {
+  it("memiliki integrasi HTTP fetch ke endpoint /api/login dan penanganan redirect callbackUrl", () => {
     const filePath = path.resolve(__dirname, "../src/app/login/page.tsx");
     const content = fs.readFileSync(filePath, "utf-8");
 
@@ -93,7 +96,8 @@ describe("User Login Page UI (/login) - Issue #120", () => {
     expect(content).toContain('method: "POST"');
     expect(content).toContain("data?.error");
     expect(content).toContain("setIsSuccess(true)");
-    expect(content).toContain('router.push("/")');
+    expect(content).toContain("router.push(callbackUrl)");
+    expect(content).toContain("useSearchParams");
   });
 });
 

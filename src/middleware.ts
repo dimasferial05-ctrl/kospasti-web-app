@@ -37,6 +37,10 @@ export function middleware(request: NextRequest) {
 
   // 3. Logika User: Pengguna yang sudah login tidak boleh mengakses /login atau /register
   if ((pathname === "/login" || pathname === "/register") && userToken) {
+    const callbackUrl = request.nextUrl.searchParams.get("callbackUrl");
+    if (callbackUrl && callbackUrl.startsWith("/")) {
+      return NextResponse.redirect(new URL(callbackUrl, request.url));
+    }
     return NextResponse.redirect(new URL("/", request.url));
   }
 
@@ -47,7 +51,12 @@ export function middleware(request: NextRequest) {
   );
 
   if (isProtectedUserRoute && !userToken) {
-    return NextResponse.redirect(new URL("/login", request.url));
+    const currentPath = request.nextUrl.pathname;
+    const currentQuery = request.nextUrl.search;
+    const callbackUrl = encodeURIComponent(currentPath + currentQuery);
+    return NextResponse.redirect(
+      new URL(`/login?callbackUrl=${callbackUrl}`, request.url)
+    );
   }
 
   return NextResponse.next();

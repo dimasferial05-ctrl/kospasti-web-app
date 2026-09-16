@@ -15,7 +15,7 @@ vi.mock("next/navigation", () => ({
   }),
 }));
 
-describe("Header Component (/components/shared/Header) - Issue #133", () => {
+describe("Header Component (/components/shared/Header) - Issue #133 & #138", () => {
   beforeEach(() => {
     vi.restoreAllMocks();
     mockPathname = "/";
@@ -28,35 +28,48 @@ describe("Header Component (/components/shared/Header) - Issue #133", () => {
     expect(firstLine).toMatch(/^["']use client["'];?$/);
   });
 
-  it("merender logo KosPasti dan tombol Keluar Akun pada halaman umum", () => {
+  it("merender logo KosPasti dan tombol Keluar Akun pada halaman umum ketika isLoggedIn bernilai true", () => {
     mockPathname = "/";
-    const html = renderToStaticMarkup(<Header />);
+    const html = renderToStaticMarkup(<Header isLoggedIn={true} />);
 
     expect(html).toContain("KosPasti");
     expect(html).toContain("🏠");
     expect(html).toContain("Keluar Akun");
+    expect(html).not.toContain("Masuk / Daftar");
+  });
+
+  it("merender logo KosPasti dan tombol Masuk / Daftar pada halaman umum ketika isLoggedIn bernilai false atau default", () => {
+    mockPathname = "/";
+    const html = renderToStaticMarkup(<Header isLoggedIn={false} />);
+
+    expect(html).toContain("KosPasti");
+    expect(html).toContain("🏠");
+    expect(html).toContain("Masuk / Daftar");
+    expect(html).not.toContain("Keluar Akun");
   });
 
   it("menyembunyikan header secara keseluruhan pada rute /admin", () => {
     mockPathname = "/admin";
-    const adminHtml = renderToStaticMarkup(<Header />);
+    const adminHtml = renderToStaticMarkup(<Header isLoggedIn={true} />);
     expect(adminHtml).toBe("");
 
     mockPathname = "/admin/properties";
-    const adminSubHtml = renderToStaticMarkup(<Header />);
+    const adminSubHtml = renderToStaticMarkup(<Header isLoggedIn={false} />);
     expect(adminSubHtml).toBe("");
   });
 
-  it("menyembunyikan tombol logout pada halaman /login dan /register", () => {
+  it("menyembunyikan tombol auth/logout pada halaman /login dan /register", () => {
     mockPathname = "/login";
-    const loginHtml = renderToStaticMarkup(<Header />);
+    const loginHtml = renderToStaticMarkup(<Header isLoggedIn={false} />);
     expect(loginHtml).toContain("KosPasti");
     expect(loginHtml).not.toContain("Keluar Akun");
+    expect(loginHtml).not.toContain("Masuk / Daftar");
 
     mockPathname = "/register";
-    const registerHtml = renderToStaticMarkup(<Header />);
+    const registerHtml = renderToStaticMarkup(<Header isLoggedIn={false} />);
     expect(registerHtml).toContain("KosPasti");
     expect(registerHtml).not.toContain("Keluar Akun");
+    expect(registerHtml).not.toContain("Masuk / Daftar");
   });
 
   it("memiliki implementasi pemanggilan /api/logout, router.push('/login'), dan router.refresh()", () => {
@@ -69,3 +82,4 @@ describe("Header Component (/components/shared/Header) - Issue #133", () => {
     expect(content).toContain("router.refresh()");
   });
 });
+

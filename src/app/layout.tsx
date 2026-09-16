@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { cookies } from "next/headers";
 import { Header } from "@/components/shared/Header";
 import "./globals.css";
 
@@ -19,17 +20,22 @@ export const metadata: Metadata = {
     "Platform Web Pencarian Kos (PWA) yang memberikan kepastian ketersediaan kamar secara real-time dan effortless.",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const cookieStore = await cookies();
+  const userToken = cookieStore.get("user_token")?.value;
+  const isLoggedIn = Boolean(userToken);
+
   return (
     <html lang="id" className={`${geistSans.variable} ${geistMono.variable} h-full`}>
       <body className="bg-slate-50 text-slate-900 antialiased font-sans min-h-screen">
-        <Header />
+        <Header isLoggedIn={isLoggedIn} />
         {children}
       </body>
     </html>
   );
 }
+
