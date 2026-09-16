@@ -1,15 +1,36 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import { useState } from "react";
+import { LogOut, Loader2 } from "lucide-react";
 
 export function Header() {
   const pathname = usePathname();
+  const router = useRouter();
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   // Sembunyikan header pada seluruh rute /admin
   if (pathname?.startsWith("/admin")) {
     return null;
   }
+
+  const handleLogout = async () => {
+    try {
+      setIsLoggingOut(true);
+      await fetch("/api/logout", {
+        method: "POST",
+      });
+      router.push("/login");
+      router.refresh();
+    } catch (error) {
+      console.error("Gagal melakukan logout:", error);
+    } finally {
+      setIsLoggingOut(false);
+    }
+  };
+
+  const isAuthPage = pathname === "/login" || pathname === "/register";
 
   return (
     <header className="sticky top-0 z-50 w-full bg-white border-b border-slate-200">
@@ -21,6 +42,23 @@ export function Header() {
           <span>🏠</span>
           <span>KosPasti</span>
         </Link>
+
+        {!isAuthPage && (
+          <div className="flex items-center gap-3">
+            <button
+              onClick={handleLogout}
+              disabled={isLoggingOut}
+              className="flex items-center gap-2 px-3.5 py-1.5 text-sm font-medium text-rose-600 bg-rose-50 hover:bg-rose-100 rounded-lg transition-colors disabled:opacity-50 cursor-pointer"
+            >
+              {isLoggingOut ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <LogOut className="w-4 h-4" />
+              )}
+              <span>{isLoggingOut ? "Keluar..." : "Keluar Akun"}</span>
+            </button>
+          </div>
+        )}
       </div>
     </header>
   );
