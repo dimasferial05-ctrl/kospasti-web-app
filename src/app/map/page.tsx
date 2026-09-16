@@ -14,6 +14,7 @@ import {
   Map as MapIcon,
   List,
   ArrowRight,
+  ArrowLeft,
   Sparkles,
 } from "lucide-react";
 
@@ -92,6 +93,19 @@ export default function MapSearchPage() {
       <main className="flex-1 flex flex-col max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
         {/* Page Header & Search Bar */}
         <div className="mb-6">
+          {/* Tombol Kembali ke Beranda */}
+          <div className="mb-3">
+            <Link
+              href="/"
+              className="inline-flex items-center gap-2 text-xs font-semibold text-slate-500 hover:text-emerald-700 transition-colors group py-1"
+            >
+              <div className="w-6 h-6 rounded-full bg-slate-200/70 group-hover:bg-emerald-100 flex items-center justify-center transition-colors">
+                <ArrowLeft className="w-3.5 h-3.5 text-slate-600 group-hover:text-emerald-700" />
+              </div>
+              <span>Kembali ke Beranda</span>
+            </Link>
+          </div>
+
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
             <div>
               <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 text-xs font-semibold mb-1 border border-emerald-200/60">
