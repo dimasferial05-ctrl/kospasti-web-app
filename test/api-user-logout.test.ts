@@ -3,11 +3,7 @@ import { POST as logoutPOST } from "../src/app/api/logout/route";
 
 describe("User Logout API Endpoint (/api/logout)", () => {
   it("mengembalikan status 200 dan menghapus cookie user_token", async () => {
-    const request = new Request("http://localhost:3000/api/logout", {
-      method: "POST",
-    });
-
-    const response = await logoutPOST(request);
+    const response = await logoutPOST();
     const data = await response.json();
 
     expect(response.status).toBe(200);
