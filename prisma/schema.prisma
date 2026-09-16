@@ -74,8 +74,10 @@ model User {
   id         String    @id @default(uuid())
   name       String
   email      String    @unique
-  password   String
+  password   String?
   whatsapp   String?
+  avatar     String?
+  google_id  String?   @unique
   created_at DateTime  @default(now())
   updated_at DateTime  @updatedAt
   bookings   Booking[]

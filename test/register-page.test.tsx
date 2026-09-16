@@ -115,5 +115,13 @@ describe("Register Page UI (/register) - Issue #119", () => {
     expect(content).toContain("data?.error");
     expect(content).toContain("setIsSuccess(true)");
   });
+
+  it("merender tombol Daftar dengan Google dan divider 'Atau daftar dengan'", () => {
+    const html = renderToStaticMarkup(<RegisterPage />);
+
+    expect(html).toContain("Daftar dengan Google");
+    expect(html).toContain("Atau daftar dengan");
+    expect(html).toContain("/api/auth/google");
+  });
 });
 
