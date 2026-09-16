@@ -5,17 +5,18 @@ export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   const adminToken = request.cookies.get("admin_token")?.value;
+  const userToken = request.cookies.get("user_token")?.value;
 
-  // Pengecualian rute login
+  // 1. Pengecualian rute login Admin
   if (pathname === "/api/admin/login" || pathname === "/admin/login") {
-    // Jika sudah login dan mencoba mengakses halaman login UI, arahkan ke dasbor admin
+    // Jika admin sudah login dan mencoba mengakses halaman login UI admin, arahkan ke dasbor admin
     if (pathname === "/admin/login" && adminToken) {
       return NextResponse.redirect(new URL("/admin", request.url));
     }
     return NextResponse.next();
   }
 
-  // Jika tidak memiliki cookie admin_token
+  // 2. Proteksi Admin
   if (!adminToken) {
     // Proteksi endpoint API Admin
     if (pathname.startsWith("/api/admin")) {
@@ -34,9 +35,31 @@ export function middleware(request: NextRequest) {
     }
   }
 
+  // 3. Logika User: Pengguna yang sudah login tidak boleh mengakses /login atau /register
+  if ((pathname === "/login" || pathname === "/register") && userToken) {
+    return NextResponse.redirect(new URL("/", request.url));
+  }
+
+  // 4. Logika User: Proteksi Halaman Khusus Pengguna (Profil/Pesanan)
+  const protectedUserRoutes = ["/profil", "/pesanan"];
+  const isProtectedUserRoute = protectedUserRoutes.some((route) =>
+    pathname.startsWith(route)
+  );
+
+  if (isProtectedUserRoute && !userToken) {
+    return NextResponse.redirect(new URL("/login", request.url));
+  }
+
   return NextResponse.next();
 }
 
 export const config = {
-  matcher: ["/admin/:path*", "/api/admin/:path*"],
+  matcher: [
+    "/admin/:path*",
+    "/api/admin/:path*",
+    "/login",
+    "/register",
+    "/profil/:path*",
+    "/pesanan/:path*",
+  ],
 };
