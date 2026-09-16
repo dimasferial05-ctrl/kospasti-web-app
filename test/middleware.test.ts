@@ -3,13 +3,17 @@ import { NextRequest } from "next/server";
 import { middleware, config } from "../src/middleware";
 
 describe("Next.js Security Middleware (src/middleware.ts)", () => {
-  it("memiliki konfigurasi matcher untuk /admin/:path* dan /api/admin/:path*", () => {
+  it("memiliki konfigurasi matcher untuk rute admin, auth pengguna, dan rute pengguna terproteksi", () => {
     expect(config.matcher).toBeDefined();
     expect(config.matcher).toContain("/admin/:path*");
     expect(config.matcher).toContain("/api/admin/:path*");
+    expect(config.matcher).toContain("/login");
+    expect(config.matcher).toContain("/register");
+    expect(config.matcher).toContain("/profil/:path*");
+    expect(config.matcher).toContain("/pesanan/:path*");
   });
 
-  describe("Proteksi Endpoint API (/api/admin/*)", () => {
+  describe("Proteksi Endpoint API Admin (/api/admin/*)", () => {
     it("mengembalikan status 401 Unauthorized jika cookie admin_token tidak ada pada request /api/admin/*", () => {
       const request = new NextRequest("http://localhost:3000/api/admin/stats");
       const response = middleware(request);
@@ -78,6 +82,102 @@ describe("Next.js Security Middleware (src/middleware.ts)", () => {
       const request = new NextRequest("http://localhost:3000/admin", {
         headers: {
           cookie: "admin_token=kospasti_admin_authenticated",
+        },
+      });
+      const response = middleware(request);
+
+      expect(response.status).toBe(200);
+    });
+  });
+
+  describe("Proteksi Halaman Auth Pengguna (/login & /register) - Issue #132", () => {
+    it("mengizinkan akses ke /login jika pengguna belum login (tidak ada user_token)", () => {
+      const request = new NextRequest("http://localhost:3000/login");
+      const response = middleware(request);
+
+      expect(response.status).toBe(200);
+    });
+
+    it("mengizinkan akses ke /register jika pengguna belum login (tidak ada user_token)", () => {
+      const request = new NextRequest("http://localhost:3000/register");
+      const response = middleware(request);
+
+      expect(response.status).toBe(200);
+    });
+
+    it("mengalihkan ke halaman utama (/) jika pengguna yang sudah login mengakses /login", () => {
+      const request = new NextRequest("http://localhost:3000/login", {
+        headers: {
+          cookie: "user_token=mock_jwt_token_user_123",
+        },
+      });
+      const response = middleware(request);
+
+      expect(response.status).toBe(307);
+      expect(response.headers.get("location")).toBe("http://localhost:3000/");
+    });
+
+    it("mengalihkan ke halaman utama (/) jika pengguna yang sudah login mengakses /register", () => {
+      const request = new NextRequest("http://localhost:3000/register", {
+        headers: {
+          cookie: "user_token=mock_jwt_token_user_123",
+        },
+      });
+      const response = middleware(request);
+
+      expect(response.status).toBe(307);
+      expect(response.headers.get("location")).toBe("http://localhost:3000/");
+    });
+  });
+
+  describe("Proteksi Halaman Khusus Pengguna (/profil & /pesanan) - Issue #132", () => {
+    it("mengalihkan ke /login jika pengguna belum login mengakses /profil", () => {
+      const request = new NextRequest("http://localhost:3000/profil");
+      const response = middleware(request);
+
+      expect(response.status).toBe(307);
+      expect(response.headers.get("location")).toContain("/login");
+    });
+
+    it("mengalihkan ke /login jika pengguna belum login mengakses sub-rute /profil/edit", () => {
+      const request = new NextRequest("http://localhost:3000/profil/edit");
+      const response = middleware(request);
+
+      expect(response.status).toBe(307);
+      expect(response.headers.get("location")).toContain("/login");
+    });
+
+    it("mengalihkan ke /login jika pengguna belum login mengakses /pesanan", () => {
+      const request = new NextRequest("http://localhost:3000/pesanan");
+      const response = middleware(request);
+
+      expect(response.status).toBe(307);
+      expect(response.headers.get("location")).toContain("/login");
+    });
+
+    it("mengalihkan ke /login jika pengguna belum login mengakses sub-rute /pesanan/123", () => {
+      const request = new NextRequest("http://localhost:3000/pesanan/123");
+      const response = middleware(request);
+
+      expect(response.status).toBe(307);
+      expect(response.headers.get("location")).toContain("/login");
+    });
+
+    it("mengizinkan akses ke /profil jika pengguna sudah login (memiliki user_token)", () => {
+      const request = new NextRequest("http://localhost:3000/profil", {
+        headers: {
+          cookie: "user_token=mock_jwt_token_user_123",
+        },
+      });
+      const response = middleware(request);
+
+      expect(response.status).toBe(200);
+    });
+
+    it("mengizinkan akses ke /pesanan jika pengguna sudah login (memiliki user_token)", () => {
+      const request = new NextRequest("http://localhost:3000/pesanan", {
+        headers: {
+          cookie: "user_token=mock_jwt_token_user_123",
         },
       });
       const response = middleware(request);
