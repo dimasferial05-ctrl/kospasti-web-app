@@ -107,6 +107,17 @@ export async function POST(request: Request) {
     }
 
     // 4. Verifikasi kecocokan password dengan hash di database
+    if (!user.password) {
+      recordFailedAttempt(clientKey);
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Akun ini terdaftar menggunakan Google. Silakan masuk dengan tombol Masuk dengan Google.",
+        },
+        { status: 400 }
+      );
+    }
+
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
       recordFailedAttempt(clientKey);

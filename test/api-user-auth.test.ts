@@ -79,6 +79,8 @@ describe("User Authentication API Endpoints (/api/register & /api/login)", () =>
         email: "existing@test.com",
         password: "hashedpassword",
         whatsapp: null,
+        avatar: null,
+        google_id: null,
         created_at: new Date(),
         updated_at: new Date(),
       });
@@ -134,7 +136,7 @@ describe("User Authentication API Endpoints (/api/register & /api/login)", () =>
       expect(createSpy).toHaveBeenCalled();
       const callData = createSpy.mock.calls[0][0].data;
       expect(callData.password).not.toBe("password123");
-      expect(await bcrypt.compare("password123", callData.password)).toBe(true);
+      expect(await bcrypt.compare("password123", (callData.password as string) || "")).toBe(true);
     });
   });
 
@@ -171,6 +173,33 @@ describe("User Authentication API Endpoints (/api/register & /api/login)", () =>
       expect(data.error).toBe("Email atau password salah.");
     });
 
+    it("mengembalikan status 400 jika user mendaftar via Google dan tidak memiliki password", async () => {
+      vi.spyOn(prisma.user, "findUnique").mockResolvedValue({
+        id: "google-user-123",
+        name: "Google User",
+        email: "google@test.com",
+        password: null,
+        whatsapp: null,
+        avatar: "https://avatar.url",
+        google_id: "g-123",
+        created_at: new Date(),
+        updated_at: new Date(),
+      });
+
+      const request = new Request("http://localhost:3000/api/login", {
+        method: "POST",
+        body: JSON.stringify({ email: "google@test.com", password: "password123" }),
+        headers: { "Content-Type": "application/json" },
+      });
+
+      const response = await loginPOST(request);
+      const data = await response.json();
+
+      expect(response.status).toBe(400);
+      expect(data.success).toBe(false);
+      expect(data.error).toContain("Google");
+    });
+
     it("mengembalikan status 401 jika password salah", async () => {
       const hashedPassword = await bcrypt.hash("correct-password", 10);
       vi.spyOn(prisma.user, "findUnique").mockResolvedValue({
@@ -179,6 +208,8 @@ describe("User Authentication API Endpoints (/api/register & /api/login)", () =>
         email: "test@test.com",
         password: hashedPassword,
         whatsapp: null,
+        avatar: null,
+        google_id: null,
         created_at: new Date(),
         updated_at: new Date(),
       });
@@ -205,6 +236,8 @@ describe("User Authentication API Endpoints (/api/register & /api/login)", () =>
         email: "budi@test.com",
         password: hashedPassword,
         whatsapp: null,
+        avatar: null,
+        google_id: null,
         created_at: new Date(),
         updated_at: new Date(),
       });
