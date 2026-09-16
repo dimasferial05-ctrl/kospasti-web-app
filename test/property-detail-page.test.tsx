@@ -113,11 +113,13 @@ describe("Property Detail Page Component (/kos/[id])", () => {
     // Menghitung variabel isFull berdasarkan available_rooms === 0
     expect(content).toContain("property.available_rooms === 0");
 
-    // Tombol memiliki properti disabled={isFull}
-    expect(content).toContain("disabled={isFull}");
+    // Tombol memiliki properti disabled={isFull || isCheckingAuth}
+    expect(content).toContain("disabled={isFull || isCheckingAuth}");
 
-    // Tombol memiliki teks dinamis 'Kamar Penuh' vs 'Amankan Kamar'
-    expect(content).toContain("isFull ? \"Kamar Penuh\" : \"Amankan Kamar\"");
+    // Tombol memiliki teks dinamis 'Kamar Penuh' vs 'Memeriksa...' vs 'Amankan Kamar'
+    expect(content).toContain("isFull");
+    expect(content).toContain("Kamar Penuh");
+    expect(content).toContain("Amankan Kamar");
 
     // Tombol memiliki kelas visual dinamis abu-abu dan cursor-not-allowed vs biru
     expect(content).toContain("bg-slate-400 cursor-not-allowed");
@@ -152,6 +154,7 @@ describe("Property Detail Page Component (/kos/[id])", () => {
     // Input data diri
     expect(content).toContain('placeholder="Nama Lengkap"');
     expect(content).toContain('type="tel"');
+    expect(content).toContain("maxLength={15}");
     expect(content).toContain('placeholder="Nomor WhatsApp (Contoh: 0812...)"');
     expect(content).toContain('type="date"');
     expect(content).toContain("min={minDate}");
@@ -161,6 +164,16 @@ describe("Property Detail Page Component (/kos/[id])", () => {
     expect(content).toContain("Batal");
     expect(content).toContain("setIsModalOpen(false)");
     expect(content).toContain("Lanjut Pembayaran");
+  });
+
+  it("memiliki fungsi handleOpenBookingModal untuk memvalidasi sesi pengguna (/api/auth/me) sebelum membuka modal", () => {
+    const filePath = path.resolve(__dirname, "../src/app/kos/[id]/page.tsx");
+    const content = fs.readFileSync(filePath, "utf-8");
+
+    expect(content).toContain("handleOpenBookingModal");
+    expect(content).toContain('fetch("/api/auth/me")');
+    expect(content).toContain("isCheckingAuth");
+    expect(content).toContain("login?callbackUrl=");
   });
 
   it("memiliki fungsi handleBookingSubmit untuk memanggil API booking dan redirect ke checkout", () => {
@@ -175,6 +188,7 @@ describe("Property Detail Page Component (/kos/[id])", () => {
     // Validasi form
     expect(content).toContain("!studentName || !waNumber || !moveInDate");
     expect(content).toContain("alert(\"Mohon lengkapi semua data diri Anda.\")");
+    expect(content).toContain("waNumber.trim().length > 15");
     expect(content).toContain("waRegex");
     expect(content).toContain("Format nomor WhatsApp tidak valid");
 

@@ -53,15 +53,46 @@ export default function PropertyDetailPage() {
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isCheckingAuth, setIsCheckingAuth] = useState(false);
   const [studentName, setStudentName] = useState("");
   const [waNumber, setWaNumber] = useState("");
   const [moveInDate, setMoveInDate] = useState("");
   const [minDate, setMinDate] = useState("");
 
+  const handleOpenBookingModal = async () => {
+    try {
+      setIsCheckingAuth(true);
+      const res = await fetch("/api/auth/me");
+      const data = await res.json().catch(() => null);
+      if (!res.ok || !data?.authenticated) {
+        const callbackUrl = encodeURIComponent(`/kos/${id}`);
+        router.push(`/login?callbackUrl=${callbackUrl}`);
+        return;
+      }
+
+      if (data.user?.name && !studentName) {
+        setStudentName(data.user.name);
+      }
+
+      setIsModalOpen(true);
+    } catch (err) {
+      console.error("Gagal memeriksa sesi pengguna:", err);
+      const callbackUrl = encodeURIComponent(`/kos/${id}`);
+      router.push(`/login?callbackUrl=${callbackUrl}`);
+    } finally {
+      setIsCheckingAuth(false);
+    }
+  };
+
   const handleBookingSubmit = async () => {
     // 1. Validasi Sederhana
     if (!studentName || !waNumber || !moveInDate) {
       alert("Mohon lengkapi semua data diri Anda.");
+      return;
+    }
+
+    if (waNumber.trim().length > 15) {
+      alert("Nomor WhatsApp tidak boleh melebihi 15 karakter.");
       return;
     }
 
@@ -89,6 +120,13 @@ export default function PropertyDetailPage() {
       });
 
       const responseData = await response.json();
+
+      if (response.status === 401) {
+        alert("Sesi Anda belum login atau telah berakhir. Silakan login kembali.");
+        const callbackUrl = encodeURIComponent(`/kos/${id}`);
+        router.push(`/login?callbackUrl=${callbackUrl}`);
+        return;
+      }
 
       // 3. Cek Status Respons
       if (!response.ok) {
@@ -466,15 +504,19 @@ export default function PropertyDetailPage() {
 
               <button
                 type="button"
-                disabled={isFull}
-                onClick={() => setIsModalOpen(true)}
+                disabled={isFull || isCheckingAuth}
+                onClick={handleOpenBookingModal}
                 className={`px-6 py-2 lg:py-3 lg:w-full rounded-lg font-bold text-white transition-all duration-200 ${
-                  isFull
+                  isFull || isCheckingAuth
                     ? "bg-slate-400 cursor-not-allowed"
                     : "bg-blue-600 hover:bg-blue-700 hover:-translate-y-0.5 hover:shadow-md active:translate-y-0 cursor-pointer"
                 }`}
               >
-                {isFull ? "Kamar Penuh" : "Amankan Kamar"}
+                {isFull
+                  ? "Kamar Penuh"
+                  : isCheckingAuth
+                  ? "Memeriksa..."
+                  : "Amankan Kamar"}
               </button>
             </div>
           </div>
@@ -514,9 +556,12 @@ export default function PropertyDetailPage() {
                 </label>
                 <input
                   type="tel"
+                  maxLength={15}
                   placeholder="Nomor WhatsApp (Contoh: 0812...)"
                   value={waNumber}
-                  onChange={(e) => setWaNumber(e.target.value.replace(/[^0-9+]/g, ""))}
+                  onChange={(e) =>
+                    setWaNumber(e.target.value.replace(/[^0-9+]/g, "").slice(0, 15))
+                  }
                   className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-slate-800"
                 />
               </div>

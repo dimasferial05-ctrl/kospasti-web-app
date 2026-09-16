@@ -1,8 +1,35 @@
 import { NextResponse } from "next/server";
+import { cookies } from "next/headers";
 import { prisma } from "@/lib/prisma";
+import { verifyUserToken } from "@/lib/auth";
 
 export async function POST(request: Request) {
   try {
+    // 0. Autentikasi Pengguna: Sesi user_token wajib valid
+    const cookieStore = await cookies();
+    const userToken = cookieStore.get("user_token")?.value;
+
+    if (!userToken) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Unauthorized: Anda harus login terlebih dahulu untuk melakukan pemesanan kos.",
+        },
+        { status: 401 }
+      );
+    }
+
+    const userPayload = await verifyUserToken(userToken);
+    if (!userPayload) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Unauthorized: Sesi pengguna tidak valid atau telah kedaluwarsa. Silakan login kembali.",
+        },
+        { status: 401 }
+      );
+    }
+
     const body = await request.json().catch(() => null);
 
     if (!body) {
@@ -35,6 +62,16 @@ export async function POST(request: Request) {
         {
           success: false,
           error: "Data booking tidak lengkap. propertyId, studentName, waNumber, dan moveInDate wajib diisi.",
+        },
+        { status: 400 }
+      );
+    }
+
+    if (waNumber.trim().length > 15) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Panjang nomor WhatsApp melebihi batas maksimal (15 karakter)",
         },
         { status: 400 }
       );

@@ -2,11 +2,84 @@ import { describe, it, expect, beforeEach, vi } from "vitest";
 import { POST } from "../src/app/api/bookings/route";
 import { prisma } from "../src/lib/prisma";
 import { clearDatabase } from "./helpers";
+import * as nextHeaders from "next/headers";
+import { signUserToken } from "../src/lib/auth";
+
+vi.mock("next/headers", () => ({
+  cookies: vi.fn(),
+}));
 
 describe("POST /api/bookings", () => {
+  let validUserToken: string;
+
   beforeEach(async () => {
     await clearDatabase();
     vi.restoreAllMocks();
+
+    validUserToken = await signUserToken({
+      userId: "test-user-id",
+      email: "test@example.com",
+      name: "Budi Santoso",
+    });
+
+    (nextHeaders.cookies as unknown as ReturnType<typeof vi.fn>).mockResolvedValue({
+      get: vi.fn().mockImplementation((name: string) => {
+        if (name === "user_token") {
+          return { value: validUserToken };
+        }
+        return undefined;
+      }),
+    });
+  });
+
+  describe("Skenario Autentikasi Pengguna (401)", () => {
+    it("menolak request (401) jika cookie user_token tidak ada (belum login)", async () => {
+      (nextHeaders.cookies as unknown as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+        get: vi.fn().mockReturnValue(undefined),
+      });
+
+      const request = new Request("http://localhost/api/bookings", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          propertyId: "prop-123",
+          studentName: "Budi",
+          waNumber: "081234567890",
+          moveInDate: "2026-09-10",
+        }),
+      });
+
+      const response = await POST(request);
+      const result = await response.json();
+
+      expect(response.status).toBe(401);
+      expect(result.success).toBe(false);
+      expect(result.error).toContain("login terlebih dahulu");
+    });
+
+    it("menolak request (401) jika token pengguna tidak valid atau kedaluwarsa", async () => {
+      (nextHeaders.cookies as unknown as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+        get: vi.fn().mockReturnValue({ value: "invalid-token" }),
+      });
+
+      const request = new Request("http://localhost/api/bookings", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          propertyId: "prop-123",
+          studentName: "Budi",
+          waNumber: "081234567890",
+          moveInDate: "2026-09-10",
+        }),
+      });
+
+      const response = await POST(request);
+      const result = await response.json();
+
+      expect(response.status).toBe(401);
+      expect(result.success).toBe(false);
+      expect(result.error).toContain("tidak valid atau telah kedaluwarsa");
+    });
   });
 
   describe("Skenario Sukses", () => {
