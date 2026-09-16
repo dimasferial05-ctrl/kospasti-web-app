@@ -99,5 +99,13 @@ describe("User Login Page UI (/login) - Issue #120", () => {
     expect(content).toContain("router.push(callbackUrl)");
     expect(content).toContain("useSearchParams");
   });
+
+  it("merender tombol Masuk dengan Google dan divider 'Atau masuk dengan'", () => {
+    const html = renderToStaticMarkup(<LoginPage />);
+
+    expect(html).toContain("Masuk dengan Google");
+    expect(html).toContain("Atau masuk dengan");
+    expect(html).toContain("/api/auth/google");
+  });
 });
 
