@@ -323,6 +323,20 @@ export default function ManagePropertiesPage() {
       setFormError("Fasilitas kos wajib diisi.");
       return;
     }
+    if (formData.latitude.trim() !== "") {
+      const lat = Number(formData.latitude.trim());
+      if (isNaN(lat) || lat < -90 || lat > 90) {
+        setFormError("Latitude harus berupa angka antara -90 dan 90.");
+        return;
+      }
+    }
+    if (formData.longitude.trim() !== "") {
+      const lng = Number(formData.longitude.trim());
+      if (isNaN(lng) || lng < -180 || lng > 180) {
+        setFormError("Longitude harus berupa angka antara -180 dan 180.");
+        return;
+      }
+    }
 
     try {
       setIsSubmitting(true);
@@ -339,15 +353,9 @@ export default function ManagePropertiesPage() {
       data.append("available_rooms", formData.available_rooms);
       data.append("gender_type", formData.gender_type);
       data.append("facilities", formData.facilities.trim());
-      if (formData.address.trim()) {
-        data.append("address", formData.address.trim());
-      }
-      if (formData.latitude.trim()) {
-        data.append("latitude", formData.latitude.trim());
-      }
-      if (formData.longitude.trim()) {
-        data.append("longitude", formData.longitude.trim());
-      }
+      data.append("address", formData.address.trim());
+      data.append("latitude", formData.latitude.trim());
+      data.append("longitude", formData.longitude.trim());
       if (formData.image_url.trim()) {
         data.append("image_url", formData.image_url.trim());
       }

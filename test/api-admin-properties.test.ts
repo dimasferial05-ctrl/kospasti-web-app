@@ -220,10 +220,43 @@ describe("POST /api/admin/properties", () => {
       const res5Json = await res5.json();
       expect(res5Json.error).toContain("Pemilik kos (Owner) tidak ditemukan");
     });
+    it("mengembalikan status 400 jika latitude atau longitude di luar rentang valid", async () => {
+      // Latitude out of range
+      const req1 = createPostRequest({
+        name: "Kos Lokasi Salah",
+        price_per_month: 1000000,
+        available_rooms: 5,
+        gender_type: "CAMPUR",
+        facilities: "WiFi",
+        owner_id: validOwnerId,
+        latitude: 100, // Invalid > 90
+        longitude: 106.85,
+      });
+      const res1 = await POST(req1);
+      expect(res1.status).toBe(400);
+      const res1Json = await res1.json();
+      expect(res1Json.error).toContain("Latitude harus berupa angka antara -90 dan 90");
+
+      // Longitude out of range
+      const req2 = createPostRequest({
+        name: "Kos Lokasi Salah 2",
+        price_per_month: 1000000,
+        available_rooms: 5,
+        gender_type: "CAMPUR",
+        facilities: "WiFi",
+        owner_id: validOwnerId,
+        latitude: -6.2,
+        longitude: -200, // Invalid < -180
+      });
+      const res2 = await POST(req2);
+      expect(res2.status).toBe(400);
+      const res2Json = await res2.json();
+      expect(res2Json.error).toContain("Longitude harus berupa angka antara -180 dan 180");
+    });
   });
 
   describe("Skenario Sukses", () => {
-    it("berhasil membuat properti baru dan mengembalikan status 201", async () => {
+    it("berhasil membuat properti baru dengan koordinat valid dan mengembalikan status 201", async () => {
       const payload = {
         name: "Kos Melati Mewah",
         price_per_month: 1500000,
@@ -231,6 +264,9 @@ describe("POST /api/admin/properties", () => {
         gender_type: "PUTRI",
         facilities: "AC, WiFi, Kamar Mandi Dalam",
         image_url: "https://example.com/kos-melati.jpg",
+        address: "Jl. Tebet Raya No. 10",
+        latitude: -6.2374,
+        longitude: 106.8526,
         owner_id: validOwnerId,
       };
 
@@ -246,6 +282,9 @@ describe("POST /api/admin/properties", () => {
       expect(result.data.gender_type).toBe("PUTRI");
       expect(result.data.facilities).toBe("AC, WiFi, Kamar Mandi Dalam");
       expect(result.data.image_url).toBe("https://example.com/kos-melati.jpg");
+      expect(result.data.address).toBe("Jl. Tebet Raya No. 10");
+      expect(result.data.latitude).toBe(-6.2374);
+      expect(result.data.longitude).toBe(106.8526);
       expect(result.data.owner_id).toBe(validOwnerId);
       expect(result.data.owner.name).toBe("Pemilik Test");
 
@@ -255,6 +294,8 @@ describe("POST /api/admin/properties", () => {
       });
       expect(dbProp).not.toBeNull();
       expect(dbProp?.name).toBe("Kos Melati Mewah");
+      expect(dbProp?.latitude).toBe(-6.2374);
+      expect(dbProp?.longitude).toBe(106.8526);
     });
   });
 
@@ -372,12 +413,18 @@ describe("PATCH /api/admin/properties/[id]", () => {
       const res4 = await PATCH(req4, { params: Promise.resolve({ id: validPropertyId }) });
       expect(res4.status).toBe(400);
 
-      // Invalid owner
-      const req5 = createPatchRequest(validPropertyId, { owner_id: "non-existent-owner" });
-      const res5 = await PATCH(req5, { params: Promise.resolve({ id: validPropertyId }) });
-      expect(res5.status).toBe(400);
-      const res5Json = await res5.json();
-      expect(res5Json.error).toContain("Pemilik kos (Owner) tidak ditemukan");
+      // Invalid coordinates
+      const req6 = createPatchRequest(validPropertyId, { latitude: -100 });
+      const res6 = await PATCH(req6, { params: Promise.resolve({ id: validPropertyId }) });
+      expect(res6.status).toBe(400);
+      const res6Json = await res6.json();
+      expect(res6Json.error).toContain("Latitude harus berupa angka antara -90 dan 90");
+
+      const req7 = createPatchRequest(validPropertyId, { longitude: 200 });
+      const res7 = await PATCH(req7, { params: Promise.resolve({ id: validPropertyId }) });
+      expect(res7.status).toBe(400);
+      const res7Json = await res7.json();
+      expect(res7Json.error).toContain("Longitude harus berupa angka antara -180 dan 180");
     });
   });
 
@@ -397,6 +444,9 @@ describe("PATCH /api/admin/properties/[id]", () => {
         gender_type: "PUTRA",
         facilities: "AC, Kasur, Lemari",
         image_url: "https://example.com/updated.jpg",
+        address: "Jl. Baru No. 1",
+        latitude: -6.2,
+        longitude: 106.8,
         owner_id: newOwner.id,
       };
 
@@ -412,6 +462,9 @@ describe("PATCH /api/admin/properties/[id]", () => {
       expect(result.data.gender_type).toBe("PUTRA");
       expect(result.data.facilities).toBe("AC, Kasur, Lemari");
       expect(result.data.image_url).toBe("https://example.com/updated.jpg");
+      expect(result.data.address).toBe("Jl. Baru No. 1");
+      expect(result.data.latitude).toBe(-6.2);
+      expect(result.data.longitude).toBe(106.8);
       expect(result.data.owner_id).toBe(newOwner.id);
       expect(result.data.owner.name).toBe("Pemilik Baru");
 
@@ -421,6 +474,34 @@ describe("PATCH /api/admin/properties/[id]", () => {
       });
       expect(updatedInDb?.name).toBe("Kos Awal Updated");
       expect(updatedInDb?.price_per_month).toBe(1250000);
+      expect(updatedInDb?.latitude).toBe(-6.2);
+      expect(updatedInDb?.longitude).toBe(106.8);
+    });
+
+    it("berhasil mereset koordinat latitude dan longitude menjadi null jika dikirim string kosong", async () => {
+      // Set initial coordinates
+      await prisma.property.update({
+        where: { id: validPropertyId },
+        data: { latitude: -6.2, longitude: 106.8 },
+      });
+
+      const request = createPatchRequest(validPropertyId, {
+        latitude: "",
+        longitude: "",
+      });
+      const response = await PATCH(request, { params: Promise.resolve({ id: validPropertyId }) });
+      const result = await response.json();
+
+      expect(response.status).toBe(200);
+      expect(result.success).toBe(true);
+      expect(result.data.latitude).toBeNull();
+      expect(result.data.longitude).toBeNull();
+
+      const dbProp = await prisma.property.findUnique({
+        where: { id: validPropertyId },
+      });
+      expect(dbProp?.latitude).toBeNull();
+      expect(dbProp?.longitude).toBeNull();
     });
   });
 

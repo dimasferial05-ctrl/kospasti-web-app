@@ -94,7 +94,62 @@ function MapCameraController({
   return null;
 }
 
-export default function MapViewer({
+interface ErrorBoundaryProps {
+  fallback?: React.ReactNode;
+  children: React.ReactNode;
+}
+
+interface ErrorBoundaryState {
+  hasError: boolean;
+  error?: Error;
+}
+
+class MapErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundaryState> {
+  constructor(props: ErrorBoundaryProps) {
+    super(props);
+    this.state = { hasError: false };
+  }
+
+  static getDerivedStateFromError(error: Error): ErrorBoundaryState {
+    return { hasError: true, error };
+  }
+
+  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
+    console.error("MapViewer error:", error, errorInfo);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      if (this.props.fallback) {
+        return this.props.fallback;
+      }
+      return (
+        <div className="relative w-full h-full min-h-[400px] flex flex-col items-center justify-center bg-slate-100 rounded-2xl border border-dashed border-slate-300 p-8 text-center">
+          <div className="w-14 h-14 rounded-full bg-red-100 text-red-600 flex items-center justify-center mb-4 shadow-sm">
+            <AlertCircle className="w-7 h-7" />
+          </div>
+          <h3 className="text-lg font-bold text-slate-800 mb-2">
+            Gagal Memuat Peta Google Maps
+          </h3>
+          <p className="text-sm text-slate-600 max-w-md mb-4">
+            Terjadi kesalahan saat merender peta. Silakan periksa koneksi internet atau validitas Google Maps API Key Anda.
+          </p>
+          <button
+            type="button"
+            onClick={() => this.setState({ hasError: false })}
+            className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold rounded-lg shadow transition-colors cursor-pointer"
+          >
+            Coba Muat Ulang
+          </button>
+        </div>
+      );
+    }
+
+    return this.props.children;
+  }
+}
+
+function MapViewerInner({
   properties,
   selectedPropertyId,
   hoveredPropertyId,
@@ -175,6 +230,22 @@ export default function MapViewer({
       !isNaN(p.longitude)
   );
 
+  // Hitung center dinamis berdasarkan rata-rata koordinat kos jika center tidak di-override
+  const dynamicCenter = React.useMemo(() => {
+    if (center && (center.lat !== DEFAULT_CENTER.lat || center.lng !== DEFAULT_CENTER.lng)) {
+      return center;
+    }
+    if (validProperties.length > 0) {
+      const sumLat = validProperties.reduce((acc, p) => acc + (p.latitude as number), 0);
+      const sumLng = validProperties.reduce((acc, p) => acc + (p.longitude as number), 0);
+      return {
+        lat: sumLat / validProperties.length,
+        lng: sumLng / validProperties.length,
+      };
+    }
+    return DEFAULT_CENTER;
+  }, [center, validProperties]);
+
   if (!effectiveApiKey) {
     return (
       <div className="relative w-full h-full min-h-[400px] flex flex-col items-center justify-center bg-slate-100 rounded-2xl border border-dashed border-slate-300 p-8 text-center">
@@ -202,7 +273,7 @@ export default function MapViewer({
     <div className="relative w-full h-full min-h-[400px] rounded-2xl overflow-hidden border border-slate-200 shadow-sm bg-slate-50">
       <APIProvider apiKey={effectiveApiKey} language="id" region="ID">
         <Map
-          defaultCenter={center}
+          defaultCenter={dynamicCenter}
           defaultZoom={zoom}
           mapId="DEMO_MAP_ID"
           internalUsageAttributionIds={["gmp_git_agentskills_v1"]}
@@ -375,5 +446,13 @@ export default function MapViewer({
         </div>
       )}
     </div>
+  );
+}
+
+export default function MapViewer(props: MapViewerProps) {
+  return (
+    <MapErrorBoundary>
+      <MapViewerInner {...props} />
+    </MapErrorBoundary>
   );
 }

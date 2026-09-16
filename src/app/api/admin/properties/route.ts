@@ -214,14 +214,39 @@ export async function POST(request: NextRequest) {
       mediaToCreate[0]?.url ||
       (image_url ? String(image_url).trim() : null);
 
-    const parsedLatitude =
-      latitude !== undefined && latitude !== null && latitude !== ""
-        ? parseFloat(String(latitude))
-        : null;
-    const parsedLongitude =
-      longitude !== undefined && longitude !== null && longitude !== ""
-        ? parseFloat(String(longitude))
-        : null;
+    let parsedLatitude: number | null = null;
+    if (latitude !== undefined && latitude !== null && String(latitude).trim() !== "") {
+      const parsed = parseFloat(String(latitude));
+      if (isNaN(parsed) || parsed < -90 || parsed > 90) {
+        return NextResponse.json(
+          {
+            success: false,
+            error: "Bad Request: Latitude harus berupa angka antara -90 dan 90.",
+          },
+          {
+            status: 400,
+          }
+        );
+      }
+      parsedLatitude = parsed;
+    }
+
+    let parsedLongitude: number | null = null;
+    if (longitude !== undefined && longitude !== null && String(longitude).trim() !== "") {
+      const parsed = parseFloat(String(longitude));
+      if (isNaN(parsed) || parsed < -180 || parsed > 180) {
+        return NextResponse.json(
+          {
+            success: false,
+            error: "Bad Request: Longitude harus berupa angka antara -180 dan 180.",
+          },
+          {
+            status: 400,
+          }
+        );
+      }
+      parsedLongitude = parsed;
+    }
 
     const newProperty = await prisma.property.create({
       data: {
@@ -232,8 +257,8 @@ export async function POST(request: NextRequest) {
         facilities: facilities.trim(),
         image_url: firstImageUrl,
         address: address ? String(address).trim() : null,
-        latitude: !isNaN(parsedLatitude as number) ? parsedLatitude : null,
-        longitude: !isNaN(parsedLongitude as number) ? parsedLongitude : null,
+        latitude: parsedLatitude,
+        longitude: parsedLongitude,
         owner_id: owner_id.trim(),
         media: {
           create: mediaToCreate,

@@ -263,20 +263,42 @@ export async function PATCH(
     }
 
     if (latitude !== undefined) {
-      if (latitude === null || latitude === "") {
+      if (latitude === null || String(latitude).trim() === "") {
         updateData.latitude = null;
       } else {
         const parsed = parseFloat(String(latitude));
-        updateData.latitude = !isNaN(parsed) ? parsed : null;
+        if (isNaN(parsed) || parsed < -90 || parsed > 90) {
+          return NextResponse.json(
+            {
+              success: false,
+              error: "Bad Request: Latitude harus berupa angka antara -90 dan 90.",
+            },
+            {
+              status: 400,
+            }
+          );
+        }
+        updateData.latitude = parsed;
       }
     }
 
     if (longitude !== undefined) {
-      if (longitude === null || longitude === "") {
+      if (longitude === null || String(longitude).trim() === "") {
         updateData.longitude = null;
       } else {
         const parsed = parseFloat(String(longitude));
-        updateData.longitude = !isNaN(parsed) ? parsed : null;
+        if (isNaN(parsed) || parsed < -180 || parsed > 180) {
+          return NextResponse.json(
+            {
+              success: false,
+              error: "Bad Request: Longitude harus berupa angka antara -180 dan 180.",
+            },
+            {
+              status: 400,
+            }
+          );
+        }
+        updateData.longitude = parsed;
       }
     }
 

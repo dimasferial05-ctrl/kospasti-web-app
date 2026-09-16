@@ -143,6 +143,14 @@ describe("Interactive Google Maps Property Search (/map) - Issue #121", () => {
     expect(content).toContain('internalUsageAttributionIds={["gmp_git_agentskills_v1"]}');
   });
 
+  it("MapViewer mengimplementasikan ErrorBoundary untuk menangani runtime rendering error", () => {
+    const mapViewerPath = path.resolve(__dirname, "../src/components/MapViewer.tsx");
+    const content = fs.readFileSync(mapViewerPath, "utf-8");
+
+    expect(content).toContain("MapErrorBoundary");
+    expect(content).toContain("Gagal Memuat Peta Google Maps");
+  });
+
   it("Header memuat tautan navigasi Peta Kos (/map)", () => {
     const headerPath = path.resolve(__dirname, "../src/components/shared/Header.tsx");
     const content = fs.readFileSync(headerPath, "utf-8");
