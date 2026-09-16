@@ -61,6 +61,9 @@ export async function PATCH(
     let gender_type: string | undefined;
     let facilities: string | undefined;
     let image_url: string | null | undefined;
+    let address: string | null | undefined;
+    let latitude: number | string | null | undefined;
+    let longitude: number | string | null | undefined;
     let owner_id: string | undefined;
     const newMediaToCreate: { url: string; type: string }[] = [];
 
@@ -77,6 +80,12 @@ export async function PATCH(
         facilities = (formData.get("facilities") as string) ?? undefined;
       if (formData.has("image_url"))
         image_url = (formData.get("image_url") as string) ?? null;
+      if (formData.has("address"))
+        address = (formData.get("address") as string) ?? null;
+      if (formData.has("latitude"))
+        latitude = formData.get("latitude") as string | undefined;
+      if (formData.has("longitude"))
+        longitude = formData.get("longitude") as string | undefined;
       if (formData.has("owner_id"))
         owner_id = (formData.get("owner_id") as string) ?? undefined;
 
@@ -110,6 +119,9 @@ export async function PATCH(
       gender_type = body.gender_type;
       facilities = body.facilities;
       image_url = body.image_url;
+      address = body.address;
+      latitude = body.latitude;
+      longitude = body.longitude;
       owner_id = body.owner_id;
 
       if (Array.isArray(body.media)) {
@@ -136,6 +148,9 @@ export async function PATCH(
       gender_type?: string;
       facilities?: string;
       image_url?: string | null;
+      address?: string | null;
+      latitude?: number | null;
+      longitude?: number | null;
       owner_id?: string;
       media?: {
         create?: { url: string; type: string }[];
@@ -240,6 +255,50 @@ export async function PATCH(
           url: updateData.image_url,
           type: detectMediaType(undefined, updateData.image_url),
         });
+      }
+    }
+
+    if (address !== undefined) {
+      updateData.address = address ? String(address).trim() : null;
+    }
+
+    if (latitude !== undefined) {
+      if (latitude === null || String(latitude).trim() === "") {
+        updateData.latitude = null;
+      } else {
+        const parsed = parseFloat(String(latitude));
+        if (isNaN(parsed) || parsed < -90 || parsed > 90) {
+          return NextResponse.json(
+            {
+              success: false,
+              error: "Bad Request: Latitude harus berupa angka antara -90 dan 90.",
+            },
+            {
+              status: 400,
+            }
+          );
+        }
+        updateData.latitude = parsed;
+      }
+    }
+
+    if (longitude !== undefined) {
+      if (longitude === null || String(longitude).trim() === "") {
+        updateData.longitude = null;
+      } else {
+        const parsed = parseFloat(String(longitude));
+        if (isNaN(parsed) || parsed < -180 || parsed > 180) {
+          return NextResponse.json(
+            {
+              success: false,
+              error: "Bad Request: Longitude harus berupa angka antara -180 dan 180.",
+            },
+            {
+              status: 400,
+            }
+          );
+        }
+        updateData.longitude = parsed;
       }
     }
 

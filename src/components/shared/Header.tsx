@@ -72,7 +72,19 @@ export function Header({ isLoggedIn: initialIsLoggedIn = false }: HeaderProps) {
         </Link>
 
         {!isAuthPage && (
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2.5 sm:gap-3">
+            <Link
+              href="/map"
+              className={`flex items-center gap-1.5 px-3 py-1.5 text-sm font-semibold rounded-lg transition-colors ${
+                pathname === "/map"
+                  ? "text-emerald-700 bg-emerald-50 border border-emerald-200"
+                  : "text-slate-750 hover:text-emerald-600 hover:bg-slate-100"
+              }`}
+            >
+              <span>🗺️</span>
+              <span className="hidden sm:inline">Peta Kos</span>
+            </Link>
+
             {isLoggedIn ? (
               <button
                 onClick={handleLogout}

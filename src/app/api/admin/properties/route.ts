@@ -76,6 +76,9 @@ export async function POST(request: NextRequest) {
     let gender_type: string | undefined;
     let facilities: string | undefined;
     let image_url: string | null | undefined;
+    let address: string | null | undefined;
+    let latitude: number | string | null | undefined;
+    let longitude: number | string | null | undefined;
     let owner_id: string | undefined;
     const mediaToCreate: { url: string; type: string }[] = [];
 
@@ -87,6 +90,9 @@ export async function POST(request: NextRequest) {
       gender_type = (formData.get("gender_type") as string) || undefined;
       facilities = (formData.get("facilities") as string) || undefined;
       image_url = (formData.get("image_url") as string) || null;
+      address = (formData.get("address") as string) || null;
+      latitude = formData.get("latitude") as string | undefined;
+      longitude = formData.get("longitude") as string | undefined;
       owner_id = (formData.get("owner_id") as string) || undefined;
 
       // Ambil file media yang diunggah
@@ -120,6 +126,9 @@ export async function POST(request: NextRequest) {
       gender_type = body.gender_type;
       facilities = body.facilities;
       image_url = body.image_url;
+      address = body.address;
+      latitude = body.latitude;
+      longitude = body.longitude;
       owner_id = body.owner_id;
 
       if (Array.isArray(body.media)) {
@@ -205,6 +214,40 @@ export async function POST(request: NextRequest) {
       mediaToCreate[0]?.url ||
       (image_url ? String(image_url).trim() : null);
 
+    let parsedLatitude: number | null = null;
+    if (latitude !== undefined && latitude !== null && String(latitude).trim() !== "") {
+      const parsed = parseFloat(String(latitude));
+      if (isNaN(parsed) || parsed < -90 || parsed > 90) {
+        return NextResponse.json(
+          {
+            success: false,
+            error: "Bad Request: Latitude harus berupa angka antara -90 dan 90.",
+          },
+          {
+            status: 400,
+          }
+        );
+      }
+      parsedLatitude = parsed;
+    }
+
+    let parsedLongitude: number | null = null;
+    if (longitude !== undefined && longitude !== null && String(longitude).trim() !== "") {
+      const parsed = parseFloat(String(longitude));
+      if (isNaN(parsed) || parsed < -180 || parsed > 180) {
+        return NextResponse.json(
+          {
+            success: false,
+            error: "Bad Request: Longitude harus berupa angka antara -180 dan 180.",
+          },
+          {
+            status: 400,
+          }
+        );
+      }
+      parsedLongitude = parsed;
+    }
+
     const newProperty = await prisma.property.create({
       data: {
         name: name.trim(),
@@ -213,6 +256,9 @@ export async function POST(request: NextRequest) {
         gender_type: String(gender_type).toUpperCase(),
         facilities: facilities.trim(),
         image_url: firstImageUrl,
+        address: address ? String(address).trim() : null,
+        latitude: parsedLatitude,
+        longitude: parsedLongitude,
         owner_id: owner_id.trim(),
         media: {
           create: mediaToCreate,

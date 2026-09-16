@@ -1,8 +1,26 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  // Memberi tahu Vercel untuk membawa file database SQLite saat deploy
-  // (Format baru untuk Next.js 15 & 16 ke atas)
+  images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "images.unsplash.com",
+      },
+      {
+        protocol: "https",
+        hostname: "lh3.googleusercontent.com",
+      },
+      {
+        protocol: "https",
+        hostname: "**",
+      },
+      {
+        protocol: "http",
+        hostname: "**",
+      },
+    ],
+  },
   outputFileTracingIncludes: {
     "/**": ["./prisma/**/*"],
   },
