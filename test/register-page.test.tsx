@@ -102,4 +102,15 @@ describe("Register Page UI (/register) - Issue #119", () => {
     expect(content).toContain("max-w-md");
     expect(content).toContain("rounded-2xl");
   });
+
+  it("memiliki integrasi HTTP fetch ke endpoint /api/register dan penanganan error", () => {
+    const filePath = path.resolve(__dirname, "../src/app/register/page.tsx");
+    const content = fs.readFileSync(filePath, "utf-8");
+
+    expect(content).toContain('fetch("/api/register"');
+    expect(content).toContain('method: "POST"');
+    expect(content).toContain("data?.error");
+    expect(content).toContain("setIsSuccess(true)");
+  });
 });
+

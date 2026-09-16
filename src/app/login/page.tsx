@@ -64,8 +64,25 @@ export default function LoginPage() {
       setIsLoading(true);
       setErrors({});
 
-      // Simulasi panggilan API autentikasi di sisi klien (akan disambungkan ke backend di tahap selanjutnya)
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      const response = await fetch("/api/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email: email.trim(),
+          password,
+        }),
+      });
+
+      const data = await response.json().catch(() => null);
+
+      if (!response.ok) {
+        setErrors({
+          general: data?.error || "Email atau password salah.",
+        });
+        return;
+      }
 
       setIsSuccess(true);
 
@@ -76,7 +93,7 @@ export default function LoginPage() {
     } catch (err) {
       console.error("Login gagal:", err);
       setErrors({
-        general: "Terjadi kesalahan koneksi saat login. Silakan coba lagi.",
+        general: "Terjadi kesalahan koneksi saat login. Silakan periksa jaringan Anda.",
       });
     } finally {
       setIsLoading(false);

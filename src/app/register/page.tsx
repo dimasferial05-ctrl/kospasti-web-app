@@ -90,14 +90,33 @@ export default function RegisterPage() {
       setIsLoading(true);
       setErrors({});
 
-      // Simulasi proses registrasi client-side (akan disambungkan ke API backend di tahap berikutnya)
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      const response = await fetch("/api/register", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: name.trim(),
+          email: email.trim(),
+          password,
+          whatsapp: whatsapp.trim() || undefined,
+        }),
+      });
+
+      const data = await response.json().catch(() => null);
+
+      if (!response.ok) {
+        setErrors({
+          general: data?.error || "Pendaftaran gagal. Silakan coba lagi.",
+        });
+        return;
+      }
 
       setIsSuccess(true);
     } catch (err) {
       console.error("Registrasi gagal:", err);
       setErrors({
-        general: "Terjadi kesalahan saat memproses pendaftaran. Silakan coba lagi.",
+        general: "Terjadi kesalahan koneksi saat memproses pendaftaran. Silakan periksa jaringan Anda.",
       });
     } finally {
       setIsLoading(false);
