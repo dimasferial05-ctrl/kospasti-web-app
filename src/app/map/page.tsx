@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useMemo, useRef, Suspense } from "react";
+import React, { useState, useEffect, useMemo, useRef, useCallback, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import MapViewer, { PropertyMapItem, SearchTargetLocation } from "@/components/MapViewer";
 import { SmartSearchBar } from "@/components/shared/SmartSearchBar";
@@ -173,75 +173,78 @@ function MapSearchContent() {
     fetchProperties();
   }, []);
 
-  const handleAISearch = async (promptText?: string) => {
-    const textToSearch = (promptText || aiPrompt).trim();
-    if (!textToSearch) return;
+  const handleAISearch = useCallback(
+    async (promptText?: string) => {
+      const textToSearch = (promptText || aiPrompt).trim();
+      if (!textToSearch) return;
 
-    try {
-      setIsAiLoading(true);
-      setAiError(null);
+      try {
+        setIsAiLoading(true);
+        setAiError(null);
 
-      const res = await fetch("/api/ai-search", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prompt: textToSearch }),
-      });
-
-      const result = await res.json();
-
-      if (!result.success) {
-        throw new Error(result.error || "Gagal memproses pencarian.");
-      }
-
-      const criteria: AISearchCriteria = result.data;
-      setActiveCriteria(criteria);
-
-      // Sinkronkan filter Gender jika diekstrak
-      if (criteria.gender_type) {
-        setSelectedGender(criteria.gender_type);
-      }
-
-      // Sinkronkan filter Max Price jika diekstrak
-      if (criteria.max_price !== null && !isNaN(criteria.max_price)) {
-        setMaxPrice(criteria.max_price.toString());
-      }
-
-      // Sinkronkan kata kunci fasilitas
-      if (Array.isArray(criteria.facilities_keywords)) {
-        setFacilitiesFilter(criteria.facilities_keywords);
-      }
-
-      // Tentukan koordinat target pencarian
-      if (
-        criteria.location_intent &&
-        typeof criteria.target_latitude === "number" &&
-        typeof criteria.target_longitude === "number"
-      ) {
-        setSearchTarget({
-          lat: criteria.target_latitude,
-          lng: criteria.target_longitude,
-          name: criteria.location_intent,
+        const res = await fetch("/api/ai-search", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ prompt: textToSearch }),
         });
-      } else if (criteria.location_intent) {
-        // Fallback geocode jika backend tidak memberikan koordinat
-        const geoResult = await geocodeLocation(criteria.location_intent, mapsApiKey);
-        if (geoResult) {
-          setSearchTarget(geoResult);
+
+        const result = await res.json();
+
+        if (!result.success) {
+          throw new Error(result.error || "Gagal memproses pencarian.");
+        }
+
+        const criteria: AISearchCriteria = result.data;
+        setActiveCriteria(criteria);
+
+        // Sinkronkan filter Gender jika diekstrak
+        if (criteria.gender_type) {
+          setSelectedGender(criteria.gender_type);
+        }
+
+        // Sinkronkan filter Max Price jika diekstrak
+        if (criteria.max_price !== null && !isNaN(criteria.max_price)) {
+          setMaxPrice(criteria.max_price.toString());
+        }
+
+        // Sinkronkan kata kunci fasilitas
+        if (Array.isArray(criteria.facilities_keywords)) {
+          setFacilitiesFilter(criteria.facilities_keywords);
+        }
+
+        // Tentukan koordinat target pencarian
+        if (
+          criteria.location_intent &&
+          typeof criteria.target_latitude === "number" &&
+          typeof criteria.target_longitude === "number"
+        ) {
+          setSearchTarget({
+            lat: criteria.target_latitude,
+            lng: criteria.target_longitude,
+            name: criteria.location_intent,
+          });
+        } else if (criteria.location_intent) {
+          // Fallback geocode jika backend tidak memberikan koordinat
+          const geoResult = await geocodeLocation(criteria.location_intent, mapsApiKey);
+          if (geoResult) {
+            setSearchTarget(geoResult);
+          } else {
+            setSearchTarget(null);
+          }
         } else {
           setSearchTarget(null);
         }
-      } else {
-        setSearchTarget(null);
+      } catch (err: unknown) {
+        console.error("Error search:", err);
+        const msg =
+          err instanceof Error ? err.message : "Terjadi kesalahan saat memproses pencarian Anda.";
+        setAiError(msg);
+      } finally {
+        setIsAiLoading(false);
       }
-    } catch (err: unknown) {
-      console.error("Error search:", err);
-      const msg =
-        err instanceof Error ? err.message : "Terjadi kesalahan saat memproses pencarian Anda.";
-      setAiError(msg);
-    } finally {
-      setIsAiLoading(false);
-    }
-  };
+    },
+    [aiPrompt, mapsApiKey]
+  );
 
   // Auto search when loaded with query param from URL (?q=...)
   useEffect(() => {
@@ -250,7 +253,7 @@ function MapSearchContent() {
       setAiPrompt(urlQuery);
       handleAISearch(urlQuery);
     }
-  }, [urlQuery]);
+  }, [urlQuery, handleAISearch]);
 
   const handleResetFilters = () => {
     setAiPrompt("");

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { Search, Loader2, RotateCcw, AlertCircle } from "lucide-react";
 
 export interface SuggestionItem {
@@ -44,35 +44,31 @@ export function SmartSearchBar({
   showReset = false,
   autoFocus = false,
 }: SmartSearchBarProps) {
-  const [internalValue, setInternalValue] = useState(value || "");
-
-  useEffect(() => {
-    if (value !== undefined) {
-      setInternalValue(value);
-    }
-  }, [value]);
+  const isControlled = value !== undefined;
+  const [uncontrolledValue, setUncontrolledValue] = useState(value || "");
+  const currentValue = isControlled ? (value ?? "") : uncontrolledValue;
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value;
-    setInternalValue(val);
-    if (onChange) {
-      onChange(val);
+    if (!isControlled) {
+      setUncontrolledValue(val);
     }
+    onChange?.(val);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const query = internalValue.trim();
+    const query = currentValue.trim();
     if (query && !isLoading) {
       onSearch(query);
     }
   };
 
   const handleSuggestionClick = (prompt: string) => {
-    setInternalValue(prompt);
-    if (onChange) {
-      onChange(prompt);
+    if (!isControlled) {
+      setUncontrolledValue(prompt);
     }
+    onChange?.(prompt);
     if (!isLoading) {
       onSearch(prompt);
     }
@@ -96,7 +92,7 @@ export function SmartSearchBar({
           {/* Text Input */}
           <input
             type="text"
-            value={internalValue}
+            value={currentValue}
             onChange={handleChange}
             disabled={isLoading}
             autoFocus={autoFocus}
@@ -110,7 +106,7 @@ export function SmartSearchBar({
 
           {/* Actions Container */}
           <div className="flex items-center gap-1.5 sm:gap-2 pr-1 shrink-0">
-            {showReset && onReset && internalValue && (
+            {showReset && onReset && currentValue && (
               <button
                 type="button"
                 onClick={onReset}
@@ -125,7 +121,7 @@ export function SmartSearchBar({
             {/* Submit Button (Search Icon with Brand Primary Color) */}
             <button
               type="submit"
-              disabled={isLoading || !internalValue.trim()}
+              disabled={isLoading || !currentValue.trim()}
               className={`rounded-xl sm:rounded-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold transition-all shadow-sm hover:shadow-emerald-600/25 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer ${
                 isHero
                   ? "px-5 sm:px-7 py-2.5 sm:py-3 text-xs sm:text-sm"
