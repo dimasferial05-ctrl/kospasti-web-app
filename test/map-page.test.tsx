@@ -56,14 +56,14 @@ describe("Interactive Google Maps Property Search (/map) - Issue #121", () => {
     expect(mapViewerContent.trim().split("\n")[0].trim()).toMatch(/^["']use client["'];?$/);
   });
 
-  it("merender judul halaman, tombol kembali ke beranda, input pencarian, filter gender, dan dropdown harga", () => {
+  it("merender judul halaman, tombol kembali ke beranda, input pencarian AI, filter gender, dan dropdown harga", () => {
     const html = renderToStaticMarkup(<MapSearchPage />);
 
     expect(html).toContain("Kembali ke Beranda");
     expect(html).toContain("Eksplorasi Kos Berdasarkan Lokasi");
-    expect(html).toContain("Peta Interaktif Google Maps");
-    expect(html).toContain("Cari nama kos, alamat, atau fasilitas...");
-    expect(html).toContain("Semua Tipe");
+    expect(html).toContain("Pencarian Cerdas AI + Google Maps");
+    expect(html).toContain("Tanya AI");
+    expect(html).toContain("Semua");
     expect(html).toContain("Putra");
     expect(html).toContain("Putri");
     expect(html).toContain("Campur");

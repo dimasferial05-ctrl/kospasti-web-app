@@ -9,8 +9,7 @@ import {
   useMap,
 } from "@vis.gl/react-google-maps";
 import Link from "next/link";
-import Image from "next/image";
-import { MapPin, Navigation, ExternalLink, Users, AlertCircle } from "lucide-react";
+import { MapPin, Navigation, ExternalLink, AlertCircle, Sparkles } from "lucide-react";
 
 export interface PropertyMapItem {
   id: string;
@@ -23,9 +22,16 @@ export interface PropertyMapItem {
   address?: string | null;
   latitude?: number | null;
   longitude?: number | null;
+  distance_km?: number | null;
   owner?: {
     name: string;
   };
+}
+
+export interface SearchTargetLocation {
+  lat: number;
+  lng: number;
+  name: string;
 }
 
 interface MapViewerProps {
@@ -36,6 +42,7 @@ interface MapViewerProps {
   apiKey?: string;
   center?: { lat: number; lng: number };
   zoom?: number;
+  searchTarget?: SearchTargetLocation | null;
 }
 
 // Default center: Jakarta Pusat (Monas area)
@@ -62,9 +69,11 @@ function formatRupiah(price: number): string {
 function MapCameraController({
   selectedProperty,
   userLocation,
+  searchTarget,
 }: {
   selectedProperty?: PropertyMapItem | null;
   userLocation?: { lat: number; lng: number } | null;
+  searchTarget?: SearchTargetLocation | null;
 }) {
   const map = useMap();
 
@@ -90,6 +99,12 @@ function MapCameraController({
     map.panTo(userLocation);
     map.setZoom(14);
   }, [map, userLocation]);
+
+  useEffect(() => {
+    if (!map || !searchTarget) return;
+    map.panTo({ lat: searchTarget.lat, lng: searchTarget.lng });
+    map.setZoom(14);
+  }, [map, searchTarget]);
 
   return null;
 }
@@ -157,6 +172,7 @@ function MapViewerInner({
   apiKey,
   center = DEFAULT_CENTER,
   zoom = DEFAULT_ZOOM,
+  searchTarget,
 }: MapViewerProps) {
   const [activeProperty, setActiveProperty] = useState<PropertyMapItem | null>(null);
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
@@ -232,6 +248,9 @@ function MapViewerInner({
 
   // Hitung center dinamis berdasarkan rata-rata koordinat kos jika center tidak di-override
   const dynamicCenter = React.useMemo(() => {
+    if (searchTarget) {
+      return { lat: searchTarget.lat, lng: searchTarget.lng };
+    }
     if (center && (center.lat !== DEFAULT_CENTER.lat || center.lng !== DEFAULT_CENTER.lng)) {
       return center;
     }
@@ -244,7 +263,7 @@ function MapViewerInner({
       };
     }
     return DEFAULT_CENTER;
-  }, [center, validProperties]);
+  }, [center, validProperties, searchTarget]);
 
   if (!effectiveApiKey) {
     return (
@@ -285,6 +304,7 @@ function MapViewerInner({
           <MapCameraController
             selectedProperty={activeProperty}
             userLocation={userLocation}
+            searchTarget={searchTarget}
           />
 
           {/* User Location Marker */}
@@ -295,6 +315,22 @@ function MapViewerInner({
                 <div className="w-5 h-5 bg-blue-600 border-2 border-white rounded-full shadow-lg flex items-center justify-center text-white">
                   <div className="w-2 h-2 bg-white rounded-full"></div>
                 </div>
+              </div>
+            </AdvancedMarker>
+          )}
+
+          {/* Search Target Marker (AI Location Intent) */}
+          {searchTarget && (
+            <AdvancedMarker
+              position={{ lat: searchTarget.lat, lng: searchTarget.lng }}
+              title={`Target Pencarian: ${searchTarget.name}`}
+            >
+              <div className="relative flex flex-col items-center group cursor-pointer z-20">
+                <div className="bg-indigo-600 text-white text-[11px] font-bold px-3 py-1.5 rounded-full shadow-xl border-2 border-white flex items-center gap-1.5 whitespace-nowrap animate-pulse">
+                  <Sparkles className="w-3.5 h-3.5 text-amber-300" />
+                  <span>📍 {searchTarget.name}</span>
+                </div>
+                <div className="w-2.5 h-2.5 bg-indigo-600 rotate-45 -mt-1 border-r-2 border-b-2 border-white"></div>
               </div>
             </AdvancedMarker>
           )}
