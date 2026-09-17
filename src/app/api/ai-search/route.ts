@@ -381,7 +381,7 @@ Aturan Ekstraksi:
           outputText = response.text;
           break;
         }
-      } catch (err) {
+      } catch {
         console.warn(`Model ${modelName} failed or busy, trying next model...`);
       }
     }

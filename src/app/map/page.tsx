@@ -1,7 +1,9 @@
 "use client";
 
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useRef, useCallback, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 import MapViewer, { PropertyMapItem, SearchTargetLocation } from "@/components/MapViewer";
+import { SmartSearchBar } from "@/components/shared/SmartSearchBar";
 import Link from "next/link";
 import {
   MapPin,
@@ -12,12 +14,6 @@ import {
   List,
   ArrowRight,
   ArrowLeft,
-  Sparkles,
-  Loader2,
-  RotateCcw,
-  Compass,
-  AlertCircle,
-  Send,
   Tag,
 } from "lucide-react";
 
@@ -63,7 +59,20 @@ async function geocodeLocation(
   apiKey?: string
 ): Promise<{ lat: number; lng: number; name: string } | null> {
   if (typeof window !== "undefined") {
-    const googleObj = (window as unknown as { google?: { maps?: { Geocoder: new () => { geocode: (req: unknown, cb: (results: GoogleGeocodeResult[] | null, status: string) => void) => void } } } }).google;
+    const googleObj = (
+      window as unknown as {
+        google?: {
+          maps?: {
+            Geocoder: new () => {
+              geocode: (
+                req: unknown,
+                cb: (results: GoogleGeocodeResult[] | null, status: string) => void
+              ) => void;
+            };
+          };
+        };
+      }
+    ).google;
     if (googleObj?.maps?.Geocoder) {
       try {
         const geocoder = new googleObj.maps.Geocoder();
@@ -118,13 +127,11 @@ async function geocodeLocation(
   return null;
 }
 
-const EXAMPLE_PROMPTS = [
-  { label: "Dekat UI, <2 Jt", prompt: "Kos putri dekat UI ada AC harga di bawah 2 juta" },
-  { label: "Dekat Monas, WiFi", prompt: "Kos putra dekat Monas Jakarta fasilitas WiFi" },
-  { label: "Dekat Gandaria, 1.5Jt", prompt: "Kos campur dekat Mall Gandaria City budget 1.5jt" },
-];
+function MapSearchContent() {
+  const searchParams = useSearchParams();
+  const urlQuery = searchParams.get("q");
+  const processedQueryRef = useRef<string | null>(null);
 
-export default function MapSearchPage() {
   const [properties, setProperties] = useState<PropertyMapItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -166,75 +173,87 @@ export default function MapSearchPage() {
     fetchProperties();
   }, []);
 
-  const handleAISearch = async (promptText?: string) => {
-    const textToSearch = (promptText || aiPrompt).trim();
-    if (!textToSearch) return;
+  const handleAISearch = useCallback(
+    async (promptText?: string) => {
+      const textToSearch = (promptText || aiPrompt).trim();
+      if (!textToSearch) return;
 
-    try {
-      setIsAiLoading(true);
-      setAiError(null);
+      try {
+        setIsAiLoading(true);
+        setAiError(null);
 
-      const res = await fetch("/api/ai-search", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prompt: textToSearch }),
-      });
-
-      const result = await res.json();
-
-      if (!result.success) {
-        throw new Error(result.error || "Gagal memproses pencarian AI.");
-      }
-
-      const criteria: AISearchCriteria = result.data;
-      setActiveCriteria(criteria);
-
-      // Sinkronkan filter Gender jika diekstrak oleh AI
-      if (criteria.gender_type) {
-        setSelectedGender(criteria.gender_type);
-      }
-
-      // Sinkronkan filter Max Price jika diekstrak oleh AI
-      if (criteria.max_price !== null && !isNaN(criteria.max_price)) {
-        setMaxPrice(criteria.max_price.toString());
-      }
-
-      // Sinkronkan kata kunci fasilitas
-      if (Array.isArray(criteria.facilities_keywords)) {
-        setFacilitiesFilter(criteria.facilities_keywords);
-      }
-
-      // Tentukan koordinat target pencarian
-      if (
-        criteria.location_intent &&
-        typeof criteria.target_latitude === "number" &&
-        typeof criteria.target_longitude === "number"
-      ) {
-        // Koordinat sudah diekstrak cerdas langsung oleh AI tanpa perlu Geocoding Google Cloud
-        setSearchTarget({
-          lat: criteria.target_latitude,
-          lng: criteria.target_longitude,
-          name: criteria.location_intent,
+        const res = await fetch("/api/ai-search", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ prompt: textToSearch }),
         });
-      } else if (criteria.location_intent) {
-        // Fallback geocode jika AI tidak memberikan koordinat
-        const geoResult = await geocodeLocation(criteria.location_intent, mapsApiKey);
-        if (geoResult) {
-          setSearchTarget(geoResult);
+
+        const result = await res.json();
+
+        if (!result.success) {
+          throw new Error(result.error || "Gagal memproses pencarian.");
+        }
+
+        const criteria: AISearchCriteria = result.data;
+        setActiveCriteria(criteria);
+
+        // Sinkronkan filter Gender jika diekstrak
+        if (criteria.gender_type) {
+          setSelectedGender(criteria.gender_type);
+        }
+
+        // Sinkronkan filter Max Price jika diekstrak
+        if (criteria.max_price !== null && !isNaN(criteria.max_price)) {
+          setMaxPrice(criteria.max_price.toString());
+        }
+
+        // Sinkronkan kata kunci fasilitas
+        if (Array.isArray(criteria.facilities_keywords)) {
+          setFacilitiesFilter(criteria.facilities_keywords);
+        }
+
+        // Tentukan koordinat target pencarian
+        if (
+          criteria.location_intent &&
+          typeof criteria.target_latitude === "number" &&
+          typeof criteria.target_longitude === "number"
+        ) {
+          setSearchTarget({
+            lat: criteria.target_latitude,
+            lng: criteria.target_longitude,
+            name: criteria.location_intent,
+          });
+        } else if (criteria.location_intent) {
+          // Fallback geocode jika backend tidak memberikan koordinat
+          const geoResult = await geocodeLocation(criteria.location_intent, mapsApiKey);
+          if (geoResult) {
+            setSearchTarget(geoResult);
+          } else {
+            setSearchTarget(null);
+          }
         } else {
           setSearchTarget(null);
         }
-      } else {
-        setSearchTarget(null);
+      } catch (err: unknown) {
+        console.error("Error search:", err);
+        const msg =
+          err instanceof Error ? err.message : "Terjadi kesalahan saat memproses pencarian Anda.";
+        setAiError(msg);
+      } finally {
+        setIsAiLoading(false);
       }
-    } catch (err: unknown) {
-      console.error("Error AI search:", err);
-      const msg = err instanceof Error ? err.message : "Terjadi kesalahan saat memproses pertanyaan Anda.";
-      setAiError(msg);
-    } finally {
-      setIsAiLoading(false);
+    },
+    [aiPrompt, mapsApiKey]
+  );
+
+  // Auto search when loaded with query param from URL (?q=...)
+  useEffect(() => {
+    if (urlQuery && urlQuery !== processedQueryRef.current) {
+      processedQueryRef.current = urlQuery;
+      setAiPrompt(urlQuery);
+      handleAISearch(urlQuery);
     }
-  };
+  }, [urlQuery, handleAISearch]);
 
   const handleResetFilters = () => {
     setAiPrompt("");
@@ -245,9 +264,10 @@ export default function MapSearchPage() {
     setSearchTarget(null);
     setAiError(null);
     setSelectedPropertyId(null);
+    processedQueryRef.current = null;
   };
 
-  // Filter & Sort properties based on AI criteria & search target distance
+  // Filter & Sort properties based on criteria & search target distance
   const filteredProperties = useMemo(() => {
     const list = properties
       .map((p) => {
@@ -319,6 +339,10 @@ export default function MapSearchPage() {
     }).format(val);
   };
 
+  const hasActiveFilters = Boolean(
+    activeCriteria || selectedGender !== "ALL" || maxPrice || searchTarget || aiPrompt
+  );
+
   return (
     <div className="min-h-screen flex flex-col bg-slate-50 text-slate-900">
       <main className="flex-1 flex flex-col max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
@@ -339,15 +363,11 @@ export default function MapSearchPage() {
 
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
             <div>
-              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-indigo-50 text-indigo-700 text-xs font-bold mb-1.5 border border-indigo-200/60 shadow-xs">
-                <Compass className="w-3.5 h-3.5 text-indigo-600" />
-                <span>Pencarian Cerdas</span>
-              </div>
               <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
-                Eksplorasi Kos Berdasarkan Lokasi & Kebutuhan
+                Peta & Rekomendasi Lokasi Kos
               </h1>
               <p className="text-sm text-slate-500 mt-0.5">
-                Ketik kebutuhan kos Anda dalam bahasa sehari-hari untuk menemukan rekomendasi terdekat.
+                Ketik kebutuhan kos Anda dalam bahasa sehari-hari untuk menemukan rekomendasi terdekat di peta.
               </p>
             </div>
 
@@ -380,92 +400,23 @@ export default function MapSearchPage() {
             </div>
           </div>
 
-          {/* AI Search Card */}
+          {/* Search Card */}
           <div className="bg-white p-4 sm:p-5 rounded-3xl border border-slate-200/80 shadow-md mb-4 relative overflow-hidden">
-            <div className="absolute -right-8 -top-8 w-32 h-32 bg-indigo-100/50 rounded-full blur-2xl pointer-events-none"></div>
+            <div className="absolute -right-8 -top-8 w-32 h-32 bg-emerald-100/40 rounded-full blur-2xl pointer-events-none"></div>
 
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                handleAISearch();
-              }}
-              className="flex flex-col gap-3 relative z-10"
-            >
-              <div className="flex flex-col sm:flex-row gap-2.5 items-stretch">
-                <div className="relative flex-1">
-                  <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400">
-                    <MapPin className="w-4 h-4" />
-                  </div>
-                  <input
-                    type="text"
-                    value={aiPrompt}
-                    onChange={(e) => setAiPrompt(e.target.value)}
-                    disabled={isAiLoading}
-                    placeholder='Cari kos... "Kos putri dekat UI ada AC harga di bawah 2 juta"'
-                    className="w-full pl-10 pr-4 py-3 text-sm bg-slate-50/80 border border-slate-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-indigo-500/25 focus:border-indigo-500 transition-all text-slate-800 placeholder:text-slate-400"
-                  />
-                </div>
+            <div className="relative z-10">
+              <SmartSearchBar
+                value={aiPrompt}
+                onChange={setAiPrompt}
+                onSearch={(prompt) => handleAISearch(prompt)}
+                isLoading={isAiLoading}
+                error={aiError}
+                variant="compact"
+                showReset={hasActiveFilters}
+                onReset={handleResetFilters}
+              />
 
-                <div className="flex items-center gap-2">
-                  <button
-                    type="submit"
-                    disabled={isAiLoading || !aiPrompt.trim()}
-                    className="flex-1 sm:flex-initial px-5 py-3 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-md hover:shadow-indigo-500/20 transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
-                  >
-                    {isAiLoading ? (
-                      <>
-                        <Loader2 className="w-4 h-4 animate-spin" />
-                        <span>Mencari...</span>
-                      </>
-                    ) : (
-                      <>
-                        <Send className="w-3.5 h-3.5" />
-                        <span>Cari</span>
-                      </>
-                    )}
-                  </button>
-
-                  {(activeCriteria || selectedGender !== "ALL" || maxPrice || searchTarget) && (
-                    <button
-                      type="button"
-                      onClick={handleResetFilters}
-                      className="px-3.5 py-3 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs font-semibold transition-all flex items-center gap-1.5"
-                      title="Reset Pencarian"
-                    >
-                      <RotateCcw className="w-3.5 h-3.5" />
-                      <span className="hidden sm:inline">Reset</span>
-                    </button>
-                  )}
-                </div>
-              </div>
-
-              {/* Example Prompts */}
-              <div className="flex flex-wrap items-center gap-x-4 gap-y-2 pt-1.5 text-xs">
-                <span className="font-medium text-slate-500">Saran:</span>
-                {EXAMPLE_PROMPTS.map((item, idx) => (
-                  <button
-                    key={idx}
-                    type="button"
-                    onClick={() => {
-                      setAiPrompt(item.prompt);
-                      handleAISearch(item.prompt);
-                    }}
-                    className="text-indigo-600 hover:text-indigo-800 hover:underline transition-colors font-medium text-left"
-                  >
-                    {item.label}
-                  </button>
-                ))}
-              </div>
-
-              {/* Error Message */}
-              {aiError && (
-                <div className="mt-1 flex items-center gap-2 text-xs text-red-600 bg-red-50 p-2.5 rounded-xl border border-red-200">
-                  <AlertCircle className="w-4 h-4 shrink-0" />
-                  <span>{aiError}</span>
-                </div>
-              )}
-
-              {/* Active AI Extracted Criteria Badges */}
+              {/* Active Extracted Criteria Badges */}
               {activeCriteria && (
                 <div className="mt-2 pt-3 border-t border-slate-100 flex flex-wrap items-center gap-2">
                   <span className="text-xs font-bold text-slate-700 flex items-center gap-1 mr-1">
@@ -474,7 +425,7 @@ export default function MapSearchPage() {
                   </span>
 
                   {searchTarget && (
-                    <span className="inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-xl bg-indigo-50 text-indigo-700 border border-indigo-200/80">
+                    <span className="inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200/80">
                       📍 Lokasi: {searchTarget.name}
                     </span>
                   )}
@@ -499,7 +450,7 @@ export default function MapSearchPage() {
                   )}
                 </div>
               )}
-            </form>
+            </div>
 
             {/* Quick Adjustment Toolbar */}
             <div className="mt-4 pt-3 border-t border-slate-100 flex flex-wrap items-center justify-between gap-3 text-xs">
@@ -517,7 +468,7 @@ export default function MapSearchPage() {
                       key={g.id}
                       type="button"
                       onClick={() => setSelectedGender(g.id)}
-                      className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-all ${
+                      className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
                         selectedGender === g.id
                           ? "bg-slate-800 text-white shadow-xs"
                           : "bg-slate-100 text-slate-600 hover:bg-slate-200"
@@ -572,7 +523,7 @@ export default function MapSearchPage() {
 
             {isLoading ? (
               <div className="flex-1 flex flex-col items-center justify-center p-12 text-slate-400 bg-white rounded-2xl border border-slate-200">
-                <div className="w-8 h-8 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin mb-3"></div>
+                <div className="w-8 h-8 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin mb-3"></div>
                 <p className="text-sm font-medium">Memuat data kos...</p>
               </div>
             ) : filteredProperties.length === 0 ? (
@@ -611,7 +562,7 @@ export default function MapSearchPage() {
                       }}
                       className={`group bg-white rounded-2xl p-3.5 border transition-all duration-200 cursor-pointer ${
                         isSelected
-                          ? "border-indigo-500 ring-2 ring-indigo-500/20 shadow-md bg-indigo-50/20"
+                          ? "border-emerald-500 ring-2 ring-emerald-500/20 shadow-md bg-emerald-50/20"
                           : isHovered
                           ? "border-slate-400 shadow-md translate-x-1"
                           : "border-slate-200 hover:border-slate-300 shadow-sm"
@@ -637,10 +588,10 @@ export default function MapSearchPage() {
                             <span
                               className={`text-[9px] font-bold px-1.5 py-0.5 rounded uppercase shadow-sm ${
                                 property.gender_type === "PUTRI"
-                                    ? "bg-pink-600 text-white"
-                                    : property.gender_type === "PUTRA"
-                                    ? "bg-blue-600 text-white"
-                                    : "bg-purple-600 text-white"
+                                  ? "bg-pink-600 text-white"
+                                  : property.gender_type === "PUTRA"
+                                  ? "bg-blue-600 text-white"
+                                  : "bg-purple-600 text-white"
                               }`}
                             >
                               {property.gender_type}
@@ -665,13 +616,13 @@ export default function MapSearchPage() {
                               )}
 
                               {typeof property.distance_km === "number" && (
-                                <span className="inline-flex items-center gap-1 font-bold text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded-full text-[10px] border border-indigo-200/60">
+                                <span className="inline-flex items-center gap-1 font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full text-[10px] border border-emerald-200/60">
                                   📍 {property.distance_km} km
                                 </span>
                               )}
                             </div>
 
-                            <h3 className="font-bold text-sm text-slate-900 line-clamp-1 group-hover:text-indigo-600 transition-colors">
+                            <h3 className="font-bold text-sm text-slate-900 line-clamp-1 group-hover:text-emerald-700 transition-colors">
                               {property.name}
                             </h3>
 
@@ -682,7 +633,8 @@ export default function MapSearchPage() {
                               </p>
                             )}
 
-                            <p className="text-[11px] text-slate-400 line-clamp-1 mt-1">
+                            {/* Breathing room for facilities */}
+                            <p className="text-[11px] text-slate-400 line-clamp-1 mt-1 mb-1.5">
                               {property.facilities}
                             </p>
                           </div>
@@ -696,7 +648,7 @@ export default function MapSearchPage() {
                             </div>
 
                             <div className="flex items-center gap-2">
-                              <span className="text-[11px] font-semibold text-indigo-600 group-hover:translate-x-0.5 transition-transform flex items-center gap-1">
+                              <span className="text-[11px] font-semibold text-emerald-700 group-hover:translate-x-0.5 transition-transform flex items-center gap-1">
                                 <span>Peta</span>
                                 <ArrowRight className="w-3 h-3" />
                               </span>
@@ -728,5 +680,19 @@ export default function MapSearchPage() {
         </div>
       </main>
     </div>
+  );
+}
+
+export default function MapSearchPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center bg-slate-50">
+          <div className="w-8 h-8 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin"></div>
+        </div>
+      }
+    >
+      <MapSearchContent />
+    </Suspense>
   );
 }

@@ -58,7 +58,7 @@ export function KosPropertyCard({
   const isAvailable = availableRooms > 0;
 
   return (
-    <div className="group bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden flex flex-col hover:shadow-lg transition-all duration-300 h-full">
+    <div className="group bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden flex flex-col hover:shadow-lg transition-all duration-300 h-full">
       {/* Image Section */}
       <div className="aspect-[4/3] w-full relative overflow-hidden bg-slate-100 flex items-center justify-center">
         {imageUrl ? (
@@ -66,7 +66,7 @@ export function KosPropertyCard({
           <img
             src={imageUrl}
             alt={name}
-            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
           />
         ) : (
           <div className="flex flex-col items-center justify-center text-slate-400 gap-1">
@@ -76,10 +76,10 @@ export function KosPropertyCard({
       </div>
 
       {/* Content Section */}
-      <div className="p-4 flex flex-col flex-1 gap-3">
+      <div className="p-4 flex flex-col flex-1 gap-2.5">
         {/* Header: Name & Gender Badge */}
         <div className="flex items-start justify-between gap-2">
-          <h3 className="text-lg font-bold text-slate-900 line-clamp-1">
+          <h3 className="text-base font-bold text-slate-900 line-clamp-1 group-hover:text-emerald-700 transition-colors">
             {name}
           </h3>
           <span
@@ -91,19 +91,19 @@ export function KosPropertyCard({
 
         {/* Price */}
         <div>
-          <span className="text-base sm:text-lg font-bold text-blue-600">
+          <span className="text-base sm:text-lg font-bold text-emerald-600">
             {formattedPrice}
           </span>
         </div>
 
-        {/* Additional Info: Owner & Facilities */}
-        <div className="space-y-1 text-xs text-slate-500">
+        {/* Additional Info: Owner & Facilities with extra breathing room */}
+        <div className="space-y-1.5 text-xs text-slate-500 mb-2">
           <div className="flex items-center gap-1.5">
             <User className="w-3.5 h-3.5 text-slate-400 shrink-0" />
             <span className="truncate">{ownerName}</span>
           </div>
           {facilities && (
-            <p className="line-clamp-1 text-slate-500">
+            <p className="line-clamp-1 text-slate-500 pt-0.5">
               {facilities}
             </p>
           )}
@@ -113,11 +113,11 @@ export function KosPropertyCard({
         <div className="mt-auto pt-3 border-t border-slate-100 flex items-center justify-between gap-2">
           {/* Availability Badge */}
           {isAvailable ? (
-            <span className="bg-green-100 text-green-700 text-xs font-semibold px-2.5 py-1 rounded-full">
+            <span className="bg-emerald-50 text-emerald-700 text-xs font-semibold px-2.5 py-1 rounded-full border border-emerald-200/60">
               Sisa {availableRooms} Kamar
             </span>
           ) : (
-            <span className="bg-slate-200 text-slate-600 text-xs font-semibold px-2.5 py-1 rounded-full">
+            <span className="bg-slate-100 text-slate-500 text-xs font-semibold px-2.5 py-1 rounded-full">
               Penuh
             </span>
           )}
