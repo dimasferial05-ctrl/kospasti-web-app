@@ -1,7 +1,9 @@
 "use client";
 
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useRef, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 import MapViewer, { PropertyMapItem, SearchTargetLocation } from "@/components/MapViewer";
+import { SmartSearchBar } from "@/components/shared/SmartSearchBar";
 import Link from "next/link";
 import {
   MapPin,
@@ -12,12 +14,7 @@ import {
   List,
   ArrowRight,
   ArrowLeft,
-  Sparkles,
-  Loader2,
-  RotateCcw,
   Compass,
-  AlertCircle,
-  Send,
   Tag,
 } from "lucide-react";
 
@@ -63,7 +60,20 @@ async function geocodeLocation(
   apiKey?: string
 ): Promise<{ lat: number; lng: number; name: string } | null> {
   if (typeof window !== "undefined") {
-    const googleObj = (window as unknown as { google?: { maps?: { Geocoder: new () => { geocode: (req: unknown, cb: (results: GoogleGeocodeResult[] | null, status: string) => void) => void } } } }).google;
+    const googleObj = (
+      window as unknown as {
+        google?: {
+          maps?: {
+            Geocoder: new () => {
+              geocode: (
+                req: unknown,
+                cb: (results: GoogleGeocodeResult[] | null, status: string) => void
+              ) => void;
+            };
+          };
+        };
+      }
+    ).google;
     if (googleObj?.maps?.Geocoder) {
       try {
         const geocoder = new googleObj.maps.Geocoder();
@@ -118,13 +128,11 @@ async function geocodeLocation(
   return null;
 }
 
-const EXAMPLE_PROMPTS = [
-  { label: "Dekat UI, <2 Jt", prompt: "Kos putri dekat UI ada AC harga di bawah 2 juta" },
-  { label: "Dekat Monas, WiFi", prompt: "Kos putra dekat Monas Jakarta fasilitas WiFi" },
-  { label: "Dekat Gandaria, 1.5Jt", prompt: "Kos campur dekat Mall Gandaria City budget 1.5jt" },
-];
+function MapSearchContent() {
+  const searchParams = useSearchParams();
+  const urlQuery = searchParams.get("q");
+  const processedQueryRef = useRef<string | null>(null);
 
-export default function MapSearchPage() {
   const [properties, setProperties] = useState<PropertyMapItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -210,7 +218,6 @@ export default function MapSearchPage() {
         typeof criteria.target_latitude === "number" &&
         typeof criteria.target_longitude === "number"
       ) {
-        // Koordinat sudah diekstrak cerdas langsung oleh AI tanpa perlu Geocoding Google Cloud
         setSearchTarget({
           lat: criteria.target_latitude,
           lng: criteria.target_longitude,
@@ -229,12 +236,22 @@ export default function MapSearchPage() {
       }
     } catch (err: unknown) {
       console.error("Error AI search:", err);
-      const msg = err instanceof Error ? err.message : "Terjadi kesalahan saat memproses pertanyaan Anda.";
+      const msg =
+        err instanceof Error ? err.message : "Terjadi kesalahan saat memproses pertanyaan Anda.";
       setAiError(msg);
     } finally {
       setIsAiLoading(false);
     }
   };
+
+  // Auto search when loaded with query param from URL (?q=...)
+  useEffect(() => {
+    if (urlQuery && urlQuery !== processedQueryRef.current) {
+      processedQueryRef.current = urlQuery;
+      setAiPrompt(urlQuery);
+      handleAISearch(urlQuery);
+    }
+  }, [urlQuery]);
 
   const handleResetFilters = () => {
     setAiPrompt("");
@@ -245,6 +262,7 @@ export default function MapSearchPage() {
     setSearchTarget(null);
     setAiError(null);
     setSelectedPropertyId(null);
+    processedQueryRef.current = null;
   };
 
   // Filter & Sort properties based on AI criteria & search target distance
@@ -319,6 +337,10 @@ export default function MapSearchPage() {
     }).format(val);
   };
 
+  const hasActiveFilters = Boolean(
+    activeCriteria || selectedGender !== "ALL" || maxPrice || searchTarget || aiPrompt
+  );
+
   return (
     <div className="min-h-screen flex flex-col bg-slate-50 text-slate-900">
       <main className="flex-1 flex flex-col max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
@@ -384,86 +406,17 @@ export default function MapSearchPage() {
           <div className="bg-white p-4 sm:p-5 rounded-3xl border border-slate-200/80 shadow-md mb-4 relative overflow-hidden">
             <div className="absolute -right-8 -top-8 w-32 h-32 bg-indigo-100/50 rounded-full blur-2xl pointer-events-none"></div>
 
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                handleAISearch();
-              }}
-              className="flex flex-col gap-3 relative z-10"
-            >
-              <div className="flex flex-col sm:flex-row gap-2.5 items-stretch">
-                <div className="relative flex-1">
-                  <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400">
-                    <MapPin className="w-4 h-4" />
-                  </div>
-                  <input
-                    type="text"
-                    value={aiPrompt}
-                    onChange={(e) => setAiPrompt(e.target.value)}
-                    disabled={isAiLoading}
-                    placeholder='Cari kos... "Kos putri dekat UI ada AC harga di bawah 2 juta"'
-                    className="w-full pl-10 pr-4 py-3 text-sm bg-slate-50/80 border border-slate-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-indigo-500/25 focus:border-indigo-500 transition-all text-slate-800 placeholder:text-slate-400"
-                  />
-                </div>
-
-                <div className="flex items-center gap-2">
-                  <button
-                    type="submit"
-                    disabled={isAiLoading || !aiPrompt.trim()}
-                    className="flex-1 sm:flex-initial px-5 py-3 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-md hover:shadow-indigo-500/20 transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
-                  >
-                    {isAiLoading ? (
-                      <>
-                        <Loader2 className="w-4 h-4 animate-spin" />
-                        <span>Mencari...</span>
-                      </>
-                    ) : (
-                      <>
-                        <Send className="w-3.5 h-3.5" />
-                        <span>Cari</span>
-                      </>
-                    )}
-                  </button>
-
-                  {(activeCriteria || selectedGender !== "ALL" || maxPrice || searchTarget) && (
-                    <button
-                      type="button"
-                      onClick={handleResetFilters}
-                      className="px-3.5 py-3 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs font-semibold transition-all flex items-center gap-1.5"
-                      title="Reset Pencarian"
-                    >
-                      <RotateCcw className="w-3.5 h-3.5" />
-                      <span className="hidden sm:inline">Reset</span>
-                    </button>
-                  )}
-                </div>
-              </div>
-
-              {/* Example Prompts */}
-              <div className="flex flex-wrap items-center gap-x-4 gap-y-2 pt-1.5 text-xs">
-                <span className="font-medium text-slate-500">Saran:</span>
-                {EXAMPLE_PROMPTS.map((item, idx) => (
-                  <button
-                    key={idx}
-                    type="button"
-                    onClick={() => {
-                      setAiPrompt(item.prompt);
-                      handleAISearch(item.prompt);
-                    }}
-                    className="text-indigo-600 hover:text-indigo-800 hover:underline transition-colors font-medium text-left"
-                  >
-                    {item.label}
-                  </button>
-                ))}
-              </div>
-
-              {/* Error Message */}
-              {aiError && (
-                <div className="mt-1 flex items-center gap-2 text-xs text-red-600 bg-red-50 p-2.5 rounded-xl border border-red-200">
-                  <AlertCircle className="w-4 h-4 shrink-0" />
-                  <span>{aiError}</span>
-                </div>
-              )}
+            <div className="relative z-10">
+              <SmartSearchBar
+                value={aiPrompt}
+                onChange={setAiPrompt}
+                onSearch={(prompt) => handleAISearch(prompt)}
+                isLoading={isAiLoading}
+                error={aiError}
+                variant="compact"
+                showReset={hasActiveFilters}
+                onReset={handleResetFilters}
+              />
 
               {/* Active AI Extracted Criteria Badges */}
               {activeCriteria && (
@@ -499,7 +452,7 @@ export default function MapSearchPage() {
                   )}
                 </div>
               )}
-            </form>
+            </div>
 
             {/* Quick Adjustment Toolbar */}
             <div className="mt-4 pt-3 border-t border-slate-100 flex flex-wrap items-center justify-between gap-3 text-xs">
@@ -517,7 +470,7 @@ export default function MapSearchPage() {
                       key={g.id}
                       type="button"
                       onClick={() => setSelectedGender(g.id)}
-                      className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-all ${
+                      className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
                         selectedGender === g.id
                           ? "bg-slate-800 text-white shadow-xs"
                           : "bg-slate-100 text-slate-600 hover:bg-slate-200"
@@ -637,10 +590,10 @@ export default function MapSearchPage() {
                             <span
                               className={`text-[9px] font-bold px-1.5 py-0.5 rounded uppercase shadow-sm ${
                                 property.gender_type === "PUTRI"
-                                    ? "bg-pink-600 text-white"
-                                    : property.gender_type === "PUTRA"
-                                    ? "bg-blue-600 text-white"
-                                    : "bg-purple-600 text-white"
+                                  ? "bg-pink-600 text-white"
+                                  : property.gender_type === "PUTRA"
+                                  ? "bg-blue-600 text-white"
+                                  : "bg-purple-600 text-white"
                               }`}
                             >
                               {property.gender_type}
@@ -728,5 +681,19 @@ export default function MapSearchPage() {
         </div>
       </main>
     </div>
+  );
+}
+
+export default function MapSearchPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center bg-slate-50">
+          <div className="w-8 h-8 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
+        </div>
+      }
+    >
+      <MapSearchContent />
+    </Suspense>
   );
 }

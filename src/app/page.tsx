@@ -1,10 +1,11 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { SearchFilter, FilterValues } from "@/components/shared/SearchFilter";
+import { useRouter } from "next/navigation";
 import { KosPropertyCard } from "@/components/shared/KosPropertyCard";
-import { Loader2, AlertCircle, SearchX } from "lucide-react";
+import { SmartSearchBar } from "@/components/shared/SmartSearchBar";
+import { Loader2, AlertCircle, SearchX, MapPin, Compass } from "lucide-react";
 
 interface PropertyItem {
   id: string;
@@ -22,49 +23,15 @@ interface PropertyItem {
 }
 
 export default function Home() {
+  const router = useRouter();
   const [properties, setProperties] = useState<PropertyItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchProperties = useCallback(async (filters?: FilterValues) => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      const params = new URLSearchParams();
-      if (filters?.name && filters.name.trim()) {
-        params.append("name", filters.name.trim());
-      }
-      if (filters?.maxPrice && filters.maxPrice.trim()) {
-        params.append("maxPrice", filters.maxPrice.trim());
-      }
-      if (filters?.genderType && filters.genderType.trim()) {
-        params.append("genderType", filters.genderType.trim());
-      }
-
-      const queryString = params.toString();
-      const url = queryString
-        ? `/api/properties?${queryString}`
-        : "/api/properties";
-      const res = await fetch(url);
-      const json = await res.json();
-
-      if (json.success && Array.isArray(json.data)) {
-        setProperties(json.data);
-      } else {
-        setError(json.error || "Gagal mengambil data properti");
-      }
-    } catch (err) {
-      console.error("Fetch properties error:", err);
-      setError("Terjadi kesalahan saat memuat data kos");
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
-
   useEffect(() => {
     let isMounted = true;
 
-    async function loadInitialProperties() {
+    async function loadProperties() {
       try {
         const res = await fetch("/api/properties");
         const json = await res.json();
@@ -88,99 +55,139 @@ export default function Home() {
       }
     }
 
-    loadInitialProperties();
+    loadProperties();
 
     return () => {
       isMounted = false;
     };
   }, []);
 
-  return (
-    <main className="max-w-7xl mx-auto min-h-screen relative w-full px-4 sm:px-6 lg:px-8 py-6 flex flex-col">
-      <div className="flex flex-col gap-4 pb-8">
-        {/* Search & Filter Component */}
-        <SearchFilter onSearch={fetchProperties} />
+  const handleSearch = (prompt: string) => {
+    if (prompt.trim()) {
+      router.push(`/map?q=${encodeURIComponent(prompt.trim())}`);
+    }
+  };
 
-        {/* Map Explorer Banner CTA */}
-        <div className="bg-gradient-to-r from-emerald-600 to-teal-700 rounded-2xl p-4 sm:p-5 text-white shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div className="flex items-center gap-3.5">
-            <div className="w-10 h-10 rounded-xl bg-white/15 backdrop-blur flex items-center justify-center text-xl shrink-0">
-              🗺️
-            </div>
-            <div>
-              <h3 className="font-bold text-sm sm:text-base">
-                Cari Kos Berdasarkan Lokasi Peta Interaktif
-              </h3>
-              <p className="text-xs text-emerald-100 mt-0.5">
-                Lihat sebaran kos di Google Maps, cek harga langsung dari marker, dan tentukan lokasi terdekat.
-              </p>
-            </div>
+  return (
+    <main className="max-w-7xl mx-auto min-h-screen relative w-full px-4 sm:px-6 lg:px-8 py-8 flex flex-col gap-10">
+      {/* Hero Section: Google Search-like Experience */}
+      <section className="relative w-full flex flex-col items-center justify-center text-center pt-8 pb-10 sm:pt-14 sm:pb-16 px-4">
+        {/* Subtle background glow decoration */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-2xl h-64 bg-gradient-to-tr from-indigo-100/60 via-purple-50/40 to-emerald-50/50 rounded-full blur-3xl pointer-events-none -z-10" />
+
+        {/* Badge */}
+        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-indigo-50/90 text-indigo-700 text-xs font-semibold mb-5 border border-indigo-200/60 shadow-xs backdrop-blur-xs">
+          <Compass className="w-3.5 h-3.5 text-indigo-600" />
+          <span>Pencarian Cerdas KosPasti</span>
+        </div>
+
+        {/* Main Headline */}
+        <h1 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold text-slate-900 tracking-tight max-w-3xl leading-[1.15]">
+          Cari Kos Impianmu dengan{" "}
+          <span className="bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-800 bg-clip-text text-transparent">
+            Bahasa Sehari-hari
+          </span>
+        </h1>
+
+        {/* Subtitle */}
+        <p className="mt-4 text-sm sm:text-lg text-slate-600 max-w-xl leading-relaxed">
+          Ketik kebutuhan kos Anda seperti lokasi terdekat, budget harga, atau fasilitas tertentu tanpa ribet atur filter manual.
+        </p>
+
+        {/* Smart Search Bar Container */}
+        <div className="w-full max-w-2xl mt-8">
+          <SmartSearchBar
+            variant="hero"
+            onSearch={handleSearch}
+            placeholder='Ketik kebutuhan kos... contoh: "Kos putri dekat UI ada AC harga di bawah 2 juta"'
+          />
+        </div>
+
+        {/* Quick Link to Map */}
+        <div className="mt-5 flex items-center justify-center gap-2 text-xs sm:text-sm text-slate-500">
+          <span>Ingin melihat sebaran langsung di peta?</span>
+          <Link
+            href="/map"
+            className="font-bold text-indigo-600 hover:text-indigo-800 hover:underline inline-flex items-center gap-1"
+          >
+            <MapPin className="w-3.5 h-3.5" />
+            <span>Buka Peta Interaktif →</span>
+          </Link>
+        </div>
+      </section>
+
+      {/* Property List Section */}
+      <section className="flex flex-col gap-6">
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-2 border-b border-slate-200 pb-4">
+          <div>
+            <h2 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
+              Rekomendasi Kos Terbaru
+            </h2>
+            <p className="text-xs sm:text-sm text-slate-500 mt-1">
+              Pilihan kamar kos terverifikasi dan siap huni di berbagai lokasi strategis.
+            </p>
           </div>
           <Link
             href="/map"
-            className="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 bg-white text-emerald-800 hover:bg-emerald-50 rounded-xl text-xs font-bold transition-all shadow-sm shrink-0"
+            className="text-xs sm:text-sm font-semibold text-emerald-600 hover:text-emerald-700 hover:underline self-start sm:self-auto"
           >
-            <span>Buka Peta Kos</span>
-            <span>→</span>
+            Lihat semua di peta →
           </Link>
         </div>
 
-        {/* Property List Section */}
-        <div className="flex flex-col gap-4">
-          {isLoading && (
-            <div className="py-12 flex flex-col items-center justify-center gap-3 text-slate-500">
-              <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
-              <p className="text-sm font-medium">Memuat daftar kos...</p>
-            </div>
-          )}
+        {isLoading && (
+          <div className="py-16 flex flex-col items-center justify-center gap-3 text-slate-500">
+            <Loader2 className="w-8 h-8 animate-spin text-indigo-600" />
+            <p className="text-sm font-medium">Memuat rekomendasi kos...</p>
+          </div>
+        )}
 
-          {!isLoading && error && (
-            <div className="p-4 bg-rose-50 border border-rose-200 rounded-xl text-rose-600 flex items-center gap-2 text-sm">
-              <AlertCircle className="w-5 h-5 shrink-0" />
-              <span>{error}</span>
-            </div>
-          )}
+        {!isLoading && error && (
+          <div className="p-4 bg-rose-50 border border-rose-200 rounded-2xl text-rose-600 flex items-center gap-2 text-sm">
+            <AlertCircle className="w-5 h-5 shrink-0" />
+            <span>{error}</span>
+          </div>
+        )}
 
-          {!isLoading && !error && properties.length === 0 && (
-            <div className="flex flex-col items-center justify-center p-12 text-center bg-white rounded-xl border border-slate-200 border-dashed mt-4">
-              <SearchX className="w-16 h-16 text-slate-300 mb-4" />
-              <h3 className="text-base font-semibold text-slate-800 mb-1">
-                Kos Tidak Ditemukan
-              </h3>
-              <p className="text-xs text-slate-500 max-w-xs leading-relaxed">
-                Maaf, tidak ada kos yang sesuai dengan kriteria pencarian atau filter Anda. Silakan coba atur ulang filter pencarian.
-              </p>
-            </div>
-          )}
+        {!isLoading && !error && properties.length === 0 && (
+          <div className="flex flex-col items-center justify-center p-12 text-center bg-white rounded-2xl border border-slate-200 border-dashed">
+            <SearchX className="w-16 h-16 text-slate-300 mb-4" />
+            <h3 className="text-base font-semibold text-slate-800 mb-1">
+              Belum Ada Kos Tersedia
+            </h3>
+            <p className="text-xs text-slate-500 max-w-xs leading-relaxed">
+              Saat ini belum ada listing kos yang terdaftar di sistem.
+            </p>
+          </div>
+        )}
 
-          {!isLoading && !error && properties.length > 0 && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {properties.map((property) => (
-                <Link
-                  key={property.id}
-                  href={`/kos/${property.id}`}
-                  className="block h-full transition-transform hover:scale-[1.02]"
-                >
-                  <KosPropertyCard
-                    name={property.name}
-                    price={property.price_per_month}
-                    availableRooms={property.available_rooms}
-                    genderType={property.gender_type}
-                    facilities={property.facilities}
-                    imageUrl={property.image_url}
-                    ownerName={property.owner?.name || "Pemilik Kos"}
-                    lastUpdated={
-                      property.last_updated ||
-                      property.updated_at ||
-                      new Date().toISOString()
-                    }
-                  />
-                </Link>
-              ))}
-            </div>
-          )}
-        </div>
-      </div>
+        {!isLoading && !error && properties.length > 0 && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {properties.map((property) => (
+              <Link
+                key={property.id}
+                href={`/kos/${property.id}`}
+                className="block h-full transition-transform duration-200 hover:scale-[1.02]"
+              >
+                <KosPropertyCard
+                  name={property.name}
+                  price={property.price_per_month}
+                  availableRooms={property.available_rooms}
+                  genderType={property.gender_type}
+                  facilities={property.facilities}
+                  imageUrl={property.image_url}
+                  ownerName={property.owner?.name || "Pemilik Kos"}
+                  lastUpdated={
+                    property.last_updated ||
+                    property.updated_at ||
+                    new Date().toISOString()
+                  }
+                />
+              </Link>
+            ))}
+          </div>
+        )}
+      </section>
     </main>
   );
 }
