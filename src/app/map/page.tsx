@@ -14,7 +14,6 @@ import {
   List,
   ArrowRight,
   ArrowLeft,
-  Compass,
   Tag,
 } from "lucide-react";
 
@@ -191,18 +190,18 @@ function MapSearchContent() {
       const result = await res.json();
 
       if (!result.success) {
-        throw new Error(result.error || "Gagal memproses pencarian AI.");
+        throw new Error(result.error || "Gagal memproses pencarian.");
       }
 
       const criteria: AISearchCriteria = result.data;
       setActiveCriteria(criteria);
 
-      // Sinkronkan filter Gender jika diekstrak oleh AI
+      // Sinkronkan filter Gender jika diekstrak
       if (criteria.gender_type) {
         setSelectedGender(criteria.gender_type);
       }
 
-      // Sinkronkan filter Max Price jika diekstrak oleh AI
+      // Sinkronkan filter Max Price jika diekstrak
       if (criteria.max_price !== null && !isNaN(criteria.max_price)) {
         setMaxPrice(criteria.max_price.toString());
       }
@@ -224,7 +223,7 @@ function MapSearchContent() {
           name: criteria.location_intent,
         });
       } else if (criteria.location_intent) {
-        // Fallback geocode jika AI tidak memberikan koordinat
+        // Fallback geocode jika backend tidak memberikan koordinat
         const geoResult = await geocodeLocation(criteria.location_intent, mapsApiKey);
         if (geoResult) {
           setSearchTarget(geoResult);
@@ -235,9 +234,9 @@ function MapSearchContent() {
         setSearchTarget(null);
       }
     } catch (err: unknown) {
-      console.error("Error AI search:", err);
+      console.error("Error search:", err);
       const msg =
-        err instanceof Error ? err.message : "Terjadi kesalahan saat memproses pertanyaan Anda.";
+        err instanceof Error ? err.message : "Terjadi kesalahan saat memproses pencarian Anda.";
       setAiError(msg);
     } finally {
       setIsAiLoading(false);
@@ -265,7 +264,7 @@ function MapSearchContent() {
     processedQueryRef.current = null;
   };
 
-  // Filter & Sort properties based on AI criteria & search target distance
+  // Filter & Sort properties based on criteria & search target distance
   const filteredProperties = useMemo(() => {
     const list = properties
       .map((p) => {
@@ -361,15 +360,11 @@ function MapSearchContent() {
 
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
             <div>
-              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-indigo-50 text-indigo-700 text-xs font-bold mb-1.5 border border-indigo-200/60 shadow-xs">
-                <Compass className="w-3.5 h-3.5 text-indigo-600" />
-                <span>Pencarian Cerdas</span>
-              </div>
               <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
-                Eksplorasi Kos Berdasarkan Lokasi & Kebutuhan
+                Peta & Rekomendasi Lokasi Kos
               </h1>
               <p className="text-sm text-slate-500 mt-0.5">
-                Ketik kebutuhan kos Anda dalam bahasa sehari-hari untuk menemukan rekomendasi terdekat.
+                Ketik kebutuhan kos Anda dalam bahasa sehari-hari untuk menemukan rekomendasi terdekat di peta.
               </p>
             </div>
 
@@ -402,9 +397,9 @@ function MapSearchContent() {
             </div>
           </div>
 
-          {/* AI Search Card */}
+          {/* Search Card */}
           <div className="bg-white p-4 sm:p-5 rounded-3xl border border-slate-200/80 shadow-md mb-4 relative overflow-hidden">
-            <div className="absolute -right-8 -top-8 w-32 h-32 bg-indigo-100/50 rounded-full blur-2xl pointer-events-none"></div>
+            <div className="absolute -right-8 -top-8 w-32 h-32 bg-emerald-100/40 rounded-full blur-2xl pointer-events-none"></div>
 
             <div className="relative z-10">
               <SmartSearchBar
@@ -418,7 +413,7 @@ function MapSearchContent() {
                 onReset={handleResetFilters}
               />
 
-              {/* Active AI Extracted Criteria Badges */}
+              {/* Active Extracted Criteria Badges */}
               {activeCriteria && (
                 <div className="mt-2 pt-3 border-t border-slate-100 flex flex-wrap items-center gap-2">
                   <span className="text-xs font-bold text-slate-700 flex items-center gap-1 mr-1">
@@ -427,7 +422,7 @@ function MapSearchContent() {
                   </span>
 
                   {searchTarget && (
-                    <span className="inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-xl bg-indigo-50 text-indigo-700 border border-indigo-200/80">
+                    <span className="inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200/80">
                       📍 Lokasi: {searchTarget.name}
                     </span>
                   )}
@@ -525,7 +520,7 @@ function MapSearchContent() {
 
             {isLoading ? (
               <div className="flex-1 flex flex-col items-center justify-center p-12 text-slate-400 bg-white rounded-2xl border border-slate-200">
-                <div className="w-8 h-8 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin mb-3"></div>
+                <div className="w-8 h-8 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin mb-3"></div>
                 <p className="text-sm font-medium">Memuat data kos...</p>
               </div>
             ) : filteredProperties.length === 0 ? (
@@ -564,7 +559,7 @@ function MapSearchContent() {
                       }}
                       className={`group bg-white rounded-2xl p-3.5 border transition-all duration-200 cursor-pointer ${
                         isSelected
-                          ? "border-indigo-500 ring-2 ring-indigo-500/20 shadow-md bg-indigo-50/20"
+                          ? "border-emerald-500 ring-2 ring-emerald-500/20 shadow-md bg-emerald-50/20"
                           : isHovered
                           ? "border-slate-400 shadow-md translate-x-1"
                           : "border-slate-200 hover:border-slate-300 shadow-sm"
@@ -618,13 +613,13 @@ function MapSearchContent() {
                               )}
 
                               {typeof property.distance_km === "number" && (
-                                <span className="inline-flex items-center gap-1 font-bold text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded-full text-[10px] border border-indigo-200/60">
+                                <span className="inline-flex items-center gap-1 font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full text-[10px] border border-emerald-200/60">
                                   📍 {property.distance_km} km
                                 </span>
                               )}
                             </div>
 
-                            <h3 className="font-bold text-sm text-slate-900 line-clamp-1 group-hover:text-indigo-600 transition-colors">
+                            <h3 className="font-bold text-sm text-slate-900 line-clamp-1 group-hover:text-emerald-700 transition-colors">
                               {property.name}
                             </h3>
 
@@ -635,7 +630,8 @@ function MapSearchContent() {
                               </p>
                             )}
 
-                            <p className="text-[11px] text-slate-400 line-clamp-1 mt-1">
+                            {/* Breathing room for facilities */}
+                            <p className="text-[11px] text-slate-400 line-clamp-1 mt-1 mb-1.5">
                               {property.facilities}
                             </p>
                           </div>
@@ -649,7 +645,7 @@ function MapSearchContent() {
                             </div>
 
                             <div className="flex items-center gap-2">
-                              <span className="text-[11px] font-semibold text-indigo-600 group-hover:translate-x-0.5 transition-transform flex items-center gap-1">
+                              <span className="text-[11px] font-semibold text-emerald-700 group-hover:translate-x-0.5 transition-transform flex items-center gap-1">
                                 <span>Peta</span>
                                 <ArrowRight className="w-3 h-3" />
                               </span>
@@ -689,7 +685,7 @@ export default function MapSearchPage() {
     <Suspense
       fallback={
         <div className="min-h-screen flex items-center justify-center bg-slate-50">
-          <div className="w-8 h-8 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
+          <div className="w-8 h-8 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin"></div>
         </div>
       }
     >

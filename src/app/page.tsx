@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { KosPropertyCard } from "@/components/shared/KosPropertyCard";
 import { SmartSearchBar } from "@/components/shared/SmartSearchBar";
-import { Loader2, AlertCircle, SearchX, MapPin, Compass } from "lucide-react";
+import { Loader2, AlertCircle, SearchX, MapPin } from "lucide-react";
 
 interface PropertyItem {
   id: string;
@@ -73,19 +73,13 @@ export default function Home() {
       {/* Hero Section: Google Search-like Experience */}
       <section className="relative w-full flex flex-col items-center justify-center text-center pt-8 pb-10 sm:pt-14 sm:pb-16 px-4">
         {/* Subtle background glow decoration */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-2xl h-64 bg-gradient-to-tr from-indigo-100/60 via-purple-50/40 to-emerald-50/50 rounded-full blur-3xl pointer-events-none -z-10" />
-
-        {/* Badge */}
-        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-indigo-50/90 text-indigo-700 text-xs font-semibold mb-5 border border-indigo-200/60 shadow-xs backdrop-blur-xs">
-          <Compass className="w-3.5 h-3.5 text-indigo-600" />
-          <span>Pencarian Cerdas KosPasti</span>
-        </div>
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-2xl h-64 bg-gradient-to-tr from-emerald-100/40 via-teal-50/30 to-slate-50/50 rounded-full blur-3xl pointer-events-none -z-10" />
 
         {/* Main Headline */}
         <h1 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold text-slate-900 tracking-tight max-w-3xl leading-[1.15]">
-          Cari Kos Impianmu dengan{" "}
-          <span className="bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-800 bg-clip-text text-transparent">
-            Bahasa Sehari-hari
+          Cari Kos Impianmu Lebih{" "}
+          <span className="text-emerald-600">
+            Mudah dan Instan
           </span>
         </h1>
 
@@ -108,7 +102,7 @@ export default function Home() {
           <span>Ingin melihat sebaran langsung di peta?</span>
           <Link
             href="/map"
-            className="font-bold text-indigo-600 hover:text-indigo-800 hover:underline inline-flex items-center gap-1"
+            className="font-bold text-emerald-600 hover:text-emerald-700 hover:underline inline-flex items-center gap-1"
           >
             <MapPin className="w-3.5 h-3.5" />
             <span>Buka Peta Interaktif →</span>
@@ -137,7 +131,7 @@ export default function Home() {
 
         {isLoading && (
           <div className="py-16 flex flex-col items-center justify-center gap-3 text-slate-500">
-            <Loader2 className="w-8 h-8 animate-spin text-indigo-600" />
+            <Loader2 className="w-8 h-8 animate-spin text-emerald-600" />
             <p className="text-sm font-medium">Memuat rekomendasi kos...</p>
           </div>
         )}
