@@ -15,6 +15,8 @@ interface PropertyItem {
   gender_type: string;
   facilities: string;
   image_url?: string | null;
+  is_pet_friendly?: boolean;
+  is_24_hours?: boolean;
   last_updated: string;
   updated_at?: string;
   owner?: {
@@ -176,6 +178,8 @@ export default function Home() {
                     property.updated_at ||
                     new Date().toISOString()
                   }
+                  isPetFriendly={property.is_pet_friendly}
+                  is24Hours={property.is_24_hours}
                 />
               </Link>
             ))}

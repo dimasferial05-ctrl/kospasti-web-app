@@ -15,6 +15,10 @@ import {
   ArrowRight,
   ArrowLeft,
   Tag,
+  Clock,
+  Sparkles,
+  Users,
+  SlidersHorizontal,
 } from "lucide-react";
 
 interface AISearchCriteria {
@@ -24,6 +28,8 @@ interface AISearchCriteria {
   max_price: number | null;
   gender_type: "PUTRA" | "PUTRI" | "CAMPUR" | null;
   facilities_keywords: string[];
+  is_pet_friendly?: boolean | null;
+  is_24_hours?: boolean | null;
 }
 
 function calculateDistanceKm(
@@ -316,6 +322,16 @@ function MapSearchContent() {
           }
         }
 
+        // Lifestyle: Pet Friendly filter
+        if (activeCriteria?.is_pet_friendly && !p.is_pet_friendly) {
+          return false;
+        }
+
+        // Lifestyle: 24 Hours Curfew-Free filter
+        if (activeCriteria?.is_24_hours && !p.is_24_hours) {
+          return false;
+        }
+
         return true;
       });
 
@@ -329,7 +345,7 @@ function MapSearchContent() {
     }
 
     return list;
-  }, [properties, selectedGender, maxPrice, facilitiesFilter, searchTarget]);
+  }, [properties, selectedGender, maxPrice, facilitiesFilter, searchTarget, activeCriteria]);
 
   const formatRupiah = (val: number) => {
     return new Intl.NumberFormat("id-ID", {
@@ -418,34 +434,50 @@ function MapSearchContent() {
 
               {/* Active Extracted Criteria Badges */}
               {activeCriteria && (
-                <div className="mt-2 pt-3 border-t border-slate-100 flex flex-wrap items-center gap-2">
-                  <span className="text-xs font-bold text-slate-700 flex items-center gap-1 mr-1">
-                    <List className="w-3.5 h-3.5 text-slate-500" />
-                    Filter Aktif:
+                <div className="mt-3 pt-3 border-t border-slate-100 flex flex-wrap items-center gap-1.5">
+                  <span className="text-[11px] font-semibold text-slate-400 flex items-center gap-1 mr-1 uppercase tracking-wider">
+                    <SlidersHorizontal className="w-3 h-3 text-slate-400" />
+                    Kriteria AI:
                   </span>
 
                   {searchTarget && (
-                    <span className="inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200/80">
-                      📍 Lokasi: {searchTarget.name}
+                    <span className="inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-lg bg-slate-900 text-white shadow-xs">
+                      <MapPin className="w-3 h-3 text-emerald-400" />
+                      <span>{searchTarget.name}</span>
                     </span>
                   )}
 
                   {activeCriteria.gender_type && (
-                    <span className="inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-xl bg-pink-50 text-pink-700 border border-pink-200/80">
-                      👥 Tipe: {activeCriteria.gender_type}
+                    <span className="inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700 border border-slate-200/80">
+                      <Users className="w-3 h-3 text-slate-500" />
+                      <span>Kos {activeCriteria.gender_type}</span>
                     </span>
                   )}
 
                   {activeCriteria.max_price && (
-                    <span className="inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200/80">
-                      💰 Maks: {formatRupiah(activeCriteria.max_price)}
+                    <span className="inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-lg bg-emerald-50 text-emerald-800 border border-emerald-200/80">
+                      <span>Maks. {formatRupiah(activeCriteria.max_price)}</span>
                     </span>
                   )}
 
                   {activeCriteria.facilities_keywords && activeCriteria.facilities_keywords.length > 0 && (
-                    <span className="inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-xl bg-amber-50 text-amber-800 border border-amber-200/80">
-                      <Tag className="w-3 h-3" />
-                      Fasilitas: {activeCriteria.facilities_keywords.join(", ")}
+                    <span className="inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700 border border-slate-200/80">
+                      <Tag className="w-3 h-3 text-slate-400" />
+                      <span>{activeCriteria.facilities_keywords.join(", ")}</span>
+                    </span>
+                  )}
+
+                  {activeCriteria.is_24_hours && (
+                    <span className="inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700 border border-slate-200/80">
+                      <Clock className="w-3 h-3 text-slate-500" />
+                      <span>Akses 24 Jam</span>
+                    </span>
+                  )}
+
+                  {activeCriteria.is_pet_friendly && (
+                    <span className="inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-lg bg-emerald-50 text-emerald-800 border border-emerald-200/80">
+                      <Sparkles className="w-3 h-3 text-emerald-600" />
+                      <span>Boleh Bawa Hewan</span>
                     </span>
                   )}
                 </div>
@@ -633,8 +665,20 @@ function MapSearchContent() {
                               </p>
                             )}
 
-                            {/* Breathing room for facilities */}
-                            <p className="text-[11px] text-slate-400 line-clamp-1 mt-1 mb-1.5">
+                            {/* Lifestyle tags */}
+                            <div className="flex items-center gap-1 flex-wrap mt-1 mb-1">
+                              {property.is_24_hours && (
+                                <span className="text-[10px] font-medium px-1.5 py-0.5 rounded bg-slate-100 text-slate-600 border border-slate-200">
+                                  Akses 24 Jam
+                                </span>
+                              )}
+                              {property.is_pet_friendly && (
+                                <span className="text-[10px] font-medium px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200/80">
+                                  Pet Friendly
+                                </span>
+                              )}
+                            </div>
+                            <p className="text-[11px] text-slate-400 line-clamp-1 mb-1.5">
                               {property.facilities}
                             </p>
                           </div>

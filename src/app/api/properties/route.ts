@@ -9,6 +9,8 @@ export async function GET(request?: Request) {
     const name = searchParams.get("name");
     const maxPrice = searchParams.get("maxPrice");
     const genderType = searchParams.get("genderType");
+    const isPetFriendly = searchParams.get("isPetFriendly");
+    const is24Hours = searchParams.get("is24Hours");
 
     const whereClause: Prisma.PropertyWhereInput = {};
 
@@ -33,6 +35,14 @@ export async function GET(request?: Request) {
       genderType.trim().toUpperCase() !== "ALL"
     ) {
       whereClause.gender_type = genderType.trim().toUpperCase();
+    }
+
+    if (isPetFriendly === "true") {
+      whereClause.is_pet_friendly = true;
+    }
+
+    if (is24Hours === "true") {
+      whereClause.is_24_hours = true;
     }
 
     const rawProperties = await prisma.property.findMany({

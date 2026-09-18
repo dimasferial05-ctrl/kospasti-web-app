@@ -31,6 +31,8 @@ model Property {
   address         String?
   latitude        Float?
   longitude       Float?
+  is_pet_friendly Boolean         @default(false)
+  is_24_hours     Boolean         @default(false)
   created_at      DateTime        @default(now())
   updated_at      DateTime        @updatedAt
   owner_id        String

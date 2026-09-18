@@ -8,6 +8,8 @@ export interface AISearchResult {
   max_price: number | null;
   gender_type: "PUTRA" | "PUTRI" | "CAMPUR" | null;
   facilities_keywords: string[];
+  is_pet_friendly?: boolean | null;
+  is_24_hours?: boolean | null;
 }
 
 const COMMON_LOCATION_COORDINATES: Record<string, { lat: number; lng: number }> = {
@@ -427,16 +429,36 @@ function fallbackExtractCriteria(prompt: string): AISearchResult {
   if (/\b(parkir|parkiran|garasi)\b/i.test(lower)) facilities_keywords.push("Parkir");
   if (/\b(kasur|springbed|bed)\b/i.test(lower)) facilities_keywords.push("Kasur");
   if (/\b(lemari)\b/i.test(lower)) facilities_keywords.push("Lemari");
-  if (/\b(dapur)\b/i.test(lower)) facilities_keywords.push("Dapur");
-  if (/\b(water\s*heater)\b/i.test(lower)) facilities_keywords.push("Water Heater");
+  if (/\b(dapur|pantry)\b/i.test(lower)) facilities_keywords.push("Dapur");
+  if (/\b(water\s*heater|air\s*panas)\b/i.test(lower)) facilities_keywords.push("Water Heater");
+  if (/\b(cctv|keamanan|satpam)\b/i.test(lower)) facilities_keywords.push("Keamanan / CCTV");
 
-  // 4. Location extraction
+  // 4. Lifestyle extraction (Pet Friendly & 24 Hours Curfew-Free)
+  let is_pet_friendly: boolean | null = null;
+  if (
+    /\b(pet\s*friendly|bawa\s*hewan|bawa\s*kucing|bawa\s*anjing|peliharaan|boleh\s*hewan|bawa\s*pet)\b/i.test(
+      lower
+    )
+  ) {
+    is_pet_friendly = true;
+  }
+
+  let is_24_hours: boolean | null = null;
+  if (
+    /\b(24\s*jam|bebas\s*jam\s*malam|akses\s*24\s*jam|tanpa\s*jam\s*malam|bebas\s*akses|gerbang\s*24\s*jam)\b/i.test(
+      lower
+    )
+  ) {
+    is_24_hours = true;
+  }
+
+  // 5. Location extraction
   let location_intent: string | null = null;
   let target_latitude: number | null = null;
   let target_longitude: number | null = null;
 
   const locMatch = lower.match(
-    /(?:dekat|deket|sekitar|area|daerah|di)\s+([a-z0-9\s.]+?)(?=\s+(?:harga|fasilitas|ada|khusus|budget|maks|di\s*bawah|putra|putri|campur|\d|$))/i
+    /(?:dekat|deket|sekitar|area|daerah|di)\s+([a-z0-9\s.]+?)(?=\s+(?:harga|fasilitas|ada|khusus|budget|maks|di\s*bawah|putra|putri|campur|bebas|bisa|boleh|bawa|\d|$))/i
   );
   if (locMatch && locMatch[1].trim().length > 1) {
     location_intent = locMatch[1].trim();
@@ -454,6 +476,8 @@ function fallbackExtractCriteria(prompt: string): AISearchResult {
     max_price,
     gender_type,
     facilities_keywords,
+    is_pet_friendly,
+    is_24_hours,
   };
 }
 
@@ -490,7 +514,9 @@ Aturan Ekstraksi:
 3. target_longitude: Estimasi angka Longitude geografis lokasi target tersebut di Indonesia. Jika tidak ada lokasi tujuan, kembalikan null.
 4. max_price: Angka batas maksimal harga sewa per bulan dalam Rupiah (number/integer). Contoh: "di bawah 2 juta" -> 2000000, "maksimal 1.5 jt" -> 1500000, "budget 800rb" -> 800000. Jika tidak disebutkan batas harga, kembalikan null.
 5. gender_type: Jenis kelamin/tipe kos. Hanya boleh salah satu dari: "PUTRA", "PUTRI", "CAMPUR", atau null jika tidak spesifik.
-6. facilities_keywords: Array kata kunci fasilitas yang diinginkan (contoh: ["AC", "WiFi", "Kamar Mandi Dalam", "Parkir Mobil"]). Jika tidak ada fasilitas spesifik yang dicari, kembalikan array kosong [].`;
+6. facilities_keywords: Array kata kunci fasilitas yang diinginkan (contoh: ["AC", "WiFi", "Kamar Mandi Dalam", "Dapur Bersama", "Parkir Mobil"]). Jika tidak ada fasilitas spesifik yang dicari, kembalikan array kosong [].
+7. is_pet_friendly: Boolean (true jika pengguna mencari kos yang memperbolehkan hewan peliharaan / kucing / anjing / pet friendly, false atau null jika tidak disebutkan).
+8. is_24_hours: Boolean (true jika pengguna mencari kos bebas jam malam, akses 24 jam, atau tanpa jam malam, false atau null jika tidak disebutkan).`;
 
     const generateConfig = {
       systemInstruction,
@@ -527,6 +553,16 @@ Aturan Ekstraksi:
             type: Type.ARRAY,
             items: { type: Type.STRING },
             description: "Daftar kata kunci fasilitas yang dicari",
+          },
+          is_pet_friendly: {
+            type: Type.BOOLEAN,
+            description: "True jika mencari kos yang memperbolehkan hewan peliharaan (kucing/anjing), null jika tidak disebutkan",
+            nullable: true,
+          },
+          is_24_hours: {
+            type: Type.BOOLEAN,
+            description: "True jika mencari kos bebas jam malam / akses 24 jam, null jika tidak disebutkan",
+            nullable: true,
           },
         },
         required: ["facilities_keywords"],
