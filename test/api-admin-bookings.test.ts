@@ -56,6 +56,8 @@ describe("GET /api/admin/bookings", () => {
           email: "budi.akun@example.com",
           password: "hashedpassword123",
           whatsapp: "081111111111",
+          avatar: "/uploads/avatars/budi.png",
+          bio: "Mahasiswa tingkat akhir",
         },
       });
 
@@ -101,6 +103,8 @@ describe("GET /api/admin/bookings", () => {
       expect(result.data[1].student_name).toBe("Budi Santoso");
       expect(result.data[1].student_whatsapp).toBe("081111111111");
       expect(result.data[1].user.name).toBe("Budi Santoso Akun");
+      expect(result.data[1].user.avatar).toBe("/uploads/avatars/budi.png");
+      expect(result.data[1].user.bio).toBe("Mahasiswa tingkat akhir");
       expect(result.data[1].status).toBe("PENDING");
       expect(result.data[1].property.name).toBe("Kos Melati Indah");
     });

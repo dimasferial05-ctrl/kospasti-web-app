@@ -55,6 +55,7 @@ describe("Admin Layout & Protection Component (/admin/layout)", () => {
     expect(html).toContain("Dashboard");
     expect(html).toContain("Kelola Properti");
     expect(html).toContain("Pemilik Kos");
+    expect(html).toContain("Data Pengguna");
     expect(html).toContain("Data Transaksi");
   });
 
@@ -74,6 +75,8 @@ describe("Admin Layout & Protection Component (/admin/layout)", () => {
     expect(content).toContain("Kelola Properti");
     expect(content).toContain('href="/admin/owners"');
     expect(content).toContain("Pemilik Kos");
+    expect(content).toContain('href="/admin/users"');
+    expect(content).toContain("Data Pengguna");
     expect(content).toContain('href="/admin/bookings"');
     expect(content).toContain("Data Transaksi");
 

@@ -155,5 +155,22 @@ describe("Manage Bookings Page (/admin/bookings)", () => {
       expect(content).toContain("Laporan_KosPasti_");
     });
   });
+
+  describe("Fitur Avatar & Detail Profil Pemesan (Issue #156)", () => {
+    it("memiliki avatar thumbnail dan modal dialog detail profil pemesan", () => {
+      const filePath = path.resolve(
+        __dirname,
+        "../src/app/admin/bookings/page.tsx"
+      );
+      const content = fs.readFileSync(filePath, "utf-8");
+
+      expect(content).toContain("selectedUser");
+      expect(content).toContain("setSelectedUser");
+      expect(content).toContain("Detail Profil Pemesan");
+      expect(content).toContain("Bio / Deskripsi Diri");
+      expect(content).toContain("userAvatar");
+    });
+  });
 });
+
 

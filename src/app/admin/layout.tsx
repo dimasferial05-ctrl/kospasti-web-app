@@ -7,6 +7,7 @@ import {
   Building,
   Users,
   FileText,
+  User,
   LogOut,
   Loader2,
   Menu,
@@ -126,6 +127,17 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             href="/admin/owners"
           >
             <Users size={20} /> Pemilik Kos
+          </Link>
+          <Link
+            onClick={closeMobileMenu}
+            className={`flex items-center gap-3 p-3 rounded-lg transition-colors ${
+              pathname?.startsWith("/admin/users")
+                ? "bg-slate-800 text-white font-semibold"
+                : "hover:bg-slate-800 hover:text-white"
+            }`}
+            href="/admin/users"
+          >
+            <User size={20} /> Data Pengguna
           </Link>
           <Link
             onClick={closeMobileMenu}
