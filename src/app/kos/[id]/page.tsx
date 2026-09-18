@@ -14,6 +14,8 @@ import {
   ChevronRight,
   Play,
   Camera,
+  Clock,
+  Sparkles,
 } from "lucide-react";
 
 interface PropertyMediaItem {
@@ -32,6 +34,8 @@ interface PropertyDetail {
   image_url?: string | null;
   media?: PropertyMediaItem[];
   description?: string | null;
+  is_pet_friendly?: boolean;
+  is_24_hours?: boolean;
   updated_at?: string;
   owner?: {
     name: string;
@@ -440,6 +444,74 @@ export default function PropertyDetailPage() {
                   {property.facilities || "Tidak ada rincian fasilitas"}
                 </p>
               )}
+
+              {/* Aturan & Kebijakan Kos */}
+              <div className="mt-2 pt-3 border-t border-slate-100">
+                <h4 className="text-xs font-bold text-slate-800 mb-2.5">
+                  Aturan & Kebijakan
+                </h4>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  <div
+                    className={`flex items-center gap-2.5 text-xs p-2.5 rounded-lg border ${
+                      property.is_24_hours
+                        ? "bg-slate-50/80 text-slate-800 border-slate-200"
+                        : "bg-slate-50/40 text-slate-500 border-slate-200/60"
+                    }`}
+                  >
+                    <div
+                      className={`w-6 h-6 rounded-md flex items-center justify-center shrink-0 ${
+                        property.is_24_hours
+                          ? "bg-slate-200 text-slate-700"
+                          : "bg-slate-100 text-slate-400"
+                      }`}
+                    >
+                      <Clock className="w-3.5 h-3.5" />
+                    </div>
+                    <div>
+                      <p className="font-semibold">
+                        {property.is_24_hours
+                          ? "Akses 24 Jam"
+                          : "Ada Jam Malam"}
+                      </p>
+                      <p className="text-[11px] text-slate-500">
+                        {property.is_24_hours
+                          ? "Bebas keluar masuk tanpa jam malam"
+                          : "Gerbang dikunci pada jam tertentu"}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div
+                    className={`flex items-center gap-2.5 text-xs p-2.5 rounded-lg border ${
+                      property.is_pet_friendly
+                        ? "bg-emerald-50/40 text-emerald-900 border-emerald-200"
+                        : "bg-slate-50/40 text-slate-500 border-slate-200/60"
+                    }`}
+                  >
+                    <div
+                      className={`w-6 h-6 rounded-md flex items-center justify-center shrink-0 ${
+                        property.is_pet_friendly
+                          ? "bg-emerald-100 text-emerald-700"
+                          : "bg-slate-100 text-slate-400"
+                      }`}
+                    >
+                      <Sparkles className="w-3.5 h-3.5" />
+                    </div>
+                    <div>
+                      <p className="font-semibold">
+                        {property.is_pet_friendly
+                          ? "Boleh Bawa Hewan"
+                          : "Dilarang Bawa Hewan"}
+                      </p>
+                      <p className="text-[11px] text-slate-500">
+                        {property.is_pet_friendly
+                          ? "Hewan peliharaan (kucing/anjing) diizinkan"
+                          : "Tidak diperkenankan membawa peliharaan"}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
 
               {property.description && (
                 <div className="mt-2 pt-3 border-t border-slate-100">

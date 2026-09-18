@@ -23,6 +23,8 @@ export interface PropertyMapItem {
   latitude?: number | null;
   longitude?: number | null;
   distance_km?: number | null;
+  is_pet_friendly?: boolean;
+  is_24_hours?: boolean;
   owner?: {
     name: string;
   };

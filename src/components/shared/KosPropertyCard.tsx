@@ -10,6 +10,8 @@ export interface KosPropertyCardProps {
   imageUrl?: string | null;
   ownerName: string;
   lastUpdated: string;
+  isPetFriendly?: boolean;
+  is24Hours?: boolean;
 }
 
 export function KosPropertyCard({
@@ -21,6 +23,8 @@ export function KosPropertyCard({
   imageUrl,
   ownerName,
   lastUpdated,
+  isPetFriendly,
+  is24Hours,
 }: KosPropertyCardProps) {
   // Format mata uang Rupiah
   const formattedPrice = `Rp ${price.toLocaleString("id-ID")} / bulan`;
@@ -89,11 +93,27 @@ export function KosPropertyCard({
           </span>
         </div>
 
-        {/* Price */}
-        <div>
-          <span className="text-base sm:text-lg font-bold text-emerald-600">
-            {formattedPrice}
-          </span>
+        {/* Price & Lifestyle Badges */}
+        <div className="flex flex-wrap items-baseline justify-between gap-1.5">
+          <div className="flex items-baseline gap-1">
+            <span className="text-base sm:text-lg font-bold text-emerald-600 tracking-tight">
+              Rp {price.toLocaleString("id-ID")}
+            </span>
+            <span className="text-xs text-slate-400 font-normal">/ bulan</span>
+          </div>
+
+          <div className="flex items-center gap-1 flex-wrap">
+            {is24Hours && (
+              <span className="text-[10px] font-medium px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 border border-slate-200/80" title="Akses 24 Jam / Bebas Jam Malam">
+                Akses 24 Jam
+              </span>
+            )}
+            {isPetFriendly && (
+              <span className="text-[10px] font-medium px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200/80" title="Boleh membawa hewan peliharaan">
+                Pet Friendly
+              </span>
+            )}
+          </div>
         </div>
 
         {/* Additional Info: Owner & Facilities with extra breathing room */}
