@@ -65,6 +65,8 @@ export async function PATCH(
     let latitude: number | string | null | undefined;
     let longitude: number | string | null | undefined;
     let owner_id: string | undefined;
+    let is_pet_friendly: boolean | undefined;
+    let is_24_hours: boolean | undefined;
     const newMediaToCreate: { url: string; type: string }[] = [];
 
     if (contentType.includes("multipart/form-data")) {
@@ -88,6 +90,14 @@ export async function PATCH(
         longitude = formData.get("longitude") as string | undefined;
       if (formData.has("owner_id"))
         owner_id = (formData.get("owner_id") as string) ?? undefined;
+      if (formData.has("is_pet_friendly")) {
+        const val = formData.get("is_pet_friendly");
+        is_pet_friendly = val === "true" || val === "1";
+      }
+      if (formData.has("is_24_hours")) {
+        const val = formData.get("is_24_hours");
+        is_24_hours = val === "true" || val === "1";
+      }
 
       const filesFromMedia = formData.getAll("media");
       const filesFromFiles = formData.getAll("files");
@@ -123,6 +133,12 @@ export async function PATCH(
       latitude = body.latitude;
       longitude = body.longitude;
       owner_id = body.owner_id;
+      if (body.is_pet_friendly !== undefined) {
+        is_pet_friendly = Boolean(body.is_pet_friendly);
+      }
+      if (body.is_24_hours !== undefined) {
+        is_24_hours = Boolean(body.is_24_hours);
+      }
 
       if (Array.isArray(body.media)) {
         for (const m of body.media) {
@@ -152,6 +168,8 @@ export async function PATCH(
       latitude?: number | null;
       longitude?: number | null;
       owner_id?: string;
+      is_pet_friendly?: boolean;
+      is_24_hours?: boolean;
       media?: {
         create?: { url: string; type: string }[];
       };
@@ -332,6 +350,14 @@ export async function PATCH(
       }
 
       updateData.owner_id = owner_id.trim();
+    }
+
+    if (is_pet_friendly !== undefined) {
+      updateData.is_pet_friendly = is_pet_friendly;
+    }
+
+    if (is_24_hours !== undefined) {
+      updateData.is_24_hours = is_24_hours;
     }
 
     if (newMediaToCreate.length > 0) {

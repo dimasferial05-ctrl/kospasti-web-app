@@ -80,6 +80,8 @@ export async function POST(request: NextRequest) {
     let latitude: number | string | null | undefined;
     let longitude: number | string | null | undefined;
     let owner_id: string | undefined;
+    let is_pet_friendly: boolean = false;
+    let is_24_hours: boolean = false;
     const mediaToCreate: { url: string; type: string }[] = [];
 
     if (contentType.includes("multipart/form-data")) {
@@ -94,6 +96,12 @@ export async function POST(request: NextRequest) {
       latitude = formData.get("latitude") as string | undefined;
       longitude = formData.get("longitude") as string | undefined;
       owner_id = (formData.get("owner_id") as string) || undefined;
+      is_pet_friendly =
+        formData.get("is_pet_friendly") === "true" ||
+        formData.get("is_pet_friendly") === "1";
+      is_24_hours =
+        formData.get("is_24_hours") === "true" ||
+        formData.get("is_24_hours") === "1";
 
       // Ambil file media yang diunggah
       const filesFromMedia = formData.getAll("media");
@@ -130,6 +138,8 @@ export async function POST(request: NextRequest) {
       latitude = body.latitude;
       longitude = body.longitude;
       owner_id = body.owner_id;
+      is_pet_friendly = Boolean(body.is_pet_friendly);
+      is_24_hours = Boolean(body.is_24_hours);
 
       if (Array.isArray(body.media)) {
         for (const m of body.media) {
@@ -260,6 +270,8 @@ export async function POST(request: NextRequest) {
         latitude: parsedLatitude,
         longitude: parsedLongitude,
         owner_id: owner_id.trim(),
+        is_pet_friendly: is_pet_friendly,
+        is_24_hours: is_24_hours,
         media: {
           create: mediaToCreate,
         },

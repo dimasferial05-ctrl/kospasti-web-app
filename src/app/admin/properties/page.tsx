@@ -15,6 +15,9 @@ import {
   Trash2,
   Star,
   Play,
+  Clock,
+  Sparkles,
+  MapPin,
 } from "lucide-react";
 
 interface OwnerOption {
@@ -40,6 +43,8 @@ interface PropertyAdminItem {
   address?: string | null;
   latitude?: number | null;
   longitude?: number | null;
+  is_pet_friendly?: boolean;
+  is_24_hours?: boolean;
   media?: PropertyMediaItem[];
   owner_id: string;
   owner?: OwnerOption | null;
@@ -56,6 +61,8 @@ interface PropertyFormData {
   address: string;
   latitude: string;
   longitude: string;
+  is_pet_friendly: boolean;
+  is_24_hours: boolean;
 }
 
 const initialFormData: PropertyFormData = {
@@ -69,6 +76,8 @@ const initialFormData: PropertyFormData = {
   address: "",
   latitude: "",
   longitude: "",
+  is_pet_friendly: false,
+  is_24_hours: false,
 };
 
 export default function ManagePropertiesPage() {
@@ -155,6 +164,8 @@ export default function ManagePropertiesPage() {
       address: "",
       latitude: "",
       longitude: "",
+      is_pet_friendly: false,
+      is_24_hours: false,
     });
     setSelectedFiles([]);
     setFormError(null);
@@ -178,6 +189,8 @@ export default function ManagePropertiesPage() {
       address: prop.address || "",
       latitude: prop.latitude !== undefined && prop.latitude !== null ? String(prop.latitude) : "",
       longitude: prop.longitude !== undefined && prop.longitude !== null ? String(prop.longitude) : "",
+      is_pet_friendly: Boolean(prop.is_pet_friendly),
+      is_24_hours: Boolean(prop.is_24_hours),
     });
     setSelectedFiles([]);
     setFormError(null);
@@ -356,6 +369,8 @@ export default function ManagePropertiesPage() {
       data.append("address", formData.address.trim());
       data.append("latitude", formData.latitude.trim());
       data.append("longitude", formData.longitude.trim());
+      data.append("is_pet_friendly", String(formData.is_pet_friendly));
+      data.append("is_24_hours", String(formData.is_24_hours));
       if (formData.image_url.trim()) {
         data.append("image_url", formData.image_url.trim());
       }
@@ -536,8 +551,24 @@ export default function ManagePropertiesPage() {
                 <tr key={prop.id} className="hover:bg-slate-50 transition-colors">
                   <td className="p-4">
                     <div className="font-bold text-slate-800">{prop.name}</div>
+                    {(prop.is_24_hours || prop.is_pet_friendly) && (
+                      <div className="flex items-center gap-1.5 flex-wrap mt-1">
+                        {prop.is_24_hours && (
+                          <span className="inline-flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 border border-slate-200/80">
+                            <Clock size={10} className="text-slate-500" />
+                            <span>24 Jam</span>
+                          </span>
+                        )}
+                        {prop.is_pet_friendly && (
+                          <span className="inline-flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-800 border border-emerald-200/80">
+                            <Sparkles size={10} className="text-emerald-600" />
+                            <span>Pet Friendly</span>
+                          </span>
+                        )}
+                      </div>
+                    )}
                     {prop.facilities && (
-                      <div className="text-xs text-slate-400 truncate max-w-xs">
+                      <div className="text-xs text-slate-400 truncate max-w-xs mt-0.5">
                         {prop.facilities}
                       </div>
                     )}
@@ -798,15 +829,13 @@ export default function ManagePropertiesPage() {
                 </p>
               </div>
 
-              {/* Alamat & Koordinat Peta Google Maps */}
+              {/* Alamat & Koordinat Peta */}
               <div className="p-3.5 bg-slate-50 border border-slate-200/80 rounded-xl space-y-3">
-                <div className="flex items-center justify-between">
+                <div className="flex items-center gap-1.5">
+                  <MapPin size={14} className="text-slate-500" />
                   <label className="block text-xs font-bold text-slate-800">
-                    📍 Lokasi &amp; Koordinat Google Maps (Opsional)
+                    Lokasi &amp; Titik Koordinat (Opsional)
                   </label>
-                  <span className="text-[10px] text-emerald-600 font-semibold bg-emerald-50 px-2 py-0.5 rounded">
-                    Untuk Peta Kos
-                  </span>
                 </div>
 
                 <div>
@@ -848,9 +877,107 @@ export default function ManagePropertiesPage() {
                     />
                   </div>
                 </div>
-                <p className="text-[10px] text-slate-400">
-                  💡 <strong>Tips:</strong> Buka Google Maps di browser, klik kanan pada lokasi kos, lalu pilih angka koordinat paling atas untuk disalin ke sini.
+                <p className="text-[11px] text-slate-400">
+                  Salin koordinat dari Google Maps (klik kanan pada lokasi kos &rarr; salin angka koordinat).
                 </p>
+              </div>
+
+              {/* Kebijakan & Akses */}
+              <div className="space-y-2">
+                <label className="block text-xs font-semibold text-slate-700">
+                  Kebijakan &amp; Akses Properti
+                </label>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                  {/* Akses 24 Jam */}
+                  <label
+                    className={`flex items-start gap-3 p-3 rounded-xl border transition-all cursor-pointer select-none ${
+                      formData.is_24_hours
+                        ? "bg-slate-900 border-slate-900 text-white shadow-xs"
+                        : "bg-white border-slate-200 text-slate-700 hover:border-slate-300 hover:bg-slate-50/60"
+                    }`}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={formData.is_24_hours}
+                      onChange={(e) =>
+                        setFormData({ ...formData, is_24_hours: e.target.checked })
+                      }
+                      className="sr-only"
+                    />
+                    <div
+                      className={`w-4 h-4 rounded mt-0.5 flex items-center justify-center shrink-0 border transition-colors ${
+                        formData.is_24_hours
+                          ? "bg-white text-slate-900 border-white"
+                          : "border-slate-300 bg-white"
+                      }`}
+                    >
+                      {formData.is_24_hours && (
+                        <CheckCircle2 className="w-3.5 h-3.5 fill-slate-900 text-white" />
+                      )}
+                    </div>
+                    <div className="text-xs">
+                      <div className="font-semibold flex items-center gap-1.5">
+                        <Clock
+                          size={13}
+                          className={formData.is_24_hours ? "text-slate-300" : "text-slate-400"}
+                        />
+                        <span>Akses 24 Jam</span>
+                      </div>
+                      <p
+                        className={`text-[11px] mt-0.5 ${
+                          formData.is_24_hours ? "text-slate-300" : "text-slate-400"
+                        }`}
+                      >
+                        Bebas jam malam
+                      </p>
+                    </div>
+                  </label>
+
+                  {/* Pet Friendly */}
+                  <label
+                    className={`flex items-start gap-3 p-3 rounded-xl border transition-all cursor-pointer select-none ${
+                      formData.is_pet_friendly
+                        ? "bg-emerald-900 border-emerald-900 text-white shadow-xs"
+                        : "bg-white border-slate-200 text-slate-700 hover:border-slate-300 hover:bg-slate-50/60"
+                    }`}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={formData.is_pet_friendly}
+                      onChange={(e) =>
+                        setFormData({ ...formData, is_pet_friendly: e.target.checked })
+                      }
+                      className="sr-only"
+                    />
+                    <div
+                      className={`w-4 h-4 rounded mt-0.5 flex items-center justify-center shrink-0 border transition-colors ${
+                        formData.is_pet_friendly
+                          ? "bg-white text-emerald-900 border-white"
+                          : "border-slate-300 bg-white"
+                      }`}
+                    >
+                      {formData.is_pet_friendly && (
+                        <CheckCircle2 className="w-3.5 h-3.5 fill-emerald-900 text-white" />
+                      )}
+                    </div>
+                    <div className="text-xs">
+                      <div className="font-semibold flex items-center gap-1.5">
+                        <Sparkles
+                          size={13}
+                          className={formData.is_pet_friendly ? "text-emerald-200" : "text-slate-400"}
+                        />
+                        <span>Pet Friendly</span>
+                      </div>
+                      <p
+                        className={`text-[11px] mt-0.5 ${
+                          formData.is_pet_friendly ? "text-emerald-200" : "text-slate-400"
+                        }`}
+                      >
+                        Boleh bawa hewan
+                      </p>
+                    </div>
+                  </label>
+                </div>
               </div>
 
               {/* Media Tersimpan (Hanya Tampil saat Edit Properti) */}
