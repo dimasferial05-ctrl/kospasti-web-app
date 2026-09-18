@@ -30,6 +30,8 @@ export async function GET() {
           name: payload.name,
           email: payload.email,
           whatsapp: payload.whatsapp ?? null,
+          avatar: payload.avatar ?? null,
+          bio: payload.bio ?? null,
         },
       },
       { status: 200 }
