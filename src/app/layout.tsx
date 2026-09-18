@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { cookies } from "next/headers";
 import { Header } from "@/components/shared/Header";
+import { ProfileCompletionModal } from "@/components/shared/ProfileCompletionModal";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -33,6 +34,7 @@ export default async function RootLayout({
     <html lang="id" className={`${geistSans.variable} ${geistMono.variable} h-full`}>
       <body className="bg-slate-50 text-slate-900 antialiased font-sans min-h-screen">
         <Header isLoggedIn={isLoggedIn} />
+        <ProfileCompletionModal />
         {children}
       </body>
     </html>
