@@ -5,6 +5,8 @@ export interface UserTokenPayload extends JWTPayload {
   email: string;
   name: string;
   whatsapp?: string | null;
+  avatar?: string | null;
+  bio?: string | null;
 }
 
 const JWT_SECRET = process.env.JWT_SECRET || "kospasti-user-jwt-secret-key-min-32-chars-secure-2026";
@@ -18,12 +20,16 @@ export async function signUserToken(payload: {
   email: string;
   name: string;
   whatsapp?: string | null;
+  avatar?: string | null;
+  bio?: string | null;
 }): Promise<string> {
   return new SignJWT({
     userId: payload.userId,
     email: payload.email,
     name: payload.name,
     whatsapp: payload.whatsapp ?? null,
+    avatar: payload.avatar ?? null,
+    bio: payload.bio ?? null,
   })
     .setProtectedHeader({ alg: "HS256" })
     .setIssuedAt()

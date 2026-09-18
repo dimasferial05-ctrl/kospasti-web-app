@@ -60,6 +60,8 @@ describe("GET /api/auth/me", () => {
       email: "budi@example.com",
       name: "Budi Santoso",
       whatsapp: "081234567890",
+      avatar: null,
+      bio: null,
     });
   });
 });

@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
-import { LogOut, Loader2, LogIn } from "lucide-react";
+import { LogOut, Loader2, LogIn, User } from "lucide-react";
 
 interface HeaderProps {
   isLoggedIn?: boolean;
@@ -86,18 +86,32 @@ export function Header({ isLoggedIn: initialIsLoggedIn = false }: HeaderProps) {
             </Link>
 
             {isLoggedIn ? (
-              <button
-                onClick={handleLogout}
-                disabled={isLoggingOut}
-                className="flex items-center gap-2 px-3.5 py-1.5 text-sm font-medium text-rose-600 bg-rose-50 hover:bg-rose-100 rounded-lg transition-colors disabled:opacity-50 cursor-pointer"
-              >
-                {isLoggingOut ? (
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                ) : (
-                  <LogOut className="w-4 h-4" />
-                )}
-                <span>{isLoggingOut ? "Keluar..." : "Keluar Akun"}</span>
-              </button>
+              <div className="flex items-center gap-2">
+                <Link
+                  href="/profil"
+                  className={`flex items-center gap-1.5 px-3 py-1.5 text-sm font-semibold rounded-lg transition-colors ${
+                    pathname === "/profil"
+                      ? "text-emerald-700 bg-emerald-50 border border-emerald-200"
+                      : "text-slate-700 hover:text-emerald-600 hover:bg-slate-100"
+                  }`}
+                >
+                  <User className="w-4 h-4" />
+                  <span className="hidden sm:inline">Profil Saya</span>
+                </Link>
+
+                <button
+                  onClick={handleLogout}
+                  disabled={isLoggingOut}
+                  className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-rose-600 bg-rose-50 hover:bg-rose-100 rounded-lg transition-colors disabled:opacity-50 cursor-pointer"
+                >
+                  {isLoggingOut ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <LogOut className="w-4 h-4" />
+                  )}
+                  <span className="hidden sm:inline">{isLoggingOut ? "Keluar..." : "Keluar"}</span>
+                </button>
+              </div>
             ) : (
               <Link
                 href="/login"

@@ -82,6 +82,7 @@ model User {
   password   String?
   whatsapp   String?
   avatar     String?
+  bio        String?
   google_id  String?   @unique
   created_at DateTime  @default(now())
   updated_at DateTime  @updatedAt
