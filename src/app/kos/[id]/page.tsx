@@ -17,6 +17,7 @@ import {
   Clock,
   Sparkles,
 } from "lucide-react";
+import PropertyLocationMap from "@/components/PropertyLocationMap";
 
 interface PropertyMediaItem {
   id?: string;
@@ -34,6 +35,9 @@ interface PropertyDetail {
   image_url?: string | null;
   media?: PropertyMediaItem[];
   description?: string | null;
+  address?: string | null;
+  latitude?: number | null;
+  longitude?: number | null;
   is_pet_friendly?: boolean;
   is_24_hours?: boolean;
   updated_at?: string;
@@ -141,10 +145,14 @@ export default function PropertyDetailPage() {
   };
 
   useEffect(() => {
+    // Scroll ke paling atas saat halaman dimuat
+    if (typeof window !== "undefined") {
+      window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+    }
     // Mendapatkan format YYYY-MM-DD hari ini di sisi client
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setMinDate(new Date().toISOString().split("T")[0]);
-  }, []);
+  }, [id]);
 
   useEffect(() => {
     let isMounted = true;
@@ -524,6 +532,14 @@ export default function PropertyDetailPage() {
                 </div>
               )}
             </div>
+
+            {/* Lokasi & Rute Google Maps */}
+            <PropertyLocationMap
+              propertyName={property.name}
+              address={property.address}
+              latitude={property.latitude}
+              longitude={property.longitude}
+            />
 
             {/* Info Pemilik */}
             <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-xs flex items-center justify-between">
