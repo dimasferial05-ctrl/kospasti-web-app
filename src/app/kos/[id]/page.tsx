@@ -473,13 +473,13 @@ export default function PropertyDetailPage() {
 
             {/* Pilihan Tipe Kamar */}
             {property.room_types && property.room_types.length > 0 && (
-              <div className="bg-white p-5 sm:p-6 rounded-2xl sm:rounded-3xl border border-slate-200/80 shadow-soft flex flex-col gap-4">
+              <div className="bg-white p-5 sm:p-6 rounded-2xl border border-slate-200/90 shadow-xs flex flex-col gap-4">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
+                    <span className="w-2 h-2 rounded-full bg-emerald-600"></span>
                     <h3 className="text-base font-bold text-slate-900">Pilihan Tipe Kamar</h3>
                   </div>
-                  <span className="text-xs font-semibold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200">
+                  <span className="text-xs font-medium text-slate-600 bg-slate-100 px-2.5 py-1 rounded-md border border-slate-200">
                     {property.room_types.length} Tipe Tersedia
                   </span>
                 </div>
@@ -496,16 +496,16 @@ export default function PropertyDetailPage() {
                       <div
                         key={rt.id}
                         onClick={() => handleSelectRoomType(rt)}
-                        className={`group p-3.5 sm:p-4 rounded-2xl border transition-all duration-200 cursor-pointer flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3.5 ${
+                        className={`group p-3.5 sm:p-4 rounded-xl border transition-all duration-200 cursor-pointer flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3.5 ${
                           isSelected
-                            ? "border-emerald-500 bg-emerald-50/50 ring-2 ring-emerald-500/20 shadow-xs"
-                            : "border-slate-200 hover:border-slate-300 bg-white hover:bg-slate-50/60"
+                            ? "border-emerald-600 bg-emerald-50/40 shadow-xs"
+                            : "border-slate-200 hover:border-slate-300 bg-white hover:bg-slate-50/50"
                         }`}
                       >
                         {/* Thumbnail & Title/Facilities */}
                         <div className="flex items-start sm:items-center gap-3.5 flex-1 min-w-0">
                           {rt.image_url ? (
-                            <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-xl overflow-hidden bg-slate-100 shrink-0 relative border border-slate-200/80 shadow-2xs">
+                            <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-lg overflow-hidden bg-slate-100 shrink-0 relative border border-slate-200/80">
                               {/* eslint-disable-next-line @next/next/no-img-element */}
                               <img
                                 src={rt.image_url}
@@ -514,7 +514,7 @@ export default function PropertyDetailPage() {
                               />
                             </div>
                           ) : (
-                            <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-xl bg-slate-100 flex items-center justify-center shrink-0 border border-slate-200/60 text-slate-400">
+                            <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-lg bg-slate-100 flex items-center justify-center shrink-0 border border-slate-200/60 text-slate-400">
                               <Home className="w-6 h-6 stroke-[1.5]" />
                             </div>
                           )}
@@ -525,17 +525,17 @@ export default function PropertyDetailPage() {
                                 {rt.name}
                               </span>
                               {isRoomAvailable ? (
-                                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100/80 text-emerald-800 border border-emerald-200">
+                                <span className="text-[11px] font-medium px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200/80">
                                   Sisa {rt.available_rooms} Kamar
                                 </span>
                               ) : (
-                                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-rose-100 text-rose-800 border border-rose-200">
+                                <span className="text-[11px] font-medium px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 border border-slate-200">
                                   Penuh
                                 </span>
                               )}
                               {isSelected && (
-                                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-600 text-white shadow-2xs">
-                                  ✓ Dipilih
+                                <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-emerald-600 text-white">
+                                  Dipilih
                                 </span>
                               )}
                             </div>
@@ -545,7 +545,7 @@ export default function PropertyDetailPage() {
                                 {roomFacilitiesList.map((fac, fIdx) => (
                                   <span
                                     key={fIdx}
-                                    className="text-[11px] font-medium text-slate-600 bg-slate-100/90 px-2 py-0.5 rounded-md"
+                                    className="text-[11px] font-normal text-slate-600 bg-slate-100 px-2 py-0.5 rounded"
                                   >
                                     {fac}
                                   </span>
@@ -559,9 +559,9 @@ export default function PropertyDetailPage() {
                         <div className="flex sm:flex-col items-center sm:items-end justify-between sm:justify-center gap-2 w-full sm:w-auto pt-2 sm:pt-0 border-t sm:border-t-0 border-slate-100 shrink-0">
                           <div className="text-left sm:text-right">
                             <p className="text-[10px] sm:text-xs text-slate-400 font-medium">Harga Kamar</p>
-                            <p className="text-base sm:text-lg font-black text-emerald-600">
+                            <p className="text-base sm:text-lg font-bold text-emerald-600">
                               Rp {rt.price_per_month.toLocaleString("id-ID")}
-                              <span className="text-[11px] font-normal text-slate-500"> /bln</span>
+                              <span className="text-xs font-normal text-slate-500"> /bln</span>
                             </p>
                           </div>
                           <button
@@ -572,12 +572,12 @@ export default function PropertyDetailPage() {
                               handleOpenBookingModal(rt);
                             }}
                             disabled={!isRoomAvailable || isCheckingAuth}
-                            className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                            className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
                               !isRoomAvailable
-                                ? "bg-slate-200 text-slate-400 cursor-not-allowed"
+                                ? "bg-slate-100 text-slate-400 cursor-not-allowed border border-slate-200"
                                 : isSelected
                                 ? "bg-emerald-600 hover:bg-emerald-700 text-white shadow-xs"
-                                : "bg-slate-100 hover:bg-emerald-50 text-slate-700 hover:text-emerald-700 border border-slate-200 hover:border-emerald-200"
+                                : "bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 hover:border-slate-300"
                             }`}
                           >
                             {!isRoomAvailable ? "Penuh" : isSelected ? "Pilih & Pesan" : "Pilih Tipe Ini"}

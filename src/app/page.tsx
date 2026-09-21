@@ -79,33 +79,30 @@ export default function Home() {
   };
 
   return (
-    <main className="max-w-7xl mx-auto min-h-screen relative w-full px-4 sm:px-6 lg:px-8 py-8 sm:py-12 flex flex-col gap-12 sm:gap-16">
-      {/* Hero Section: Bespoke Human-Crafted Search Experience */}
-      <section className="relative w-full flex flex-col items-center justify-center text-center pt-8 pb-10 sm:pt-16 sm:pb-20 px-4">
-        {/* Soft Ambient Mesh Background Decoration */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-3xl h-72 bg-gradient-to-tr from-emerald-100/40 via-teal-50/40 to-amber-50/40 rounded-full blur-3xl pointer-events-none -z-10" />
-
-        {/* Feature Pill / Trust Tag */}
-        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-800 text-xs font-semibold mb-6 shadow-2xs">
-          <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-          <span>Platform Pencarian Kos Modern &amp; Cerdas</span>
+    <main className="max-w-7xl mx-auto min-h-screen relative w-full px-4 sm:px-6 lg:px-8 py-8 sm:py-12 flex flex-col gap-10 sm:gap-14">
+      {/* Hero Section */}
+      <section className="relative w-full flex flex-col items-center justify-center text-center pt-6 pb-8 sm:pt-12 sm:pb-16 px-4">
+        {/* Subtle Brand Tag */}
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200/80 text-emerald-800 text-xs font-semibold mb-5">
+          <span className="w-1.5 h-1.5 rounded-full bg-emerald-600"></span>
+          <span>Sewa Kos Nyaman &amp; Terpercaya</span>
         </div>
 
         {/* Main Headline */}
-        <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black text-slate-900 tracking-tight max-w-3xl leading-[1.12]">
-          Cari Kos Impianmu Lebih{" "}
-          <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700">
-            Mudah dan Instan
+        <h1 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold text-slate-900 tracking-tight max-w-3xl leading-[1.15]">
+          Temukan Kos Impian{" "}
+          <span className="text-emerald-600">
+            Sesuai Kebutuhanmu
           </span>
         </h1>
 
         {/* Subtitle */}
-        <p className="mt-4 sm:mt-5 text-sm sm:text-lg text-slate-600 max-w-2xl leading-relaxed font-normal">
-          Ketik kebutuhan kos Anda seperti lokasi kampus, budget bulanan, atau fasilitas idaman tanpa repot mengatur filter manual yang rumit.
+        <p className="mt-3.5 sm:mt-4 text-sm sm:text-base text-slate-600 max-w-2xl leading-relaxed font-normal">
+          Cari info kos dengan fasilitas lengkap, harga transparan, dan lokasi strategis di sekitar kampus atau kantor impianmu.
         </p>
 
         {/* Smart Search Bar Container */}
-        <div className="w-full max-w-2xl mt-8 sm:mt-10">
+        <div className="w-full max-w-2xl mt-7 sm:mt-9">
           <SmartSearchBar
             variant="hero"
             onSearch={handleSearch}
@@ -114,13 +111,13 @@ export default function Home() {
         </div>
 
         {/* Quick Link to Map */}
-        <div className="mt-6 flex items-center justify-center gap-2 text-xs sm:text-sm text-slate-500">
-          <span>Ingin menjelajahi sebaran kos secara visual?</span>
+        <div className="mt-5 flex items-center justify-center gap-2 text-xs sm:text-sm text-slate-500">
+          <span>Ingin melihat sebaran kos di peta?</span>
           <Link
             href="/map"
-            className="font-bold text-emerald-600 hover:text-emerald-700 hover:underline inline-flex items-center gap-1.5 transition-colors"
+            className="font-semibold text-emerald-600 hover:text-emerald-700 hover:underline inline-flex items-center gap-1 transition-colors"
           >
-            <MapPin className="w-4 h-4 text-emerald-600" />
+            <MapPin className="w-3.5 h-3.5 text-emerald-600" />
             <span>Buka Peta Interaktif →</span>
           </Link>
         </div>
