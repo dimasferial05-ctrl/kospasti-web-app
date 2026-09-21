@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
-import { KosPropertyCard } from "../src/components/shared/KosPropertyCard";
+import { KosPropertyCard } from "../src/components/features/KosPropertyCard";
 
 describe("KosPropertyCard Component", () => {
   const defaultProps = {

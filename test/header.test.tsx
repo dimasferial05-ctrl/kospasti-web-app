@@ -3,7 +3,7 @@ import React from "react";
 import fs from "fs";
 import path from "path";
 import { renderToStaticMarkup } from "react-dom/server";
-import { Header } from "../src/components/shared/Header";
+import { Header } from "../src/components/layout/Header";
 
 // Mock next/navigation
 let mockPathname = "/";
@@ -15,14 +15,14 @@ vi.mock("next/navigation", () => ({
   }),
 }));
 
-describe("Header Component (/components/shared/Header) - Issue #133 & #138", () => {
+describe("Header Component (/components/layout/Header) - Issue #133 & #138", () => {
   beforeEach(() => {
     vi.restoreAllMocks();
     mockPathname = "/";
   });
 
   it("memiliki direktif 'use client' di baris paling awal file", () => {
-    const filePath = path.resolve(__dirname, "../src/components/shared/Header.tsx");
+    const filePath = path.resolve(__dirname, "../src/components/layout/Header.tsx");
     const content = fs.readFileSync(filePath, "utf-8");
     const firstLine = content.trim().split("\n")[0].trim();
     expect(firstLine).toMatch(/^["']use client["'];?$/);
@@ -73,7 +73,7 @@ describe("Header Component (/components/shared/Header) - Issue #133 & #138", () 
   });
 
   it("memiliki implementasi pemanggilan /api/logout, router.push('/login'), dan router.refresh()", () => {
-    const filePath = path.resolve(__dirname, "../src/components/shared/Header.tsx");
+    const filePath = path.resolve(__dirname, "../src/components/layout/Header.tsx");
     const content = fs.readFileSync(filePath, "utf-8");
 
     expect(content).toContain('fetch("/api/logout"');

@@ -2,8 +2,8 @@
 
 import React, { useState, useEffect, useMemo, useRef, useCallback, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
-import MapViewer, { PropertyMapItem, SearchTargetLocation } from "@/components/MapViewer";
-import { SmartSearchBar } from "@/components/shared/SmartSearchBar";
+import MapViewer, { PropertyMapItem, SearchTargetLocation } from "@/components/map/MapViewer";
+import { SmartSearchBar } from "@/components/features/SmartSearchBar";
 import Link from "next/link";
 import {
   MapPin,

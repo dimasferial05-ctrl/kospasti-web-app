@@ -32,7 +32,7 @@ vi.mock("@vis.gl/react-google-maps", () => ({
   }),
 }));
 
-import PropertyLocationMap from "../src/components/PropertyLocationMap";
+import PropertyLocationMap from "../src/components/map/PropertyLocationMap";
 
 describe("PropertyLocationMap Component - Issue #158 (Distance & Route Calculator)", () => {
   beforeEach(() => {
@@ -42,7 +42,7 @@ describe("PropertyLocationMap Component - Issue #158 (Distance & Route Calculato
   it("memiliki direktif 'use client' di baris paling awal file PropertyLocationMap.tsx", () => {
     const filePath = path.resolve(
       __dirname,
-      "../src/components/PropertyLocationMap.tsx"
+      "../src/components/map/PropertyLocationMap.tsx"
     );
     const content = fs.readFileSync(filePath, "utf-8");
     const firstLine = content.trim().split("\n")[0].trim();

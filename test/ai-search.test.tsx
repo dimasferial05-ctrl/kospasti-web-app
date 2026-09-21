@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { POST } from "../src/app/api/ai-search/route";
 import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
-import MapViewer from "../src/components/MapViewer";
+import MapViewer from "../src/components/map/MapViewer";
 
 // Mock @vis.gl/react-google-maps
 vi.mock("@vis.gl/react-google-maps", () => ({

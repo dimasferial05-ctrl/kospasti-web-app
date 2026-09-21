@@ -3,8 +3,8 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { KosPropertyCard } from "@/components/shared/KosPropertyCard";
-import { SmartSearchBar } from "@/components/shared/SmartSearchBar";
+import { KosPropertyCard } from "@/components/features/KosPropertyCard";
+import { SmartSearchBar } from "@/components/features/SmartSearchBar";
 import { Loader2, AlertCircle, SearchX, MapPin } from "lucide-react";
 
 interface PropertyItem {
