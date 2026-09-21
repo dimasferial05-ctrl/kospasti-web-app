@@ -142,19 +142,25 @@ export function KosPropertyCard({
     >
       {/* Image Section */}
       <div className="aspect-[4/3] w-full relative overflow-hidden bg-slate-100 flex items-center justify-center">
-        {displayedImageUrl ? (
+        {slides.length > 0 ? (
           <>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              key={displayedImageUrl}
-              src={displayedImageUrl}
-              alt={name}
-              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110 ease-out"
-            />
+            {slides.map((slide, idx) => (
+              /* eslint-disable-next-line @next/next/no-img-element */
+              <img
+                key={slide.imageUrl + idx}
+                src={slide.imageUrl}
+                alt={name}
+                className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-700 ease-in-out group-hover:scale-110 transition-transform ${
+                  idx === activeSlideIndex
+                    ? "opacity-100 z-10"
+                    : "opacity-0 z-0 pointer-events-none"
+                }`}
+              />
+            ))}
 
             {/* Room Type Tag when cycling */}
             {slides.length > 1 && currentSlide && currentSlide.title !== "Utama" && (
-              <div className="absolute top-3 left-3 bg-slate-900/80 backdrop-blur-md text-white text-[11px] font-medium px-2.5 py-1 rounded-md border border-white/10 shadow-xs flex items-center gap-1.5 transition-all">
+              <div className="absolute top-3 left-3 z-20 bg-slate-900/80 backdrop-blur-md text-white text-[11px] font-medium px-2.5 py-1 rounded-md border border-white/10 shadow-xs flex items-center gap-1.5 transition-all duration-300">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
                 <span className="truncate max-w-[150px]">{currentSlide.title}</span>
               </div>
@@ -167,7 +173,7 @@ export function KosPropertyCard({
                   type="button"
                   onClick={handlePrevSlide}
                   aria-label="Foto sebelumnya"
-                  className="absolute left-2 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-white/90 hover:bg-white text-slate-700 shadow-md flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 cursor-pointer"
+                  className="absolute left-2 top-1/2 -translate-y-1/2 z-20 w-7 h-7 rounded-full bg-white/90 hover:bg-white text-slate-700 shadow-md flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 cursor-pointer"
                 >
                   <ChevronLeft className="w-4 h-4" />
                 </button>
@@ -175,7 +181,7 @@ export function KosPropertyCard({
                   type="button"
                   onClick={handleNextSlide}
                   aria-label="Foto berikutnya"
-                  className="absolute right-2 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-white/90 hover:bg-white text-slate-700 shadow-md flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 cursor-pointer"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 z-20 w-7 h-7 rounded-full bg-white/90 hover:bg-white text-slate-700 shadow-md flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 cursor-pointer"
                 >
                   <ChevronRight className="w-4 h-4" />
                 </button>
@@ -184,7 +190,7 @@ export function KosPropertyCard({
 
             {/* Slide Dots Indicator */}
             {slides.length > 1 && (
-              <div className="absolute bottom-2.5 left-1/2 -translate-x-1/2 flex items-center gap-1.5 bg-slate-950/40 backdrop-blur-xs px-2 py-1 rounded-full">
+              <div className="absolute bottom-2.5 left-1/2 -translate-x-1/2 z-20 flex items-center gap-1.5 bg-slate-950/40 backdrop-blur-xs px-2 py-1 rounded-full">
                 {slides.map((_, idx) => (
                   <button
                     key={idx}
