@@ -22,6 +22,14 @@ interface PropertyItem {
   owner?: {
     name: string;
   };
+  room_types?: Array<{
+    id: string;
+    name: string;
+    price_per_month: number;
+    available_rooms: number;
+    facilities?: string | null;
+    image_url?: string | null;
+  }>;
 }
 
 export default function Home() {
@@ -192,6 +200,8 @@ export default function Home() {
                   }
                   isPetFriendly={property.is_pet_friendly}
                   is24Hours={property.is_24_hours}
+                  roomTypes={property.room_types}
+                  roomTypesCount={property.room_types?.length}
                 />
               </Link>
             ))}

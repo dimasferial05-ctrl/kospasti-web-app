@@ -92,6 +92,7 @@ export async function POST(request: NextRequest) {
       price_per_month: number;
       available_rooms: number;
       facilities?: string | null;
+      image_url?: string | null;
     }> = [];
     const mediaToCreate: { url: string; type: string }[] = [];
 
@@ -119,11 +120,12 @@ export async function POST(request: NextRequest) {
         try {
           const parsed = JSON.parse(rawRoomTypes);
           if (Array.isArray(parsed) && parsed.length > 0) {
-            room_types = parsed.map((rt: { name?: string; price_per_month?: number | string; available_rooms?: number | string; facilities?: string }) => ({
+            room_types = parsed.map((rt: { name?: string; price_per_month?: number | string; available_rooms?: number | string; facilities?: string; image_url?: string }) => ({
               name: String(rt.name || "Standar").trim(),
               price_per_month: Math.floor(Number(rt.price_per_month || 0)),
               available_rooms: Math.floor(Number(rt.available_rooms || 0)),
               facilities: rt.facilities ? String(rt.facilities).trim() : null,
+              image_url: rt.image_url ? String(rt.image_url).trim() : null,
             }));
           }
         } catch (err) {
@@ -170,11 +172,12 @@ export async function POST(request: NextRequest) {
       is_24_hours = Boolean(body.is_24_hours);
 
       if (Array.isArray(body.room_types) && body.room_types.length > 0) {
-        room_types = body.room_types.map((rt: { name?: string; price_per_month?: number | string; available_rooms?: number | string; facilities?: string }) => ({
+        room_types = body.room_types.map((rt: { name?: string; price_per_month?: number | string; available_rooms?: number | string; facilities?: string; image_url?: string }) => ({
           name: String(rt.name || "Standar").trim(),
           price_per_month: Math.floor(Number(rt.price_per_month || 0)),
           available_rooms: Math.floor(Number(rt.available_rooms || 0)),
           facilities: rt.facilities ? String(rt.facilities).trim() : null,
+          image_url: rt.image_url ? String(rt.image_url).trim() : null,
         }));
       }
 

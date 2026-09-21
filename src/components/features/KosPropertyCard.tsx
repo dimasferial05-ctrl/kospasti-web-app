@@ -1,5 +1,16 @@
-import React from "react";
-import { Home, User, Clock } from "lucide-react";
+"use client";
+
+import React, { useState, useEffect } from "react";
+import { Home, User, Clock, Sparkles } from "lucide-react";
+
+export interface RoomTypeItem {
+  id?: string;
+  name: string;
+  price_per_month: number;
+  available_rooms: number;
+  facilities?: string | null;
+  image_url?: string | null;
+}
 
 export interface KosPropertyCardProps {
   name: string;
@@ -14,6 +25,7 @@ export interface KosPropertyCardProps {
   is24Hours?: boolean;
   hasMultipleRoomTypes?: boolean;
   roomTypesCount?: number;
+  roomTypes?: RoomTypeItem[];
 }
 
 export function KosPropertyCard({
@@ -29,8 +41,49 @@ export function KosPropertyCard({
   is24Hours,
   hasMultipleRoomTypes,
   roomTypesCount,
+  roomTypes,
 }: KosPropertyCardProps) {
-  const isMultiType = hasMultipleRoomTypes || (roomTypesCount !== undefined && roomTypesCount > 1);
+  const isMultiType =
+    hasMultipleRoomTypes ||
+    (roomTypesCount !== undefined && roomTypesCount > 1) ||
+    (roomTypes !== undefined && roomTypes.length > 1);
+
+  // Filter room types with valid image_url for slideshow cycle
+  const slides = React.useMemo(() => {
+    const list: Array<{ imageUrl: string; title: string; price: number }> = [];
+    if (imageUrl) {
+      list.push({ imageUrl, title: "Utama", price });
+    }
+    if (roomTypes && roomTypes.length > 0) {
+      for (const rt of roomTypes) {
+        if (rt.image_url && rt.image_url !== imageUrl && !list.some((s) => s.imageUrl === rt.image_url)) {
+          list.push({
+            imageUrl: rt.image_url,
+            title: rt.name,
+            price: rt.price_per_month,
+          });
+        }
+      }
+    }
+    return list;
+  }, [imageUrl, price, roomTypes]);
+
+  const [activeSlideIndex, setActiveSlideIndex] = useState(0);
+  const [isHovered, setIsHovered] = useState(false);
+
+  // Auto-cycle through room types images every 3.5s if there are multiple slides
+  useEffect(() => {
+    if (slides.length <= 1 || isHovered) return;
+
+    const interval = setInterval(() => {
+      setActiveSlideIndex((prev) => (prev + 1) % slides.length);
+    }, 3500);
+
+    return () => clearInterval(interval);
+  }, [slides.length, isHovered]);
+
+  const currentSlide = slides[activeSlideIndex] || (imageUrl ? { imageUrl, title: "Utama", price } : null);
+  const displayedImageUrl = currentSlide ? currentSlide.imageUrl : imageUrl;
 
   // Format mata uang Rupiah
   const formattedPrice = isMultiType
@@ -70,16 +123,54 @@ export function KosPropertyCard({
   const isAvailable = availableRooms > 0;
 
   return (
-    <div className="group bg-white rounded-3xl border border-slate-200/80 overflow-hidden flex flex-col hover:shadow-lg hover:shadow-slate-200/60 hover:-translate-y-1.5 transition-all duration-300 h-full relative">
+    <div
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+      className="group bg-white rounded-3xl border border-slate-200/80 overflow-hidden flex flex-col hover:shadow-lg hover:shadow-slate-200/60 hover:-translate-y-1.5 transition-all duration-300 h-full relative"
+    >
       {/* Image Section */}
       <div className="aspect-[4/3] w-full relative overflow-hidden bg-slate-100/90 flex items-center justify-center">
-        {imageUrl ? (
-          /* eslint-disable-next-line @next/next/no-img-element */
-          <img
-            src={imageUrl}
-            alt={name}
-            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110 ease-out"
-          />
+        {displayedImageUrl ? (
+          <>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              key={displayedImageUrl}
+              src={displayedImageUrl}
+              alt={name}
+              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110 ease-out animate-in fade-in zoom-in-95"
+            />
+
+            {/* Room Type Pill Indicator when cycling */}
+            {slides.length > 1 && currentSlide && currentSlide.title !== "Utama" && (
+              <div className="absolute top-3 left-3 bg-slate-900/75 backdrop-blur-md text-white text-[10px] font-bold px-2.5 py-1 rounded-full border border-white/20 shadow-md flex items-center gap-1 animate-in fade-in slide-in-from-top-1 duration-300">
+                <Sparkles className="w-3 h-3 text-emerald-400" />
+                <span className="truncate max-w-[140px]">{currentSlide.title}</span>
+              </div>
+            )}
+
+            {/* Slide Dots Indicator */}
+            {slides.length > 1 && (
+              <div className="absolute bottom-2.5 left-1/2 -translate-x-1/2 flex items-center gap-1.5 bg-slate-900/40 backdrop-blur-xs px-2 py-1 rounded-full">
+                {slides.map((_, idx) => (
+                  <button
+                    key={idx}
+                    type="button"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      setActiveSlideIndex(idx);
+                    }}
+                    className={`h-1.5 rounded-full transition-all duration-300 ${
+                      idx === activeSlideIndex
+                        ? "w-4 bg-emerald-400"
+                        : "w-1.5 bg-white/60 hover:bg-white"
+                    }`}
+                    aria-label={`Slide ${idx + 1}`}
+                  />
+                ))}
+              </div>
+            )}
+          </>
         ) : (
           <div className="flex flex-col items-center justify-center text-slate-400 gap-1.5">
             <div className="w-12 h-12 rounded-2xl bg-slate-200/60 flex items-center justify-center text-slate-500">

@@ -38,6 +38,7 @@ interface RoomTypeAdminItem {
   price_per_month: number;
   available_rooms: number;
   facilities?: string | null;
+  image_url?: string | null;
 }
 
 interface RoomTypeFormItem {
@@ -46,6 +47,7 @@ interface RoomTypeFormItem {
   price_per_month: string;
   available_rooms: string;
   facilities: string;
+  image_url?: string;
 }
 
 interface PropertyAdminItem {
@@ -172,11 +174,8 @@ export default function ManagePropertiesPage() {
   const handleOpenAddModal = () => {
     setEditingProperty(null);
     setFormData({
-      name: "",
+      ...initialFormData,
       owner_id: owners.length > 0 ? owners[0].id : "",
-      price_per_month: "",
-      available_rooms: "0",
-      gender_type: "CAMPUR",
       facilities: "",
       image_url: "",
       address: "",
@@ -191,6 +190,7 @@ export default function ManagePropertiesPage() {
         price_per_month: "",
         available_rooms: "1",
         facilities: "",
+        image_url: "",
       },
     ]);
     setSelectedFiles([]);
@@ -226,6 +226,7 @@ export default function ManagePropertiesPage() {
           price_per_month: String(rt.price_per_month),
           available_rooms: String(rt.available_rooms),
           facilities: rt.facilities || "",
+          image_url: rt.image_url || "",
         }))
       );
     } else {
@@ -235,6 +236,7 @@ export default function ManagePropertiesPage() {
           price_per_month: prop.price_per_month !== undefined ? String(prop.price_per_month) : "",
           available_rooms: prop.available_rooms !== undefined ? String(prop.available_rooms) : "0",
           facilities: prop.facilities || "",
+          image_url: "",
         },
       ]);
     }
@@ -969,6 +971,23 @@ export default function ManagePropertiesPage() {
                           onChange={(e) => {
                             const updated = [...roomTypes];
                             updated[idx].facilities = e.target.value;
+                            setRoomTypes(updated);
+                          }}
+                          className="w-full px-3 py-1.5 text-xs border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-[11px] font-semibold text-slate-600 mb-1">
+                          URL Foto Tipe Kamar (Opsional)
+                        </label>
+                        <input
+                          type="url"
+                          placeholder="https://images.unsplash.com/... atau link foto kamar tipe ini"
+                          value={rt.image_url || ""}
+                          onChange={(e) => {
+                            const updated = [...roomTypes];
+                            updated[idx].image_url = e.target.value;
                             setRoomTypes(updated);
                           }}
                           className="w-full px-3 py-1.5 text-xs border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white"

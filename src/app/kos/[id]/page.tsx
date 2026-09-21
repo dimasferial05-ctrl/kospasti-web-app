@@ -243,19 +243,32 @@ export default function PropertyDetailPage() {
   }
 
   const mediaList: PropertyMediaItem[] = (() => {
-    if (!property.media || property.media.length === 0) {
-      return property.image_url ? [{ url: property.image_url, type: "IMAGE" }] : [];
+    const list: PropertyMediaItem[] = [];
+    if (property.media && property.media.length > 0) {
+      list.push(...property.media);
     }
-    const list = [...property.media];
-    if (property.image_url) {
-      const thumbIndex = list.findIndex((m) => m.url === property.image_url);
-      if (thumbIndex > 0) {
-        const [thumb] = list.splice(thumbIndex, 1);
-        list.unshift(thumb);
+    if (property.image_url && !list.some((m) => m.url === property.image_url)) {
+      list.unshift({ url: property.image_url, type: "IMAGE" });
+    }
+    if (property.room_types && property.room_types.length > 0) {
+      for (const rt of property.room_types) {
+        if (rt.image_url && !list.some((m) => m.url === rt.image_url)) {
+          list.push({ url: rt.image_url, type: "IMAGE" });
+        }
       }
     }
     return list;
   })();
+
+  const handleSelectRoomType = (rt: RoomTypeItem) => {
+    setSelectedRoomType(rt);
+    if (rt.image_url) {
+      const foundIdx = mediaList.findIndex((m) => m.url === rt.image_url);
+      if (foundIdx >= 0) {
+        setActiveIndex(foundIdx);
+      }
+    }
+  };
 
   const prevSlide = () => {
     if (mediaList.length <= 1) return;
@@ -482,44 +495,68 @@ export default function PropertyDetailPage() {
                     return (
                       <div
                         key={rt.id}
-                        onClick={() => setSelectedRoomType(rt)}
-                        className={`p-4 sm:p-5 rounded-2xl border transition-all duration-200 cursor-pointer flex flex-col sm:flex-row sm:items-center justify-between gap-4 ${
+                        onClick={() => handleSelectRoomType(rt)}
+                        className={`group p-3.5 sm:p-4 rounded-2xl border transition-all duration-200 cursor-pointer flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3.5 ${
                           isSelected
-                            ? "border-emerald-500 bg-emerald-50/40 ring-2 ring-emerald-500/20 shadow-xs"
-                            : "border-slate-200 hover:border-slate-300 bg-white hover:bg-slate-50/50"
+                            ? "border-emerald-500 bg-emerald-50/50 ring-2 ring-emerald-500/20 shadow-xs"
+                            : "border-slate-200 hover:border-slate-300 bg-white hover:bg-slate-50/60"
                         }`}
                       >
-                        <div className="flex flex-col gap-1.5 flex-1 min-w-0">
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <span className="font-bold text-slate-900 text-sm sm:text-base">
-                              {rt.name}
-                            </span>
-                            {isRoomAvailable ? (
-                              <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-100/80 text-emerald-800 border border-emerald-200">
-                                Sisa {rt.available_rooms} Kamar
-                              </span>
-                            ) : (
-                              <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-rose-100 text-rose-800 border border-rose-200">
-                                Penuh
-                              </span>
-                            )}
-                          </div>
-
-                          {roomFacilitiesList.length > 0 && (
-                            <div className="flex items-center gap-1.5 flex-wrap pt-0.5">
-                              {roomFacilitiesList.map((fac, fIdx) => (
-                                <span
-                                  key={fIdx}
-                                  className="text-[11px] font-medium text-slate-600 bg-slate-100/90 px-2 py-0.5 rounded-md"
-                                >
-                                  {fac}
-                                </span>
-                              ))}
+                        {/* Thumbnail & Title/Facilities */}
+                        <div className="flex items-start sm:items-center gap-3.5 flex-1 min-w-0">
+                          {rt.image_url ? (
+                            <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-xl overflow-hidden bg-slate-100 shrink-0 relative border border-slate-200/80 shadow-2xs">
+                              {/* eslint-disable-next-line @next/next/no-img-element */}
+                              <img
+                                src={rt.image_url}
+                                alt={rt.name}
+                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                              />
+                            </div>
+                          ) : (
+                            <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-xl bg-slate-100 flex items-center justify-center shrink-0 border border-slate-200/60 text-slate-400">
+                              <Home className="w-6 h-6 stroke-[1.5]" />
                             </div>
                           )}
+
+                          <div className="flex flex-col gap-1 flex-1 min-w-0">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <span className="font-bold text-slate-900 text-sm sm:text-base group-hover:text-emerald-700 transition-colors">
+                                {rt.name}
+                              </span>
+                              {isRoomAvailable ? (
+                                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100/80 text-emerald-800 border border-emerald-200">
+                                  Sisa {rt.available_rooms} Kamar
+                                </span>
+                              ) : (
+                                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-rose-100 text-rose-800 border border-rose-200">
+                                  Penuh
+                                </span>
+                              )}
+                              {isSelected && (
+                                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-600 text-white shadow-2xs">
+                                  ✓ Dipilih
+                                </span>
+                              )}
+                            </div>
+
+                            {roomFacilitiesList.length > 0 && (
+                              <div className="flex items-center gap-1.5 flex-wrap pt-0.5">
+                                {roomFacilitiesList.map((fac, fIdx) => (
+                                  <span
+                                    key={fIdx}
+                                    className="text-[11px] font-medium text-slate-600 bg-slate-100/90 px-2 py-0.5 rounded-md"
+                                  >
+                                    {fac}
+                                  </span>
+                                ))}
+                              </div>
+                            )}
+                          </div>
                         </div>
 
-                        <div className="flex sm:flex-col items-center sm:items-end justify-between sm:justify-center gap-2 pt-2 sm:pt-0 border-t sm:border-t-0 border-slate-100 shrink-0">
+                        {/* Price & Action */}
+                        <div className="flex sm:flex-col items-center sm:items-end justify-between sm:justify-center gap-2 w-full sm:w-auto pt-2 sm:pt-0 border-t sm:border-t-0 border-slate-100 shrink-0">
                           <div className="text-left sm:text-right">
                             <p className="text-[10px] sm:text-xs text-slate-400 font-medium">Harga Kamar</p>
                             <p className="text-base sm:text-lg font-black text-emerald-600">
@@ -531,7 +568,7 @@ export default function PropertyDetailPage() {
                             type="button"
                             onClick={(e) => {
                               e.stopPropagation();
-                              setSelectedRoomType(rt);
+                              handleSelectRoomType(rt);
                               handleOpenBookingModal(rt);
                             }}
                             disabled={!isRoomAvailable || isCheckingAuth}
