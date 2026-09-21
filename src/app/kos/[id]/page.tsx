@@ -399,51 +399,56 @@ export default function PropertyDetailPage() {
           </div>
 
           {/* Body Section */}
-          <div className="flex flex-col gap-3 p-4 lg:px-0 lg:py-6">
+          <div className="flex flex-col gap-4 p-4 lg:px-0 lg:py-6">
             {/* Informasi Dasar */}
-            <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-xs flex flex-col gap-3">
-              <div className="flex items-start justify-between gap-2">
+            <div className="bg-white p-5 sm:p-6 rounded-2xl sm:rounded-3xl border border-slate-200/80 shadow-soft flex flex-col gap-4">
+              <div className="flex items-start justify-between gap-2.5">
                 <span
-                  className={`text-xs px-2.5 py-0.5 rounded-md font-semibold border ${genderBadgeStyle}`}
+                  className={`text-xs px-3 py-1 rounded-full font-bold border ${genderBadgeStyle}`}
                 >
                   {property.gender_type}
                 </span>
                 {isAvailable ? (
-                  <span className="bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-semibold px-2.5 py-0.5 rounded-md">
+                  <span className="bg-emerald-50 text-emerald-700 border border-emerald-200/80 text-xs font-bold px-3 py-1 rounded-full shadow-2xs">
                     Tersedia {property.available_rooms} Kamar
                   </span>
                 ) : (
-                  <span className="bg-rose-50 text-rose-700 border border-rose-200 text-xs font-semibold px-2.5 py-0.5 rounded-md">
+                  <span className="bg-rose-50 text-rose-700 border border-rose-200/80 text-xs font-bold px-3 py-1 rounded-full">
                     Kamar Penuh
                   </span>
                 )}
               </div>
 
               <div>
-                <h2 className="text-xl font-bold text-slate-900 leading-tight">
+                <h2 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight leading-tight">
                   {property.name}
                 </h2>
-                <p className="text-lg font-bold text-blue-600 mt-1">
-                  {formattedPrice}{" "}
-                  <span className="text-xs font-normal text-slate-500">
-                    / bulan
-                  </span>
-                </p>
+                <div className="flex items-baseline gap-1.5 mt-2">
+                  <p className="text-xl sm:text-2xl font-black text-emerald-600 tracking-tight">
+                    {formattedPrice}
+                  </p>
+                </div>
               </div>
             </div>
 
             {/* Fasilitas & Deskripsi */}
-            <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-xs flex flex-col gap-3">
-              <h3 className="text-sm font-bold text-slate-900">Fasilitas Kos</h3>
+            <div className="bg-white p-5 sm:p-6 rounded-2xl sm:rounded-3xl border border-slate-200/80 shadow-soft flex flex-col gap-4">
+              <div className="flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
+                <h3 className="text-base font-bold text-slate-900">Fasilitas Kos</h3>
+              </div>
+
               {facilitiesList.length > 0 ? (
-                <div className="grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
                   {facilitiesList.map((facility, idx) => (
                     <div
                       key={idx}
-                      className="flex items-center gap-2 text-xs text-slate-700 bg-slate-50 p-2 rounded-lg border border-slate-100"
+                      className="flex items-center gap-2.5 text-xs text-slate-700 bg-slate-50/80 p-3 rounded-xl border border-slate-100 hover:border-emerald-200 transition-colors"
                     >
-                      <Check className="w-4 h-4 text-emerald-600 shrink-0" />
-                      <span className="truncate">{facility}</span>
+                      <div className="w-5 h-5 rounded-md bg-emerald-100/70 flex items-center justify-center shrink-0">
+                        <Check className="w-3.5 h-3.5 text-emerald-700" />
+                      </div>
+                      <span className="truncate font-medium">{facility}</span>
                     </div>
                   ))}
                 </div>
@@ -454,29 +459,29 @@ export default function PropertyDetailPage() {
               )}
 
               {/* Aturan & Kebijakan Kos */}
-              <div className="mt-2 pt-3 border-t border-slate-100">
-                <h4 className="text-xs font-bold text-slate-800 mb-2.5">
-                  Aturan & Kebijakan
+              <div className="mt-2 pt-4 border-t border-slate-100">
+                <h4 className="text-xs font-bold text-slate-800 uppercase tracking-wider mb-3">
+                  Aturan &amp; Kebijakan
                 </h4>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div
-                    className={`flex items-center gap-2.5 text-xs p-2.5 rounded-lg border ${
+                    className={`flex items-center gap-3 text-xs p-3.5 rounded-xl border transition-colors ${
                       property.is_24_hours
-                        ? "bg-slate-50/80 text-slate-800 border-slate-200"
+                        ? "bg-slate-50/80 text-slate-800 border-slate-200/90 shadow-2xs"
                         : "bg-slate-50/40 text-slate-500 border-slate-200/60"
                     }`}
                   >
                     <div
-                      className={`w-6 h-6 rounded-md flex items-center justify-center shrink-0 ${
+                      className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 ${
                         property.is_24_hours
-                          ? "bg-slate-200 text-slate-700"
+                          ? "bg-slate-200 text-slate-800"
                           : "bg-slate-100 text-slate-400"
                       }`}
                     >
-                      <Clock className="w-3.5 h-3.5" />
+                      <Clock className="w-4 h-4" />
                     </div>
                     <div>
-                      <p className="font-semibold">
+                      <p className="font-bold">
                         {property.is_24_hours
                           ? "Akses 24 Jam"
                           : "Ada Jam Malam"}
@@ -490,23 +495,23 @@ export default function PropertyDetailPage() {
                   </div>
 
                   <div
-                    className={`flex items-center gap-2.5 text-xs p-2.5 rounded-lg border ${
+                    className={`flex items-center gap-3 text-xs p-3.5 rounded-xl border transition-colors ${
                       property.is_pet_friendly
-                        ? "bg-emerald-50/40 text-emerald-900 border-emerald-200"
+                        ? "bg-emerald-50/40 text-emerald-900 border-emerald-200 shadow-2xs"
                         : "bg-slate-50/40 text-slate-500 border-slate-200/60"
                     }`}
                   >
                     <div
-                      className={`w-6 h-6 rounded-md flex items-center justify-center shrink-0 ${
+                      className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 ${
                         property.is_pet_friendly
                           ? "bg-emerald-100 text-emerald-700"
                           : "bg-slate-100 text-slate-400"
                       }`}
                     >
-                      <Sparkles className="w-3.5 h-3.5" />
+                      <Sparkles className="w-4 h-4" />
                     </div>
                     <div>
-                      <p className="font-semibold">
+                      <p className="font-bold">
                         {property.is_pet_friendly
                           ? "Boleh Bawa Hewan"
                           : "Dilarang Bawa Hewan"}
@@ -522,11 +527,11 @@ export default function PropertyDetailPage() {
               </div>
 
               {property.description && (
-                <div className="mt-2 pt-3 border-t border-slate-100">
-                  <h4 className="text-xs font-bold text-slate-800 mb-1">
+                <div className="mt-2 pt-4 border-t border-slate-100">
+                  <h4 className="text-xs font-bold text-slate-800 uppercase tracking-wider mb-2">
                     Deskripsi
                   </h4>
-                  <p className="text-xs text-slate-600 leading-relaxed whitespace-pre-line">
+                  <p className="text-xs sm:text-sm text-slate-600 leading-relaxed whitespace-pre-line font-normal">
                     {property.description}
                   </p>
                 </div>
@@ -542,14 +547,14 @@ export default function PropertyDetailPage() {
             />
 
             {/* Info Pemilik */}
-            <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-xs flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center font-bold text-sm">
+            <div className="bg-white p-5 rounded-2xl sm:rounded-3xl border border-slate-200/80 shadow-soft flex items-center justify-between">
+              <div className="flex items-center gap-3.5">
+                <div className="w-11 h-11 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold text-sm shadow-2xs">
                   <User className="w-5 h-5" />
                 </div>
                 <div>
-                  <p className="text-[11px] text-slate-500">Dikelola oleh</p>
-                  <p className="text-sm font-semibold text-slate-800">
+                  <p className="text-[11px] font-medium text-slate-400 uppercase tracking-wider">Dikelola oleh</p>
+                  <p className="text-sm font-bold text-slate-900">
                     {property.owner?.name || "Pemilik Kos"}
                   </p>
                 </div>

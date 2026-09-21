@@ -62,68 +62,72 @@ export function KosPropertyCard({
   const isAvailable = availableRooms > 0;
 
   return (
-    <div className="group bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden flex flex-col hover:shadow-lg transition-all duration-300 h-full">
+    <div className="group bg-white rounded-3xl border border-slate-200/80 overflow-hidden flex flex-col hover:shadow-lg hover:shadow-slate-200/60 hover:-translate-y-1.5 transition-all duration-300 h-full relative">
       {/* Image Section */}
-      <div className="aspect-[4/3] w-full relative overflow-hidden bg-slate-100 flex items-center justify-center">
+      <div className="aspect-[4/3] w-full relative overflow-hidden bg-slate-100/90 flex items-center justify-center">
         {imageUrl ? (
           /* eslint-disable-next-line @next/next/no-img-element */
           <img
             src={imageUrl}
             alt={name}
-            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110 ease-out"
           />
         ) : (
-          <div className="flex flex-col items-center justify-center text-slate-400 gap-1">
-            <Home className="w-12 h-12 stroke-[1.5]" />
+          <div className="flex flex-col items-center justify-center text-slate-400 gap-1.5">
+            <div className="w-12 h-12 rounded-2xl bg-slate-200/60 flex items-center justify-center text-slate-500">
+              <Home className="w-6 h-6 stroke-[1.5]" />
+            </div>
+            <span className="text-[11px] font-medium text-slate-600">Foto belum tersedia</span>
           </div>
         )}
       </div>
 
       {/* Content Section */}
-      <div className="p-4 flex flex-col flex-1 gap-2.5">
+      <div className="p-5 flex flex-col flex-1 gap-3">
         {/* Header: Name & Gender Badge */}
-        <div className="flex items-start justify-between gap-2">
-          <h3 className="text-base font-bold text-slate-900 line-clamp-1 group-hover:text-emerald-700 transition-colors">
+        <div className="flex items-start justify-between gap-2.5">
+          <h3 className="text-base sm:text-lg font-bold text-slate-900 line-clamp-1 group-hover:text-emerald-700 transition-colors tracking-tight">
             {name}
           </h3>
           <span
-            className={`text-xs px-2 py-0.5 rounded font-medium border shrink-0 ${genderBadgeStyle}`}
+            className={`text-[11px] px-2.5 py-0.5 rounded-full font-bold border shrink-0 ${genderBadgeStyle}`}
           >
             {genderType}
           </span>
         </div>
 
         {/* Price & Lifestyle Badges */}
-        <div className="flex flex-wrap items-baseline justify-between gap-1.5">
-          <div className="flex items-baseline gap-1">
-            <span className="text-base sm:text-lg font-bold text-emerald-600 tracking-tight">
-              Rp {price.toLocaleString("id-ID")}
+        <div className="flex flex-wrap items-baseline justify-between gap-2">
+          <div className="flex items-baseline gap-1.5">
+            <span className="text-lg sm:text-xl font-extrabold text-emerald-600 tracking-tight">
+              {formattedPrice}
             </span>
-            <span className="text-xs text-slate-400 font-normal">/ bulan</span>
           </div>
 
-          <div className="flex items-center gap-1 flex-wrap">
+          <div className="flex items-center gap-1.5 flex-wrap">
             {is24Hours && (
-              <span className="text-[10px] font-medium px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 border border-slate-200/80" title="Akses 24 Jam / Bebas Jam Malam">
-                Akses 24 Jam
+              <span className="text-[10px] font-semibold px-2.5 py-1 rounded-full bg-slate-100 text-slate-700 border border-slate-200" title="Akses 24 Jam / Bebas Jam Malam">
+                24 Jam
               </span>
             )}
             {isPetFriendly && (
-              <span className="text-[10px] font-medium px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200/80" title="Boleh membawa hewan peliharaan">
-                Pet Friendly
+              <span className="text-[10px] font-semibold px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200" title="Boleh membawa hewan peliharaan">
+                🐾 Pet Friendly
               </span>
             )}
           </div>
         </div>
 
         {/* Additional Info: Owner & Facilities with extra breathing room */}
-        <div className="space-y-1.5 text-xs text-slate-500 mb-2">
-          <div className="flex items-center gap-1.5">
-            <User className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-            <span className="truncate">{ownerName}</span>
+        <div className="space-y-1.5 text-xs text-slate-600 py-1 border-t border-slate-100">
+          <div className="flex items-center gap-2">
+            <div className="w-5 h-5 rounded-full bg-slate-100 flex items-center justify-center shrink-0">
+              <User className="w-3 h-3 text-slate-500" />
+            </div>
+            <span className="font-medium text-slate-700 truncate">{ownerName}</span>
           </div>
           {facilities && (
-            <p className="line-clamp-1 text-slate-500 pt-0.5">
+            <p className="line-clamp-1 text-slate-600 text-[11px] pl-0.5">
               {facilities}
             </p>
           )}
@@ -133,17 +137,17 @@ export function KosPropertyCard({
         <div className="mt-auto pt-3 border-t border-slate-100 flex items-center justify-between gap-2">
           {/* Availability Badge */}
           {isAvailable ? (
-            <span className="bg-emerald-50 text-emerald-700 text-xs font-semibold px-2.5 py-1 rounded-full border border-emerald-200/60">
+            <span className="bg-green-100 text-green-700 text-xs font-bold px-3 py-1 rounded-full border border-green-200/60 shadow-xs">
               Sisa {availableRooms} Kamar
             </span>
           ) : (
-            <span className="bg-slate-100 text-slate-500 text-xs font-semibold px-2.5 py-1 rounded-full">
+            <span className="bg-slate-200 text-slate-600 text-xs font-bold px-3 py-1 rounded-full">
               Penuh
             </span>
           )}
 
           {/* Last Updated */}
-          <div className="flex items-center gap-1 text-[11px] text-slate-400 shrink-0">
+          <div className="flex items-center gap-1 text-[11px] font-medium text-slate-600 shrink-0">
             <Clock className="w-3 h-3" />
             <span>Diperbarui: {formattedDate}</span>
           </div>
@@ -154,3 +158,4 @@ export function KosPropertyCard({
 }
 
 export default KosPropertyCard;
+
