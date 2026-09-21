@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Search, ArrowRight, MapPin, Sparkles } from "lucide-react";
+import { Search, ArrowRight, MapPin } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 
@@ -25,11 +25,6 @@ export function HeroSection() {
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-5xl h-80 bg-gradient-to-b from-emerald-200/30 via-teal-100/20 to-transparent blur-3xl -z-10 pointer-events-none" />
 
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center flex flex-col items-center">
-        {/* Subtle pill */}
-        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white border border-emerald-200 shadow-2xs text-emerald-800 text-xs sm:text-sm font-semibold mb-6 animate-float-slow">
-          <Sparkles className="w-3.5 h-3.5 text-emerald-600" />
-          <span>Platform Pencarian &amp; Manajemen Kos Terpercaya</span>
-        </div>
 
         {/* Big centered question headline */}
         <h1 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold text-slate-900 tracking-tight leading-[1.18] max-w-3xl">
@@ -99,9 +94,6 @@ export function HeroSection() {
           <div className="absolute inset-0 flex flex-col justify-end p-6 sm:p-10 z-10">
             <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
               <div>
-                <span className="px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 text-xs font-semibold border border-emerald-500/30 backdrop-blur-md">
-                  Kepastian Real-Time
-                </span>
                 <h3 className="text-xl sm:text-2xl lg:text-3xl font-extrabold text-white mt-2 drop-shadow-sm">
                   Ribuan Kamar Kos Siap Huni &amp; Terverifikasi
                 </h3>

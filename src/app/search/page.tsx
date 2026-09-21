@@ -82,11 +82,6 @@ export default function SearchPage() {
     <main className="max-w-7xl mx-auto min-h-screen relative w-full px-4 sm:px-6 lg:px-8 py-8 sm:py-12 flex flex-col gap-10 sm:gap-14">
       {/* Search Header Section */}
       <section className="relative w-full flex flex-col items-center justify-center text-center pt-6 pb-8 sm:pt-10 sm:pb-12 px-4">
-        {/* Subtle Brand Tag */}
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200/80 text-emerald-800 text-xs font-semibold mb-5">
-          <span className="w-1.5 h-1.5 rounded-full bg-emerald-600"></span>
-          <span>Pencarian Kos Cepat &amp; Akurat</span>
-        </div>
 
         {/* Main Headline */}
         <h1 className="text-3xl sm:text-5xl font-extrabold text-slate-900 tracking-tight max-w-3xl leading-[1.15]">
@@ -128,7 +123,7 @@ export default function SearchPage() {
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3 border-b border-slate-200/80 pb-5">
           <div>
             <div className="flex items-center gap-2">
-              <span className="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+
               <h2 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
                 Rekomendasi Kos Terbaru
               </h2>

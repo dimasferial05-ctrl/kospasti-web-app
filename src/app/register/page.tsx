@@ -165,10 +165,6 @@ export default function RegisterPage() {
           <>
             {/* Header Form */}
             <div className="text-center mb-6">
-              <div className="inline-flex items-center gap-1.5 px-3.5 py-1 bg-emerald-50 text-emerald-700 rounded-full text-xs font-semibold mb-3 border border-emerald-200/70 shadow-2xs">
-                <GraduationCap className="w-3.5 h-3.5" />
-                <span>Pencari Kos & Mahasiswa</span>
-              </div>
 
               <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
                 Daftar Akun Baru
@@ -218,11 +214,10 @@ export default function RegisterPage() {
                     required
                     aria-invalid={!!errors.name}
                     aria-describedby={errors.name ? "name-error" : undefined}
-                    className={`w-full pl-11 pr-4 py-3 bg-slate-50/80 border rounded-xl text-sm font-medium text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 transition-all disabled:opacity-50 ${
-                      errors.name
+                    className={`w-full pl-11 pr-4 py-3 bg-slate-50/80 border rounded-xl text-sm font-medium text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 transition-all disabled:opacity-50 ${errors.name
                         ? "border-rose-400 focus:ring-rose-200 focus:border-rose-500 bg-rose-50/20"
                         : "border-slate-200 focus:ring-emerald-600/20 focus:border-emerald-600 focus:bg-white"
-                    }`}
+                      }`}
                   />
                 </div>
                 {errors.name && (
@@ -259,11 +254,10 @@ export default function RegisterPage() {
                     required
                     aria-invalid={!!errors.whatsapp}
                     aria-describedby={errors.whatsapp ? "whatsapp-error" : undefined}
-                    className={`w-full pl-11 pr-4 py-3 bg-slate-50/80 border rounded-xl text-sm font-medium text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 transition-all disabled:opacity-50 ${
-                      errors.whatsapp
+                    className={`w-full pl-11 pr-4 py-3 bg-slate-50/80 border rounded-xl text-sm font-medium text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 transition-all disabled:opacity-50 ${errors.whatsapp
                         ? "border-rose-400 focus:ring-rose-200 focus:border-rose-500 bg-rose-50/20"
                         : "border-slate-200 focus:ring-emerald-600/20 focus:border-emerald-600 focus:bg-white"
-                    }`}
+                      }`}
                   />
                 </div>
                 {errors.whatsapp && (
@@ -299,11 +293,10 @@ export default function RegisterPage() {
                     autoComplete="email"
                     aria-invalid={!!errors.email}
                     aria-describedby={errors.email ? "email-error" : undefined}
-                    className={`w-full pl-11 pr-4 py-3 bg-slate-50/80 border rounded-xl text-sm font-medium text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 transition-all disabled:opacity-50 ${
-                      errors.email
+                    className={`w-full pl-11 pr-4 py-3 bg-slate-50/80 border rounded-xl text-sm font-medium text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 transition-all disabled:opacity-50 ${errors.email
                         ? "border-rose-400 focus:ring-rose-200 focus:border-rose-500 bg-rose-50/20"
                         : "border-slate-200 focus:ring-emerald-600/20 focus:border-emerald-600 focus:bg-white"
-                    }`}
+                      }`}
                   />
                 </div>
                 {errors.email && (
@@ -339,11 +332,10 @@ export default function RegisterPage() {
                     autoComplete="new-password"
                     aria-invalid={!!errors.password}
                     aria-describedby={errors.password ? "password-error" : undefined}
-                    className={`w-full pl-11 pr-11 py-3 bg-slate-50/80 border rounded-xl text-sm font-medium text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 transition-all disabled:opacity-50 ${
-                      errors.password
+                    className={`w-full pl-11 pr-11 py-3 bg-slate-50/80 border rounded-xl text-sm font-medium text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 transition-all disabled:opacity-50 ${errors.password
                         ? "border-rose-400 focus:ring-rose-200 focus:border-rose-500 bg-rose-50/20"
                         : "border-slate-200 focus:ring-emerald-600/20 focus:border-emerald-600 focus:bg-white"
-                    }`}
+                      }`}
                   />
                   <button
                     type="button"
@@ -393,11 +385,10 @@ export default function RegisterPage() {
                     autoComplete="new-password"
                     aria-invalid={!!errors.confirmPassword}
                     aria-describedby={errors.confirmPassword ? "confirm-password-error" : undefined}
-                    className={`w-full pl-11 pr-11 py-3 bg-slate-50/80 border rounded-xl text-sm font-medium text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 transition-all disabled:opacity-50 ${
-                      errors.confirmPassword
+                    className={`w-full pl-11 pr-11 py-3 bg-slate-50/80 border rounded-xl text-sm font-medium text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 transition-all disabled:opacity-50 ${errors.confirmPassword
                         ? "border-rose-400 focus:ring-rose-200 focus:border-rose-500 bg-rose-50/20"
                         : "border-slate-200 focus:ring-emerald-600/20 focus:border-emerald-600 focus:bg-white"
-                    }`}
+                      }`}
                   />
                   <button
                     type="button"
