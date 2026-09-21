@@ -93,5 +93,17 @@ describe("KosPropertyCard Component", () => {
     expect(html).toContain("group-hover:scale-110");
     expect(html).toContain("transition-transform");
   });
+
+  it("menampilkan badge Multi Tipe dan label Mulai Rp jika hasMultipleRoomTypes bernilai true", () => {
+    const html = renderToStaticMarkup(
+      <KosPropertyCard
+        {...defaultProps}
+        hasMultipleRoomTypes={true}
+        roomTypesCount={3}
+      />
+    );
+    expect(html).toContain("Mulai Rp 500.000");
+    expect(html).toContain("3 Tipe");
+  });
 });
 

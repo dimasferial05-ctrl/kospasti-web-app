@@ -17,6 +17,7 @@ export async function GET(request?: Request) {
     if (name && name.trim()) {
       whereClause.name = {
         contains: name.trim(),
+        mode: "insensitive",
       };
     }
 
@@ -57,18 +58,38 @@ export async function GET(request?: Request) {
           },
         },
         media: true,
+        room_types: {
+          orderBy: {
+            price_per_month: "asc",
+          },
+        },
       },
     });
 
-    const properties = rawProperties.map((property) => ({
-      ...property,
-      image_url:
-        property.image_url ||
-        property.media?.find((m) => m.type === "IMAGE")?.url ||
-        property.media?.[0]?.url ||
-        null,
-      last_updated: property.updated_at,
-    }));
+    const properties = rawProperties.map((property) => {
+      const roomTypes = property.room_types || [];
+      const lowestPrice =
+        roomTypes.length > 0
+          ? Math.min(...roomTypes.map((rt) => rt.price_per_month))
+          : property.price_per_month;
+      const totalRooms =
+        roomTypes.length > 0
+          ? roomTypes.reduce((sum, rt) => sum + rt.available_rooms, 0)
+          : property.available_rooms;
+
+      return {
+        ...property,
+        price_per_month: lowestPrice,
+        available_rooms: totalRooms,
+        image_url:
+          property.image_url ||
+          property.media?.find((m) => m.type === "IMAGE")?.url ||
+          property.media?.[0]?.url ||
+          null,
+        last_updated: property.updated_at,
+        room_types: roomTypes,
+      };
+    });
 
     return NextResponse.json(
       {

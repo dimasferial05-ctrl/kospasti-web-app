@@ -42,7 +42,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const { propertyId, studentName, waNumber, moveInDate } = body;
+    const { propertyId, studentName, waNumber, moveInDate, roomTypeId } = body;
 
     // Ambil data profil user dari DB jika data diri tidak disertakan di request body
     const dbUser = await prisma.user.findUnique({
@@ -110,7 +110,26 @@ export async function POST(request: Request) {
     }
 
     const result = await prisma.$transaction(async (tx) => {
-      // 1. Kurangi kamar langsung DENGAN SYARAT kamar masih > 0
+      let resolvedRoomTypeId: string | null = null;
+      if (roomTypeId && typeof roomTypeId === "string" && roomTypeId.trim()) {
+        const updatedRoomType = await tx.roomType.updateMany({
+          where: {
+            id: roomTypeId.trim(),
+            property_id: propertyId.trim(),
+            available_rooms: { gt: 0 },
+          },
+          data: {
+            available_rooms: { decrement: 1 },
+          },
+        });
+
+        if (updatedRoomType.count === 0) {
+          throw new Error("Tipe kamar sudah penuh atau tidak ditemukan");
+        }
+        resolvedRoomTypeId = roomTypeId.trim();
+      }
+
+      // 1. Kurangi kamar properti langsung DENGAN SYARAT kamar masih > 0
       const updatedProperty = await tx.property.updateMany({
         where: {
           id: propertyId.trim(),
@@ -130,6 +149,7 @@ export async function POST(request: Request) {
       const newBooking = await tx.booking.create({
         data: {
           property_id: propertyId.trim(),
+          room_type_id: resolvedRoomTypeId,
           student_name: resolvedStudentName,
           student_whatsapp: resolvedWaNumber,
           move_in_date: parsedDate,
@@ -155,9 +175,10 @@ export async function POST(request: Request) {
     const errorMessage = error instanceof Error ? error.message : "";
     if (
       errorMessage === "Kamar sudah penuh atau tidak ditemukan" ||
+      errorMessage === "Tipe kamar sudah penuh atau tidak ditemukan" ||
       errorMessage === "Kamar sudah penuh" ||
       errorMessage === "Properti tidak ditemukan" ||
-      errorMessage.includes("Kamar sudah penuh")
+      errorMessage.includes("sudah penuh")
     ) {
       return NextResponse.json(
         {

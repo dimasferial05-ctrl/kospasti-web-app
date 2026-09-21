@@ -28,26 +28,62 @@ async function main() {
             price_per_month: 850000,
             available_rooms: 3,
             gender_type: "PUTRA",
-            facilities: "WiFi, Kasur, Lemari, Kamar Mandi Luar, Parkir Motor",
+            facilities: "WiFi, Dapur Umum, Parkir Motor, Ruang Jemur",
             is_pet_friendly: false,
             is_24_hours: true,
             image_url: "https://images.unsplash.com/photo-1555854877-bab0e564b8d5?auto=format&fit=crop&w=800&q=80",
             address: "Jl. Tebet Barat Dalam VII No. 12, Tebet, Jakarta Selatan",
             latitude: -6.2374,
             longitude: 106.8526,
+            room_types: {
+              create: [
+                {
+                  name: "Tipe A (AC + KM Dalam)",
+                  price_per_month: 1100000,
+                  available_rooms: 1,
+                  facilities: "AC, Kasur Springbed, Lemari, Kamar Mandi Dalam",
+                  image_url: "https://images.unsplash.com/photo-1555854877-bab0e564b8d5?auto=format&fit=crop&w=800&q=80",
+                },
+                {
+                  name: "Tipe B (Standar)",
+                  price_per_month: 850000,
+                  available_rooms: 2,
+                  facilities: "Kasur, Lemari, Kamar Mandi Luar, Kipas Angin",
+                  image_url: "https://images.unsplash.com/photo-1540518614846-7ede433c4550?auto=format&fit=crop&w=800&q=80",
+                },
+              ],
+            },
           },
           {
             name: "Kos Taekwang Jaya Mandiri",
             price_per_month: 900000,
             available_rooms: 4,
             gender_type: "CAMPUR",
-            facilities: "WiFi Super Cepat, Kasur Springbed, Kamar Mandi Dalam, Dapur Bersama, Parkir Motor",
+            facilities: "WiFi Super Cepat, Dapur Bersama, Parkir Motor, Keamanan",
             is_pet_friendly: true,
             is_24_hours: true,
             image_url: "https://images.unsplash.com/photo-1595526114035-0d45ed16cfbf?auto=format&fit=crop&w=800&q=80",
             address: "Jl. Raya Subang - Cirebon, Cibogo, Dekat PT Taekwang, Subang",
             latitude: -6.5595,
             longitude: 107.7875,
+            room_types: {
+              create: [
+                {
+                  name: "Tipe Deluxe (Dapur Mini + AC)",
+                  price_per_month: 1200000,
+                  available_rooms: 2,
+                  facilities: "AC, Kasur Springbed, Kamar Mandi Dalam, Dapur Mini",
+                  image_url: "https://images.unsplash.com/photo-1595526114035-0d45ed16cfbf?auto=format&fit=crop&w=800&q=80",
+                },
+                {
+                  name: "Tipe Standar (KM Dalam)",
+                  price_per_month: 900000,
+                  available_rooms: 2,
+                  facilities: "Kasur Springbed, Kamar Mandi Dalam, Kipas Angin",
+                  image_url: "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=800&q=80",
+                },
+              ],
+            },
           },
         ],
       },
@@ -62,7 +98,11 @@ async function main() {
       },
     },
     include: {
-      properties: true,
+      properties: {
+        include: {
+          room_types: true,
+        },
+      },
       magic_links: true,
     },
   });
@@ -79,26 +119,62 @@ async function main() {
             price_per_month: 1250000,
             available_rooms: 2,
             gender_type: "PUTRI",
-            facilities: "WiFi, AC, Kasur Springbed, Kamar Mandi Dalam, Dapur Bersama, Keamanan 24 Jam, CCTV",
+            facilities: "WiFi, Dapur Bersama, Keamanan 24 Jam, CCTV, Parkir Motor",
             is_pet_friendly: false,
             is_24_hours: false,
             image_url: "https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?auto=format&fit=crop&w=800&q=80",
             address: "Jl. Kyai Tapa No. 45, Grogol, Jakarta Barat",
             latitude: -6.1674,
             longitude: 106.7881,
+            room_types: {
+              create: [
+                {
+                  name: "Tipe VIP (Balkon + AC + Water Heater)",
+                  price_per_month: 1500000,
+                  available_rooms: 1,
+                  facilities: "AC, Smart TV, Water Heater, Kasur Springbed, Kamar Mandi Dalam, Balkon",
+                  image_url: "https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?auto=format&fit=crop&w=800&q=80",
+                },
+                {
+                  name: "Tipe Standar Putri (AC)",
+                  price_per_month: 1250000,
+                  available_rooms: 1,
+                  facilities: "AC, Kasur Springbed, Kamar Mandi Dalam, Lemari",
+                  image_url: "https://images.unsplash.com/photo-1616046229478-9901c5536a45?auto=format&fit=crop&w=800&q=80",
+                },
+              ],
+            },
           },
           {
             name: "Kos Putri An-Nur UNSUB",
             price_per_month: 800000,
             available_rooms: 3,
             gender_type: "PUTRI",
-            facilities: "WiFi Cepat, AC, Kamar Mandi Dalam, Kasur, Dapur Bersama, CCTV",
+            facilities: "WiFi Cepat, Dapur Bersama, CCTV, Ruang Santai",
             is_pet_friendly: true,
             is_24_hours: false,
             image_url: "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?auto=format&fit=crop&w=800&q=80",
             address: "Jl. RA Kartini No. 15, Dekat Universitas Subang (UNSUB), Subang",
             latitude: -6.5592,
             longitude: 107.7656,
+            room_types: {
+              create: [
+                {
+                  name: "Tipe A (AC + KM Dalam)",
+                  price_per_month: 950000,
+                  available_rooms: 1,
+                  facilities: "AC, Kasur, Lemari, Kamar Mandi Dalam",
+                  image_url: "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?auto=format&fit=crop&w=800&q=80",
+                },
+                {
+                  name: "Tipe B (Non-AC + KM Dalam)",
+                  price_per_month: 800000,
+                  available_rooms: 2,
+                  facilities: "Kasur, Lemari, Kamar Mandi Dalam, Kipas Angin",
+                  image_url: "https://images.unsplash.com/photo-1598928506311-c55ded91a20c?auto=format&fit=crop&w=800&q=80",
+                },
+              ],
+            },
           },
         ],
       },
@@ -113,7 +189,11 @@ async function main() {
       },
     },
     include: {
-      properties: true,
+      properties: {
+        include: {
+          room_types: true,
+        },
+      },
       magic_links: true,
     },
   });
@@ -130,39 +210,93 @@ async function main() {
             price_per_month: 1600000,
             available_rooms: 5,
             gender_type: "CAMPUR",
-            facilities: "WiFi Cepat, AC, Smart TV, Water Heater, Kamar Mandi Dalam, Balkon, Parkir Mobil/Motor",
+            facilities: "WiFi Cepat, Dapur Bersama, Parkir Mobil/Motor, CCTV, Ruang Coworking",
             is_pet_friendly: true,
             is_24_hours: true,
             image_url: "https://images.unsplash.com/photo-1595526114035-0d45ed16cfbf?auto=format&fit=crop&w=800&q=80",
             address: "Jl. Margonda Raya No. 108, Pondok Cina, Beji, Depok",
             latitude: -6.3686,
             longitude: 106.8332,
+            room_types: {
+              create: [
+                {
+                  name: "Tipe Suite (King Bed + Smart TV + Water Heater)",
+                  price_per_month: 1900000,
+                  available_rooms: 2,
+                  facilities: "AC, Smart TV, Water Heater, King Bed, Kamar Mandi Dalam, Balkon",
+                  image_url: "https://images.unsplash.com/photo-1566665797739-1674de7a421a?auto=format&fit=crop&w=800&q=80",
+                },
+                {
+                  name: "Tipe Deluxe (AC + KM Dalam)",
+                  price_per_month: 1600000,
+                  available_rooms: 3,
+                  facilities: "AC, Kasur Springbed, Kamar Mandi Dalam, Meja Kerja",
+                  image_url: "https://images.unsplash.com/photo-1590490360182-c33d57733427?auto=format&fit=crop&w=800&q=80",
+                },
+              ],
+            },
           },
           {
             name: "Kos Paviliun Alun-Alun Subang",
             price_per_month: 1100000,
             available_rooms: 4,
             gender_type: "CAMPUR",
-            facilities: "AC, WiFi Kencang, Kamar Mandi Dalam, Akses Bebas 24 Jam, Boleh Bawa Kucing, Dapur Mini",
+            facilities: "WiFi Kencang, Akses Bebas 24 Jam, Boleh Bawa Kucing, Parkir Motor",
             is_pet_friendly: true,
             is_24_hours: true,
             image_url: "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&w=800&q=80",
             address: "Jl. Wangsa Goparana No. 8, Dekat Alun-Alun Subang, Subang Kota",
             latitude: -6.5710,
             longitude: 107.7615,
+            room_types: {
+              create: [
+                {
+                  name: "Tipe Paviliun Utama (Dapur Mini)",
+                  price_per_month: 1300000,
+                  available_rooms: 2,
+                  facilities: "AC, Dapur Mini, Kamar Mandi Dalam, Kasur Springbed",
+                  image_url: "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&w=800&q=80",
+                },
+                {
+                  name: "Tipe Studio",
+                  price_per_month: 1100000,
+                  available_rooms: 2,
+                  facilities: "AC, Kamar Mandi Dalam, Kasur Busa, Meja",
+                  image_url: "https://images.unsplash.com/photo-1512918728675-ed5a9ecdebfd?auto=format&fit=crop&w=800&q=80",
+                },
+              ],
+            },
           },
           {
             name: "Kos Asri Polsub Cibogo",
             price_per_month: 650000,
             available_rooms: 6,
             gender_type: "PUTRA",
-            facilities: "WiFi, Kasur, Lemari, Dapur Bersama, Parkir Motor Luas, Suasana Hening & Tenang",
+            facilities: "WiFi, Dapur Bersama, Parkir Motor Luas, Suasana Hening & Tenang",
             is_pet_friendly: false,
             is_24_hours: true,
             image_url: "https://images.unsplash.com/photo-1513694203232-719a280e022f?auto=format&fit=crop&w=800&q=80",
             address: "Jl. Brigjen Katamso, Dekat Kampus Polsub Cibogo, Subang",
             latitude: -6.5683,
             longitude: 107.8347,
+            room_types: {
+              create: [
+                {
+                  name: "Tipe A (Kamar Luas)",
+                  price_per_month: 750000,
+                  available_rooms: 2,
+                  facilities: "Kasur Busa, Lemari 2 Pintu, Meja Belajar",
+                  image_url: "https://images.unsplash.com/photo-1513694203232-719a280e022f?auto=format&fit=crop&w=800&q=80",
+                },
+                {
+                  name: "Tipe B (Standar)",
+                  price_per_month: 650000,
+                  available_rooms: 4,
+                  facilities: "Kasur, Lemari, Kipas Angin",
+                  image_url: "https://images.unsplash.com/photo-1505691938895-1758d7feb511?auto=format&fit=crop&w=800&q=80",
+                },
+              ],
+            },
           },
         ],
       },
@@ -177,15 +311,19 @@ async function main() {
       },
     },
     include: {
-      properties: true,
+      properties: {
+        include: {
+          room_types: true,
+        },
+      },
       magic_links: true,
     },
   });
 
-  console.log("✅ Seeded owners and properties with magic links:");
-  console.log(` - ${owner1.name} -> ${owner1.properties.map((p) => `${p.name} (Sisa ${p.available_rooms} kamar, ID: ${p.id})`).join(", ")} | Token: magic-bambang-123`);
-  console.log(` - ${owner2.name} -> ${owner2.properties.map((p) => `${p.name} (Sisa ${p.available_rooms} kamar, ID: ${p.id})`).join(", ")} | Token: magic-sri-456`);
-  console.log(` - ${owner3.name} -> ${owner3.properties.map((p) => `${p.name} (Sisa ${p.available_rooms} kamar, ID: ${p.id})`).join(", ")} | Token: magic-hendra-789`);
+  console.log("✅ Seeded owners and properties with magic links & room types:");
+  console.log(` - ${owner1.name} -> ${owner1.properties.map((p) => `${p.name} (Sisa ${p.available_rooms} kamar, ${p.room_types.length} tipe, ID: ${p.id})`).join(", ")} | Token: magic-bambang-123`);
+  console.log(` - ${owner2.name} -> ${owner2.properties.map((p) => `${p.name} (Sisa ${p.available_rooms} kamar, ${p.room_types.length} tipe, ID: ${p.id})`).join(", ")} | Token: magic-sri-456`);
+  console.log(` - ${owner3.name} -> ${owner3.properties.map((p) => `${p.name} (Sisa ${p.available_rooms} kamar, ${p.room_types.length} tipe, ID: ${p.id})`).join(", ")} | Token: magic-hendra-789`);
 
   console.log("✨ Seeding completed successfully!");
 }

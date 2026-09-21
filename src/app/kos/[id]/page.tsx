@@ -25,6 +25,15 @@ interface PropertyMediaItem {
   type: string; // "IMAGE" | "VIDEO"
 }
 
+export interface RoomTypeItem {
+  id: string;
+  name: string;
+  price_per_month: number;
+  available_rooms: number;
+  facilities?: string | null;
+  image_url?: string | null;
+}
+
 interface PropertyDetail {
   id: string;
   name: string;
@@ -34,6 +43,7 @@ interface PropertyDetail {
   facilities: string;
   image_url?: string | null;
   media?: PropertyMediaItem[];
+  room_types?: RoomTypeItem[];
   description?: string | null;
   address?: string | null;
   latitude?: number | null;
@@ -53,6 +63,7 @@ export default function PropertyDetailPage() {
   const id = params?.id as string;
 
   const [property, setProperty] = useState<PropertyDetail | null>(null);
+  const [selectedRoomType, setSelectedRoomType] = useState<RoomTypeItem | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -67,7 +78,10 @@ export default function PropertyDetailPage() {
   const [moveInDate, setMoveInDate] = useState("");
   const [minDate, setMinDate] = useState("");
 
-  const handleOpenBookingModal = async () => {
+  const handleOpenBookingModal = async (roomTypeToBook?: RoomTypeItem) => {
+    if (roomTypeToBook) {
+      setSelectedRoomType(roomTypeToBook);
+    }
     try {
       setIsCheckingAuth(true);
       const res = await fetch("/api/auth/me");
@@ -111,6 +125,7 @@ export default function PropertyDetailPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           propertyId: id, // id diambil dari parameter URL
+          roomTypeId: selectedRoomType?.id || undefined,
           studentName: studentName || undefined,
           waNumber: waNumber || undefined,
           moveInDate,
@@ -168,6 +183,10 @@ export default function PropertyDetailPage() {
           if (json.success && json.data) {
             setProperty(json.data);
             setActiveIndex(0);
+            if (Array.isArray(json.data.room_types) && json.data.room_types.length > 0) {
+              const available = json.data.room_types.find((rt: RoomTypeItem) => rt.available_rooms > 0);
+              setSelectedRoomType(available || json.data.room_types[0]);
+            }
           } else {
             setError(json.error || "Kos tidak ditemukan");
           }
@@ -224,19 +243,32 @@ export default function PropertyDetailPage() {
   }
 
   const mediaList: PropertyMediaItem[] = (() => {
-    if (!property.media || property.media.length === 0) {
-      return property.image_url ? [{ url: property.image_url, type: "IMAGE" }] : [];
+    const list: PropertyMediaItem[] = [];
+    if (property.media && property.media.length > 0) {
+      list.push(...property.media);
     }
-    const list = [...property.media];
-    if (property.image_url) {
-      const thumbIndex = list.findIndex((m) => m.url === property.image_url);
-      if (thumbIndex > 0) {
-        const [thumb] = list.splice(thumbIndex, 1);
-        list.unshift(thumb);
+    if (property.image_url && !list.some((m) => m.url === property.image_url)) {
+      list.unshift({ url: property.image_url, type: "IMAGE" });
+    }
+    if (property.room_types && property.room_types.length > 0) {
+      for (const rt of property.room_types) {
+        if (rt.image_url && !list.some((m) => m.url === rt.image_url)) {
+          list.push({ url: rt.image_url, type: "IMAGE" });
+        }
       }
     }
     return list;
   })();
+
+  const handleSelectRoomType = (rt: RoomTypeItem) => {
+    setSelectedRoomType(rt);
+    if (rt.image_url) {
+      const foundIdx = mediaList.findIndex((m) => m.url === rt.image_url);
+      if (foundIdx >= 0) {
+        setActiveIndex(foundIdx);
+      }
+    }
+  };
 
   const prevSlide = () => {
     if (mediaList.length <= 1) return;
@@ -250,9 +282,12 @@ export default function PropertyDetailPage() {
 
   const currentMedia = mediaList[activeIndex] || null;
 
-  const formattedPrice = `Rp ${property.price_per_month.toLocaleString("id-ID")}`;
-  const isFull = property.available_rooms === 0;
-  const isAvailable = property.available_rooms > 0;
+  const currentPrice = selectedRoomType ? selectedRoomType.price_per_month : property.price_per_month;
+  const formattedPrice = `Rp ${currentPrice.toLocaleString("id-ID")}`;
+  const isFull = selectedRoomType
+    ? selectedRoomType.available_rooms === 0
+    : property.available_rooms === 0;
+  const isAvailable = !isFull;
   const normalizedGender = property.gender_type?.toUpperCase() || "";
   const genderBadgeStyle = (() => {
     switch (normalizedGender) {
@@ -427,15 +462,139 @@ export default function PropertyDetailPage() {
                   <p className="text-xl sm:text-2xl font-black text-emerald-600 tracking-tight">
                     {formattedPrice}
                   </p>
+                  {selectedRoomType && (
+                    <span className="text-xs font-semibold text-slate-500">
+                      ({selectedRoomType.name})
+                    </span>
+                  )}
                 </div>
               </div>
             </div>
+
+            {/* Pilihan Tipe Kamar */}
+            {property.room_types && property.room_types.length > 0 && (
+              <div className="bg-white p-5 sm:p-6 rounded-2xl border border-slate-200/90 shadow-xs flex flex-col gap-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-emerald-600"></span>
+                    <h3 className="text-base font-bold text-slate-900">Pilihan Tipe Kamar</h3>
+                  </div>
+                  <span className="text-xs font-medium text-slate-600 bg-slate-100 px-2.5 py-1 rounded-md border border-slate-200">
+                    {property.room_types.length} Tipe Tersedia
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-1 gap-3">
+                  {property.room_types.map((rt) => {
+                    const isSelected = selectedRoomType?.id === rt.id;
+                    const isRoomAvailable = rt.available_rooms > 0;
+                    const roomFacilitiesList = rt.facilities
+                      ? rt.facilities.split(",").map((f) => f.trim()).filter(Boolean)
+                      : [];
+
+                    return (
+                      <div
+                        key={rt.id}
+                        onClick={() => handleSelectRoomType(rt)}
+                        className={`group p-3.5 sm:p-4 rounded-xl border transition-all duration-200 cursor-pointer flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3.5 ${
+                          isSelected
+                            ? "border-emerald-600 bg-emerald-50/40 shadow-xs"
+                            : "border-slate-200 hover:border-slate-300 bg-white hover:bg-slate-50/50"
+                        }`}
+                      >
+                        {/* Thumbnail & Title/Facilities */}
+                        <div className="flex items-start sm:items-center gap-3.5 flex-1 min-w-0">
+                          {rt.image_url ? (
+                            <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-lg overflow-hidden bg-slate-100 shrink-0 relative border border-slate-200/80">
+                              {/* eslint-disable-next-line @next/next/no-img-element */}
+                              <img
+                                src={rt.image_url}
+                                alt={rt.name}
+                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                              />
+                            </div>
+                          ) : (
+                            <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-lg bg-slate-100 flex items-center justify-center shrink-0 border border-slate-200/60 text-slate-400">
+                              <Home className="w-6 h-6 stroke-[1.5]" />
+                            </div>
+                          )}
+
+                          <div className="flex flex-col gap-1 flex-1 min-w-0">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <span className="font-bold text-slate-900 text-sm sm:text-base group-hover:text-emerald-700 transition-colors">
+                                {rt.name}
+                              </span>
+                              {isRoomAvailable ? (
+                                <span className="text-[11px] font-medium px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200/80">
+                                  Sisa {rt.available_rooms} Kamar
+                                </span>
+                              ) : (
+                                <span className="text-[11px] font-medium px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 border border-slate-200">
+                                  Penuh
+                                </span>
+                              )}
+                              {isSelected && (
+                                <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-emerald-600 text-white">
+                                  Dipilih
+                                </span>
+                              )}
+                            </div>
+
+                            {roomFacilitiesList.length > 0 && (
+                              <div className="flex items-center gap-1.5 flex-wrap pt-0.5">
+                                {roomFacilitiesList.map((fac, fIdx) => (
+                                  <span
+                                    key={fIdx}
+                                    className="text-[11px] font-normal text-slate-600 bg-slate-100 px-2 py-0.5 rounded"
+                                  >
+                                    {fac}
+                                  </span>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Price & Action */}
+                        <div className="flex sm:flex-col items-center sm:items-end justify-between sm:justify-center gap-2 w-full sm:w-auto pt-2 sm:pt-0 border-t sm:border-t-0 border-slate-100 shrink-0">
+                          <div className="text-left sm:text-right">
+                            <p className="text-[10px] sm:text-xs text-slate-400 font-medium">Harga Kamar</p>
+                            <p className="text-base sm:text-lg font-bold text-emerald-600">
+                              Rp {rt.price_per_month.toLocaleString("id-ID")}
+                              <span className="text-xs font-normal text-slate-500"> /bln</span>
+                            </p>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleSelectRoomType(rt);
+                              handleOpenBookingModal(rt);
+                            }}
+                            disabled={!isRoomAvailable || isCheckingAuth}
+                            className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+                              !isRoomAvailable
+                                ? "bg-slate-100 text-slate-400 cursor-not-allowed border border-slate-200"
+                                : isSelected
+                                ? "bg-emerald-600 hover:bg-emerald-700 text-white shadow-xs"
+                                : "bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 hover:border-slate-300"
+                            }`}
+                          >
+                            {!isRoomAvailable ? "Penuh" : isSelected ? "Pilih & Pesan" : "Pilih Tipe Ini"}
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
 
             {/* Fasilitas & Deskripsi */}
             <div className="bg-white p-5 sm:p-6 rounded-2xl sm:rounded-3xl border border-slate-200/80 shadow-soft flex flex-col gap-4">
               <div className="flex items-center gap-2">
                 <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
-                <h3 className="text-base font-bold text-slate-900">Fasilitas Kos</h3>
+                <h3 className="text-base font-bold text-slate-900">Fasilitas Bersama &amp; Bangunan</h3>
               </div>
 
               {facilitiesList.length > 0 ? (
@@ -570,7 +729,7 @@ export default function PropertyDetailPage() {
             <div className="max-w-md mx-auto lg:max-w-none w-full flex justify-between lg:flex-col lg:gap-4 items-center lg:items-start">
               <div className="lg:w-full">
                 <p className="text-[10px] lg:text-sm text-slate-400 font-medium">
-                  Harga per bulan
+                  {selectedRoomType ? `Harga (${selectedRoomType.name})` : "Harga per bulan"}
                 </p>
                 <p className="text-base lg:text-2xl font-bold text-slate-900">
                   {formattedPrice}{" "}
@@ -580,7 +739,7 @@ export default function PropertyDetailPage() {
                 </p>
                 {isFull && (
                   <p className="text-[10px] lg:text-sm text-rose-500 font-medium mt-1">
-                    Mohon maaf, semua kamar telah terisi.
+                    Mohon maaf, tipe kamar ini telah penuh.
                   </p>
                 )}
               </div>
@@ -588,11 +747,11 @@ export default function PropertyDetailPage() {
               <button
                 type="button"
                 disabled={isFull || isCheckingAuth}
-                onClick={handleOpenBookingModal}
+                onClick={() => handleOpenBookingModal()}
                 className={`px-6 py-2 lg:py-3 lg:w-full rounded-lg font-bold text-white transition-all duration-200 ${
                   isFull || isCheckingAuth
                     ? "bg-slate-400 cursor-not-allowed"
-                    : "bg-blue-600 hover:bg-blue-700 hover:-translate-y-0.5 hover:shadow-md active:translate-y-0 cursor-pointer"
+                    : "bg-emerald-600 hover:bg-emerald-700 hover:-translate-y-0.5 hover:shadow-md active:translate-y-0 cursor-pointer"
                 }`}
               >
                 {isFull
@@ -619,18 +778,38 @@ export default function PropertyDetailPage() {
               </p>
             </div>
 
+            {/* Selected Room Type Info */}
+            {selectedRoomType && (
+              <div className="bg-emerald-50/70 border border-emerald-200/90 rounded-xl p-3 flex items-center justify-between">
+                <div>
+                  <p className="text-[11px] font-semibold text-emerald-800 uppercase tracking-wide">
+                    Tipe Kamar Dipilih
+                  </p>
+                  <p className="text-sm font-bold text-slate-900">
+                    {selectedRoomType.name}
+                  </p>
+                </div>
+                <div className="text-right">
+                  <p className="text-xs font-extrabold text-emerald-700">
+                    Rp {selectedRoomType.price_per_month.toLocaleString("id-ID")}
+                  </p>
+                  <p className="text-[10px] text-slate-500">/ bulan</p>
+                </div>
+              </div>
+            )}
+
             {/* User Profile Summary Card */}
             <div className="bg-slate-50 border border-slate-200/80 rounded-xl p-3.5 flex flex-col gap-2">
               <div className="flex items-center justify-between">
                 <span className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">
                   Data Pemesan (Akun Anda)
                 </span>
-                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-blue-100 text-blue-700">
+                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-100 text-emerald-800">
                   Terverifikasi
                 </span>
               </div>
               <div className="flex items-center gap-3 pt-1">
-                <div className="w-9 h-9 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-xs shrink-0">
+                <div className="w-9 h-9 rounded-full bg-emerald-600 text-white flex items-center justify-center font-bold text-xs shrink-0">
                   <User className="w-4 h-4" />
                 </div>
                 <div className="min-w-0 flex-1">
@@ -655,7 +834,7 @@ export default function PropertyDetailPage() {
                   value={moveInDate}
                   onChange={(e) => setMoveInDate(e.target.value)}
                   required
-                  className="w-full px-3.5 py-2.5 text-sm border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-slate-800 bg-white"
+                  className="w-full px-3.5 py-2.5 text-sm border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent text-slate-800 bg-white"
                 />
               </div>
 
@@ -671,7 +850,7 @@ export default function PropertyDetailPage() {
                   type="button"
                   disabled={isSubmitting}
                   onClick={handleBookingSubmit}
-                  className="w-full py-2.5 px-4 rounded-xl bg-blue-600 text-white font-semibold hover:bg-blue-700 hover:-translate-y-0.5 hover:shadow-md active:translate-y-0 disabled:opacity-75 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-none transition-all duration-200 cursor-pointer text-sm flex items-center justify-center gap-2"
+                  className="w-full py-2.5 px-4 rounded-xl bg-emerald-600 text-white font-semibold hover:bg-emerald-700 hover:-translate-y-0.5 hover:shadow-md active:translate-y-0 disabled:opacity-75 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-none transition-all duration-200 cursor-pointer text-sm flex items-center justify-center gap-2"
                 >
                   {isSubmitting ? "Memproses..." : "Lanjut Pembayaran"}
                 </button>

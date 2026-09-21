@@ -23,6 +23,7 @@ export async function GET(request: NextRequest) {
             name: true,
           },
         },
+        room_type: true,
         user: {
           select: {
             id: true,

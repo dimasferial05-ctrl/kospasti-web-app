@@ -46,6 +46,7 @@ export async function GET() {
             address: true,
           },
         },
+        room_type: true,
       },
       orderBy: {
         created_at: "desc",
