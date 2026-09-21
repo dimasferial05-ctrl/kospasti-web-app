@@ -147,10 +147,6 @@ function LoginForm() {
           <>
             {/* Header Form */}
             <div className="text-center mb-6">
-              <div className="inline-flex items-center gap-1.5 px-3.5 py-1 bg-emerald-50 text-emerald-700 rounded-full text-xs font-semibold mb-3 border border-emerald-200/70 shadow-2xs">
-                <GraduationCap className="w-3.5 h-3.5" />
-                <span>Pencari Kos & Mahasiswa</span>
-              </div>
 
               <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
                 Masuk ke Akun Anda
@@ -201,11 +197,10 @@ function LoginForm() {
                     autoComplete="email"
                     aria-invalid={!!errors.email}
                     aria-describedby={errors.email ? "email-error" : undefined}
-                    className={`w-full pl-11 pr-4 py-3 bg-slate-50/80 border rounded-xl text-sm font-medium text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 transition-all disabled:opacity-50 ${
-                      errors.email
+                    className={`w-full pl-11 pr-4 py-3 bg-slate-50/80 border rounded-xl text-sm font-medium text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 transition-all disabled:opacity-50 ${errors.email
                         ? "border-rose-400 focus:ring-rose-200 focus:border-rose-500 bg-rose-50/20"
                         : "border-slate-200 focus:ring-emerald-600/20 focus:border-emerald-600 focus:bg-white"
-                    }`}
+                      }`}
                   />
                 </div>
                 {errors.email && (
@@ -241,11 +236,10 @@ function LoginForm() {
                     autoComplete="current-password"
                     aria-invalid={!!errors.password}
                     aria-describedby={errors.password ? "password-error" : undefined}
-                    className={`w-full pl-11 pr-11 py-3 bg-slate-50/80 border rounded-xl text-sm font-medium text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 transition-all disabled:opacity-50 ${
-                      errors.password
+                    className={`w-full pl-11 pr-11 py-3 bg-slate-50/80 border rounded-xl text-sm font-medium text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 transition-all disabled:opacity-50 ${errors.password
                         ? "border-rose-400 focus:ring-rose-200 focus:border-rose-500 bg-rose-50/20"
                         : "border-slate-200 focus:ring-emerald-600/20 focus:border-emerald-600 focus:bg-white"
-                    }`}
+                      }`}
                   />
                   <button
                     type="button"
