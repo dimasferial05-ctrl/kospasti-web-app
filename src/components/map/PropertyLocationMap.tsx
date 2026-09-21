@@ -148,9 +148,7 @@ export default function PropertyLocationMap({
   latitude,
   longitude,
 }: PropertyLocationMapProps) {
-  const apiKey =
-    process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY ||
-    "AIzaSyCBuVGifR_SP3rV3tyMRxEWPiRVd1fg6o8";
+  const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "";
 
   const hasValidCoordinates =
     typeof latitude === "number" &&
