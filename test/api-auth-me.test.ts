@@ -2,9 +2,18 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { GET } from "../src/app/api/auth/me/route";
 import * as nextHeaders from "next/headers";
 import { signUserToken } from "../src/lib/auth";
+import { prisma } from "../src/lib/prisma";
 
 vi.mock("next/headers", () => ({
   cookies: vi.fn(),
+}));
+
+vi.mock("../src/lib/prisma", () => ({
+  prisma: {
+    user: {
+      findUnique: vi.fn(),
+    },
+  },
 }));
 
 describe("GET /api/auth/me", () => {
@@ -38,7 +47,28 @@ describe("GET /api/auth/me", () => {
     expect(json.user).toBeNull();
   });
 
-  it("mengembalikan data pengguna dan { authenticated: true } jika user_token valid", async () => {
+  it("mengembalikan { authenticated: false, user: null } jika user tidak ada di database", async () => {
+    const validToken = await signUserToken({
+      userId: "user-deleted-uuid",
+      email: "deleted@example.com",
+      name: "Deleted User",
+    });
+
+    (nextHeaders.cookies as unknown as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+      get: vi.fn().mockReturnValue({ value: validToken }),
+    });
+
+    vi.mocked(prisma.user.findUnique).mockResolvedValueOnce(null);
+
+    const response = await GET();
+    const json = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(json.authenticated).toBe(false);
+    expect(json.user).toBeNull();
+  });
+
+  it("mengembalikan data pengguna dan { authenticated: true } jika user_token valid dan ada di DB", async () => {
     const validToken = await signUserToken({
       userId: "user-uuid-123",
       email: "budi@example.com",
@@ -49,6 +79,15 @@ describe("GET /api/auth/me", () => {
     (nextHeaders.cookies as unknown as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
       get: vi.fn().mockReturnValue({ value: validToken }),
     });
+
+    vi.mocked(prisma.user.findUnique).mockResolvedValueOnce({
+      id: "user-uuid-123",
+      email: "budi@example.com",
+      name: "Budi Santoso",
+      whatsapp: "081234567890",
+      avatar: null,
+      bio: null,
+    } as any);
 
     const response = await GET();
     const json = await response.json();
