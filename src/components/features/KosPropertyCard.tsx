@@ -12,6 +12,8 @@ export interface KosPropertyCardProps {
   lastUpdated: string;
   isPetFriendly?: boolean;
   is24Hours?: boolean;
+  hasMultipleRoomTypes?: boolean;
+  roomTypesCount?: number;
 }
 
 export function KosPropertyCard({
@@ -25,9 +27,15 @@ export function KosPropertyCard({
   lastUpdated,
   isPetFriendly,
   is24Hours,
+  hasMultipleRoomTypes,
+  roomTypesCount,
 }: KosPropertyCardProps) {
+  const isMultiType = hasMultipleRoomTypes || (roomTypesCount !== undefined && roomTypesCount > 1);
+
   // Format mata uang Rupiah
-  const formattedPrice = `Rp ${price.toLocaleString("id-ID")} / bulan`;
+  const formattedPrice = isMultiType
+    ? `Mulai Rp ${price.toLocaleString("id-ID")} / bln`
+    : `Rp ${price.toLocaleString("id-ID")} / bulan`;
 
   // Format tanggal pembaruan
   const formattedDate = (() => {
@@ -136,15 +144,22 @@ export function KosPropertyCard({
         {/* Footer: Availability Badge & Last Updated */}
         <div className="mt-auto pt-3 border-t border-slate-100 flex items-center justify-between gap-2">
           {/* Availability Badge */}
-          {isAvailable ? (
-            <span className="bg-green-100 text-green-700 text-xs font-bold px-3 py-1 rounded-full border border-green-200/60 shadow-xs">
-              Sisa {availableRooms} Kamar
-            </span>
-          ) : (
-            <span className="bg-slate-200 text-slate-600 text-xs font-bold px-3 py-1 rounded-full">
-              Penuh
-            </span>
-          )}
+          <div className="flex items-center gap-1.5 flex-wrap">
+            {isAvailable ? (
+              <span className="bg-green-100 text-green-700 text-xs font-bold px-3 py-1 rounded-full border border-green-200/60 shadow-xs">
+                Sisa {availableRooms} Kamar
+              </span>
+            ) : (
+              <span className="bg-slate-200 text-slate-600 text-xs font-bold px-3 py-1 rounded-full">
+                Penuh
+              </span>
+            )}
+            {isMultiType && (
+              <span className="bg-teal-50 text-teal-700 text-[10px] font-bold px-2 py-0.5 rounded-full border border-teal-200">
+                {roomTypesCount ? `${roomTypesCount} Tipe` : "Multi Tipe"}
+              </span>
+            )}
+          </div>
 
           {/* Last Updated */}
           <div className="flex items-center gap-1 text-[11px] font-medium text-slate-600 shrink-0">

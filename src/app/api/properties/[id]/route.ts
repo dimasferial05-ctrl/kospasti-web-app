@@ -29,6 +29,11 @@ export async function GET(
           },
         },
         media: true,
+        room_types: {
+          orderBy: {
+            price_per_month: "asc",
+          },
+        },
       },
     });
 

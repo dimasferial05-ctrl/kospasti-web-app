@@ -32,6 +32,22 @@ interface PropertyMediaItem {
   type: string;
 }
 
+interface RoomTypeAdminItem {
+  id: string;
+  name: string;
+  price_per_month: number;
+  available_rooms: number;
+  facilities?: string | null;
+}
+
+interface RoomTypeFormItem {
+  id?: string;
+  name: string;
+  price_per_month: string;
+  available_rooms: string;
+  facilities: string;
+}
+
 interface PropertyAdminItem {
   id: string;
   name: string;
@@ -46,6 +62,7 @@ interface PropertyAdminItem {
   is_pet_friendly?: boolean;
   is_24_hours?: boolean;
   media?: PropertyMediaItem[];
+  room_types?: RoomTypeAdminItem[];
   owner_id: string;
   owner?: OwnerOption | null;
 }
@@ -96,6 +113,7 @@ export default function ManagePropertiesPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingProperty, setEditingProperty] = useState<PropertyAdminItem | null>(null);
   const [formData, setFormData] = useState<PropertyFormData>(initialFormData);
+  const [roomTypes, setRoomTypes] = useState<RoomTypeFormItem[]>([]);
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [formError, setFormError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -167,6 +185,14 @@ export default function ManagePropertiesPage() {
       is_pet_friendly: false,
       is_24_hours: false,
     });
+    setRoomTypes([
+      {
+        name: "Tipe A (Standar)",
+        price_per_month: "",
+        available_rooms: "1",
+        facilities: "",
+      },
+    ]);
     setSelectedFiles([]);
     setFormError(null);
     setIsModalOpen(true);
@@ -192,6 +218,26 @@ export default function ManagePropertiesPage() {
       is_pet_friendly: Boolean(prop.is_pet_friendly),
       is_24_hours: Boolean(prop.is_24_hours),
     });
+    if (prop.room_types && prop.room_types.length > 0) {
+      setRoomTypes(
+        prop.room_types.map((rt) => ({
+          id: rt.id,
+          name: rt.name,
+          price_per_month: String(rt.price_per_month),
+          available_rooms: String(rt.available_rooms),
+          facilities: rt.facilities || "",
+        }))
+      );
+    } else {
+      setRoomTypes([
+        {
+          name: "Standar",
+          price_per_month: prop.price_per_month !== undefined ? String(prop.price_per_month) : "",
+          available_rooms: prop.available_rooms !== undefined ? String(prop.available_rooms) : "0",
+          facilities: prop.facilities || "",
+        },
+      ]);
+    }
     setSelectedFiles([]);
     setFormError(null);
     setIsModalOpen(true);
@@ -202,6 +248,7 @@ export default function ManagePropertiesPage() {
     setIsModalOpen(false);
     setEditingProperty(null);
     setFormData(initialFormData);
+    setRoomTypes([]);
     setSelectedFiles([]);
     setFormError(null);
   };
@@ -320,18 +367,47 @@ export default function ManagePropertiesPage() {
       setFormError("Pemilik kos wajib dipilih.");
       return;
     }
-    if (!formData.price_per_month || Number(formData.price_per_month) <= 0) {
-      setFormError("Harga per bulan harus lebih dari 0.");
-      return;
+    let computedPrice = formData.price_per_month;
+    let computedRooms = formData.available_rooms;
+
+    if (roomTypes.length > 0) {
+      for (let i = 0; i < roomTypes.length; i++) {
+        const rt = roomTypes[i];
+        if (!rt.name.trim()) {
+          setFormError(`Nama Tipe Kamar #${i + 1} wajib diisi.`);
+          return;
+        }
+        if (!rt.price_per_month || Number(rt.price_per_month) <= 0 || isNaN(Number(rt.price_per_month))) {
+          setFormError(`Harga Tipe Kamar "${rt.name || `#${i + 1}`}" harus lebih dari 0.`);
+          return;
+        }
+        if (
+          rt.available_rooms === "" ||
+          Number(rt.available_rooms) < 0 ||
+          isNaN(Number(rt.available_rooms))
+        ) {
+          setFormError(`Jumlah kamar Tipe Kamar "${rt.name || `#${i + 1}`}" harus >= 0.`);
+          return;
+        }
+      }
+
+      computedPrice = String(Math.min(...roomTypes.map((rt) => Number(rt.price_per_month))));
+      computedRooms = String(roomTypes.reduce((sum, rt) => sum + Number(rt.available_rooms), 0));
+    } else {
+      if (!formData.price_per_month || Number(formData.price_per_month) <= 0) {
+        setFormError("Harga per bulan harus lebih dari 0.");
+        return;
+      }
+      if (
+        formData.available_rooms === "" ||
+        Number(formData.available_rooms) < 0 ||
+        isNaN(Number(formData.available_rooms))
+      ) {
+        setFormError("Jumlah kamar tersedia harus berupa angka >= 0.");
+        return;
+      }
     }
-    if (
-      formData.available_rooms === "" ||
-      Number(formData.available_rooms) < 0 ||
-      isNaN(Number(formData.available_rooms))
-    ) {
-      setFormError("Jumlah kamar tersedia harus berupa angka >= 0.");
-      return;
-    }
+
     if (!formData.facilities.trim()) {
       setFormError("Fasilitas kos wajib diisi.");
       return;
@@ -362,8 +438,8 @@ export default function ManagePropertiesPage() {
       const data = new FormData();
       data.append("name", formData.name.trim());
       data.append("owner_id", formData.owner_id.trim());
-      data.append("price_per_month", formData.price_per_month);
-      data.append("available_rooms", formData.available_rooms);
+      data.append("price_per_month", computedPrice);
+      data.append("available_rooms", computedRooms);
       data.append("gender_type", formData.gender_type);
       data.append("facilities", formData.facilities.trim());
       data.append("address", formData.address.trim());
@@ -371,6 +447,9 @@ export default function ManagePropertiesPage() {
       data.append("longitude", formData.longitude.trim());
       data.append("is_pet_friendly", String(formData.is_pet_friendly));
       data.append("is_24_hours", String(formData.is_24_hours));
+      if (roomTypes.length > 0) {
+        data.append("room_types", JSON.stringify(roomTypes));
+      }
       if (formData.image_url.trim()) {
         data.append("image_url", formData.image_url.trim());
       }
@@ -595,9 +674,16 @@ export default function ManagePropertiesPage() {
                     </span>
                   </td>
                   <td className="p-4 font-semibold text-slate-700">
-                    {prop.price_per_month
-                      ? `Rp ${prop.price_per_month.toLocaleString("id-ID")}/bln`
-                      : "-"}
+                    <div>
+                      {prop.price_per_month
+                        ? `Rp ${prop.price_per_month.toLocaleString("id-ID")}/bln`
+                        : "-"}
+                    </div>
+                    {prop.room_types && prop.room_types.length > 1 && (
+                      <span className="inline-block mt-0.5 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-teal-50 text-teal-700 border border-teal-200">
+                        {prop.room_types.length} Tipe Kamar
+                      </span>
+                    )}
                   </td>
                   <td className="p-4 text-center">
                     <span
@@ -649,15 +735,14 @@ export default function ManagePropertiesPage() {
                             <Loader2 className="w-3.5 h-3.5 animate-spin text-white" />
                             <span>Membuat Link...</span>
                           </>
-                        ) : copiedId === prop.id ? (
-                          <>
-                            <CheckCircle2 className="text-green-400" size={14} />
-                            <span>Tersalin!</span>
-                          </>
                         ) : (
                           <>
-                            <LinkIcon size={14} />
-                            <span>Copy Link</span>
+                            <LinkIcon size={13} />
+                            <span>
+                              {copiedId === (prop.owner?.id || prop.owner_id)
+                                ? "Tersalin!"
+                                : "Link Pemilik"}
+                            </span>
                           </>
                         )}
                       </button>
@@ -677,67 +762,54 @@ export default function ManagePropertiesPage() {
         </div>
       </div>
 
-      {/* Modal Dialog Form Tambah & Edit Properti */}
+      {/* MODAL TAMBAH / EDIT PROPERTI */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-xs animate-in fade-in duration-200">
-          <div className="bg-white rounded-2xl shadow-xl border border-slate-200 w-full max-w-lg overflow-hidden flex flex-col max-h-[90vh]">
-            <div className="p-5 border-b border-slate-100 flex items-center justify-between bg-slate-50/70">
-              <div className="flex items-center gap-2.5">
-                <div className="w-9 h-9 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center font-bold">
-                  <Building2 size={18} />
-                </div>
-                <div>
-                  <h3 className="font-bold text-slate-800 text-base">
-                    {editingProperty ? "Edit Properti Kos" : "Tambah Properti Kos Baru"}
-                  </h3>
-                  <p className="text-xs text-slate-500">
-                    {editingProperty
-                      ? "Perbarui informasi dan spesifikasi kos."
-                      : "Lengkapi data untuk mendaftarkan properti kos baru."}
-                  </p>
-                </div>
-              </div>
+        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+            {/* Modal Header */}
+            <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+              <h3 className="font-bold text-slate-800 text-base">
+                {editingProperty ? "Edit Properti Kos" : "Tambah Properti Kos Baru"}
+              </h3>
               <button
                 onClick={handleCloseModal}
-                className="text-slate-400 hover:text-slate-600 p-1 rounded-lg hover:bg-slate-100 transition-colors"
+                className="text-slate-400 hover:text-slate-600 p-1.5 rounded-lg hover:bg-slate-100 transition-colors cursor-pointer"
               >
-                <X size={20} />
+                <X size={18} />
               </button>
             </div>
 
-            <form onSubmit={handleSubmitForm} className="p-5 space-y-4 overflow-y-auto">
+            {/* Modal Body (Form) */}
+            <form onSubmit={handleSubmitForm} className="p-6 overflow-y-auto space-y-4 flex-1">
               {formError && (
-                <div className="p-3 bg-red-50 border border-red-200 rounded-xl flex items-center gap-2.5 text-xs text-red-600 font-medium">
-                  <AlertCircle size={16} className="shrink-0" />
+                <div className="p-3.5 bg-red-50 border border-red-200 text-red-700 text-xs rounded-xl flex items-center gap-2">
+                  <AlertCircle size={16} className="shrink-0 text-red-500" />
                   <span>{formError}</span>
                 </div>
               )}
 
-              {/* Nama Kos */}
+              {/* Nama Properti */}
               <div>
                 <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-                  Nama Kos <span className="text-red-500">*</span>
+                  Nama Properti Kos <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
                   required
-                  placeholder="Contoh: Kos Melati Asri"
+                  placeholder="Contoh: Kos Mawar Indah"
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   className="w-full px-3.5 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white"
                 />
               </div>
 
-              {/* Pemilik Kos (Dropdown Owner) */}
+              {/* Pemilik Kos */}
               <div>
                 <label className="block text-xs font-semibold text-slate-700 mb-1.5">
                   Pemilik Kos (Owner) <span className="text-red-500">*</span>
                 </label>
                 {isLoadingOwners ? (
-                  <div className="flex items-center gap-2 text-xs text-slate-400 py-2">
-                    <Loader2 size={14} className="animate-spin" />
-                    <span>Memuat daftar pemilik kos...</span>
-                  </div>
+                  <div className="text-xs text-slate-400 py-2">Memuat daftar pemilik...</div>
                 ) : (
                   <select
                     required
@@ -757,75 +829,171 @@ export default function ManagePropertiesPage() {
                 )}
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {/* Harga Per Bulan */}
-                <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-                    Harga / Bulan (Rp) <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="number"
-                    required
-                    min="1"
-                    placeholder="Contoh: 850000"
-                    value={formData.price_per_month}
-                    onChange={(e) =>
-                      setFormData({ ...formData, price_per_month: e.target.value })
-                    }
-                    className="w-full px-3.5 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white"
-                  />
-                </div>
-
-                {/* Tipe Kos */}
-                <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-                    Tipe Kos <span className="text-red-500">*</span>
-                  </label>
-                  <select
-                    value={formData.gender_type}
-                    onChange={(e) => setFormData({ ...formData, gender_type: e.target.value })}
-                    className="w-full px-3.5 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white"
-                  >
-                    <option value="PUTRA">Putra</option>
-                    <option value="PUTRI">Putri</option>
-                    <option value="CAMPUR">Campur</option>
-                  </select>
-                </div>
-              </div>
-
-              {/* Jumlah Kamar Tersedia */}
+              {/* Tipe Kos */}
               <div>
                 <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-                  Jumlah Kamar Tersedia <span className="text-red-500">*</span>
+                  Tipe Kos (Gender) <span className="text-red-500">*</span>
                 </label>
-                <input
-                  type="number"
-                  required
-                  min="0"
-                  placeholder="Contoh: 5"
-                  value={formData.available_rooms}
-                  onChange={(e) =>
-                    setFormData({ ...formData, available_rooms: e.target.value })
-                  }
+                <select
+                  value={formData.gender_type}
+                  onChange={(e) => setFormData({ ...formData, gender_type: e.target.value })}
                   className="w-full px-3.5 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white"
-                />
+                >
+                  <option value="PUTRA">Putra</option>
+                  <option value="PUTRI">Putri</option>
+                  <option value="CAMPUR">Campur</option>
+                </select>
               </div>
 
-              {/* Fasilitas */}
+              {/* Seksi Manajemen Tipe Kamar */}
+              <div className="p-4 bg-slate-50 border border-slate-200/80 rounded-2xl space-y-3">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h4 className="text-xs font-bold text-slate-900">
+                      Tipe Kamar Kos
+                    </h4>
+                    <p className="text-[11px] text-slate-500">
+                      Kelola daftar tipe kamar, harga, dan sisa kamar.
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setRoomTypes([
+                        ...roomTypes,
+                        {
+                          name: `Tipe ${String.fromCharCode(65 + roomTypes.length)}`,
+                          price_per_month: "",
+                          available_rooms: "1",
+                          facilities: "",
+                        },
+                      ])
+                    }
+                    className="inline-flex items-center gap-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-xs font-bold px-3 py-1.5 rounded-lg border border-emerald-200 transition-colors cursor-pointer"
+                  >
+                    <Plus size={13} />
+                    <span>Tambah Tipe</span>
+                  </button>
+                </div>
+
+                <div className="space-y-3 mt-2">
+                  {roomTypes.map((rt, idx) => (
+                    <div
+                      key={idx}
+                      className="p-3.5 bg-white border border-slate-200 rounded-xl space-y-2.5 shadow-2xs relative"
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-bold text-slate-800">
+                          Tipe #{idx + 1}
+                        </span>
+                        {roomTypes.length > 1 && (
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setRoomTypes(roomTypes.filter((_, rIdx) => rIdx !== idx))
+                            }
+                            className="text-rose-500 hover:text-rose-700 text-[11px] font-semibold flex items-center gap-1 cursor-pointer"
+                          >
+                            <Trash2 size={12} />
+                            <span>Hapus</span>
+                          </button>
+                        )}
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                        <div className="sm:col-span-1">
+                          <label className="block text-[11px] font-semibold text-slate-600 mb-1">
+                            Nama Tipe <span className="text-red-500">*</span>
+                          </label>
+                          <input
+                            type="text"
+                            required
+                            placeholder="Contoh: Tipe A (AC)"
+                            value={rt.name}
+                            onChange={(e) => {
+                              const updated = [...roomTypes];
+                              updated[idx].name = e.target.value;
+                              setRoomTypes(updated);
+                            }}
+                            className="w-full px-3 py-1.5 text-xs border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-[11px] font-semibold text-slate-600 mb-1">
+                            Harga/Bln (Rp) <span className="text-red-500">*</span>
+                          </label>
+                          <input
+                            type="number"
+                            required
+                            min="1"
+                            placeholder="Contoh: 850000"
+                            value={rt.price_per_month}
+                            onChange={(e) => {
+                              const updated = [...roomTypes];
+                              updated[idx].price_per_month = e.target.value;
+                              setRoomTypes(updated);
+                            }}
+                            className="w-full px-3 py-1.5 text-xs border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-[11px] font-semibold text-slate-600 mb-1">
+                            Sisa Kamar <span className="text-red-500">*</span>
+                          </label>
+                          <input
+                            type="number"
+                            required
+                            min="0"
+                            placeholder="Contoh: 3"
+                            value={rt.available_rooms}
+                            onChange={(e) => {
+                              const updated = [...roomTypes];
+                              updated[idx].available_rooms = e.target.value;
+                              setRoomTypes(updated);
+                            }}
+                            className="w-full px-3 py-1.5 text-xs border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white"
+                          />
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="block text-[11px] font-semibold text-slate-600 mb-1">
+                          Fasilitas Khusus Kamar Ini (Opsional)
+                        </label>
+                        <input
+                          type="text"
+                          placeholder="Contoh: AC, Kasur Springbed, Kamar Mandi Dalam"
+                          value={rt.facilities}
+                          onChange={(e) => {
+                            const updated = [...roomTypes];
+                            updated[idx].facilities = e.target.value;
+                            setRoomTypes(updated);
+                          }}
+                          className="w-full px-3 py-1.5 text-xs border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white"
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Fasilitas Umum / Bersama */}
               <div>
                 <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-                  Fasilitas <span className="text-red-500">*</span>
+                  Fasilitas Umum / Bangunan <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
                   required
-                  placeholder="Contoh: AC, WiFi, Kamar Mandi Dalam, Kasur"
+                  placeholder="Contoh: WiFi, Dapur Bersama, Parkir Motor, CCTV"
                   value={formData.facilities}
                   onChange={(e) => setFormData({ ...formData, facilities: e.target.value })}
                   className="w-full px-3.5 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white"
                 />
                 <p className="text-[11px] text-slate-400 mt-1">
-                  Gunakan tanda koma (,) untuk memisahkan antar fasilitas.
+                  Fasilitas yang bisa digunakan bersama oleh semua penghuni. Gunakan tanda koma (,) untuk memisahkan.
                 </p>
               </div>
 

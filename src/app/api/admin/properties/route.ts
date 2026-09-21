@@ -27,6 +27,11 @@ export async function GET(request: NextRequest) {
           },
         },
         media: true,
+        room_types: {
+          orderBy: {
+            price_per_month: "asc",
+          },
+        },
       },
       orderBy: {
         name: "asc",
@@ -82,6 +87,12 @@ export async function POST(request: NextRequest) {
     let owner_id: string | undefined;
     let is_pet_friendly: boolean = false;
     let is_24_hours: boolean = false;
+    let room_types: Array<{
+      name: string;
+      price_per_month: number;
+      available_rooms: number;
+      facilities?: string | null;
+    }> = [];
     const mediaToCreate: { url: string; type: string }[] = [];
 
     if (contentType.includes("multipart/form-data")) {
@@ -102,6 +113,23 @@ export async function POST(request: NextRequest) {
       is_24_hours =
         formData.get("is_24_hours") === "true" ||
         formData.get("is_24_hours") === "1";
+
+      const rawRoomTypes = formData.get("room_types") as string | null;
+      if (rawRoomTypes) {
+        try {
+          const parsed = JSON.parse(rawRoomTypes);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            room_types = parsed.map((rt: { name?: string; price_per_month?: number | string; available_rooms?: number | string; facilities?: string }) => ({
+              name: String(rt.name || "Standar").trim(),
+              price_per_month: Math.floor(Number(rt.price_per_month || 0)),
+              available_rooms: Math.floor(Number(rt.available_rooms || 0)),
+              facilities: rt.facilities ? String(rt.facilities).trim() : null,
+            }));
+          }
+        } catch (err) {
+          console.warn("Gagal parsing room_types formData:", err);
+        }
+      }
 
       // Ambil file media yang diunggah
       const filesFromMedia = formData.getAll("media");
@@ -141,6 +169,15 @@ export async function POST(request: NextRequest) {
       is_pet_friendly = Boolean(body.is_pet_friendly);
       is_24_hours = Boolean(body.is_24_hours);
 
+      if (Array.isArray(body.room_types) && body.room_types.length > 0) {
+        room_types = body.room_types.map((rt: { name?: string; price_per_month?: number | string; available_rooms?: number | string; facilities?: string }) => ({
+          name: String(rt.name || "Standar").trim(),
+          price_per_month: Math.floor(Number(rt.price_per_month || 0)),
+          available_rooms: Math.floor(Number(rt.available_rooms || 0)),
+          facilities: rt.facilities ? String(rt.facilities).trim() : null,
+        }));
+      }
+
       if (Array.isArray(body.media)) {
         for (const m of body.media) {
           if (typeof m === "string" && m.trim()) {
@@ -155,6 +192,15 @@ export async function POST(request: NextRequest) {
             });
           }
         }
+      }
+    }
+
+    if (room_types.length > 0) {
+      if (price_per_month === undefined || price_per_month === null || isNaN(Number(price_per_month)) || Number(price_per_month) <= 0) {
+        price_per_month = Math.min(...room_types.map((rt) => rt.price_per_month));
+      }
+      if (available_rooms === undefined || available_rooms === null || isNaN(Number(available_rooms)) || Number(available_rooms) < 0) {
+        available_rooms = room_types.reduce((sum, rt) => sum + rt.available_rooms, 0);
       }
     }
 
@@ -275,6 +321,19 @@ export async function POST(request: NextRequest) {
         media: {
           create: mediaToCreate,
         },
+        room_types: {
+          create:
+            room_types.length > 0
+              ? room_types
+              : [
+                  {
+                    name: "Standar",
+                    price_per_month: Math.floor(Number(price_per_month)),
+                    available_rooms: Math.floor(Number(available_rooms)),
+                    facilities: facilities.trim(),
+                  },
+                ],
+        },
       },
       include: {
         owner: {
@@ -285,6 +344,11 @@ export async function POST(request: NextRequest) {
           },
         },
         media: true,
+        room_types: {
+          orderBy: {
+            price_per_month: "asc",
+          },
+        },
       },
     });
 

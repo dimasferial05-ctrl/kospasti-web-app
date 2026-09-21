@@ -74,7 +74,7 @@ describe("Property Detail Page Component (/kos/[id])", () => {
     expect(content).toContain("bg-slate-200");
 
     // Fasilitas
-    expect(content).toContain("Fasilitas Kos");
+    expect(content).toContain("Fasilitas");
 
     // Info Pemilik
     expect(content).toContain("Dikelola oleh");
@@ -121,12 +121,12 @@ describe("Property Detail Page Component (/kos/[id])", () => {
     expect(content).toContain("Kamar Penuh");
     expect(content).toContain("Amankan Kamar");
 
-    // Tombol memiliki kelas visual dinamis abu-abu dan cursor-not-allowed vs biru
+    // Tombol memiliki kelas visual dinamis abu-abu dan cursor-not-allowed vs emerald
     expect(content).toContain("bg-slate-400 cursor-not-allowed");
-    expect(content).toContain("bg-blue-600 hover:bg-blue-700");
+    expect(content).toContain("bg-emerald-600 hover:bg-emerald-700");
 
     // Pesan peringatan opsional jika isFull bernilai true
-    expect(content).toContain("Mohon maaf, semua kamar telah terisi.");
+    expect(content).toContain("Mohon maaf, tipe kamar ini telah penuh.");
   });
 
   it("memiliki struktur Booking Form Modal yang lengkap, menampilkan data akun, dan responsif", () => {

@@ -5,6 +5,13 @@ import path from "path";
 import { renderToStaticMarkup } from "react-dom/server";
 import Home from "../src/app/page";
 
+// Mock next/navigation
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({
+    push: vi.fn(),
+  }),
+}));
+
 describe("Home Page Component (/)", () => {
   beforeEach(() => {
     vi.restoreAllMocks();
@@ -27,11 +34,9 @@ describe("Home Page Component (/)", () => {
 
     const html = renderToStaticMarkup(<Home />);
 
-    // Search filter elements
-    expect(html).toContain("Cari nama kos...");
-    expect(html).toContain("Batas Harga");
-    expect(html).toContain("Tipe Kos");
-    expect(html).toContain("Cari Kos");
+    // Search filter / SmartSearchBar elements
+    expect(html).toContain("Ketik kebutuhan kos");
+    expect(html).toContain("Cari");
 
     // Loading indicator should appear
     expect(html).toContain("Memuat daftar kos...");

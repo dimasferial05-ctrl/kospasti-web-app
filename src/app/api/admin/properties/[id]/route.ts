@@ -67,6 +67,15 @@ export async function PATCH(
     let owner_id: string | undefined;
     let is_pet_friendly: boolean | undefined;
     let is_24_hours: boolean | undefined;
+    let room_types:
+      | Array<{
+          id?: string;
+          name: string;
+          price_per_month: number;
+          available_rooms: number;
+          facilities: string | null;
+        }>
+      | undefined;
     const newMediaToCreate: { url: string; type: string }[] = [];
 
     if (contentType.includes("multipart/form-data")) {
@@ -97,6 +106,24 @@ export async function PATCH(
       if (formData.has("is_24_hours")) {
         const val = formData.get("is_24_hours");
         is_24_hours = val === "true" || val === "1";
+      }
+
+      if (formData.has("room_types")) {
+        const raw = formData.get("room_types") as string;
+        try {
+          const parsed = JSON.parse(raw);
+          if (Array.isArray(parsed)) {
+            room_types = parsed.map((rt: { id?: string; name?: string; price_per_month?: number | string; available_rooms?: number | string; facilities?: string }) => ({
+              id: rt.id ? String(rt.id) : undefined,
+              name: String(rt.name || "Standar").trim(),
+              price_per_month: Math.floor(Number(rt.price_per_month || 0)),
+              available_rooms: Math.floor(Number(rt.available_rooms || 0)),
+              facilities: rt.facilities ? String(rt.facilities).trim() : null,
+            }));
+          }
+        } catch (err) {
+          console.warn("Gagal parsing room_types PATCH formData:", err);
+        }
       }
 
       const filesFromMedia = formData.getAll("media");
@@ -140,6 +167,16 @@ export async function PATCH(
         is_24_hours = Boolean(body.is_24_hours);
       }
 
+      if (Array.isArray(body.room_types)) {
+        room_types = body.room_types.map((rt: { id?: string; name?: string; price_per_month?: number | string; available_rooms?: number | string; facilities?: string }) => ({
+          id: rt.id ? String(rt.id) : undefined,
+          name: String(rt.name || "Standar").trim(),
+          price_per_month: Math.floor(Number(rt.price_per_month || 0)),
+          available_rooms: Math.floor(Number(rt.available_rooms || 0)),
+          facilities: rt.facilities ? String(rt.facilities).trim() : null,
+        }));
+      }
+
       if (Array.isArray(body.media)) {
         for (const m of body.media) {
           if (typeof m === "string" && m.trim()) {
@@ -156,6 +193,8 @@ export async function PATCH(
         }
       }
     }
+
+    let room_types_data: typeof room_types = room_types;
 
     const updateData: {
       name?: string;
@@ -370,6 +409,25 @@ export async function PATCH(
       }
     }
 
+    if (room_types_data && room_types_data.length > 0) {
+      updateData.price_per_month = Math.min(...room_types_data.map((rt) => rt.price_per_month));
+      updateData.available_rooms = room_types_data.reduce((sum, rt) => sum + rt.available_rooms, 0);
+
+      // Re-sync room types for this property
+      await prisma.roomType.deleteMany({
+        where: { property_id: propertyId.trim() },
+      });
+      await prisma.roomType.createMany({
+        data: room_types_data.map((rt) => ({
+          property_id: propertyId.trim(),
+          name: rt.name,
+          price_per_month: rt.price_per_month,
+          available_rooms: rt.available_rooms,
+          facilities: rt.facilities,
+        })),
+      });
+    }
+
     const updatedProperty = await prisma.property.update({
       where: { id: propertyId.trim() },
       data: updateData,
@@ -382,6 +440,11 @@ export async function PATCH(
           },
         },
         media: true,
+        room_types: {
+          orderBy: {
+            price_per_month: "asc",
+          },
+        },
       },
     });
 
