@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { cookies } from "next/headers";
-import { Header } from "@/components/shared/Header";
-import { ProfileCompletionModal } from "@/components/shared/ProfileCompletionModal";
+import { Header } from "@/components/layout/Header";
+import { ProfileCompletionModal } from "@/components/features/ProfileCompletionModal";
 import "./globals.css";
 
 const geistSans = Geist({

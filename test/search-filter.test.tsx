@@ -3,13 +3,13 @@ import React from "react";
 import fs from "fs";
 import path from "path";
 import { renderToStaticMarkup } from "react-dom/server";
-import { SearchFilter } from "../src/components/shared/SearchFilter";
+import { SearchFilter } from "../src/components/features/SearchFilter";
 
 describe("SearchFilter Component", () => {
   it("memiliki direktif 'use client' di baris paling awal file", () => {
     const filePath = path.resolve(
       __dirname,
-      "../src/components/shared/SearchFilter.tsx"
+      "../src/components/features/SearchFilter.tsx"
     );
     const content = fs.readFileSync(filePath, "utf-8");
     const firstLine = content.trim().split("\n")[0].trim();
@@ -72,7 +72,7 @@ describe("SearchFilter Component", () => {
   it("menerapkan tata letak horizontal pada layar desktop (lg)", () => {
     const filePath = path.resolve(
       __dirname,
-      "../src/components/shared/SearchFilter.tsx"
+      "../src/components/features/SearchFilter.tsx"
     );
     const content = fs.readFileSync(filePath, "utf-8");
 

@@ -17,7 +17,7 @@ import {
   Clock,
   Sparkles,
 } from "lucide-react";
-import PropertyLocationMap from "@/components/PropertyLocationMap";
+import PropertyLocationMap from "@/components/map/PropertyLocationMap";
 
 interface PropertyMediaItem {
   id?: string;

@@ -38,7 +38,7 @@ vi.mock("@vis.gl/react-google-maps", () => ({
 }));
 
 import MapSearchPage from "../src/app/map/page";
-import MapViewer from "../src/components/MapViewer";
+import MapViewer from "../src/components/map/MapViewer";
 
 describe("Interactive Google Maps Property Search (/map) - Issue #121", () => {
   beforeEach(() => {
@@ -47,7 +47,7 @@ describe("Interactive Google Maps Property Search (/map) - Issue #121", () => {
 
   it("memiliki direktif 'use client' di baris paling awal file page.tsx dan MapViewer.tsx", () => {
     const pagePath = path.resolve(__dirname, "../src/app/map/page.tsx");
-    const mapViewerPath = path.resolve(__dirname, "../src/components/MapViewer.tsx");
+    const mapViewerPath = path.resolve(__dirname, "../src/components/map/MapViewer.tsx");
 
     const pageContent = fs.readFileSync(pagePath, "utf-8");
     const mapViewerContent = fs.readFileSync(mapViewerPath, "utf-8");
@@ -138,14 +138,14 @@ describe("Interactive Google Maps Property Search (/map) - Issue #121", () => {
   });
 
   it("memiliki tracking attribution internal 'gmp_git_agentskills_v1' sesuai kepatuhan Google Maps Platform", () => {
-    const mapViewerPath = path.resolve(__dirname, "../src/components/MapViewer.tsx");
+    const mapViewerPath = path.resolve(__dirname, "../src/components/map/MapViewer.tsx");
     const content = fs.readFileSync(mapViewerPath, "utf-8");
 
     expect(content).toContain('internalUsageAttributionIds={["gmp_git_agentskills_v1"]}');
   });
 
   it("MapViewer mengimplementasikan ErrorBoundary untuk menangani runtime rendering error", () => {
-    const mapViewerPath = path.resolve(__dirname, "../src/components/MapViewer.tsx");
+    const mapViewerPath = path.resolve(__dirname, "../src/components/map/MapViewer.tsx");
     const content = fs.readFileSync(mapViewerPath, "utf-8");
 
     expect(content).toContain("MapErrorBoundary");
@@ -153,7 +153,7 @@ describe("Interactive Google Maps Property Search (/map) - Issue #121", () => {
   });
 
   it("Header memuat tautan navigasi Peta Kos (/map)", () => {
-    const headerPath = path.resolve(__dirname, "../src/components/shared/Header.tsx");
+    const headerPath = path.resolve(__dirname, "../src/components/layout/Header.tsx");
     const content = fs.readFileSync(headerPath, "utf-8");
 
     expect(content).toContain('href="/map"');

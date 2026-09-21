@@ -4,7 +4,7 @@ import fs from "fs";
 import path from "path";
 import { renderToStaticMarkup } from "react-dom/server";
 import AdminLayout from "../src/app/admin/layout";
-import { Header } from "../src/components/shared/Header";
+import { Header } from "../src/components/layout/Header";
 
 // Mock next/navigation
 let mockPathname = "/";
