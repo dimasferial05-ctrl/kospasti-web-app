@@ -3,82 +3,87 @@ import React from "react";
 import fs from "fs";
 import path from "path";
 import { renderToStaticMarkup } from "react-dom/server";
-import Home from "../src/app/page";
+import LandingPage from "../src/app/page";
 
 // Mock next/navigation
 vi.mock("next/navigation", () => ({
   useRouter: () => ({
     push: vi.fn(),
   }),
+  usePathname: () => "/",
 }));
 
-describe("Home Page Component (/)", () => {
+describe("Landing Page Component (/) - Issue #168 Revamp", () => {
   beforeEach(() => {
     vi.restoreAllMocks();
   });
 
-  it("memiliki direktif 'use client' di baris paling awal file", () => {
-    const filePath = path.resolve(__dirname, "../src/app/page.tsx");
-    const content = fs.readFileSync(filePath, "utf-8");
-    const firstLine = content.trim().split("\n")[0].trim();
-    expect(firstLine).toMatch(/^["']use client["'];?$/);
+  it("merender Landing Page secara lengkap dengan seluruh seksi utama sesuai layout referensi", () => {
+    const html = renderToStaticMarkup(<LandingPage />);
+
+    // 1. Hero Section
+    expect(html).toContain("Temukan Kos Impian atau");
+    expect(html).toContain("Kelola Propertimu?");
+    expect(html).toContain("Cari Kos");
+
+    // 2. Role Cards Section
+    expect(html).toContain("Saya Pencari Kos");
+    expect(html).toContain("Saya Pemilik Kos");
+    expect(html).toContain("Cari Kos Sekarang");
+    expect(html).toContain("Pelajari Kemitraan Mitra");
+
+    // 3. How It Works Section
+    expect(html).toContain("KosPasti mempermudah proses sewa kos hanya dalam 3 langkah mudah:");
+    expect(html).toContain("Cari Kos &amp; Filter Kebutuhan");
+    expect(html).toContain("Tanya Pemilik &amp; Cek Ulasan");
+    expect(html).toContain("Booking &amp; Bayar dengan Escrow");
+
+    // 4. Features Section (Editorial)
+    expect(html).toContain("Ulasan Asli dari Penghuni, Transparansi Tanpa Rekayasa");
+    expect(html).toContain("Pencarian Berbasis AI &amp; Otomasi Notifikasi WhatsApp");
+
+    // 5. Partner CTA Section (B2B)
+    expect(html).toContain("Punya Properti Kos? Kelola Cerdas &amp; Maksimalkan Okupansi");
+    expect(html).toContain("Daftar Sebagai Mitra Kos");
+    expect(html).toContain('id="mitra"');
+
+    // 6. FAQ Section
+    expect(html).toContain("Pertanyaan yang Sering Diajukan (FAQ)");
+    expect(html).toContain('id="faq"');
+    expect(html).toContain("Bagaimana sistem pembayaran aman (Escrow)");
+
+    // 7. Modern Footer
+    expect(html).toContain("KosPasti");
+    expect(html).toContain("Kepastian Kos Real-Time");
+    expect(html).toContain("All rights reserved");
   });
 
-  it("merender komponen filter dan status loading pada saat inisialisasi tanpa memunculkan empty state", () => {
-    // Mock global fetch agar tidak melakukan real network request
-    global.fetch = vi.fn().mockImplementation(() =>
-      new Promise(() => {
-        // Pending promise to simulate initial loading state in SSR/static render
-      })
-    );
+  it("memiliki struktur komponen modular yang terorganisir di src/components/landing/", () => {
+    const landingDir = path.resolve(__dirname, "../src/components/landing");
+    expect(fs.existsSync(landingDir)).toBe(true);
 
-    const html = renderToStaticMarkup(<Home />);
+    const expectedFiles = [
+      "HeroSection.tsx",
+      "RoleCardsSection.tsx",
+      "HowItWorksSection.tsx",
+      "FeaturesSection.tsx",
+      "PartnerCTASection.tsx",
+      "FAQSection.tsx",
+      "LandingFooter.tsx",
+      "index.ts",
+    ];
 
-    // Search filter / SmartSearchBar elements
-    expect(html).toContain("Ketik kebutuhan kos");
-    expect(html).toContain("Cari");
-
-    // Loading indicator should appear
-    expect(html).toContain("Memuat daftar kos...");
-
-    // Empty state should NOT appear while loading
-    expect(html).not.toContain("Kos Tidak Ditemukan");
+    expectedFiles.forEach((file) => {
+      const filePath = path.join(landingDir, file);
+      expect(fs.existsSync(filePath)).toBe(true);
+    });
   });
 
-  it("memiliki struktur Empty State yang sesuai dengan spesifikasi UI", () => {
-    const filePath = path.resolve(__dirname, "../src/app/page.tsx");
-    const content = fs.readFileSync(filePath, "utf-8");
+  it("mengarahkan CTA pencarian ke /search dan CTA mitra ke id #mitra", () => {
+    const roleCardPath = path.resolve(__dirname, "../src/components/landing/RoleCardsSection.tsx");
+    const content = fs.readFileSync(roleCardPath, "utf-8");
 
-    // Pastikan mengimpor SearchX dari lucide-react
-    expect(content).toContain("SearchX");
-    expect(content).toContain("from \"lucide-react\"");
-
-    // Pastikan memiliki teks Empty State sesuai spesifikasi
-    expect(content).toContain("Kos Tidak Ditemukan");
-    expect(content).toContain(
-      "Maaf, tidak ada kos yang sesuai dengan kriteria pencarian atau filter Anda."
-    );
-
-    // Pastikan styling dashed border & responsive container ada
-    expect(content).toContain("border-dashed");
-    expect(content).toContain("text-slate-300");
-  });
-
-  it("membungkus setiap kartu kos dengan Link ke /kos/[id]", () => {
-    const filePath = path.resolve(__dirname, "../src/app/page.tsx");
-    const content = fs.readFileSync(filePath, "utf-8");
-
-    expect(content).toContain("import Link from \"next/link\"");
-    expect(content).toContain("href={`/kos/${property.id}`}");
-  });
-
-  it("menggunakan layout CSS Grid responsif untuk daftar kos", () => {
-    const filePath = path.resolve(__dirname, "../src/app/page.tsx");
-    const content = fs.readFileSync(filePath, "utf-8");
-
-    expect(content).toContain("grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6");
-    expect(content).toContain("h-full transition-transform hover:scale-[1.02]");
+    expect(content).toContain('href="/search"');
+    expect(content).toContain('href="#mitra"');
   });
 });
-
-

@@ -1,0 +1,82 @@
+import { describe, it, expect, vi, beforeEach } from "vitest";
+import React from "react";
+import fs from "fs";
+import path from "path";
+import { renderToStaticMarkup } from "react-dom/server";
+import SearchPage from "../src/app/search/page";
+
+// Mock next/navigation
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({
+    push: vi.fn(),
+  }),
+}));
+
+describe("Search Page Component (/search)", () => {
+  beforeEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it("memiliki direktif 'use client' di baris paling awal file", () => {
+    const filePath = path.resolve(__dirname, "../src/app/search/page.tsx");
+    const content = fs.readFileSync(filePath, "utf-8");
+    const firstLine = content.trim().split("\n")[0].trim();
+    expect(firstLine).toMatch(/^["']use client["'];?$/);
+  });
+
+  it("merender komponen filter dan status loading pada saat inisialisasi tanpa memunculkan empty state", () => {
+    // Mock global fetch agar tidak melakukan real network request
+    global.fetch = vi.fn().mockImplementation(() =>
+      new Promise(() => {
+        // Pending promise to simulate initial loading state in SSR/static render
+      })
+    );
+
+    const html = renderToStaticMarkup(<SearchPage />);
+
+    // Search filter / SmartSearchBar elements
+    expect(html).toContain("Ketik kebutuhan kos");
+    expect(html).toContain("Cari");
+
+    // Loading indicator should appear
+    expect(html).toContain("Memuat daftar kos...");
+
+    // Empty state should NOT appear while loading
+    expect(html).not.toContain("Kos Tidak Ditemukan");
+  });
+
+  it("memiliki struktur Empty State yang sesuai dengan spesifikasi UI", () => {
+    const filePath = path.resolve(__dirname, "../src/app/search/page.tsx");
+    const content = fs.readFileSync(filePath, "utf-8");
+
+    // Pastikan mengimpor SearchX dari lucide-react
+    expect(content).toContain("SearchX");
+    expect(content).toContain("from \"lucide-react\"");
+
+    // Pastikan memiliki teks Empty State sesuai spesifikasi
+    expect(content).toContain("Kos Tidak Ditemukan");
+    expect(content).toContain(
+      "Maaf, tidak ada kos yang sesuai dengan kriteria pencarian atau filter Anda."
+    );
+
+    // Pastikan styling dashed border & responsive container ada
+    expect(content).toContain("border-dashed");
+    expect(content).toContain("text-slate-300");
+  });
+
+  it("membungkus setiap kartu kos dengan Link ke /kos/[id]", () => {
+    const filePath = path.resolve(__dirname, "../src/app/search/page.tsx");
+    const content = fs.readFileSync(filePath, "utf-8");
+
+    expect(content).toContain("import Link from \"next/link\"");
+    expect(content).toContain("href={`/kos/${property.id}`}");
+  });
+
+  it("menggunakan layout CSS Grid responsif untuk daftar kos", () => {
+    const filePath = path.resolve(__dirname, "../src/app/search/page.tsx");
+    const content = fs.readFileSync(filePath, "utf-8");
+
+    expect(content).toContain("grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6");
+    expect(content).toContain("h-full transition-transform hover:scale-[1.02]");
+  });
+});
