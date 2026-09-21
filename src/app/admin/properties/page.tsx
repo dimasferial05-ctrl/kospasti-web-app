@@ -794,14 +794,15 @@ export default function ManagePropertiesPage() {
 
       {/* MODAL TAMBAH / EDIT PROPERTI */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 sm:p-6 overflow-hidden">
+          <div className="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200">
             {/* Modal Header */}
-            <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+            <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/80 shrink-0">
               <h3 className="font-bold text-slate-800 text-base">
                 {editingProperty ? "Edit Properti Kos" : "Tambah Properti Kos Baru"}
               </h3>
               <button
+                type="button"
                 onClick={handleCloseModal}
                 className="text-slate-400 hover:text-slate-600 p-1.5 rounded-lg hover:bg-slate-100 transition-colors cursor-pointer"
               >
@@ -809,14 +810,16 @@ export default function ManagePropertiesPage() {
               </button>
             </div>
 
-            {/* Modal Body (Form) */}
-            <form onSubmit={handleSubmitForm} className="p-6 overflow-y-auto space-y-4 flex-1">
-              {formError && (
-                <div className="p-3.5 bg-red-50 border border-red-200 text-red-700 text-xs rounded-xl flex items-center gap-2">
-                  <AlertCircle size={16} className="shrink-0 text-red-500" />
-                  <span>{formError}</span>
-                </div>
-              )}
+            {/* Modal Body & Footer in Form */}
+            <form onSubmit={handleSubmitForm} className="flex flex-col flex-1 min-h-0 overflow-hidden">
+              {/* Scrollable Content */}
+              <div className="p-6 overflow-y-auto space-y-4 flex-1 overscroll-contain">
+                {formError && (
+                  <div className="p-3.5 bg-red-50 border border-red-200 text-red-700 text-xs rounded-xl flex items-center gap-2">
+                    <AlertCircle size={16} className="shrink-0 text-red-500" />
+                    <span>{formError}</span>
+                  </div>
+                )}
 
               {/* Nama Properti */}
               <div>
@@ -1426,12 +1429,14 @@ export default function ManagePropertiesPage() {
                 />
               </div>
 
-              {/* Action Buttons */}
-              <div className="pt-3 border-t border-slate-100 flex items-center justify-end gap-2.5">
+              </div>
+
+              {/* Pinned Action Buttons Footer */}
+              <div className="px-6 py-3.5 border-t border-slate-100 bg-slate-50/80 flex items-center justify-end gap-2.5 shrink-0">
                 <button
                   type="button"
                   onClick={handleCloseModal}
-                  className="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-xl transition-colors cursor-pointer"
+                  className="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-200/60 rounded-xl transition-colors cursor-pointer"
                 >
                   Batal
                 </button>
