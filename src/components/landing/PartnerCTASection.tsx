@@ -2,9 +2,6 @@ import React from "react";
 import Link from "next/link";
 import {
   Building2,
-  TrendingUp,
-  ShieldCheck,
-  CheckCircle2,
   ArrowRight,
   MessageCircle,
   Users,

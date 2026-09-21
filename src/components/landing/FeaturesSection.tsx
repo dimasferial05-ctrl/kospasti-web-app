@@ -3,7 +3,6 @@ import Link from "next/link";
 import {
   ShieldCheck,
   Star,
-  MessageSquare,
   Sparkles,
   MapPin,
   BellRing,

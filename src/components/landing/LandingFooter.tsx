@@ -1,5 +1,6 @@
 import React from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { MessageCircle, Mail, MapPin, Heart } from "lucide-react";
 
 export function LandingFooter() {
@@ -124,27 +125,33 @@ export function LandingFooter() {
         <div className="pt-8 pb-3 w-full overflow-hidden flex items-end justify-center select-none opacity-80 hover:opacity-100 transition-opacity">
           <div className="flex items-end justify-center -space-x-px w-full max-w-5xl">
             {/* Mirrored Left */}
-            <div className="w-1/3 flex justify-end overflow-hidden">
-              <img
+            <div className="w-1/3 h-20 sm:h-28 md:h-32 relative flex justify-end overflow-hidden">
+              <Image
                 src="/images/footer-skyline.jpg"
                 alt="City Skyline Left"
-                className="h-20 sm:h-28 md:h-32 w-full object-cover object-bottom scale-x-[-1]"
+                fill
+                className="object-cover object-bottom scale-x-[-1]"
+                sizes="(max-width: 768px) 33vw, 300px"
               />
             </div>
             {/* Center Normal */}
-            <div className="w-1/3 flex justify-center overflow-hidden">
-              <img
+            <div className="w-1/3 h-20 sm:h-28 md:h-32 relative flex justify-center overflow-hidden">
+              <Image
                 src="/images/footer-skyline.jpg"
                 alt="City Skyline Center"
-                className="h-20 sm:h-28 md:h-32 w-full object-cover object-bottom"
+                fill
+                className="object-cover object-bottom"
+                sizes="(max-width: 768px) 33vw, 300px"
               />
             </div>
             {/* Mirrored Right */}
-            <div className="w-1/3 flex justify-start overflow-hidden">
-              <img
+            <div className="w-1/3 h-20 sm:h-28 md:h-32 relative flex justify-start overflow-hidden">
+              <Image
                 src="/images/footer-skyline.jpg"
                 alt="City Skyline Right"
-                className="h-20 sm:h-28 md:h-32 w-full object-cover object-bottom scale-x-[-1]"
+                fill
+                className="object-cover object-bottom scale-x-[-1]"
+                sizes="(max-width: 768px) 33vw, 300px"
               />
             </div>
           </div>

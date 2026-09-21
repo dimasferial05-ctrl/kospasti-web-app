@@ -16,10 +16,6 @@ export function Header({ isLoggedIn: initialIsLoggedIn = false }: HeaderProps) {
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   useEffect(() => {
-    setIsLoggedIn(initialIsLoggedIn);
-  }, [initialIsLoggedIn]);
-
-  useEffect(() => {
     let isMounted = true;
     fetch("/api/auth/me")
       .then((res) => res.json())

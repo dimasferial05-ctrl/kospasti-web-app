@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Search, ArrowRight, MapPin, Sparkles } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
 
 export function HeroSection() {
   const router = useRouter();
@@ -82,10 +83,13 @@ export function HeroSection() {
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 mt-10 sm:mt-12">
         <div className="relative w-full h-56 sm:h-80 lg:h-96 rounded-t-3xl overflow-hidden border-t border-x border-slate-200/80 shadow-2xl bg-slate-900 group">
           {/* Architectural Image */}
-          <img
+          <Image
             src="https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=1400&q=80"
             alt="Modern Kos Building Architecture"
-            className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-700 opacity-90"
+            fill
+            priority
+            className="object-cover object-center group-hover:scale-105 transition-transform duration-700 opacity-90"
+            sizes="(max-width: 1200px) 100vw, 1200px"
           />
 
           {/* Clean Gradient Overlay */}

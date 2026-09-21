@@ -1,5 +1,6 @@
 import React from "react";
-import { Laptop, Smartphone } from "lucide-react";
+import Image from "next/image";
+import { Laptop } from "lucide-react";
 
 export function HowItWorksSection() {
   const steps = [
@@ -61,11 +62,13 @@ export function HowItWorksSection() {
               </div>
 
               {/* Desktop Image View */}
-              <div className="w-full bg-slate-100 overflow-hidden">
-                <img
+              <div className="w-full bg-slate-100 overflow-hidden relative aspect-[16/10]">
+                <Image
                   src="/images/desktop-preview.png"
                   alt="Tampilan Desktop KosPasti Web App"
-                  className="w-full h-auto object-cover object-top hover:scale-[1.02] transition-transform duration-500"
+                  fill
+                  className="object-cover object-top hover:scale-[1.02] transition-transform duration-500"
+                  sizes="(max-width: 768px) 100vw, 500px"
                 />
               </div>
             </div>
@@ -75,11 +78,13 @@ export function HowItWorksSection() {
               {/* Smartphone Top Speaker Notch */}
               <div className="w-12 h-2.5 bg-slate-800 rounded-full mx-auto mb-1.5" />
               {/* Smartphone Image Container */}
-              <div className="w-full h-[calc(100%-14px)] rounded-[22px] overflow-hidden bg-white shadow-inner">
-                <img
+              <div className="w-full h-[calc(100%-14px)] rounded-[22px] overflow-hidden bg-white shadow-inner relative">
+                <Image
                   src="/images/mobile-preview.png"
                   alt="Tampilan Mobile PWA KosPasti"
-                  className="w-full h-full object-cover object-top"
+                  fill
+                  className="object-cover object-top"
+                  sizes="200px"
                 />
               </div>
             </div>
