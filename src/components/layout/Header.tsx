@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
-import { LogOut, Loader2, LogIn, User } from "lucide-react";
+import { LogOut, Loader2, LogIn, User, Search } from "lucide-react";
 
 interface HeaderProps {
   isLoggedIn?: boolean;
@@ -82,6 +82,18 @@ export function Header({ isLoggedIn: initialIsLoggedIn = false }: HeaderProps) {
 
         {!isAuthPage && (
           <div className="flex items-center gap-2 sm:gap-3">
+            <Link
+              href="/search"
+              className={`flex items-center gap-1.5 px-3.5 py-2 text-sm font-semibold rounded-full transition-all duration-200 ${
+                pathname === "/search"
+                  ? "text-emerald-700 bg-emerald-500/10 border border-emerald-500/20 shadow-xs"
+                  : "text-slate-600 hover:text-emerald-700 hover:bg-emerald-50/60"
+              }`}
+            >
+              <Search className="w-4 h-4 text-emerald-600" />
+              <span className="hidden sm:inline">Cari Kos</span>
+            </Link>
+
             <Link
               href="/map"
               className={`flex items-center gap-2 px-3.5 py-2 text-sm font-semibold rounded-full transition-all duration-200 ${
