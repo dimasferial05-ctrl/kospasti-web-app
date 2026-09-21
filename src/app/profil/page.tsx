@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect, useRef, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -57,11 +57,16 @@ interface BookingItem {
   property: BookingProperty;
 }
 
-export default function ProfilePage() {
+function ProfileContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const [activeTab, setActiveTab] = useState<"profile" | "bookings">("profile");
+  const queryTab = searchParams.get("tab") === "bookings" ? "bookings" : "profile";
+  const [manualTab, setManualTab] = useState<"profile" | "bookings" | null>(null);
+  const activeTab = manualTab ?? queryTab;
+  const setActiveTab = (tab: "profile" | "bookings") => setManualTab(tab);
+
   const [isLoadingUser, setIsLoadingUser] = useState(true);
   const [user, setUser] = useState<UserProfile | null>(null);
 
@@ -857,3 +862,19 @@ export default function ProfilePage() {
     </div>
   );
 }
+
+export default function ProfilePage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-[70vh] flex flex-col items-center justify-center p-6 text-slate-500">
+          <Loader2 className="w-8 h-8 animate-spin text-emerald-600 mb-3" />
+          <p className="text-sm font-medium">Memuat profil pengguna...</p>
+        </div>
+      }
+    >
+      <ProfileContent />
+    </Suspense>
+  );
+}
+

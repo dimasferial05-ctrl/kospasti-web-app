@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { cookies } from "next/headers";
 import { Header } from "@/components/layout/Header";
+import { BottomNav } from "@/components/layout/BottomNav";
 import { ProfileCompletionModal } from "@/components/features/ProfileCompletionModal";
 import "./globals.css";
 
@@ -31,13 +32,15 @@ export default async function RootLayout({
   const isLoggedIn = Boolean(userToken);
 
   return (
-    <html lang="id" className={`${geistSans.variable} ${geistMono.variable} h-full`}>
-      <body className="bg-slate-50 text-slate-900 antialiased font-sans min-h-screen">
+    <html lang="id" className={`${geistSans.variable} ${geistMono.variable} h-full scroll-smooth`}>
+      <body className="bg-slate-50 text-slate-900 antialiased font-sans min-h-screen flex flex-col">
         <Header isLoggedIn={isLoggedIn} />
         <ProfileCompletionModal />
-        {children}
+        <div className="flex-1 pb-20 md:pb-0 flex flex-col">
+          {children}
+        </div>
+        <BottomNav isLoggedIn={isLoggedIn} />
       </body>
     </html>
   );
 }
-

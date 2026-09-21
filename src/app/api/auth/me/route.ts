@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { verifyUserToken } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
 
 export async function GET() {
   try {
@@ -15,23 +16,47 @@ export async function GET() {
     }
 
     const payload = await verifyUserToken(userToken);
-    if (!payload) {
-      return NextResponse.json(
+    if (!payload || !payload.userId) {
+      const response = NextResponse.json(
         { authenticated: false, user: null },
         { status: 200 }
       );
+      response.cookies.delete("user_token");
+      return response;
+    }
+
+    // Verifikasi keberadaan user di database agar token lama/stale yang sudah dihapus/diseed tidak dianggap login
+    const dbUser = await prisma.user.findUnique({
+      where: { id: payload.userId },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        whatsapp: true,
+        avatar: true,
+        bio: true,
+      },
+    });
+
+    if (!dbUser) {
+      const response = NextResponse.json(
+        { authenticated: false, user: null },
+        { status: 200 }
+      );
+      response.cookies.delete("user_token");
+      return response;
     }
 
     return NextResponse.json(
       {
         authenticated: true,
         user: {
-          id: payload.userId,
-          name: payload.name,
-          email: payload.email,
-          whatsapp: payload.whatsapp ?? null,
-          avatar: payload.avatar ?? null,
-          bio: payload.bio ?? null,
+          id: dbUser.id,
+          name: dbUser.name,
+          email: dbUser.email,
+          whatsapp: dbUser.whatsapp ?? null,
+          avatar: dbUser.avatar ?? null,
+          bio: dbUser.bio ?? null,
         },
       },
       { status: 200 }

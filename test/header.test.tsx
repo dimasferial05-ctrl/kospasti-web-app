@@ -15,7 +15,7 @@ vi.mock("next/navigation", () => ({
   }),
 }));
 
-describe("Header Component (/components/layout/Header) - Issue #133 & #138", () => {
+describe("Header Component (/components/layout/Header) - Issue #133, #138 & #170", () => {
   beforeEach(() => {
     vi.restoreAllMocks();
     mockPathname = "/";
@@ -28,13 +28,13 @@ describe("Header Component (/components/layout/Header) - Issue #133 & #138", () 
     expect(firstLine).toMatch(/^["']use client["'];?$/);
   });
 
-  it("merender logo KosPasti dan tombol Keluar Akun pada halaman umum ketika isLoggedIn bernilai true", () => {
+  it("merender logo KosPasti dan elemen Avatar Menu pada halaman umum ketika isLoggedIn bernilai true", () => {
     mockPathname = "/";
     const html = renderToStaticMarkup(<Header isLoggedIn={true} />);
 
     expect(html).toContain("KosPasti");
     expect(html).toContain("🏠");
-    expect(html).toContain("Keluar Akun");
+    expect(html).toContain("Menu Pengguna");
     expect(html).not.toContain("Masuk / Daftar");
   });
 
@@ -45,7 +45,7 @@ describe("Header Component (/components/layout/Header) - Issue #133 & #138", () 
     expect(html).toContain("KosPasti");
     expect(html).toContain("🏠");
     expect(html).toContain("Masuk / Daftar");
-    expect(html).not.toContain("Keluar Akun");
+    expect(html).not.toContain("Menu Pengguna");
   });
 
   it("menyembunyikan header secara keseluruhan pada rute /admin", () => {
@@ -62,13 +62,13 @@ describe("Header Component (/components/layout/Header) - Issue #133 & #138", () 
     mockPathname = "/login";
     const loginHtml = renderToStaticMarkup(<Header isLoggedIn={false} />);
     expect(loginHtml).toContain("KosPasti");
-    expect(loginHtml).not.toContain("Keluar Akun");
+    expect(loginHtml).not.toContain("Menu Pengguna");
     expect(loginHtml).not.toContain("Masuk / Daftar");
 
     mockPathname = "/register";
     const registerHtml = renderToStaticMarkup(<Header isLoggedIn={false} />);
     expect(registerHtml).toContain("KosPasti");
-    expect(registerHtml).not.toContain("Keluar Akun");
+    expect(registerHtml).not.toContain("Menu Pengguna");
     expect(registerHtml).not.toContain("Masuk / Daftar");
   });
 
@@ -82,4 +82,3 @@ describe("Header Component (/components/layout/Header) - Issue #133 & #138", () 
     expect(content).toContain("router.refresh()");
   });
 });
-
