@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { saveUploadedFiles, detectMediaType } from "@/lib/upload";
+import { saveUploadedFiles, saveUploadedFile, detectMediaType } from "@/lib/upload";
 
 export async function GET(request: NextRequest) {
   try {
@@ -120,13 +120,25 @@ export async function POST(request: NextRequest) {
         try {
           const parsed = JSON.parse(rawRoomTypes);
           if (Array.isArray(parsed) && parsed.length > 0) {
-            room_types = parsed.map((rt: { name?: string; price_per_month?: number | string; available_rooms?: number | string; facilities?: string; image_url?: string }) => ({
-              name: String(rt.name || "Standar").trim(),
-              price_per_month: Math.floor(Number(rt.price_per_month || 0)),
-              available_rooms: Math.floor(Number(rt.available_rooms || 0)),
-              facilities: rt.facilities ? String(rt.facilities).trim() : null,
-              image_url: rt.image_url ? String(rt.image_url).trim() : null,
-            }));
+            for (let i = 0; i < parsed.length; i++) {
+              const rt = parsed[i];
+              let rtImageUrl = rt.image_url ? String(rt.image_url).trim() : null;
+
+              // Cek file foto tipe kamar yang diunggah
+              const rtFile = formData.get(`room_type_file_${i}`);
+              if (rtFile && typeof rtFile === "object" && "arrayBuffer" in rtFile && (rtFile as File).size > 0) {
+                const saved = await saveUploadedFile(rtFile as File, "properties");
+                rtImageUrl = saved.url;
+              }
+
+              room_types.push({
+                name: String(rt.name || "Standar").trim(),
+                price_per_month: Math.floor(Number(rt.price_per_month || 0)),
+                available_rooms: Math.floor(Number(rt.available_rooms || 0)),
+                facilities: rt.facilities ? String(rt.facilities).trim() : null,
+                image_url: rtImageUrl,
+              });
+            }
           }
         } catch (err) {
           console.warn("Gagal parsing room_types formData:", err);

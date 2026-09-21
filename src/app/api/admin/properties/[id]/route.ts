@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { saveUploadedFiles, detectMediaType, deleteUploadedFile } from "@/lib/upload";
+import { saveUploadedFiles, saveUploadedFile, detectMediaType, deleteUploadedFile } from "@/lib/upload";
 
 export async function PATCH(
   request: NextRequest,
@@ -114,14 +114,27 @@ export async function PATCH(
         try {
           const parsed = JSON.parse(raw);
           if (Array.isArray(parsed)) {
-            room_types = parsed.map((rt: { id?: string; name?: string; price_per_month?: number | string; available_rooms?: number | string; facilities?: string; image_url?: string }) => ({
-              id: rt.id ? String(rt.id) : undefined,
-              name: String(rt.name || "Standar").trim(),
-              price_per_month: Math.floor(Number(rt.price_per_month || 0)),
-              available_rooms: Math.floor(Number(rt.available_rooms || 0)),
-              facilities: rt.facilities ? String(rt.facilities).trim() : null,
-              image_url: rt.image_url ? String(rt.image_url).trim() : null,
-            }));
+            room_types = [];
+            for (let i = 0; i < parsed.length; i++) {
+              const rt = parsed[i];
+              let rtImageUrl = rt.image_url ? String(rt.image_url).trim() : null;
+
+              // Cek file foto tipe kamar yang diunggah
+              const rtFile = formData.get(`room_type_file_${i}`);
+              if (rtFile && typeof rtFile === "object" && "arrayBuffer" in rtFile && (rtFile as File).size > 0) {
+                const saved = await saveUploadedFile(rtFile as File, "properties");
+                rtImageUrl = saved.url;
+              }
+
+              room_types.push({
+                id: rt.id ? String(rt.id) : undefined,
+                name: String(rt.name || "Standar").trim(),
+                price_per_month: Math.floor(Number(rt.price_per_month || 0)),
+                available_rooms: Math.floor(Number(rt.available_rooms || 0)),
+                facilities: rt.facilities ? String(rt.facilities).trim() : null,
+                image_url: rtImageUrl,
+              });
+            }
           }
         } catch (err) {
           console.warn("Gagal parsing room_types PATCH formData:", err);

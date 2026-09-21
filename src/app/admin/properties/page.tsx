@@ -18,6 +18,8 @@ import {
   Clock,
   Sparkles,
   MapPin,
+  Upload,
+  Image as ImageIcon,
 } from "lucide-react";
 
 interface OwnerOption {
@@ -48,6 +50,8 @@ interface RoomTypeFormItem {
   available_rooms: string;
   facilities: string;
   image_url?: string;
+  image_file?: File | null;
+  image_preview?: string | null;
 }
 
 interface PropertyAdminItem {
@@ -191,6 +195,8 @@ export default function ManagePropertiesPage() {
         available_rooms: "1",
         facilities: "",
         image_url: "",
+        image_file: null,
+        image_preview: null,
       },
     ]);
     setSelectedFiles([]);
@@ -227,6 +233,8 @@ export default function ManagePropertiesPage() {
           available_rooms: String(rt.available_rooms),
           facilities: rt.facilities || "",
           image_url: rt.image_url || "",
+          image_file: null,
+          image_preview: rt.image_url || null,
         }))
       );
     } else {
@@ -237,6 +245,8 @@ export default function ManagePropertiesPage() {
           available_rooms: prop.available_rooms !== undefined ? String(prop.available_rooms) : "0",
           facilities: prop.facilities || "",
           image_url: "",
+          image_file: null,
+          image_preview: null,
         },
       ]);
     }
@@ -450,7 +460,25 @@ export default function ManagePropertiesPage() {
       data.append("is_pet_friendly", String(formData.is_pet_friendly));
       data.append("is_24_hours", String(formData.is_24_hours));
       if (roomTypes.length > 0) {
-        data.append("room_types", JSON.stringify(roomTypes));
+        data.append(
+          "room_types",
+          JSON.stringify(
+            roomTypes.map((rt) => ({
+              id: rt.id,
+              name: rt.name,
+              price_per_month: rt.price_per_month,
+              available_rooms: rt.available_rooms,
+              facilities: rt.facilities,
+              image_url: rt.image_url,
+            }))
+          )
+        );
+
+        roomTypes.forEach((rt, idx) => {
+          if (rt.image_file) {
+            data.append(`room_type_file_${idx}`, rt.image_file);
+          }
+        });
       }
       if (formData.image_url.trim()) {
         data.append("image_url", formData.image_url.trim());
@@ -868,6 +896,9 @@ export default function ManagePropertiesPage() {
                           price_per_month: "",
                           available_rooms: "1",
                           facilities: "",
+                          image_url: "",
+                          image_file: null,
+                          image_preview: null,
                         },
                       ])
                     }
@@ -977,21 +1008,88 @@ export default function ManagePropertiesPage() {
                         />
                       </div>
 
-                      <div>
-                        <label className="block text-[11px] font-semibold text-slate-600 mb-1">
-                          URL Foto Tipe Kamar (Opsional)
+                      {/* Foto Tipe Kamar (Unggah File atau URL) */}
+                      <div className="space-y-1.5 pt-1.5 border-t border-slate-100">
+                        <label className="block text-[11px] font-semibold text-slate-600">
+                          Foto Kamar Tipe Ini (Unggah File / URL)
                         </label>
-                        <input
-                          type="url"
-                          placeholder="https://images.unsplash.com/... atau link foto kamar tipe ini"
-                          value={rt.image_url || ""}
-                          onChange={(e) => {
-                            const updated = [...roomTypes];
-                            updated[idx].image_url = e.target.value;
-                            setRoomTypes(updated);
-                          }}
-                          className="w-full px-3 py-1.5 text-xs border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white"
-                        />
+
+                        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+                          {/* Preview Thumbnail */}
+                          {rt.image_preview || rt.image_url ? (
+                            <div className="relative w-14 h-14 rounded-lg overflow-hidden bg-slate-100 border border-slate-200 shrink-0 group">
+                              {/* eslint-disable-next-line @next/next/no-img-element */}
+                              <img
+                                src={rt.image_preview || rt.image_url}
+                                alt={rt.name}
+                                className="w-full h-full object-cover"
+                              />
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  const updated = [...roomTypes];
+                                  updated[idx].image_url = "";
+                                  updated[idx].image_file = null;
+                                  updated[idx].image_preview = null;
+                                  setRoomTypes(updated);
+                                }}
+                                className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white transition-opacity cursor-pointer"
+                                title="Hapus foto ini"
+                              >
+                                <X size={14} />
+                              </button>
+                            </div>
+                          ) : (
+                            <div className="w-14 h-14 rounded-lg bg-slate-50 border border-dashed border-slate-300 flex items-center justify-center text-slate-400 shrink-0">
+                              <ImageIcon size={16} />
+                            </div>
+                          )}
+
+                          {/* Upload / URL Inputs */}
+                          <div className="flex-1 space-y-1.5 w-full min-w-0">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <label className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-lg text-xs font-semibold cursor-pointer border border-blue-200/80 transition-colors">
+                                <Upload size={13} />
+                                <span>{rt.image_file ? "Ganti File Foto" : "Pilih File Foto"}</span>
+                                <input
+                                  type="file"
+                                  accept="image/*"
+                                  className="sr-only"
+                                  onChange={(e) => {
+                                    const file = e.target.files?.[0];
+                                    if (file) {
+                                      const previewUrl = URL.createObjectURL(file);
+                                      const updated = [...roomTypes];
+                                      updated[idx].image_file = file;
+                                      updated[idx].image_preview = previewUrl;
+                                      updated[idx].image_url = "";
+                                      setRoomTypes(updated);
+                                    }
+                                  }}
+                                />
+                              </label>
+                              {rt.image_file && (
+                                <span className="text-[11px] text-slate-600 truncate max-w-[160px]">
+                                  {rt.image_file.name}
+                                </span>
+                              )}
+                            </div>
+
+                            <input
+                              type="url"
+                              placeholder="Atau tempel URL gambar (https://...)"
+                              value={rt.image_url || ""}
+                              onChange={(e) => {
+                                const updated = [...roomTypes];
+                                updated[idx].image_url = e.target.value;
+                                updated[idx].image_file = null;
+                                updated[idx].image_preview = e.target.value || null;
+                                setRoomTypes(updated);
+                              }}
+                              className="w-full px-3 py-1.5 text-xs border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white"
+                            />
+                          </div>
+                        </div>
                       </div>
                     </div>
                   ))}
