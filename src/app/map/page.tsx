@@ -379,22 +379,26 @@ function MapSearchContent() {
 
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
             <div>
-              <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
-                Peta & Rekomendasi Lokasi Kos
+              <div className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-800 text-[11px] font-semibold mb-1.5 shadow-2xs">
+                <Sparkles className="w-3 h-3 text-emerald-600" />
+                <span>Pencarian Cerdas AI + Google Maps</span>
+              </div>
+              <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
+                Eksplorasi Kos Berdasarkan Lokasi
               </h1>
-              <p className="text-sm text-slate-500 mt-0.5">
-                Ketik kebutuhan kos Anda dalam bahasa sehari-hari untuk menemukan rekomendasi terdekat di peta.
+              <p className="text-xs sm:text-sm text-slate-500 mt-1">
+                Ketik kebutuhan kos Anda dalam bahasa sehari-hari atau gunakan fitur Tanya AI untuk menemukan rekomendasi terdekat.
               </p>
             </div>
 
             {/* Mobile View Toggle Buttons */}
-            <div className="flex lg:hidden bg-slate-200 p-1 rounded-xl w-full sm:w-auto">
+            <div className="flex lg:hidden bg-slate-200/80 p-1 rounded-2xl w-full sm:w-auto shadow-2xs">
               <button
                 type="button"
                 onClick={() => setMobileView("map")}
-                className={`flex-1 sm:flex-initial flex items-center justify-center gap-2 py-2 px-4 rounded-lg text-xs font-bold transition-all ${
+                className={`flex-1 sm:flex-initial flex items-center justify-center gap-2 py-2 px-4 rounded-xl text-xs font-bold transition-all ${
                   mobileView === "map"
-                    ? "bg-white text-emerald-700 shadow-sm"
+                    ? "bg-white text-emerald-700 shadow-soft"
                     : "text-slate-600 hover:text-slate-900"
                 }`}
               >
@@ -404,9 +408,9 @@ function MapSearchContent() {
               <button
                 type="button"
                 onClick={() => setMobileView("list")}
-                className={`flex-1 sm:flex-initial flex items-center justify-center gap-2 py-2 px-4 rounded-lg text-xs font-bold transition-all ${
+                className={`flex-1 sm:flex-initial flex items-center justify-center gap-2 py-2 px-4 rounded-xl text-xs font-bold transition-all ${
                   mobileView === "list"
-                    ? "bg-white text-emerald-700 shadow-sm"
+                    ? "bg-white text-emerald-700 shadow-soft"
                     : "text-slate-600 hover:text-slate-900"
                 }`}
               >
@@ -417,8 +421,8 @@ function MapSearchContent() {
           </div>
 
           {/* Search Card */}
-          <div className="bg-white p-4 sm:p-5 rounded-3xl border border-slate-200/80 shadow-md mb-4 relative overflow-hidden">
-            <div className="absolute -right-8 -top-8 w-32 h-32 bg-emerald-100/40 rounded-full blur-2xl pointer-events-none"></div>
+          <div className="bg-white p-4 sm:p-6 rounded-3xl border border-slate-200/80 shadow-soft-lg mb-4 relative overflow-hidden">
+            <div className="absolute -right-8 -top-8 w-40 h-40 bg-emerald-100/30 rounded-full blur-3xl pointer-events-none -z-10"></div>
 
             <div className="relative z-10">
               <SmartSearchBar
@@ -431,6 +435,7 @@ function MapSearchContent() {
                 showReset={hasActiveFilters}
                 onReset={handleResetFilters}
               />
+
 
               {/* Active Extracted Criteria Badges */}
               {activeCriteria && (

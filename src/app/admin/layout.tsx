@@ -92,76 +92,76 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           </button>
         </div>
         <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
-          <div className="text-xs font-semibold text-slate-500 mb-4 tracking-wider">
+          <div className="text-[10px] font-bold text-slate-500 mb-3 tracking-widest uppercase px-3">
             MAIN NAVIGATION
           </div>
           <Link
             onClick={closeMobileMenu}
-            className={`flex items-center gap-3 p-3 rounded-lg transition-colors ${
+            className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition-all duration-200 text-sm ${
               pathname === "/admin"
-                ? "bg-slate-800 text-white font-semibold"
-                : "hover:bg-slate-800 hover:text-white"
+                ? "bg-slate-800/90 text-white font-bold shadow-xs border border-slate-700/50"
+                : "text-slate-400 hover:bg-slate-900 hover:text-slate-200 font-medium"
             }`}
             href="/admin"
           >
-            <LayoutDashboard size={20} /> Dashboard
+            <LayoutDashboard size={18} className={pathname === "/admin" ? "text-emerald-400" : ""} /> Dashboard
           </Link>
           <Link
             onClick={closeMobileMenu}
-            className={`flex items-center gap-3 p-3 rounded-lg transition-colors ${
+            className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition-all duration-200 text-sm ${
               pathname?.startsWith("/admin/properties")
-                ? "bg-slate-800 text-white font-semibold"
-                : "hover:bg-slate-800 hover:text-white"
+                ? "bg-slate-800/90 text-white font-bold shadow-xs border border-slate-700/50"
+                : "text-slate-400 hover:bg-slate-900 hover:text-slate-200 font-medium"
             }`}
             href="/admin/properties"
           >
-            <Building size={20} /> Kelola Properti
+            <Building size={18} className={pathname?.startsWith("/admin/properties") ? "text-emerald-400" : ""} /> Kelola Properti
           </Link>
           <Link
             onClick={closeMobileMenu}
-            className={`flex items-center gap-3 p-3 rounded-lg transition-colors ${
+            className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition-all duration-200 text-sm ${
               pathname?.startsWith("/admin/owners")
-                ? "bg-slate-800 text-white font-semibold"
-                : "hover:bg-slate-800 hover:text-white"
+                ? "bg-slate-800/90 text-white font-bold shadow-xs border border-slate-700/50"
+                : "text-slate-400 hover:bg-slate-900 hover:text-slate-200 font-medium"
             }`}
             href="/admin/owners"
           >
-            <Users size={20} /> Pemilik Kos
+            <Users size={18} className={pathname?.startsWith("/admin/owners") ? "text-emerald-400" : ""} /> Pemilik Kos
           </Link>
           <Link
             onClick={closeMobileMenu}
-            className={`flex items-center gap-3 p-3 rounded-lg transition-colors ${
+            className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition-all duration-200 text-sm ${
               pathname?.startsWith("/admin/users")
-                ? "bg-slate-800 text-white font-semibold"
-                : "hover:bg-slate-800 hover:text-white"
+                ? "bg-slate-800/90 text-white font-bold shadow-xs border border-slate-700/50"
+                : "text-slate-400 hover:bg-slate-900 hover:text-slate-200 font-medium"
             }`}
             href="/admin/users"
           >
-            <User size={20} /> Data Pengguna
+            <User size={18} className={pathname?.startsWith("/admin/users") ? "text-emerald-400" : ""} /> Data Pengguna
           </Link>
           <Link
             onClick={closeMobileMenu}
-            className={`flex items-center gap-3 p-3 rounded-lg transition-colors ${
+            className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition-all duration-200 text-sm ${
               pathname?.startsWith("/admin/bookings")
-                ? "bg-slate-800 text-white font-semibold"
-                : "hover:bg-slate-800 hover:text-white"
+                ? "bg-slate-800/90 text-white font-bold shadow-xs border border-slate-700/50"
+                : "text-slate-400 hover:bg-slate-900 hover:text-slate-200 font-medium"
             }`}
             href="/admin/bookings"
           >
-            <FileText size={20} /> Data Transaksi
+            <FileText size={18} className={pathname?.startsWith("/admin/bookings") ? "text-emerald-400" : ""} /> Data Transaksi
           </Link>
         </nav>
-        <div className="p-4 border-t border-slate-800">
+        <div className="p-4 border-t border-slate-800/80">
           <button
             type="button"
             onClick={handleLogout}
             disabled={isLoggingOut}
-            className="flex items-center gap-3 p-3 w-full rounded-lg hover:bg-red-500 hover:text-white transition-colors text-left cursor-pointer disabled:opacity-50"
+            className="flex items-center gap-3 px-3.5 py-2.5 w-full rounded-xl hover:bg-rose-500/20 text-rose-400 hover:text-rose-300 transition-colors text-left cursor-pointer disabled:opacity-50 text-sm font-semibold"
           >
             {isLoggingOut ? (
-              <Loader2 size={20} className="animate-spin" />
+              <Loader2 size={18} className="animate-spin" />
             ) : (
-              <LogOut size={20} />
+              <LogOut size={18} />
             )}
             <span>{isLoggingOut ? "Keluar..." : "Logout"}</span>
           </button>
@@ -169,9 +169,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       </aside>
 
       {/* MAIN CONTENT (Kanan - Terang) */}
-      <main className="flex-1 md:ml-64 p-4 md:p-8 mt-14 md:mt-0 min-h-screen">
+      <main className="flex-1 md:ml-64 p-4 md:p-8 mt-14 md:mt-0 min-h-screen bg-slate-50/70">
         {children}
       </main>
     </div>
   );
 }
+

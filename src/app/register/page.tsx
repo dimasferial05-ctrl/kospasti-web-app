@@ -126,22 +126,22 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="min-h-[calc(100vh-64px)] flex items-center justify-center p-4 sm:p-6 bg-gradient-to-br from-slate-50 via-white to-blue-50/40">
+    <div className="min-h-[calc(100vh-64px)] flex items-center justify-center p-4 sm:p-6 bg-slate-50/60 relative overflow-hidden">
       {/* Decorative ambient lighting elements */}
       <div
-        className="fixed top-12 left-1/4 w-72 h-72 bg-blue-400/10 rounded-full blur-3xl pointer-events-none"
+        className="fixed top-12 left-1/4 w-96 h-96 bg-emerald-400/10 rounded-full blur-3xl pointer-events-none -z-10"
         aria-hidden="true"
       />
       <div
-        className="fixed bottom-12 right-1/4 w-72 h-72 bg-indigo-400/10 rounded-full blur-3xl pointer-events-none"
+        className="fixed bottom-12 right-1/4 w-96 h-96 bg-teal-400/10 rounded-full blur-3xl pointer-events-none -z-10"
         aria-hidden="true"
       />
 
-      <div className="relative z-10 w-full max-w-md bg-white p-6 sm:p-8 rounded-2xl shadow-xl border border-slate-100 transition-all">
+      <div className="relative z-10 w-full max-w-md bg-white p-6 sm:p-9 rounded-2xl sm:rounded-3xl shadow-soft-lg border border-slate-200/80 transition-all my-6">
         {/* State: Sukses */}
         {isSuccess ? (
           <div className="text-center py-6 space-y-4 animate-fadeIn">
-            <div className="w-16 h-16 bg-emerald-50 text-emerald-600 rounded-full flex items-center justify-center mx-auto ring-8 ring-emerald-50/50">
+            <div className="w-16 h-16 bg-emerald-50 text-emerald-600 rounded-full flex items-center justify-center mx-auto ring-8 ring-emerald-50/50 shadow-soft">
               <CheckCircle2 className="w-10 h-10" />
             </div>
 
@@ -155,7 +155,7 @@ export default function RegisterPage() {
             <div className="pt-4">
               <Link
                 href="/login"
-                className="w-full py-3 px-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl shadow-md transition-all inline-block text-center"
+                className="w-full py-3.5 px-4 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold rounded-xl shadow-soft transition-all inline-block text-center"
               >
                 Masuk ke Akun
               </Link>
@@ -165,15 +165,15 @@ export default function RegisterPage() {
           <>
             {/* Header Form */}
             <div className="text-center mb-6">
-              <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-xs font-semibold mb-3 border border-blue-100">
+              <div className="inline-flex items-center gap-1.5 px-3.5 py-1 bg-emerald-50 text-emerald-700 rounded-full text-xs font-semibold mb-3 border border-emerald-200/70 shadow-2xs">
                 <GraduationCap className="w-3.5 h-3.5" />
                 <span>Pencari Kos & Mahasiswa</span>
               </div>
 
-              <h1 className="text-2xl font-bold text-slate-900 tracking-tight">
+              <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
                 Daftar Akun Baru
               </h1>
-              <p className="text-xs sm:text-sm text-slate-500 mt-1">
+              <p className="text-xs sm:text-sm text-slate-500 mt-1.5">
                 Lengkapi data di bawah untuk membuat akun pencari kos Anda.
               </p>
             </div>
@@ -183,7 +183,7 @@ export default function RegisterPage() {
               <div
                 role="alert"
                 aria-live="polite"
-                className="mb-5 p-3.5 bg-rose-50 border border-rose-200 text-rose-700 rounded-xl text-xs font-medium flex items-start gap-2.5 text-left"
+                className="mb-5 p-3.5 bg-rose-50 border border-rose-200 text-rose-700 rounded-2xl text-xs font-medium flex items-start gap-2.5 text-left shadow-2xs"
               >
                 <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-rose-600" />
                 <span>{errors.general}</span>
@@ -196,7 +196,7 @@ export default function RegisterPage() {
               <div className="space-y-1.5 text-left">
                 <label
                   htmlFor="register-name"
-                  className="block text-xs font-semibold text-slate-700 uppercase tracking-wider"
+                  className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider"
                 >
                   Nama Lengkap <span className="text-rose-500">*</span>
                 </label>
@@ -218,10 +218,10 @@ export default function RegisterPage() {
                     required
                     aria-invalid={!!errors.name}
                     aria-describedby={errors.name ? "name-error" : undefined}
-                    className={`w-full pl-11 pr-4 py-3 bg-slate-50 border rounded-xl text-sm font-medium text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 transition-all disabled:opacity-50 ${
+                    className={`w-full pl-11 pr-4 py-3 bg-slate-50/80 border rounded-xl text-sm font-medium text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 transition-all disabled:opacity-50 ${
                       errors.name
                         ? "border-rose-400 focus:ring-rose-200 focus:border-rose-500 bg-rose-50/20"
-                        : "border-slate-200 focus:ring-blue-600/20 focus:border-blue-600"
+                        : "border-slate-200 focus:ring-emerald-600/20 focus:border-emerald-600 focus:bg-white"
                     }`}
                   />
                 </div>
@@ -236,7 +236,7 @@ export default function RegisterPage() {
               <div className="space-y-1.5 text-left">
                 <label
                   htmlFor="register-whatsapp"
-                  className="block text-xs font-semibold text-slate-700 uppercase tracking-wider"
+                  className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider"
                 >
                   Nomor WhatsApp <span className="text-rose-500">*</span>
                 </label>
@@ -259,10 +259,10 @@ export default function RegisterPage() {
                     required
                     aria-invalid={!!errors.whatsapp}
                     aria-describedby={errors.whatsapp ? "whatsapp-error" : undefined}
-                    className={`w-full pl-11 pr-4 py-3 bg-slate-50 border rounded-xl text-sm font-medium text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 transition-all disabled:opacity-50 ${
+                    className={`w-full pl-11 pr-4 py-3 bg-slate-50/80 border rounded-xl text-sm font-medium text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 transition-all disabled:opacity-50 ${
                       errors.whatsapp
                         ? "border-rose-400 focus:ring-rose-200 focus:border-rose-500 bg-rose-50/20"
-                        : "border-slate-200 focus:ring-blue-600/20 focus:border-blue-600"
+                        : "border-slate-200 focus:ring-emerald-600/20 focus:border-emerald-600 focus:bg-white"
                     }`}
                   />
                 </div>
@@ -277,7 +277,7 @@ export default function RegisterPage() {
               <div className="space-y-1.5 text-left">
                 <label
                   htmlFor="register-email"
-                  className="block text-xs font-semibold text-slate-700 uppercase tracking-wider"
+                  className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider"
                 >
                   Email <span className="text-rose-500">*</span>
                 </label>
@@ -299,10 +299,10 @@ export default function RegisterPage() {
                     autoComplete="email"
                     aria-invalid={!!errors.email}
                     aria-describedby={errors.email ? "email-error" : undefined}
-                    className={`w-full pl-11 pr-4 py-3 bg-slate-50 border rounded-xl text-sm font-medium text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 transition-all disabled:opacity-50 ${
+                    className={`w-full pl-11 pr-4 py-3 bg-slate-50/80 border rounded-xl text-sm font-medium text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 transition-all disabled:opacity-50 ${
                       errors.email
                         ? "border-rose-400 focus:ring-rose-200 focus:border-rose-500 bg-rose-50/20"
-                        : "border-slate-200 focus:ring-blue-600/20 focus:border-blue-600"
+                        : "border-slate-200 focus:ring-emerald-600/20 focus:border-emerald-600 focus:bg-white"
                     }`}
                   />
                 </div>
@@ -317,7 +317,7 @@ export default function RegisterPage() {
               <div className="space-y-1.5 text-left">
                 <label
                   htmlFor="register-password"
-                  className="block text-xs font-semibold text-slate-700 uppercase tracking-wider"
+                  className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider"
                 >
                   Password <span className="text-rose-500">*</span>
                 </label>
@@ -339,10 +339,10 @@ export default function RegisterPage() {
                     autoComplete="new-password"
                     aria-invalid={!!errors.password}
                     aria-describedby={errors.password ? "password-error" : undefined}
-                    className={`w-full pl-11 pr-11 py-3 bg-slate-50 border rounded-xl text-sm font-medium text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 transition-all disabled:opacity-50 ${
+                    className={`w-full pl-11 pr-11 py-3 bg-slate-50/80 border rounded-xl text-sm font-medium text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 transition-all disabled:opacity-50 ${
                       errors.password
                         ? "border-rose-400 focus:ring-rose-200 focus:border-rose-500 bg-rose-50/20"
-                        : "border-slate-200 focus:ring-blue-600/20 focus:border-blue-600"
+                        : "border-slate-200 focus:ring-emerald-600/20 focus:border-emerald-600 focus:bg-white"
                     }`}
                   />
                   <button
@@ -370,7 +370,7 @@ export default function RegisterPage() {
               <div className="space-y-1.5 text-left">
                 <label
                   htmlFor="register-confirm-password"
-                  className="block text-xs font-semibold text-slate-700 uppercase tracking-wider"
+                  className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider"
                 >
                   Konfirmasi Password <span className="text-rose-500">*</span>
                 </label>
@@ -393,10 +393,10 @@ export default function RegisterPage() {
                     autoComplete="new-password"
                     aria-invalid={!!errors.confirmPassword}
                     aria-describedby={errors.confirmPassword ? "confirm-password-error" : undefined}
-                    className={`w-full pl-11 pr-11 py-3 bg-slate-50 border rounded-xl text-sm font-medium text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 transition-all disabled:opacity-50 ${
+                    className={`w-full pl-11 pr-11 py-3 bg-slate-50/80 border rounded-xl text-sm font-medium text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 transition-all disabled:opacity-50 ${
                       errors.confirmPassword
                         ? "border-rose-400 focus:ring-rose-200 focus:border-rose-500 bg-rose-50/20"
-                        : "border-slate-200 focus:ring-blue-600/20 focus:border-blue-600"
+                        : "border-slate-200 focus:ring-emerald-600/20 focus:border-emerald-600 focus:bg-white"
                     }`}
                   />
                   <button
@@ -424,7 +424,7 @@ export default function RegisterPage() {
               <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full py-3.5 px-4 bg-blue-600 hover:bg-blue-700 active:scale-[0.99] text-white font-semibold rounded-xl shadow-lg shadow-blue-600/25 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed mt-3"
+                className="w-full py-3.5 px-4 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 active:scale-[0.99] text-white font-bold rounded-xl shadow-soft hover:shadow-glow-emerald transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed mt-4"
               >
                 {isLoading ? (
                   <>
@@ -438,12 +438,12 @@ export default function RegisterPage() {
             </form>
 
             {/* Divider Atau */}
-            <div className="relative my-4">
+            <div className="relative my-5">
               <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-slate-200" />
+                <div className="w-full border-t border-slate-200/80" />
               </div>
               <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-white px-3 text-slate-400 font-medium">
+                <span className="bg-white px-3 text-slate-400 font-semibold text-[10px] tracking-wider">
                   Atau daftar dengan
                 </span>
               </div>
@@ -452,7 +452,7 @@ export default function RegisterPage() {
             {/* Google OAuth Button */}
             <a
               href="/api/auth/google"
-              className="w-full py-3 px-4 bg-white hover:bg-slate-50 active:scale-[0.99] text-slate-700 font-semibold rounded-xl border border-slate-200 shadow-xs transition-all flex items-center justify-center gap-3 cursor-pointer hover:border-slate-300"
+              className="w-full py-3 px-4 bg-white hover:bg-slate-50/80 active:scale-[0.99] text-slate-700 font-semibold rounded-xl border border-slate-200 shadow-2xs transition-all flex items-center justify-center gap-3 cursor-pointer hover:border-slate-300"
             >
               <svg className="w-5 h-5" viewBox="0 0 24 24">
                 <path
@@ -481,7 +481,7 @@ export default function RegisterPage() {
                 Sudah punya akun?{" "}
                 <Link
                   href="/login"
-                  className="font-semibold text-blue-600 hover:text-blue-700 hover:underline transition-colors"
+                  className="font-bold text-emerald-600 hover:text-emerald-700 hover:underline transition-colors"
                 >
                   Masuk di sini
                 </Link>
@@ -503,3 +503,4 @@ export default function RegisterPage() {
     </div>
   );
 }
+

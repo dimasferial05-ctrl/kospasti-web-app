@@ -71,27 +71,33 @@ export default function Home() {
   };
 
   return (
-    <main className="max-w-7xl mx-auto min-h-screen relative w-full px-4 sm:px-6 lg:px-8 py-8 flex flex-col gap-10">
-      {/* Hero Section: Google Search-like Experience */}
-      <section className="relative w-full flex flex-col items-center justify-center text-center pt-8 pb-10 sm:pt-14 sm:pb-16 px-4">
-        {/* Subtle background glow decoration */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-2xl h-64 bg-gradient-to-tr from-emerald-100/40 via-teal-50/30 to-slate-50/50 rounded-full blur-3xl pointer-events-none -z-10" />
+    <main className="max-w-7xl mx-auto min-h-screen relative w-full px-4 sm:px-6 lg:px-8 py-8 sm:py-12 flex flex-col gap-12 sm:gap-16">
+      {/* Hero Section: Bespoke Human-Crafted Search Experience */}
+      <section className="relative w-full flex flex-col items-center justify-center text-center pt-8 pb-10 sm:pt-16 sm:pb-20 px-4">
+        {/* Soft Ambient Mesh Background Decoration */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-3xl h-72 bg-gradient-to-tr from-emerald-100/40 via-teal-50/40 to-amber-50/40 rounded-full blur-3xl pointer-events-none -z-10" />
+
+        {/* Feature Pill / Trust Tag */}
+        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-800 text-xs font-semibold mb-6 shadow-2xs">
+          <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+          <span>Platform Pencarian Kos Modern &amp; Cerdas</span>
+        </div>
 
         {/* Main Headline */}
-        <h1 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold text-slate-900 tracking-tight max-w-3xl leading-[1.15]">
+        <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black text-slate-900 tracking-tight max-w-3xl leading-[1.12]">
           Cari Kos Impianmu Lebih{" "}
-          <span className="text-emerald-600">
+          <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700">
             Mudah dan Instan
           </span>
         </h1>
 
         {/* Subtitle */}
-        <p className="mt-4 text-sm sm:text-lg text-slate-600 max-w-xl leading-relaxed">
-          Ketik kebutuhan kos Anda seperti lokasi terdekat, budget harga, atau fasilitas tertentu tanpa ribet atur filter manual.
+        <p className="mt-4 sm:mt-5 text-sm sm:text-lg text-slate-600 max-w-2xl leading-relaxed font-normal">
+          Ketik kebutuhan kos Anda seperti lokasi kampus, budget bulanan, atau fasilitas idaman tanpa repot mengatur filter manual yang rumit.
         </p>
 
         {/* Smart Search Bar Container */}
-        <div className="w-full max-w-2xl mt-8">
+        <div className="w-full max-w-2xl mt-8 sm:mt-10">
           <SmartSearchBar
             variant="hero"
             onSearch={handleSearch}
@@ -100,13 +106,13 @@ export default function Home() {
         </div>
 
         {/* Quick Link to Map */}
-        <div className="mt-5 flex items-center justify-center gap-2 text-xs sm:text-sm text-slate-500">
-          <span>Ingin melihat sebaran langsung di peta?</span>
+        <div className="mt-6 flex items-center justify-center gap-2 text-xs sm:text-sm text-slate-500">
+          <span>Ingin menjelajahi sebaran kos secara visual?</span>
           <Link
             href="/map"
-            className="font-bold text-emerald-600 hover:text-emerald-700 hover:underline inline-flex items-center gap-1"
+            className="font-bold text-emerald-600 hover:text-emerald-700 hover:underline inline-flex items-center gap-1.5 transition-colors"
           >
-            <MapPin className="w-3.5 h-3.5" />
+            <MapPin className="w-4 h-4 text-emerald-600" />
             <span>Buka Peta Interaktif →</span>
           </Link>
         </div>
@@ -114,45 +120,51 @@ export default function Home() {
 
       {/* Property List Section */}
       <section className="flex flex-col gap-6">
-        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-2 border-b border-slate-200 pb-4">
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3 border-b border-slate-200/80 pb-5">
           <div>
-            <h2 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
-              Rekomendasi Kos Terbaru
-            </h2>
+            <div className="flex items-center gap-2">
+              <span className="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+              <h2 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
+                Rekomendasi Kos Terbaru
+              </h2>
+            </div>
             <p className="text-xs sm:text-sm text-slate-500 mt-1">
               Pilihan kamar kos terverifikasi dan siap huni di berbagai lokasi strategis.
             </p>
           </div>
           <Link
             href="/map"
-            className="text-xs sm:text-sm font-semibold text-emerald-600 hover:text-emerald-700 hover:underline self-start sm:self-auto"
+            className="text-xs sm:text-sm font-bold text-emerald-600 hover:text-emerald-700 hover:underline inline-flex items-center gap-1 self-start sm:self-auto"
           >
-            Lihat semua di peta →
+            <span>Lihat semua di peta</span>
+            <span>→</span>
           </Link>
         </div>
 
         {isLoading && (
-          <div className="py-16 flex flex-col items-center justify-center gap-3 text-slate-500">
+          <div className="py-20 flex flex-col items-center justify-center gap-3 text-slate-500">
             <Loader2 className="w-8 h-8 animate-spin text-emerald-600" />
-            <p className="text-sm font-medium">Memuat rekomendasi kos...</p>
+            <p className="text-sm font-semibold text-slate-600">Memuat daftar kos...</p>
           </div>
         )}
 
         {!isLoading && error && (
-          <div className="p-4 bg-rose-50 border border-rose-200 rounded-2xl text-rose-600 flex items-center gap-2 text-sm">
+          <div className="p-4 bg-rose-50 border border-rose-200 rounded-2xl text-rose-600 flex items-center gap-2.5 text-sm shadow-2xs">
             <AlertCircle className="w-5 h-5 shrink-0" />
             <span>{error}</span>
           </div>
         )}
 
         {!isLoading && !error && properties.length === 0 && (
-          <div className="flex flex-col items-center justify-center p-12 text-center bg-white rounded-2xl border border-slate-200 border-dashed">
-            <SearchX className="w-16 h-16 text-slate-300 mb-4" />
-            <h3 className="text-base font-semibold text-slate-800 mb-1">
-              Belum Ada Kos Tersedia
+          <div className="flex flex-col items-center justify-center p-14 text-center bg-white rounded-3xl border border-slate-200 border-dashed shadow-soft">
+            <div className="w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center mb-4">
+              <SearchX className="w-8 h-8 text-slate-300" />
+            </div>
+            <h3 className="text-base font-bold text-slate-800 mb-1">
+              Kos Tidak Ditemukan
             </h3>
-            <p className="text-xs text-slate-500 max-w-xs leading-relaxed">
-              Saat ini belum ada listing kos yang terdaftar di sistem.
+            <p className="text-xs text-slate-500 max-w-sm leading-relaxed">
+              Maaf, tidak ada kos yang sesuai dengan kriteria pencarian atau filter Anda. Saat ini belum ada listing kos yang terdaftar di sistem.
             </p>
           </div>
         )}
@@ -163,7 +175,7 @@ export default function Home() {
               <Link
                 key={property.id}
                 href={`/kos/${property.id}`}
-                className="block h-full transition-transform duration-200 hover:scale-[1.02]"
+                className="block h-full transition-transform hover:scale-[1.02]"
               >
                 <KosPropertyCard
                   name={property.name}
@@ -189,3 +201,4 @@ export default function Home() {
     </main>
   );
 }
+
