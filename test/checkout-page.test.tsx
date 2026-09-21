@@ -98,7 +98,7 @@ describe("Checkout Page Component (/checkout/[bookingId])", () => {
     expect(content).toContain("rounded-2xl");
   });
 
-  it("memiliki layout Split-View (Epic 6) dua kolom dan Ringkasan Pesanan pada layar desktop", () => {
+  it("memiliki layout Split-View (Epic 6) dua kolom dan Ringkasan Pesanan pada layar desktop dengan rincian biaya transparan", () => {
     const filePath = path.resolve(
       __dirname,
       "../src/app/checkout/[bookingId]/page.tsx"
@@ -111,11 +111,13 @@ describe("Checkout Page Component (/checkout/[bookingId])", () => {
     // Acceptance Criteria 2: Grid dua kolom pada desktop
     expect(content).toContain("grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-12 items-start");
 
-    // Acceptance Criteria 3: Bagian Ringkasan Pesanan di sebelah kiri
+    // Acceptance Criteria 3: Bagian Ringkasan Pesanan di sebelah kiri dengan rincian harga (Issue #166)
     expect(content).toContain("Ringkasan Pesanan");
     expect(content).toContain("ID Booking");
     expect(content).toContain("Tipe Pembayaran");
     expect(content).toContain("Booking Fee (Escrow)");
+    expect(content).toContain("Biaya Sewa Kos");
+    expect(content).toContain("Biaya Layanan / Admin");
     expect(content).toContain("Total Tagihan");
 
     // Acceptance Criteria 4: Kolom kanan QRIS Card proporsional

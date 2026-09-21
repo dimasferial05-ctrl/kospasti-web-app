@@ -1,16 +1,123 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { QrCode, Loader2, ArrowLeft, ShieldCheck } from "lucide-react";
+import {
+  QrCode,
+  Loader2,
+  ArrowLeft,
+  ShieldCheck,
+  Building2,
+  Calendar,
+  BedDouble,
+  Receipt,
+  AlertCircle,
+} from "lucide-react";
 import Link from "next/link";
+
+interface BookingDetail {
+  id: string;
+  studentName: string;
+  studentWhatsapp: string;
+  moveInDate: string;
+  status: string;
+  createdAt: string;
+  property: {
+    id: string;
+    name: string;
+    address: string | null;
+    price_per_month: number;
+    image_url: string | null;
+    gender_type: string;
+  } | null;
+  roomType: {
+    id: string;
+    name: string;
+    price_per_month: number;
+    image_url: string | null;
+  } | null;
+  pricing: {
+    rentPrice: number;
+    adminFee: number;
+    totalPrice: number;
+  };
+}
+
+function formatRupiah(amount: number) {
+  return new Intl.NumberFormat("id-ID", {
+    style: "currency",
+    currency: "IDR",
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  }).format(amount);
+}
+
+function formatDate(dateStr: string) {
+  try {
+    const d = new Date(dateStr);
+    if (isNaN(d.getTime())) return dateStr;
+    return new Intl.DateTimeFormat("id-ID", {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+    }).format(d);
+  } catch {
+    return dateStr;
+  }
+}
 
 export default function CheckoutPage() {
   const router = useRouter();
   const params = useParams();
   const bookingId = params?.bookingId as string;
 
+  const [booking, setBooking] = useState<BookingDetail | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [fetchError, setFetchError] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
+
+  useEffect(() => {
+    if (!bookingId) {
+      setIsLoading(false);
+      return;
+    }
+
+    let isMounted = true;
+
+    async function loadBooking() {
+      setIsLoading(true);
+      setFetchError(null);
+      try {
+        const res = await fetch(`/api/bookings/${bookingId}`);
+        const result = await res.json();
+        if (!res.ok) {
+          throw new Error(result.error || "Gagal memuat detail pesanan");
+        }
+        if (isMounted) {
+          setBooking(result.data);
+        }
+      } catch (err: unknown) {
+        if (isMounted) {
+          console.error("Fetch booking detail error:", err);
+          setFetchError(
+            err instanceof Error
+              ? err.message
+              : "Terjadi kesalahan saat memuat rincian pesanan"
+          );
+        }
+      } finally {
+        if (isMounted) {
+          setIsLoading(false);
+        }
+      }
+    }
+
+    loadBooking();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [bookingId]);
 
   const handleSimulatePayment = async () => {
     setIsProcessing(true);
@@ -37,6 +144,10 @@ export default function CheckoutPage() {
       setIsProcessing(false);
     }
   };
+
+  const rentPrice = booking?.pricing?.rentPrice ?? 0;
+  const adminFee = booking?.pricing?.adminFee ?? 5000;
+  const totalPrice = booking?.pricing?.totalPrice ?? rentPrice + adminFee;
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col justify-center items-center p-4 sm:p-6 lg:p-12">
@@ -67,26 +178,110 @@ export default function CheckoutPage() {
               </p>
             </div>
 
-            <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex flex-col gap-3">
-              <div className="border-b border-slate-100 pb-3">
-                <p className="text-xs text-slate-500">ID Booking</p>
-                <p className="font-mono text-sm font-semibold text-slate-800">
-                  {bookingId || "BKG-12345"}
-                </p>
+            {fetchError && (
+              <div className="p-4 bg-amber-50 border border-amber-200 rounded-xl text-amber-800 text-sm flex items-start gap-2.5">
+                <AlertCircle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
+                <div>
+                  <p className="font-semibold">Informasi Pesanan</p>
+                  <p className="text-xs text-amber-700 mt-0.5">{fetchError}</p>
+                </div>
               </div>
+            )}
+
+            <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex flex-col gap-3.5">
+              {/* ID Booking & Status */}
+              <div className="border-b border-slate-100 pb-3 flex items-center justify-between">
+                <div>
+                  <p className="text-xs text-slate-500">ID Booking</p>
+                  <p className="font-mono text-sm font-semibold text-slate-800">
+                    {bookingId || "BKG-12345"}
+                  </p>
+                </div>
+                {booking?.status && (
+                  <span
+                    className={`text-[11px] font-semibold px-2.5 py-0.5 rounded-full ${
+                      booking.status === "PAID"
+                        ? "bg-emerald-100 text-emerald-800"
+                        : "bg-amber-100 text-amber-800"
+                    }`}
+                  >
+                    {booking.status}
+                  </span>
+                )}
+              </div>
+
+              {/* Detail Properti & Kamar */}
+              {isLoading ? (
+                <div className="py-4 flex items-center justify-center gap-2 text-slate-400 text-xs">
+                  <Loader2 className="w-4 h-4 animate-spin text-blue-600" />
+                  <span>Memuat detail pesanan...</span>
+                </div>
+              ) : booking ? (
+                <div className="border-b border-slate-100 pb-3 space-y-2 text-xs text-slate-600">
+                  <div className="flex items-center gap-2 text-slate-800 font-semibold text-sm">
+                    <Building2 className="w-4 h-4 text-slate-500 shrink-0" />
+                    <span>{booking.property?.name || "Kos"}</span>
+                  </div>
+                  {booking.roomType && (
+                    <div className="flex items-center gap-2 pl-0.5 text-slate-600">
+                      <BedDouble className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                      <span>Tipe: {booking.roomType.name}</span>
+                    </div>
+                  )}
+                  {booking.moveInDate && (
+                    <div className="flex items-center gap-2 pl-0.5 text-slate-500">
+                      <Calendar className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                      <span>Mulai Masuk: {formatDate(booking.moveInDate)}</span>
+                    </div>
+                  )}
+                </div>
+              ) : null}
+
+              {/* Tipe Pembayaran */}
               <div className="border-b border-slate-100 pb-3">
                 <p className="text-xs text-slate-500">Tipe Pembayaran</p>
                 <p className="text-sm font-semibold text-slate-800">
                   Booking Fee (Escrow)
                 </p>
               </div>
-              <div>
-                <p className="text-xs text-slate-500">Total Tagihan</p>
-                <p className="text-lg font-bold text-blue-600">
-                  Rp 100.000{" "}
-                  <span className="text-xs font-normal text-slate-500">
-                    (Contoh)
+
+              {/* Rincian Harga / Breakdown */}
+              <div className="space-y-2 pt-1 border-b border-slate-100 pb-3.5 text-xs text-slate-600">
+                <div className="flex items-center justify-between">
+                  <span>Biaya Sewa Kos (1 Bulan)</span>
+                  <span className="font-medium text-slate-800">
+                    {isLoading
+                      ? "..."
+                      : booking
+                      ? formatRupiah(rentPrice)
+                      : "-"}
                   </span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="flex items-center gap-1">
+                    Biaya Layanan / Admin
+                    <span className="text-[10px] text-slate-400 bg-slate-100 px-1 py-0.2 rounded">
+                      Flat
+                    </span>
+                  </span>
+                  <span className="font-medium text-slate-800">
+                    {formatRupiah(adminFee)}
+                  </span>
+                </div>
+              </div>
+
+              {/* Total Tagihan */}
+              <div className="flex items-center justify-between pt-1">
+                <div>
+                  <p className="text-xs text-slate-500">Total Tagihan</p>
+                  <p className="text-xs text-slate-400">Sudah termasuk biaya admin</p>
+                </div>
+                <p className="text-xl font-bold text-blue-600 tracking-tight">
+                  {isLoading
+                    ? "..."
+                    : booking
+                    ? formatRupiah(totalPrice)
+                    : formatRupiah(totalPrice)}
                 </p>
               </div>
             </div>
@@ -134,6 +329,9 @@ export default function CheckoutPage() {
                     Ref ID: <span className="font-mono text-slate-600">{bookingId}</span>
                   </p>
                 )}
+                <div className="mt-2 text-xs font-semibold text-blue-600 bg-blue-50 border border-blue-100 px-3 py-1 rounded-full">
+                  Nominal: {formatRupiah(totalPrice)}
+                </div>
               </div>
 
               {/* Tombol Simulasi Pembayaran */}
