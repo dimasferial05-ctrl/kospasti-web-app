@@ -180,29 +180,36 @@ export default function ManageBookingsPage() {
 
   // Helper untuk merender warna Status (Badge)
   const renderStatusBadge = (status: string) => {
-    if (status === "SUCCESS" || status === "CONFIRMED") {
+    if (status === "PAID") {
       return (
-        <span className="px-2 py-1 bg-green-100 text-green-700 rounded-md text-xs font-bold">
-          SUCCESS
+        <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded-md text-xs font-bold border border-blue-200">
+          PAID
+        </span>
+      );
+    }
+    if (status === "SUCCESS" || status === "CONFIRMED" || status === "ACCEPTED") {
+      return (
+        <span className="px-2 py-1 bg-green-100 text-green-700 rounded-md text-xs font-bold border border-green-200">
+          {status}
         </span>
       );
     }
     if (status === "PENDING") {
       return (
-        <span className="px-2 py-1 bg-yellow-100 text-yellow-700 rounded-md text-xs font-bold">
+        <span className="px-2 py-1 bg-yellow-100 text-yellow-700 rounded-md text-xs font-bold border border-yellow-200">
           PENDING
         </span>
       );
     }
     if (status === "REJECTED") {
       return (
-        <span className="px-2 py-1 bg-rose-100 text-rose-700 rounded-md text-xs font-bold">
+        <span className="px-2 py-1 bg-rose-100 text-rose-700 rounded-md text-xs font-bold border border-rose-200">
           REJECTED
         </span>
       );
     }
     return (
-      <span className="px-2 py-1 bg-slate-100 text-slate-700 rounded-md text-xs font-bold">
+      <span className="px-2 py-1 bg-slate-100 text-slate-700 rounded-md text-xs font-bold border border-slate-200">
         {status}
       </span>
     );

@@ -10,6 +10,7 @@ async function main() {
   await prisma.magicLink.deleteMany();
   await prisma.property.deleteMany();
   await prisma.owner.deleteMany();
+  await prisma.user.deleteMany();
 
   console.log("🧹 Cleaned up existing records.");
 
@@ -318,6 +319,141 @@ async function main() {
       },
       magic_links: true,
     },
+  });
+
+  // 4. Create dummy users
+  const user1 = await prisma.user.create({
+    data: {
+      name: "Andi Saputra",
+      email: "andi.saputra@kospasti.id",
+      whatsapp: "08111222333",
+      bio: "Mahasiswa Teknik Informatika tingkat akhir.",
+    },
+  });
+
+  const user2 = await prisma.user.create({
+    data: {
+      name: "Siti Aminah",
+      email: "siti.aminah@kospasti.id",
+      whatsapp: "08222333444",
+      bio: "Karyawati swasta mencari kos dekat kantor.",
+    },
+  });
+
+  const user3 = await prisma.user.create({
+    data: {
+      name: "Budi Santoso",
+      email: "budi.santoso@kospasti.id",
+      whatsapp: "08333444555",
+      bio: "Mahasiswa baru rantau butuh kos putra yang tenang.",
+    },
+  });
+
+  const user4 = await prisma.user.create({
+    data: {
+      name: "Dewi Lestari",
+      email: "dewi.lestari@kospasti.id",
+      whatsapp: "08444555666",
+      bio: "Pecinta kucing dan lingkungan tenang.",
+    },
+  });
+
+  const user5 = await prisma.user.create({
+    data: {
+      name: "Eko Prasetyo",
+      email: "eko.prasetyo@kospasti.id",
+      whatsapp: "08555666777",
+      bio: "Karyawan PT Taekwang Subang.",
+    },
+  });
+
+  // 5. Create dummy bookings
+  const tomorrow = new Date();
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  const nextMonth = new Date();
+  nextMonth.setMonth(nextMonth.getMonth() + 1);
+
+  await prisma.booking.create({
+    data: {
+      student_name: user1.name,
+      student_whatsapp: user1.whatsapp || "628111222333",
+      move_in_date: tomorrow,
+      status: "PAID",
+      property_id: owner1.properties[0].id,
+      room_type_id: owner1.properties[0].room_types[0].id,
+      user_id: user1.id,
+    },
+  });
+
+  await prisma.booking.create({
+    data: {
+      student_name: user2.name,
+      student_whatsapp: user2.whatsapp || "628222333444",
+      move_in_date: nextMonth,
+      status: "ACCEPTED",
+      property_id: owner2.properties[0].id,
+      room_type_id: owner2.properties[0].room_types[1].id,
+      user_id: user2.id,
+    },
+  });
+
+  await prisma.booking.create({
+    data: {
+      student_name: user3.name,
+      student_whatsapp: user3.whatsapp || "628333444555",
+      move_in_date: tomorrow,
+      status: "REJECTED",
+      property_id: owner3.properties[0].id,
+      room_type_id: owner3.properties[0].room_types[0].id,
+      user_id: user3.id,
+    },
+  });
+
+  await prisma.booking.create({
+    data: {
+      student_name: user4.name,
+      student_whatsapp: user4.whatsapp || "628444555666",
+      move_in_date: nextMonth,
+      status: "PENDING",
+      property_id: owner2.properties[1].id,
+      room_type_id: owner2.properties[1].room_types[0].id,
+      user_id: user4.id,
+    },
+  });
+
+  await prisma.booking.create({
+    data: {
+      student_name: user5.name,
+      student_whatsapp: user5.whatsapp || "628555666777",
+      move_in_date: tomorrow,
+      status: "PAID",
+      property_id: owner3.properties[1].id,
+      room_type_id: owner3.properties[1].room_types[1].id,
+      user_id: user5.id,
+    },
+  });
+
+  // Create an expired magic link for testing the UI
+  const expiredDate = new Date();
+  expiredDate.setDate(expiredDate.getDate() - 1);
+  
+  await prisma.magicLink.create({
+    data: {
+      token: "magic-bambang-expired",
+      expires_at: expiredDate,
+      is_used: false,
+      owner_id: owner1.id,
+    }
+  });
+
+  // Create an already used magic link
+  await prisma.magicLink.create({
+    data: {
+      token: "magic-sri-used",
+      expires_at: oneWeekLater,
+      is_used: true,
+      owner_id: owner2.id,
+    }
   });
 
   console.log("✅ Seeded owners and properties with magic links & room types:");
