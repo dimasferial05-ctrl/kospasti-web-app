@@ -3,7 +3,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import {
-  Link as LinkIcon,
   CheckCircle2,
   Loader2,
   Plus,
@@ -109,8 +108,6 @@ export default function ManagePropertiesPage() {
   const [owners, setOwners] = useState<OwnerOption[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isLoadingOwners, setIsLoadingOwners] = useState(false);
-  const [copiedId, setCopiedId] = useState<string | null>(null);
-  const [loadingId, setLoadingId] = useState<string | null>(null);
   const [deletingPropertyId, setDeletingPropertyId] = useState<string | null>(null);
   const [confirmDeleteModal, setConfirmDeleteModal] = useState<{ id: string; name: string } | null>(null);
   const [deleteError, setDeleteError] = useState<string | null>(null);
@@ -511,48 +508,6 @@ export default function ManagePropertiesPage() {
     }
   };
 
-  // Fungsi untuk membuat dan menyalin Magic Link via API
-  const handleCopyLink = async (ownerId: string | undefined, propertyId: string) => {
-    if (!ownerId) {
-      alert("Owner tidak ditemukan untuk properti ini.");
-      return;
-    }
-
-    try {
-      setLoadingId(propertyId);
-      const res = await fetch("/api/magic-link/generate", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ ownerId }),
-      });
-
-      if (res.status === 401) {
-        router.push("/admin/login");
-        return;
-      }
-
-      const data = await res.json();
-
-      if (data.success && data.magicLink) {
-        if (navigator.clipboard && navigator.clipboard.writeText) {
-          await navigator.clipboard.writeText(data.magicLink);
-        }
-        setCopiedId(propertyId);
-        setTimeout(() => setCopiedId(null), 2000); // Reset notifikasi setelah 2 detik
-      } else {
-        console.error("Gagal membuat magic link:", data.error);
-        alert(data.error || "Gagal membuat magic link");
-      }
-    } catch (err) {
-      console.error("Error generating magic link:", err);
-      alert("Terjadi kesalahan koneksi saat membuat magic link.");
-    } finally {
-      setLoadingId(null);
-    }
-  };
-
   // Handler untuk membuka modal konfirmasi hapus properti
   const handleDeleteProperty = (id: string, name: string) => {
     setDeleteError(null);
@@ -626,10 +581,10 @@ export default function ManagePropertiesPage() {
         <div className="p-6 border-b border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-slate-50">
           <div>
             <h2 className="text-xl font-bold text-slate-800">
-              Daftar Kos &amp; Manajemen Link
+              Daftar Kos &amp; Manajemen Properti
             </h2>
             <p className="text-sm text-slate-500">
-              Kelola properti terdaftar dan kirimkan magic link update kamar ke pemilik kos.
+              Kelola properti terdaftar, harga sewa, tipe kamar, dan fasilitas kos.
             </p>
           </div>
           <button
@@ -751,28 +706,6 @@ export default function ManagePropertiesPage() {
                           <>
                             <Trash2 size={13} />
                             <span>Hapus</span>
-                          </>
-                        )}
-                      </button>
-                      <button
-                        disabled={loadingId === prop.id}
-                        onClick={() => handleCopyLink(prop.owner?.id || prop.owner_id, prop.id)}
-                        className="inline-flex items-center gap-2 bg-slate-900 hover:bg-slate-800 disabled:opacity-50 text-white px-3.5 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer"
-                        title="Copy Magic Link Pemilik Kos"
-                      >
-                        {loadingId === prop.id ? (
-                          <>
-                            <Loader2 className="w-3.5 h-3.5 animate-spin text-white" />
-                            <span>Membuat Link...</span>
-                          </>
-                        ) : (
-                          <>
-                            <LinkIcon size={13} />
-                            <span>
-                              {copiedId === (prop.owner?.id || prop.owner_id)
-                                ? "Tersalin!"
-                                : "Link Pemilik"}
-                            </span>
                           </>
                         )}
                       </button>

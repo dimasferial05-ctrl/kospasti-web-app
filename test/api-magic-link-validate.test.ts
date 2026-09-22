@@ -164,12 +164,14 @@ describe("GET /api/magic-link/validate", () => {
       id: owner.properties[0].id,
       name: "Kos Mawar Putra",
       available_rooms: 2,
+      room_types: [],
     });
 
     expect(data.data.properties[1]).toEqual({
       id: owner.properties[1].id,
       name: "Kos Melati Putri",
       available_rooms: 0,
+      room_types: [],
     });
 
     // Pastikan nomor WhatsApp atau data sensitif owner tidak terekspos di response
@@ -177,4 +179,68 @@ describe("GET /api/magic-link/validate", () => {
     expect(data.data.ownerWhatsapp).toBeUndefined();
     expect(JSON.stringify(data)).not.toContain("6285712345678");
   });
+
+  it("mengembalikan data room_types secara lengkap jika properti memiliki tipe kamar", async () => {
+    const owner = await prisma.owner.create({
+      data: {
+        name: "Ibu Hartini",
+        whatsapp_number: "6281233445566",
+        properties: {
+          create: {
+            name: "Kos Hartini Melati",
+            price_per_month: 1000000,
+            available_rooms: 5,
+            gender_type: "PUTRI",
+            facilities: "WiFi, AC, Parkir",
+            room_types: {
+              create: [
+                {
+                  name: "Kamar AC",
+                  price_per_month: 1200000,
+                  available_rooms: 2,
+                },
+                {
+                  name: "Kamar Non-AC",
+                  price_per_month: 800000,
+                  available_rooms: 3,
+                },
+              ],
+            },
+          },
+        },
+      },
+      include: {
+        properties: {
+          include: {
+            room_types: true,
+          },
+        },
+      },
+    });
+
+    const token = "token-with-room-types";
+    await prisma.magicLink.create({
+      data: {
+        token,
+        expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000),
+        is_used: false,
+        owner_id: owner.id,
+      },
+    });
+
+    const request = new Request(`http://localhost:3000/api/magic-link/validate?token=${token}`, {
+      method: "GET",
+    });
+
+    const response = await GET(request);
+    const data = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(data.data.properties[0].room_types).toHaveLength(2);
+    expect(data.data.properties[0].room_types[0].name).toBe("Kamar AC");
+    expect(data.data.properties[0].room_types[0].available_rooms).toBe(2);
+    expect(data.data.properties[0].room_types[1].name).toBe("Kamar Non-AC");
+    expect(data.data.properties[0].room_types[1].available_rooms).toBe(3);
+  });
 });
+

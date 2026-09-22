@@ -4,12 +4,32 @@ import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Minus, Plus, Loader2, XCircle, CheckCircle, ArrowLeft, Home } from "lucide-react";
+import {
+  Minus,
+  Plus,
+  Loader2,
+  XCircle,
+  CheckCircle2,
+  ArrowLeft,
+  Building2,
+  ShieldCheck,
+  BedDouble,
+  Sparkles,
+  Layers,
+} from "lucide-react";
+
+interface RoomType {
+  id: string;
+  name: string;
+  available_rooms: number;
+  price_per_month?: number;
+}
 
 interface Property {
   id: string;
   name: string;
   available_rooms: number;
+  room_types?: RoomType[];
 }
 
 interface PropertyData {
@@ -25,7 +45,7 @@ export default function UpdateRoomPage() {
   const [error, setError] = useState<string | null>(null);
   const [propertyData, setPropertyData] = useState<PropertyData | null>(null);
   const [selectedPropertyIndex, setSelectedPropertyIndex] = useState<number>(0);
-  const [roomCount, setRoomCount] = useState<number>(0);
+  const [roomCounts, setRoomCounts] = useState<Record<string, number>>({});
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [isSuccess, setIsSuccess] = useState<boolean>(false);
 
@@ -52,7 +72,16 @@ export default function UpdateRoomPage() {
         setPropertyData(data);
 
         if (data.properties && data.properties.length > 0) {
-          setRoomCount(data.properties[0].available_rooms ?? 0);
+          const initialCounts: Record<string, number> = {};
+          const firstProp = data.properties[0];
+          if (firstProp.room_types && firstProp.room_types.length > 0) {
+            firstProp.room_types.forEach((rt) => {
+              initialCounts[rt.id] = rt.available_rooms ?? 0;
+            });
+          } else {
+            initialCounts["default"] = firstProp.available_rooms ?? 0;
+          }
+          setRoomCounts(initialCounts);
         }
       } catch (err) {
         console.error("Gagal memuat data token:", err);
@@ -65,20 +94,40 @@ export default function UpdateRoomPage() {
     fetchTokenData();
   }, [token]);
 
-  const handleDecrement = () => {
-    if (roomCount > 0) {
-      setRoomCount((prev) => Math.max(0, prev - 1));
-    }
+  const handleDecrement = (roomTypeId: string) => {
+    setRoomCounts((prev) => {
+      const current = prev[roomTypeId] ?? 0;
+      if (current <= 0) return prev;
+      return {
+        ...prev,
+        [roomTypeId]: Math.max(0, current - 1),
+      };
+    });
   };
 
-  const handleIncrement = () => {
-    setRoomCount((prev) => prev + 1);
+  const handleIncrement = (roomTypeId: string) => {
+    setRoomCounts((prev) => {
+      const current = prev[roomTypeId] ?? 0;
+      return {
+        ...prev,
+        [roomTypeId]: current + 1,
+      };
+    });
   };
 
   const handleSelectProperty = (index: number) => {
     setSelectedPropertyIndex(index);
-    if (propertyData?.properties[index]) {
-      setRoomCount(propertyData.properties[index].available_rooms ?? 0);
+    const targetProp = propertyData?.properties[index];
+    if (targetProp) {
+      const counts: Record<string, number> = {};
+      if (targetProp.room_types && targetProp.room_types.length > 0) {
+        targetProp.room_types.forEach((rt) => {
+          counts[rt.id] = rt.available_rooms ?? 0;
+        });
+      } else {
+        counts["default"] = targetProp.available_rooms ?? 0;
+      }
+      setRoomCounts(counts);
     }
   };
 
@@ -94,16 +143,32 @@ export default function UpdateRoomPage() {
 
     try {
       setIsSubmitting(true);
+
+      const hasRoomTypes =
+        targetProperty.room_types && targetProperty.room_types.length > 0;
+
+      const payload = hasRoomTypes
+        ? {
+            token,
+            propertyId: targetProperty.id,
+            updates: targetProperty.room_types!.map((rt) => ({
+              roomTypeId: rt.id,
+              availableRooms: roomCounts[rt.id] ?? 0,
+            })),
+          }
+        : {
+            token,
+            propertyId: targetProperty.id,
+            availableRooms:
+              roomCounts["default"] ?? targetProperty.available_rooms ?? 0,
+          };
+
       const response = await fetch("/api/magic-link/update", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          token,
-          propertyId: targetProperty.id,
-          availableRooms: roomCount,
-        }),
+        body: JSON.stringify(payload),
       });
 
       const result = await response.json();
@@ -121,13 +186,28 @@ export default function UpdateRoomPage() {
     }
   };
 
+  const formatRupiah = (val?: number) => {
+    if (!val) return null;
+    return new Intl.NumberFormat("id-ID", {
+      style: "currency",
+      currency: "IDR",
+      maximumFractionDigits: 0,
+    }).format(val);
+  };
+
   // 1. Loading State
   if (isLoading) {
     return (
-      <div className="flex-1 flex flex-col items-center justify-center min-h-[60vh] text-center p-6">
-        <Loader2 className="w-10 h-10 animate-spin text-slate-600 mb-4" />
-        <p className="text-base font-medium text-slate-700">Memuat data...</p>
-        <p className="text-xs text-slate-400 mt-1">Menghubungkan tautan Anda...</p>
+      <div className="min-h-[80vh] flex flex-col items-center justify-center p-6 text-center">
+        <div className="w-16 h-16 rounded-3xl bg-emerald-50 border border-emerald-100 flex items-center justify-center shadow-soft mb-5">
+          <Loader2 className="w-8 h-8 animate-spin text-emerald-600" />
+        </div>
+        <h2 className="text-lg font-bold text-slate-900 tracking-tight">
+          Menghubungkan Tautan Kos
+        </h2>
+        <p className="text-sm text-slate-500 mt-1 max-w-xs">
+          Memuat data ketersediaan kamar secara aman...
+        </p>
       </div>
     );
   }
@@ -137,20 +217,24 @@ export default function UpdateRoomPage() {
     const errorMessage = error || "Data properti tidak ditemukan.";
 
     return (
-      <div className="flex-1 flex flex-col items-center justify-center p-4 min-h-[60vh] w-full">
-        <div className="bg-red-50 border border-red-200 rounded-xl p-6 text-center max-w-sm w-full shadow-xs flex flex-col items-center">
-          <XCircle className="w-16 h-16 text-red-500 mb-4 stroke-[1.75]" />
-          <h2 className="text-xl font-bold text-red-900 mb-2">Akses Ditolak</h2>
-          <p className="text-sm font-medium text-red-700 mb-3 leading-snug">
+      <div className="min-h-[80vh] flex flex-col items-center justify-center p-4">
+        <div className="bg-white border border-slate-200/90 rounded-3xl p-8 text-center max-w-sm w-full shadow-soft-lg flex flex-col items-center">
+          <div className="w-14 h-14 rounded-2xl bg-rose-50 border border-rose-100 flex items-center justify-center text-rose-600 mb-4">
+            <XCircle className="w-7 h-7 stroke-[2]" />
+          </div>
+          <h2 className="text-xl font-bold text-slate-900 mb-2">
+            Akses Tidak Valid
+          </h2>
+          <p className="text-sm text-slate-600 mb-4 leading-relaxed">
             {errorMessage}
           </p>
-          <p className="text-xs text-slate-500 mb-6 leading-relaxed">
-            Tautan ini mungkin sudah kedaluwarsa atau pernah digunakan. Silakan hubungi admin untuk mendapatkan tautan baru.
+          <p className="text-xs text-slate-400 mb-6 leading-relaxed">
+            Tautan ini mungkin sudah pernah digunakan atau telah kedaluwarsa. Silakan hubungi admin untuk tautan terbaru.
           </p>
           <Link href="/" className="w-full">
             <Button
               variant="outline"
-              className="w-full flex items-center justify-center gap-2 border-red-200 text-red-800 hover:bg-red-100/80 hover:text-red-900"
+              className="w-full h-12 rounded-xl text-slate-700 hover:bg-slate-50 border-slate-200 font-semibold text-sm flex items-center justify-center gap-2 cursor-pointer"
             >
               <ArrowLeft className="w-4 h-4" />
               Kembali ke Beranda
@@ -164,19 +248,24 @@ export default function UpdateRoomPage() {
   // 3. Success State
   if (isSuccess) {
     return (
-      <div className="flex-1 flex flex-col items-center justify-center p-4 min-h-[60vh] w-full">
-        <div className="bg-green-50 border border-green-200 rounded-xl p-8 text-center max-w-sm w-full shadow-xs flex flex-col items-center">
-          <CheckCircle className="w-20 h-20 text-green-500 mb-4 stroke-[1.75]" />
-          <h2 className="text-xl font-bold text-green-900 mb-2">
-            Pembaruan Berhasil!
+      <div className="min-h-[80vh] flex flex-col items-center justify-center p-4">
+        <div className="bg-white border border-slate-200/90 rounded-3xl p-8 text-center max-w-sm w-full shadow-soft-lg flex flex-col items-center">
+          <div className="w-16 h-16 rounded-3xl bg-emerald-50 border border-emerald-100 flex items-center justify-center text-emerald-600 mb-4 shadow-inner">
+            <CheckCircle2 className="w-8 h-8 stroke-[2.2]" />
+          </div>
+          <span className="text-xs uppercase font-bold tracking-wider text-emerald-600 mb-1">
+            Berhasil Diperbarui
+          </span>
+          <h2 className="text-2xl font-bold text-slate-900 mb-2">
+            Data Tersimpan!
           </h2>
           <p className="text-sm text-slate-600 mb-6 leading-relaxed">
-            Data sisa kamar kos Anda telah diperbarui ke sistem. Silakan tutup halaman ini dan kembali ke WhatsApp.
+            Jumlah kamar kosong kos Anda telah diperbarui ke sistem KosPasti. Anda dapat menutup halaman ini.
           </p>
           <Link href="/" className="w-full">
             <Button
               variant="outline"
-              className="w-full flex items-center justify-center gap-2 border-green-200 text-green-800 hover:bg-green-100/80 hover:text-green-900"
+              className="w-full h-12 rounded-xl text-slate-700 hover:bg-slate-50 border-slate-200 font-semibold text-sm flex items-center justify-center gap-2 cursor-pointer"
             >
               <ArrowLeft className="w-4 h-4" />
               Kembali ke Beranda
@@ -187,116 +276,244 @@ export default function UpdateRoomPage() {
     );
   }
 
-  const currentProperty = propertyData.properties[selectedPropertyIndex] || propertyData.properties[0];
+  const currentProperty =
+    propertyData.properties[selectedPropertyIndex] || propertyData.properties[0];
 
-  // 3. Main Counter / Success State
+  const roomTypes =
+    currentProperty?.room_types && currentProperty.room_types.length > 0
+      ? currentProperty.room_types
+      : null;
+
+  const totalAvailable = roomTypes
+    ? roomTypes.reduce((sum, rt) => sum + (roomCounts[rt.id] ?? 0), 0)
+    : (roomCounts["default"] ?? currentProperty?.available_rooms ?? 0);
+
   return (
-    <div className="flex-1 flex flex-col justify-between py-6 px-4 max-w-sm mx-auto w-full">
-      <div className="flex flex-col items-center">
-        {/* Owner Greeting & Header */}
-        <div className="w-full text-center mb-6">
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200/60 mb-3">
-            <span>👋</span> Halo, {propertyData.ownerName}
-          </span>
+    <div className="min-h-screen bg-slate-50/60 py-6 sm:py-10 px-4">
+      <div className="max-w-md sm:max-w-xl mx-auto flex flex-col gap-6">
+        {/* Top Header Card (SaaS Card Layout as requested) */}
+        <div className="bg-white border border-slate-200/80 rounded-3xl p-5 sm:p-6 shadow-soft-sm relative overflow-hidden">
+          <div className="flex flex-col gap-3.5">
+            {/* Top Row: Owner info & total room status badge */}
+            <div className="flex items-center justify-between gap-2">
+              <span className="text-xs font-medium text-slate-500">
+                Pemilik: <strong className="text-slate-900 font-bold">{propertyData.ownerName}</strong>
+              </span>
 
-          {/* Multiple Properties Selector if available */}
-          {propertyData.properties.length > 1 && (
-            <div className="flex gap-2 justify-center mb-4 overflow-x-auto py-1">
-              {propertyData.properties.map((prop, idx) => (
-                <button
-                  key={prop.id}
-                  onClick={() => handleSelectProperty(idx)}
-                  className={`text-xs px-3 py-1.5 rounded-lg font-medium transition-all ${
-                    selectedPropertyIndex === idx
-                      ? "bg-slate-900 text-white shadow-sm"
-                      : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+              <div
+                className={`text-xs px-3 py-1 rounded-full font-bold border ${
+                  totalAvailable > 0
+                    ? "bg-emerald-50 text-emerald-700 border-emerald-200/80"
+                    : "bg-rose-50 text-rose-700 border-rose-200/80"
+                }`}
+              >
+                {totalAvailable > 0 ? `Total ${totalAvailable} Kamar Siap` : "Kos Penuh"}
+              </div>
+            </div>
+
+            {/* Property Selector Tabs if Owner has multiple properties */}
+            {propertyData.properties.length > 1 && (
+              <div className="pt-1">
+                <p className="text-[11px] uppercase tracking-wider font-bold text-slate-400 mb-2">
+                  Pilih Properti Kos:
+                </p>
+                <div className="flex gap-2 overflow-x-auto pb-1 no-scrollbar">
+                  {propertyData.properties.map((prop, idx) => (
+                    <button
+                      key={prop.id}
+                      onClick={() => handleSelectProperty(idx)}
+                      className={`text-xs px-3.5 py-2 rounded-xl font-bold transition-all cursor-pointer whitespace-nowrap ${
+                        selectedPropertyIndex === idx
+                          ? "bg-slate-900 text-white shadow-sm ring-2 ring-slate-900/10"
+                          : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                      }`}
+                    >
+                      {prop.name}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Property Heading */}
+            <div className="pt-2 border-t border-slate-100">
+              <h1 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
+                <Building2 className="w-5 h-5 sm:w-6 sm:h-6 text-slate-700 shrink-0" />
+                <span>{currentProperty ? currentProperty.name : "Kos Anda"}</span>
+              </h1>
+              <p className="text-xs sm:text-sm text-slate-500 mt-1 leading-relaxed">
+                Atur jumlah kamar kosong yang siap disewakan hari ini. Gunakan tombol minus/plus di bawah untuk menyesuaikan.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Room Types Large Counter Cards */}
+        <div className="flex flex-col gap-5">
+          {roomTypes ? (
+            roomTypes.map((rt) => {
+              const count = roomCounts[rt.id] ?? 0;
+              const formattedPrice = formatRupiah(rt.price_per_month);
+
+              return (
+                <div
+                  key={rt.id}
+                  className="bg-white border border-slate-200/90 rounded-3xl p-6 shadow-soft-sm flex flex-col items-center"
+                >
+                  {/* Card Title & Badges */}
+                  <div className="w-full flex items-start justify-between gap-3 pb-4 mb-4 border-b border-slate-100">
+                    <div className="flex items-start gap-3 min-w-0 flex-1">
+                      <div className="w-8 h-8 rounded-xl bg-slate-100 text-slate-700 flex items-center justify-center shrink-0 mt-0.5">
+                        <BedDouble className="w-4 h-4 text-slate-600" />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <h3 className="font-bold text-slate-900 text-base sm:text-lg leading-snug break-words">
+                          {rt.name}
+                        </h3>
+                        {formattedPrice && (
+                          <p className="text-xs font-semibold text-emerald-700 mt-0.5">
+                            {formattedPrice} <span className="text-slate-400 font-normal">/ bulan</span>
+                          </p>
+                        )}
+                      </div>
+                    </div>
+
+                    <span
+                      className={`text-xs px-3 py-1 rounded-full font-bold border shrink-0 ${
+                        count === 0
+                          ? "bg-rose-50 text-rose-700 border-rose-200"
+                          : "bg-emerald-50 text-emerald-700 border-emerald-200"
+                      }`}
+                    >
+                      {count === 0 ? "Penuh (0)" : `Tersedia ${count}`}
+                    </span>
+                  </div>
+
+                  {/* Large Counter Controls (Big, Friendly, Tactile) */}
+                  <div className="flex items-center justify-center gap-6 sm:gap-8 w-full my-3">
+                    {/* Minus Button */}
+                    <button
+                      type="button"
+                      onClick={() => handleDecrement(rt.id)}
+                      disabled={count <= 0}
+                      aria-label={`Kurangi Kamar ${rt.name}`}
+                      className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl border-2 border-slate-300 bg-white text-slate-800 hover:bg-slate-100 hover:border-slate-400 active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-white disabled:hover:border-slate-300 transition-all duration-150 flex items-center justify-center shadow-soft-sm cursor-pointer select-none"
+                    >
+                      <Minus className="w-7 h-7 stroke-[2.5]" />
+                    </button>
+
+                    {/* Room Count Display */}
+                    <div className="flex flex-col items-center min-w-[4.5ch]">
+                      <span className="text-5xl sm:text-6xl font-black text-slate-900 tracking-tight tabular-nums select-none">
+                        {count}
+                      </span>
+                      <span className="text-xs uppercase font-bold text-slate-400 mt-1 tracking-wider">
+                        Kamar
+                      </span>
+                    </div>
+
+                    {/* Plus Button */}
+                    <button
+                      type="button"
+                      onClick={() => handleIncrement(rt.id)}
+                      aria-label={`Tambah Kamar ${rt.name}`}
+                      className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl border-2 border-slate-300 bg-white text-slate-800 hover:bg-slate-100 hover:border-slate-400 active:scale-95 transition-all duration-150 flex items-center justify-center shadow-soft-sm cursor-pointer select-none"
+                    >
+                      <Plus className="w-7 h-7 stroke-[2.5]" />
+                    </button>
+                  </div>
+                </div>
+              );
+            })
+          ) : (
+            /* Fallback single counter */
+            <div className="bg-white border border-slate-200/90 rounded-3xl p-6 shadow-soft-sm flex flex-col items-center">
+              <div className="w-full flex items-start justify-between gap-3 pb-4 mb-4 border-b border-slate-100">
+                <div className="flex items-start gap-3 min-w-0 flex-1">
+                  <div className="w-8 h-8 rounded-xl bg-slate-100 text-slate-700 flex items-center justify-center shrink-0 mt-0.5">
+                    <BedDouble className="w-4 h-4 text-slate-600" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <h3 className="font-bold text-slate-900 text-base sm:text-lg leading-snug">
+                      Kamar Standar
+                    </h3>
+                  </div>
+                </div>
+
+                <span
+                  className={`text-xs px-3 py-1 rounded-full font-bold border shrink-0 ${
+                    totalAvailable === 0
+                      ? "bg-rose-50 text-rose-700 border-rose-200"
+                      : "bg-emerald-50 text-emerald-700 border-emerald-200"
                   }`}
                 >
-                  {prop.name}
+                  {totalAvailable === 0 ? "Penuh (0)" : `Tersedia ${totalAvailable}`}
+                </span>
+              </div>
+
+              <div className="flex items-center justify-center gap-6 sm:gap-8 w-full my-3">
+                <button
+                  type="button"
+                  onClick={() => handleDecrement("default")}
+                  disabled={totalAvailable <= 0}
+                  aria-label="Kurangi Kamar"
+                  className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl border-2 border-slate-300 bg-white text-slate-800 hover:bg-slate-100 hover:border-slate-400 active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-white disabled:hover:border-slate-300 transition-all duration-150 flex items-center justify-center shadow-soft-sm cursor-pointer select-none"
+                >
+                  <Minus className="w-7 h-7 stroke-[2.5]" />
                 </button>
-              ))}
+
+                <div className="flex flex-col items-center min-w-[4.5ch]">
+                  <span className="text-5xl sm:text-6xl font-black text-slate-900 tracking-tight tabular-nums select-none">
+                    {totalAvailable}
+                  </span>
+                  <span className="text-xs uppercase font-bold text-slate-400 mt-1 tracking-wider">
+                    Kamar
+                  </span>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => handleIncrement("default")}
+                  aria-label="Tambah Kamar"
+                  className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl border-2 border-slate-300 bg-white text-slate-800 hover:bg-slate-100 hover:border-slate-400 active:scale-95 transition-all duration-150 flex items-center justify-center shadow-soft-sm cursor-pointer select-none"
+                >
+                  <Plus className="w-7 h-7 stroke-[2.5]" />
+                </button>
+              </div>
             </div>
           )}
-
-          <h1 className="text-2xl font-bold text-slate-900 tracking-tight flex items-center justify-center gap-2">
-            <Home className="w-6 h-6 text-slate-700 shrink-0" />
-            <span>{currentProperty ? currentProperty.name : "Kos Anda"}</span>
-          </h1>
-          <p className="text-sm text-slate-500 mt-2">Atur Sisa Kamar Kosong Anda:</p>
         </div>
 
-        {/* Counter Component */}
-        <div className="w-full max-w-xs bg-slate-50/80 border border-slate-200/80 rounded-3xl p-6 my-4 shadow-sm flex flex-col items-center">
-          <div className="flex items-center justify-center gap-6 w-full my-4">
-            {/* Minus Button */}
-            <button
-              type="button"
-              onClick={handleDecrement}
-              disabled={roomCount <= 0}
-              aria-label="Kurangi Kamar"
-              className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl border-2 border-slate-300 bg-white text-slate-700 hover:bg-slate-100 hover:border-slate-400 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-white disabled:hover:border-slate-300 transition-all flex items-center justify-center shadow-xs cursor-pointer select-none"
-            >
-              <Minus className="w-6 h-6 stroke-[2.5]" />
-            </button>
-
-            {/* Room Count Display */}
-            <div className="flex flex-col items-center min-w-[4ch]">
-              <span className="text-5xl sm:text-6xl font-black text-slate-900 tracking-tight select-none tabular-nums">
-                {roomCount}
-              </span>
-              <span className="text-xs uppercase font-semibold text-slate-400 mt-1 tracking-wider">
-                Kamar
-              </span>
-            </div>
-
-            {/* Plus Button */}
-            <button
-              type="button"
-              onClick={handleIncrement}
-              aria-label="Tambah Kamar"
-              className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl border-2 border-slate-300 bg-white text-slate-700 hover:bg-slate-100 hover:border-slate-400 active:scale-95 transition-all flex items-center justify-center shadow-xs cursor-pointer select-none"
-            >
-              <Plus className="w-6 h-6 stroke-[2.5]" />
-            </button>
-          </div>
-
-          {/* Availability Status Badge */}
-          <div className="mt-4">
-            {roomCount === 0 ? (
-              <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-red-100 text-red-700">
-                Penuh (0 Kamar Tersedia)
-              </span>
-            ) : (
-              <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800">
-                Tersedia {roomCount} Kamar
-              </span>
-            )}
-          </div>
+        {/* Total Summary Badge */}
+        <div className="w-full flex items-center justify-between px-4 py-3 bg-emerald-50 border border-emerald-200/80 rounded-2xl text-emerald-900 text-sm font-semibold">
+          <span>Total Sisa Kamar Kosong:</span>
+          <span className="font-extrabold text-base">{totalAvailable} Kamar</span>
         </div>
 
-        <p className="text-xs text-slate-400 text-center max-w-xs mt-2">
-          Tekan tombol <span className="font-semibold text-slate-600">[+]</span> atau{" "}
-          <span className="font-semibold text-slate-600">[-]</span> untuk memperbarui jumlah kamar kosong yang siap disewakan.
+        {/* Helper Note */}
+        <p className="text-xs text-slate-400 text-center -mt-2">
+          Tekan tombol <span className="font-bold text-slate-600">[+]</span> atau{" "}
+          <span className="font-bold text-slate-600">[-]</span> untuk memperbarui jumlah kamar kosong siap sewa.
         </p>
-      </div>
 
-      {/* Submit Button */}
-      <div className="w-full pt-6">
-        <button
-          type="button"
-          onClick={handleSubmit}
-          disabled={isSubmitting}
-          className="w-full h-14 text-base font-semibold bg-slate-900 text-white hover:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed rounded-xl shadow-md transition-all active:scale-[0.99] flex items-center justify-center gap-2 cursor-pointer select-none"
-        >
-          {isSubmitting ? (
-            <>
-              <Loader2 className="w-5 h-5 animate-spin" />
-              <span>Menyimpan...</span>
-            </>
-          ) : (
-            "Simpan Data"
-          )}
-        </button>
+        {/* Submit Button */}
+        <div className="w-full pt-2">
+          <button
+            type="button"
+            onClick={handleSubmit}
+            disabled={isSubmitting}
+            className="w-full h-14 text-base font-bold bg-slate-900 hover:bg-slate-800 text-white rounded-2xl shadow-soft hover:shadow-soft-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 active:scale-[0.98] flex items-center justify-center gap-2 cursor-pointer select-none"
+          >
+            {isSubmitting ? (
+              <>
+                <Loader2 className="w-5 h-5 animate-spin" />
+                <span>Menyimpan...</span>
+              </>
+            ) : (
+              <span>Simpan Data</span>
+            )}
+          </button>
+        </div>
       </div>
     </div>
   );
