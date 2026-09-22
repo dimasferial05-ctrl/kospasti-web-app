@@ -19,6 +19,7 @@ import {
   Sparkles,
 } from "lucide-react";
 import PropertyLocationMap from "@/components/map/PropertyLocationMap";
+import { WishlistButton } from "@/components/features/WishlistButton";
 
 interface PropertyMediaItem {
   id?: string;
@@ -65,6 +66,7 @@ export default function PropertyDetailPage() {
 
   const [property, setProperty] = useState<PropertyDetail | null>(null);
   const [selectedRoomType, setSelectedRoomType] = useState<RoomTypeItem | null>(null);
+  const [isSaved, setIsSaved] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -184,8 +186,12 @@ export default function PropertyDetailPage() {
       setIsLoading(true);
       setError(null);
       try {
-        const res = await fetch(`/api/properties/${id}`);
-        const json = await res.json();
+        const [resProperty, resWishlist] = await Promise.all([
+          fetch(`/api/properties/${id}`),
+          fetch("/api/user/wishlist?idsOnly=true").catch(() => null),
+        ]);
+
+        const json = await resProperty.json();
         if (isMounted) {
           if (json.success && json.data) {
             setProperty(json.data);
@@ -196,6 +202,13 @@ export default function PropertyDetailPage() {
             }
           } else {
             setError(json.error || "Kos tidak ditemukan");
+          }
+
+          if (resWishlist && resWishlist.ok) {
+            const wishlistJson = await resWishlist.json();
+            if (wishlistJson.success && Array.isArray(wishlistJson.savedIds)) {
+              setIsSaved(wishlistJson.savedIds.includes(id));
+            }
           }
         }
       } catch (err) {
@@ -320,17 +333,28 @@ export default function PropertyDetailPage() {
     <div className="max-w-7xl mx-auto min-h-screen bg-slate-50 pb-24 lg:pb-12 px-0 lg:px-8 flex flex-col relative shadow-sm">
       {/* Header Bar */}
       <div className="sticky top-0 z-30 bg-white/80 backdrop-blur-md border-b border-slate-200/80 py-3">
-        <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 flex items-center gap-3">
-          <Link
-            href="/"
-            className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors"
-            aria-label="Kembali ke beranda"
-          >
-            <ArrowLeft className="w-4 h-4" />
-          </Link>
-          <h1 className="text-sm font-bold text-slate-800 truncate">
-            Detail Kos
-          </h1>
+        <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3 min-w-0">
+            <Link
+              href="/"
+              className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors shrink-0"
+              aria-label="Kembali ke beranda"
+            >
+              <ArrowLeft className="w-4 h-4" />
+            </Link>
+            <h1 className="text-sm font-bold text-slate-800 truncate">
+              {property?.name || "Detail Kos"}
+            </h1>
+          </div>
+          {property && (
+            <WishlistButton
+              propertyId={property.id}
+              initialIsSaved={isSaved}
+              variant="button"
+              showText
+              onToggle={(saved) => setIsSaved(saved)}
+            />
+          )}
         </div>
       </div>
 

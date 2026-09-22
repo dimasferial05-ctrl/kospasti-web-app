@@ -40,6 +40,7 @@ model Property {
   room_types      RoomType[]
   bookings        Booking[]
   media           PropertyMedia[]
+  saved_by        SavedProperty[]
 }
 
 model RoomType {
@@ -97,16 +98,30 @@ model Booking {
 }
 
 model User {
-  id         String    @id @default(uuid())
-  name       String
-  email      String    @unique
-  password   String?
-  whatsapp   String?
-  avatar     String?
-  bio        String?
-  google_id  String?   @unique
-  created_at DateTime  @default(now())
-  updated_at DateTime  @updatedAt
-  bookings   Booking[]
+  id               String          @id @default(uuid())
+  name             String
+  email            String          @unique
+  password         String?
+  whatsapp         String?
+  avatar           String?
+  bio              String?
+  google_id        String?         @unique
+  created_at       DateTime        @default(now())
+  updated_at       DateTime        @updatedAt
+  bookings         Booking[]
+  saved_properties SavedProperty[]
+}
+
+model SavedProperty {
+  id          String   @id @default(uuid())
+  user_id     String
+  user        User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  property_id String
+  property    Property @relation(fields: [property_id], references: [id], onDelete: Cascade)
+  created_at  DateTime @default(now())
+
+  @@unique([user_id, property_id])
+  @@index([user_id])
+  @@index([property_id])
 }
 
