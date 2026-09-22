@@ -16,7 +16,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const { token, propertyId, availableRooms } = body;
+    const { token, propertyId, availableRooms, updates } = body;
 
     // Validasi tipe data & ketersediaan field wajib
     if (!token || typeof token !== "string" || !token.trim()) {
@@ -39,19 +39,49 @@ export async function POST(request: Request) {
       );
     }
 
-    if (
-      typeof availableRooms !== "number" ||
-      isNaN(availableRooms) ||
-      availableRooms < 0 ||
-      !Number.isInteger(availableRooms)
-    ) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: "Jumlah kamar tidak valid (harus berupa bilangan bulat >= 0)",
-        },
-        { status: 400 }
-      );
+    const hasUpdatesArray = Array.isArray(updates) && updates.length > 0;
+
+    if (hasUpdatesArray) {
+      for (const item of updates) {
+        if (!item.roomTypeId || typeof item.roomTypeId !== "string" || !item.roomTypeId.trim()) {
+          return NextResponse.json(
+            {
+              success: false,
+              error: "ID tipe kamar tidak valid",
+            },
+            { status: 400 }
+          );
+        }
+        if (
+          typeof item.availableRooms !== "number" ||
+          isNaN(item.availableRooms) ||
+          item.availableRooms < 0 ||
+          !Number.isInteger(item.availableRooms)
+        ) {
+          return NextResponse.json(
+            {
+              success: false,
+              error: "Jumlah kamar tidak valid (harus berupa bilangan bulat >= 0)",
+            },
+            { status: 400 }
+          );
+        }
+      }
+    } else {
+      if (
+        typeof availableRooms !== "number" ||
+        isNaN(availableRooms) ||
+        availableRooms < 0 ||
+        !Number.isInteger(availableRooms)
+      ) {
+        return NextResponse.json(
+          {
+            success: false,
+            error: "Jumlah kamar tidak valid (harus berupa bilangan bulat >= 0)",
+          },
+          { status: 400 }
+        );
+      }
     }
 
     const trimmedToken = token.trim();
@@ -121,38 +151,98 @@ export async function POST(request: Request) {
 
     // Pembaruan data menggunakan transaksi atomik dengan Optimistic Concurrency Control
     try {
-      await prisma.$transaction(async (tx) => {
-        const magicLinkResult = await tx.magicLink.updateMany({
-          where: {
-            token: trimmedToken,
-            is_used: false,
-          },
-          data: {
-            is_used: true,
-          },
-        });
+      await prisma.$transaction(
+        async (tx) => {
+          const magicLinkResult = await tx.magicLink.updateMany({
+            where: {
+              token: trimmedToken,
+              is_used: false,
+            },
+            data: {
+              is_used: true,
+            },
+          });
 
-        if (magicLinkResult.count === 0) {
-          throw new Error("TOKEN_ALREADY_USED");
+          if (magicLinkResult.count === 0) {
+            throw new Error("TOKEN_ALREADY_USED");
+          }
+
+          if (hasUpdatesArray) {
+            // Validasi relasi room types terhadap property
+            const existingRoomTypes = await tx.roomType.findMany({
+              where: { property_id: trimmedPropertyId },
+              select: { id: true },
+            });
+            const existingIds = new Set(existingRoomTypes.map((rt) => rt.id));
+
+            for (const item of updates) {
+              const trimmedRoomTypeId = item.roomTypeId.trim();
+              if (!existingIds.has(trimmedRoomTypeId)) {
+                throw new Error("ROOM_TYPE_NOT_FOUND");
+              }
+
+              await tx.roomType.update({
+                where: { id: trimmedRoomTypeId },
+                data: {
+                  available_rooms: item.availableRooms,
+                  updated_at: new Date(),
+                },
+              });
+            }
+
+            // Hitung total akumulasi kamar dari seluruh room_types di properti ini
+            const allRoomTypes = await tx.roomType.findMany({
+              where: { property_id: trimmedPropertyId },
+              select: { available_rooms: true },
+            });
+
+            const totalAvailableRooms = allRoomTypes.reduce(
+              (sum, rt) => sum + rt.available_rooms,
+              0
+            );
+
+            await tx.property.update({
+              where: { id: trimmedPropertyId },
+              data: {
+                available_rooms: totalAvailableRooms,
+                updated_at: new Date(),
+              },
+            });
+          } else {
+            await tx.property.update({
+              where: { id: trimmedPropertyId },
+              data: {
+                available_rooms: availableRooms,
+                updated_at: new Date(),
+              },
+            });
+          }
+        },
+        {
+          maxWait: 15000,
+          timeout: 20000,
         }
-
-        await tx.property.update({
-          where: { id: trimmedPropertyId },
-          data: {
-            available_rooms: availableRooms,
-            updated_at: new Date(),
-          },
-        });
-      });
+      );
     } catch (txError: unknown) {
-      if (txError instanceof Error && txError.message === "TOKEN_ALREADY_USED") {
-        return NextResponse.json(
-          {
-            success: false,
-            error: "Token sudah pernah digunakan",
-          },
-          { status: 401 }
-        );
+      if (txError instanceof Error) {
+        if (txError.message === "TOKEN_ALREADY_USED") {
+          return NextResponse.json(
+            {
+              success: false,
+              error: "Token sudah pernah digunakan",
+            },
+            { status: 401 }
+          );
+        }
+        if (txError.message === "ROOM_TYPE_NOT_FOUND") {
+          return NextResponse.json(
+            {
+              success: false,
+              error: "Tipe kamar tidak ditemukan pada properti ini",
+            },
+            { status: 404 }
+          );
+        }
       }
       throw txError;
     }

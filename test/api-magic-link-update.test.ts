@@ -396,4 +396,144 @@ describe("POST /api/magic-link/update", () => {
     });
     expect(finalMagicLink?.is_used).toBe(true);
   });
+
+  it("berhasil memperbarui multiple room_types via payload updates dan mengakumulasikan total ke Property.available_rooms", async () => {
+    const owner = await prisma.owner.create({
+      data: {
+        name: "Pak Darmawan",
+        whatsapp_number: "628177889900",
+      },
+    });
+
+    const property = await prisma.property.create({
+      data: {
+        name: "Kos Darmawan Megah",
+        price_per_month: 1000000,
+        available_rooms: 10,
+        gender_type: "PUTRA",
+        facilities: "WiFi, Parkir",
+        owner_id: owner.id,
+        room_types: {
+          create: [
+            {
+              name: "Tipe A (AC)",
+              price_per_month: 1500000,
+              available_rooms: 4,
+            },
+            {
+              name: "Tipe B (Non-AC)",
+              price_per_month: 900000,
+              available_rooms: 6,
+            },
+          ],
+        },
+      },
+      include: {
+        room_types: true,
+      },
+    });
+
+    const [roomTypeA, roomTypeB] = property.room_types;
+
+    const token = "token-room-types-batch-update";
+    await prisma.magicLink.create({
+      data: {
+        token,
+        owner_id: owner.id,
+        expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000),
+        is_used: false,
+      },
+    });
+
+    const request = new Request("http://localhost:3000/api/magic-link/update", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        token,
+        propertyId: property.id,
+        updates: [
+          { roomTypeId: roomTypeA.id, availableRooms: 1 },
+          { roomTypeId: roomTypeB.id, availableRooms: 2 },
+        ],
+      }),
+    });
+
+    const response = await POST(request);
+    const data = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(data.success).toBe(true);
+    expect(data.message).toBe("Data kamar berhasil diperbarui.");
+
+    // Verifikasi masing-masing room_type terupdate
+    const updatedRoomTypeA = await prisma.roomType.findUnique({
+      where: { id: roomTypeA.id },
+    });
+    const updatedRoomTypeB = await prisma.roomType.findUnique({
+      where: { id: roomTypeB.id },
+    });
+
+    expect(updatedRoomTypeA?.available_rooms).toBe(1);
+    expect(updatedRoomTypeB?.available_rooms).toBe(2);
+
+    // Verifikasi total akumulasi pada property (1 + 2 = 3)
+    const updatedProperty = await prisma.property.findUnique({
+      where: { id: property.id },
+    });
+    expect(updatedProperty?.available_rooms).toBe(3);
+
+    // Verifikasi token ditandai is_used
+    const usedMagicLink = await prisma.magicLink.findUnique({
+      where: { token },
+    });
+    expect(usedMagicLink?.is_used).toBe(true);
+  });
+
+  it("menolak request (404) jika roomTypeId di dalam updates tidak terdaftar pada property", async () => {
+    const owner = await prisma.owner.create({
+      data: {
+        name: "Ibu Maya",
+        whatsapp_number: "6281333444555",
+      },
+    });
+
+    const property = await prisma.property.create({
+      data: {
+        name: "Kos Maya Asri",
+        price_per_month: 800000,
+        available_rooms: 2,
+        gender_type: "PUTRI",
+        facilities: "WiFi",
+        owner_id: owner.id,
+      },
+    });
+
+    const token = "token-room-type-invalid-id";
+    await prisma.magicLink.create({
+      data: {
+        token,
+        owner_id: owner.id,
+        expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000),
+        is_used: false,
+      },
+    });
+
+    const request = new Request("http://localhost:3000/api/magic-link/update", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        token,
+        propertyId: property.id,
+        updates: [{ roomTypeId: "invalid-room-type-id", availableRooms: 2 }],
+      }),
+    });
+
+    const response = await POST(request);
+    const data = await response.json();
+
+    expect(response.status).toBe(404);
+    expect(data.success).toBe(false);
+    expect(data.error).toBe("Tipe kamar tidak ditemukan pada properti ini");
+  });
 });
+

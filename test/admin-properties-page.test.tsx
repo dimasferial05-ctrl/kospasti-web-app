@@ -48,9 +48,9 @@ describe("Manage Properties Page (/admin/properties)", () => {
     const content = fs.readFileSync(filePath, "utf-8");
 
     // Judul & Deskripsi
-    expect(content).toContain("Daftar Kos &amp; Manajemen Link");
+    expect(content).toContain("Daftar Kos &amp; Manajemen Properti");
     expect(content).toContain(
-      "Kelola properti terdaftar dan kirimkan magic link update kamar ke pemilik kos."
+      "Kelola properti terdaftar, harga sewa, tipe kamar, dan fasilitas kos."
     );
 
     // Tombol Tambah Properti
@@ -66,7 +66,7 @@ describe("Manage Properties Page (/admin/properties)", () => {
     expect(content).toContain("Aksi");
   });
 
-  it("memiliki tombol Edit dan Copy Link pada setiap baris properti", () => {
+  it("memiliki tombol Edit dan Hapus pada setiap baris properti", () => {
     const filePath = path.resolve(
       __dirname,
       "../src/app/admin/properties/page.tsx"
@@ -75,8 +75,8 @@ describe("Manage Properties Page (/admin/properties)", () => {
 
     expect(content).toContain("handleOpenEditModal");
     expect(content).toContain("Edit");
-    expect(content).toContain("handleCopyLink");
-    expect(content).toContain("Copy Link");
+    expect(content).toContain("handleDeleteProperty");
+    expect(content).toContain("Hapus");
   });
 
   it("memiliki komponen Modal Dialog Form dengan field lengkap untuk Tambah dan Edit Properti", () => {
@@ -93,11 +93,11 @@ describe("Manage Properties Page (/admin/properties)", () => {
     expect(content).toContain("Edit Properti Kos");
 
     // Form inputs
-    expect(content).toContain("Nama Kos");
+    expect(content).toContain("Nama Properti Kos");
     expect(content).toContain("Pemilik Kos (Owner)");
-    expect(content).toContain("Harga / Bulan (Rp)");
+    expect(content).toContain("Harga/Bln (Rp)");
     expect(content).toContain("Tipe Kos");
-    expect(content).toContain("Jumlah Kamar Tersedia");
+    expect(content).toContain("Sisa Kamar");
     expect(content).toContain("Fasilitas");
     expect(content).toContain("URL Gambar (Opsional)");
 
@@ -161,20 +161,17 @@ describe("Manage Properties Page (/admin/properties)", () => {
     expect(content).toContain("owners.map");
   });
 
-  it("memiliki fungsi handleCopyLink untuk memanggil API generate Magic Link dan menyalin ke clipboard dengan feedback 'Tersalin!'", () => {
+  it("memiliki fungsi handleDeleteProperty untuk konfirmasi dan menghapus properti", () => {
     const filePath = path.resolve(
       __dirname,
       "../src/app/admin/properties/page.tsx"
     );
     const content = fs.readFileSync(filePath, "utf-8");
 
-    expect(content).toContain("handleCopyLink");
-    expect(content).toContain("/api/magic-link/generate");
-    expect(content).toContain("ownerId");
-    expect(content).toContain("navigator.clipboard.writeText");
-    expect(content).toContain("setCopiedId(propertyId)");
-    expect(content).toContain("setCopiedId(null)");
-    expect(content).toContain("Tersalin!");
+    expect(content).toContain("handleDeleteProperty");
+    expect(content).toContain("confirmDeleteModal");
+    expect(content).toContain("Hapus Properti");
+    expect(content).toContain("confirmDeleteProperty");
   });
 
   it("menampilkan pesan empty state saat tidak ada data kos", () => {

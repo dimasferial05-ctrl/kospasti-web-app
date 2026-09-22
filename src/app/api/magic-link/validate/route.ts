@@ -29,6 +29,14 @@ export async function GET(request: Request) {
                 id: true,
                 name: true,
                 available_rooms: true,
+                room_types: {
+                  select: {
+                    id: true,
+                    name: true,
+                    available_rooms: true,
+                    price_per_month: true,
+                  },
+                },
               },
             },
           },
