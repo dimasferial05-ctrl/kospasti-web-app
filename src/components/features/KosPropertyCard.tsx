@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { Home, User, Clock, ChevronLeft, ChevronRight } from "lucide-react";
+import { WishlistButton } from "@/components/features/WishlistButton";
 
 export interface RoomTypeItem {
   id?: string;
@@ -13,6 +14,7 @@ export interface RoomTypeItem {
 }
 
 export interface KosPropertyCardProps {
+  id?: string;
   name: string;
   price: number;
   availableRooms: number;
@@ -26,9 +28,12 @@ export interface KosPropertyCardProps {
   hasMultipleRoomTypes?: boolean;
   roomTypesCount?: number;
   roomTypes?: RoomTypeItem[];
+  isSaved?: boolean;
+  onWishlistToggle?: (isSaved: boolean) => void;
 }
 
 export function KosPropertyCard({
+  id,
   name,
   price,
   availableRooms,
@@ -42,6 +47,8 @@ export function KosPropertyCard({
   hasMultipleRoomTypes,
   roomTypesCount,
   roomTypes,
+  isSaved = false,
+  onWishlistToggle,
 }: KosPropertyCardProps) {
   const isMultiType =
     hasMultipleRoomTypes ||
@@ -210,6 +217,18 @@ export function KosPropertyCard({
                 ))}
               </div>
             )}
+            {/* Wishlist Button */}
+            {id && (
+              <div className="absolute top-3 right-3 z-20">
+                <WishlistButton
+                  propertyId={id}
+                  initialIsSaved={isSaved}
+                  onToggle={onWishlistToggle}
+                  size="sm"
+                  variant="floating"
+                />
+              </div>
+            )}
           </>
         ) : (
           <div className="flex flex-col items-center justify-center text-slate-400 gap-1.5">
@@ -217,6 +236,17 @@ export function KosPropertyCard({
               <Home className="w-5 h-5 stroke-[1.5]" />
             </div>
             <span className="text-xs font-medium text-slate-500">Foto belum tersedia</span>
+            {id && (
+              <div className="absolute top-3 right-3 z-20">
+                <WishlistButton
+                  propertyId={id}
+                  initialIsSaved={isSaved}
+                  onToggle={onWishlistToggle}
+                  size="sm"
+                  variant="floating"
+                />
+              </div>
+            )}
           </div>
         )}
       </div>

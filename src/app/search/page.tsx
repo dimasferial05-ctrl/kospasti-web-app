@@ -35,6 +35,7 @@ interface PropertyItem {
 export default function SearchPage() {
   const router = useRouter();
   const [properties, setProperties] = useState<PropertyItem[]>([]);
+  const [savedPropertyIds, setSavedPropertyIds] = useState<Set<string>>(new Set());
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -43,14 +44,25 @@ export default function SearchPage() {
 
     async function loadProperties() {
       try {
-        const res = await fetch("/api/properties");
-        const json = await res.json();
+        const [resProperties, resWishlist] = await Promise.all([
+          fetch("/api/properties"),
+          fetch("/api/user/wishlist?idsOnly=true").catch(() => null),
+        ]);
+
+        const json = await resProperties.json();
 
         if (isMounted) {
           if (json.success && Array.isArray(json.data)) {
             setProperties(json.data);
           } else {
             setError(json.error || "Gagal mengambil data properti");
+          }
+
+          if (resWishlist && resWishlist.ok) {
+            const wishlistJson = await resWishlist.json();
+            if (wishlistJson.success && Array.isArray(wishlistJson.savedIds)) {
+              setSavedPropertyIds(new Set(wishlistJson.savedIds));
+            }
           }
         }
       } catch (err) {
@@ -178,6 +190,7 @@ export default function SearchPage() {
                 className="block h-full transition-transform hover:scale-[1.02]"
               >
                 <KosPropertyCard
+                  id={property.id}
                   name={property.name}
                   price={property.price_per_month}
                   availableRooms={property.available_rooms}
@@ -194,6 +207,18 @@ export default function SearchPage() {
                   is24Hours={property.is_24_hours}
                   roomTypes={property.room_types}
                   roomTypesCount={property.room_types?.length}
+                  isSaved={savedPropertyIds.has(property.id)}
+                  onWishlistToggle={(isSaved) => {
+                    setSavedPropertyIds((prev) => {
+                      const next = new Set(prev);
+                      if (isSaved) {
+                        next.add(property.id);
+                      } else {
+                        next.delete(property.id);
+                      }
+                      return next;
+                    });
+                  }}
                 />
               </Link>
             ))}
