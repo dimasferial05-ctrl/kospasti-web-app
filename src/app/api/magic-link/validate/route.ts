@@ -74,6 +74,16 @@ export async function GET(request: Request) {
       );
     }
 
+    if (magicLink.type === "BOOKING_VERIFICATION") {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Tautan ini khusus untuk verifikasi pesanan, bukan pembaruan kamar.",
+        },
+        { status: 400 }
+      );
+    }
+
     return NextResponse.json(
       {
         success: true,

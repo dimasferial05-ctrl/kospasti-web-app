@@ -24,6 +24,7 @@ import {
   ExternalLink,
   Edit3,
   X,
+  Clock,
 } from "lucide-react";
 
 interface UserProfile {
@@ -309,11 +310,19 @@ function ProfileContent() {
 
   const renderStatusBadge = (status: string) => {
     const upper = (status || "").toUpperCase();
-    if (upper === "PAID" || upper === "CONFIRMED" || upper === "APPROVED") {
+    if (upper === "ACCEPTED" || upper === "CONFIRMED" || upper === "APPROVED" || upper === "SUCCESS") {
       return (
         <span className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-semibold rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
           <CheckCircle2 className="w-3.5 h-3.5" />
-          <span>Dikonfirmasi</span>
+          <span>Disetujui</span>
+        </span>
+      );
+    }
+    if (upper === "PAID") {
+      return (
+        <span className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-semibold rounded-full bg-blue-50 text-blue-700 border border-blue-200">
+          <Clock className="w-3.5 h-3.5" />
+          <span>Menunggu Konfirmasi Pemilik</span>
         </span>
       );
     }
@@ -321,7 +330,7 @@ function ProfileContent() {
       return (
         <span className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-semibold rounded-full bg-rose-50 text-rose-700 border border-rose-200">
           <AlertCircle className="w-3.5 h-3.5" />
-          <span>Dibatalkan</span>
+          <span>Ditolak</span>
         </span>
       );
     }

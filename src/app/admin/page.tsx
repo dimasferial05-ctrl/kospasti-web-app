@@ -32,6 +32,7 @@ interface AdminStats {
   }>;
   recent_magic_links: Array<{
     id: string;
+    type?: string;
     is_used: boolean;
     created_at: string;
     expires_at: string;
@@ -304,8 +305,23 @@ export default function AdminDashboardOverview() {
                     const isExpired = new Date() > new Date(ml.expires_at);
                     return (
                       <tr key={ml.id} className="hover:bg-slate-50/70 transition-colors">
-                        <td className="px-4 py-3 font-bold text-slate-800 truncate max-w-[120px]" title={ml.owner.name}>
-                          {ml.owner.name}
+                        <td className="px-4 py-3 font-bold text-slate-800">
+                          <div className="flex flex-col gap-0.5">
+                            <span className="truncate max-w-[130px]" title={ml.owner.name}>
+                              {ml.owner.name}
+                            </span>
+                            <span className="text-[10px] font-medium text-slate-500">
+                              {ml.type === "BOOKING_VERIFICATION" ? (
+                                <span className="text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded font-semibold border border-emerald-200/60">
+                                  Verifikasi Booking
+                                </span>
+                              ) : (
+                                <span className="text-blue-700 bg-blue-50 px-1.5 py-0.5 rounded font-semibold border border-blue-200/60">
+                                  Update Stok
+                                </span>
+                              )}
+                            </span>
+                          </div>
                         </td>
                         <td className="px-4 py-3 text-center text-slate-600 text-xs">
                           {new Date(ml.created_at).toLocaleDateString("id-ID", {

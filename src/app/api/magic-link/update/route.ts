@@ -134,6 +134,16 @@ export async function POST(request: Request) {
       );
     }
 
+    if (magicLink.type === "BOOKING_VERIFICATION") {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Tautan ini khusus untuk verifikasi pesanan, bukan pembaruan kamar.",
+        },
+        { status: 400 }
+      );
+    }
+
     // Pastikan properti milik owner dari token tersebut
     const isPropertyOwned = magicLink.owner.properties.some(
       (property) => property.id === trimmedPropertyId

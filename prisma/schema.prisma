@@ -68,28 +68,32 @@ model PropertyMedia {
 model MagicLink {
   id         String   @id @default(uuid())
   token      String   @unique
+  type       String   @default("ROOM_UPDATE") // "ROOM_UPDATE" | "BOOKING_VERIFICATION"
   expires_at DateTime
   is_used    Boolean  @default(false)
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
   owner_id   String
   owner      Owner    @relation(fields: [owner_id], references: [id], onDelete: Cascade)
+  booking_id String?
+  booking    Booking? @relation(fields: [booking_id], references: [id], onDelete: Cascade)
 }
 
 model Booking {
-  id               String    @id @default(uuid())
+  id               String      @id @default(uuid())
   student_name     String
   student_whatsapp String
   move_in_date     DateTime
-  status           String    @default("PENDING")
-  created_at       DateTime  @default(now())
-  updated_at       DateTime  @updatedAt
+  status           String      @default("PENDING")
+  created_at       DateTime    @default(now())
+  updated_at       DateTime    @updatedAt
   property_id      String
-  property         Property  @relation(fields: [property_id], references: [id], onDelete: Cascade)
+  property         Property    @relation(fields: [property_id], references: [id], onDelete: Cascade)
   room_type_id     String?
-  room_type        RoomType? @relation(fields: [room_type_id], references: [id], onDelete: SetNull)
+  room_type        RoomType?   @relation(fields: [room_type_id], references: [id], onDelete: SetNull)
   user_id          String?
-  user             User?     @relation(fields: [user_id], references: [id], onDelete: SetNull)
+  user             User?       @relation(fields: [user_id], references: [id], onDelete: SetNull)
+  magic_links      MagicLink[]
 }
 
 model User {
