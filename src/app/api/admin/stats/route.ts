@@ -64,6 +64,7 @@ export async function GET(request: NextRequest) {
       orderBy: { created_at: "desc" },
       select: {
         id: true,
+        type: true,
         is_used: true,
         created_at: true,
         expires_at: true,
