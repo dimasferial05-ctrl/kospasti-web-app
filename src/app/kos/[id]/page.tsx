@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import {
   Loader2,
   AlertCircle,
@@ -75,6 +76,7 @@ export default function PropertyDetailPage() {
   const [isCheckingAuth, setIsCheckingAuth] = useState(false);
   const [studentName, setStudentName] = useState("");
   const [waNumber, setWaNumber] = useState("");
+  const [userAvatar, setUserAvatar] = useState<string | null>(null);
   const [moveInDate, setMoveInDate] = useState("");
   const [minDate, setMinDate] = useState("");
 
@@ -97,6 +99,11 @@ export default function PropertyDetailPage() {
       }
       if (data.user?.whatsapp) {
         setWaNumber(data.user.whatsapp);
+      }
+      if (data.user?.avatar) {
+        setUserAvatar(data.user.avatar);
+      } else {
+        setUserAvatar(null);
       }
 
       setIsModalOpen(true);
@@ -809,8 +816,27 @@ export default function PropertyDetailPage() {
                 </span>
               </div>
               <div className="flex items-center gap-3 pt-1">
-                <div className="w-9 h-9 rounded-full bg-emerald-600 text-white flex items-center justify-center font-bold text-xs shrink-0">
-                  <User className="w-4 h-4" />
+                <div className="relative w-10 h-10 rounded-full overflow-hidden bg-gradient-to-tr from-emerald-600 to-teal-500 border border-emerald-500 text-white font-bold text-xs flex items-center justify-center shadow-xs shrink-0">
+                  {userAvatar ? (
+                    <Image
+                      src={userAvatar}
+                      alt={studentName || "Foto Profil"}
+                      fill
+                      className="object-cover rounded-full"
+                      unoptimized={userAvatar.startsWith("blob:") || userAvatar.startsWith("data:")}
+                    />
+                  ) : (
+                    <span>
+                      {studentName
+                        ? studentName
+                            .split(" ")
+                            .filter(Boolean)
+                            .slice(0, 2)
+                            .map((w) => w[0].toUpperCase())
+                            .join("")
+                        : <User className="w-4 h-4" />}
+                    </span>
+                  )}
                 </div>
                 <div className="min-w-0 flex-1">
                   <p className="text-sm font-bold text-slate-900 truncate">
