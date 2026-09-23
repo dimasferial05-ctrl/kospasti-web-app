@@ -80,12 +80,12 @@ export async function GET(request: NextRequest) {
     });
 
     if (user) {
-      // Perbarui google_id dan avatar jika belum ada
+      // Perbarui google_id dan sinkronkan avatar jika ada dari Google
       user = await prisma.user.update({
         where: { id: user.id },
         data: {
           google_id: googleUser.id,
-          avatar: user.avatar || googleUser.picture || null,
+          avatar: googleUser.picture || user.avatar || null,
         },
       });
     } else {
@@ -106,6 +106,8 @@ export async function GET(request: NextRequest) {
       email: user.email,
       name: user.name,
       whatsapp: user.whatsapp,
+      avatar: user.avatar,
+      bio: user.bio,
     });
 
     // 5. Tentukan tujuan redirect

@@ -6,8 +6,12 @@ async function main() {
   console.log("🌱 Starting database seeding...");
 
   // Clean up existing data in reverse order of relationships
+  await prisma.review.deleteMany();
+  await prisma.savedProperty.deleteMany();
   await prisma.booking.deleteMany();
   await prisma.magicLink.deleteMany();
+  await prisma.propertyMedia.deleteMany();
+  await prisma.roomType.deleteMany();
   await prisma.property.deleteMany();
   await prisma.owner.deleteMany();
   await prisma.user.deleteMany();
@@ -327,6 +331,7 @@ async function main() {
       name: "Andi Saputra",
       email: "andi.saputra@kospasti.id",
       whatsapp: "08111222333",
+      avatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=200&q=80",
       bio: "Mahasiswa Teknik Informatika tingkat akhir.",
     },
   });
@@ -336,6 +341,7 @@ async function main() {
       name: "Siti Aminah",
       email: "siti.aminah@kospasti.id",
       whatsapp: "08222333444",
+      avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=200&q=80",
       bio: "Karyawati swasta mencari kos dekat kantor.",
     },
   });
@@ -345,6 +351,7 @@ async function main() {
       name: "Budi Santoso",
       email: "budi.santoso@kospasti.id",
       whatsapp: "08333444555",
+      avatar: "https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?auto=format&fit=crop&w=200&q=80",
       bio: "Mahasiswa baru rantau butuh kos putra yang tenang.",
     },
   });
@@ -354,6 +361,7 @@ async function main() {
       name: "Dewi Lestari",
       email: "dewi.lestari@kospasti.id",
       whatsapp: "08444555666",
+      avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=200&q=80",
       bio: "Pecinta kucing dan lingkungan tenang.",
     },
   });
@@ -363,6 +371,7 @@ async function main() {
       name: "Eko Prasetyo",
       email: "eko.prasetyo@kospasti.id",
       whatsapp: "08555666777",
+      avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=200&q=80",
       bio: "Karyawan PT Taekwang Subang.",
     },
   });
@@ -373,7 +382,7 @@ async function main() {
   const nextMonth = new Date();
   nextMonth.setMonth(nextMonth.getMonth() + 1);
 
-  await prisma.booking.create({
+  const booking1 = await prisma.booking.create({
     data: {
       student_name: user1.name,
       student_whatsapp: user1.whatsapp || "628111222333",
@@ -385,7 +394,7 @@ async function main() {
     },
   });
 
-  await prisma.booking.create({
+  const booking2 = await prisma.booking.create({
     data: {
       student_name: user2.name,
       student_whatsapp: user2.whatsapp || "628222333444",
@@ -421,7 +430,7 @@ async function main() {
     },
   });
 
-  await prisma.booking.create({
+  const booking5 = await prisma.booking.create({
     data: {
       student_name: user5.name,
       student_whatsapp: user5.whatsapp || "628555666777",
@@ -430,6 +439,29 @@ async function main() {
       property_id: owner3.properties[1].id,
       room_type_id: owner3.properties[1].room_types[1].id,
       user_id: user5.id,
+    },
+  });
+
+  // 6. Create dummy reviews
+  await prisma.review.create({
+    data: {
+      rating: 5,
+      comment: "Lingkungan sangat nyaman, WiFi cepat untuk kuliah online, dan bapak kos ramah.",
+      property_id: owner1.properties[0].id,
+      user_id: user1.id,
+      booking_id: booking1.id,
+      is_hidden: false,
+    },
+  });
+
+  await prisma.review.create({
+    data: {
+      rating: 5,
+      comment: "Lokasi strategis dekat pabrik Taekwang, fasilitas bersih dan parkiran luas.",
+      property_id: owner3.properties[1].id,
+      user_id: user5.id,
+      booking_id: booking5.id,
+      is_hidden: false,
     },
   });
 

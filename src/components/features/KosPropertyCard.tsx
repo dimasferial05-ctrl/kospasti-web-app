@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Home, User, Clock, ChevronLeft, ChevronRight } from "lucide-react";
+import { Home, User, Clock, ChevronLeft, ChevronRight, Star } from "lucide-react";
 import { WishlistButton } from "@/components/features/WishlistButton";
 
 export interface RoomTypeItem {
@@ -28,6 +28,8 @@ export interface KosPropertyCardProps {
   hasMultipleRoomTypes?: boolean;
   roomTypesCount?: number;
   roomTypes?: RoomTypeItem[];
+  averageRating?: number;
+  totalReviews?: number;
   isSaved?: boolean;
   onWishlistToggle?: (isSaved: boolean) => void;
 }
@@ -47,6 +49,8 @@ export function KosPropertyCard({
   hasMultipleRoomTypes,
   roomTypesCount,
   roomTypes,
+  averageRating,
+  totalReviews,
   isSaved = false,
   onWishlistToggle,
 }: KosPropertyCardProps) {
@@ -253,16 +257,24 @@ export function KosPropertyCard({
 
       {/* Content Section */}
       <div className="p-4 sm:p-5 flex flex-col flex-1 gap-2.5">
-        {/* Header: Name & Gender Badge */}
+        {/* Header: Name, Rating & Gender Badge */}
         <div className="flex items-start justify-between gap-2">
           <h3 className="text-base font-bold text-slate-900 line-clamp-1 group-hover:text-emerald-700 transition-colors tracking-tight">
             {name}
           </h3>
-          <span
-            className={`text-[11px] px-2.5 py-0.5 rounded-md font-semibold border shrink-0 ${genderBadgeStyle}`}
-          >
-            {genderType}
-          </span>
+          <div className="flex items-center gap-1.5 shrink-0">
+            {averageRating !== undefined && averageRating > 0 && (
+              <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-slate-800 bg-slate-50 border border-slate-200/80 px-1.5 py-0.5 rounded-md">
+                <Star className="w-3 h-3 text-amber-400 fill-amber-400" />
+                {averageRating.toFixed(1)}
+              </span>
+            )}
+            <span
+              className={`text-[11px] px-2.5 py-0.5 rounded-md font-semibold border ${genderBadgeStyle}`}
+            >
+              {genderType}
+            </span>
+          </div>
         </div>
 
         {/* Price & Lifestyle Badges */}

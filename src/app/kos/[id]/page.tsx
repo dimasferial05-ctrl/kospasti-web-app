@@ -17,9 +17,11 @@ import {
   Camera,
   Clock,
   Sparkles,
+  Star,
 } from "lucide-react";
 import PropertyLocationMap from "@/components/map/PropertyLocationMap";
 import { WishlistButton } from "@/components/features/WishlistButton";
+import { ReviewSection } from "@/components/features/ReviewSection";
 
 interface PropertyMediaItem {
   id?: string;
@@ -52,6 +54,8 @@ interface PropertyDetail {
   longitude?: number | null;
   is_pet_friendly?: boolean;
   is_24_hours?: boolean;
+  average_rating?: number;
+  total_reviews?: number;
   updated_at?: string;
   owner?: {
     name: string;
@@ -486,9 +490,30 @@ export default function PropertyDetailPage() {
               </div>
 
               <div>
-                <h2 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight leading-tight">
-                  {property.name}
-                </h2>
+                <div className="flex items-center justify-between gap-2 flex-wrap">
+                  <h2 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight leading-tight">
+                    {property.name}
+                  </h2>
+                  {property.average_rating !== undefined && property.average_rating > 0 ? (
+                    <a
+                      href="#reviews-section"
+                      className="inline-flex items-center gap-1.5 text-xs text-slate-700 hover:text-slate-900 font-semibold transition-colors cursor-pointer"
+                    >
+                      <Star className="w-3.5 h-3.5 text-amber-500 fill-amber-500" />
+                      <span>{property.average_rating.toFixed(1)}</span>
+                      <span className="text-slate-400 font-normal underline decoration-slate-300 underline-offset-2">
+                        ({property.total_reviews} ulasan)
+                      </span>
+                    </a>
+                  ) : (
+                    <a
+                      href="#reviews-section"
+                      className="text-xs text-slate-400 hover:text-slate-600 transition-colors"
+                    >
+                      Belum ada ulasan
+                    </a>
+                  )}
+                </div>
                 <div className="flex items-baseline gap-1.5 mt-2">
                   <p className="text-xl sm:text-2xl font-black text-emerald-600 tracking-tight">
                     {formattedPrice}
@@ -750,6 +775,9 @@ export default function PropertyDetailPage() {
                 </div>
               </div>
             </div>
+
+            {/* Ulasan & Rating Penyewa */}
+            <ReviewSection propertyId={property.id} propertyName={property.name} />
           </div>
         </div>
 

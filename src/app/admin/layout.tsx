@@ -12,6 +12,7 @@ import {
   Loader2,
   Menu,
   X,
+  Star,
 } from "lucide-react";
 import Link from "next/link";
 
@@ -149,6 +150,17 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             href="/admin/bookings"
           >
             <FileText size={18} className={pathname?.startsWith("/admin/bookings") ? "text-emerald-400" : ""} /> Data Transaksi
+          </Link>
+          <Link
+            onClick={closeMobileMenu}
+            className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition-all duration-200 text-sm ${
+              pathname?.startsWith("/admin/reviews")
+                ? "bg-slate-800/90 text-white font-bold shadow-xs border border-slate-700/50"
+                : "text-slate-400 hover:bg-slate-900 hover:text-slate-200 font-medium"
+            }`}
+            href="/admin/reviews"
+          >
+            <Star size={18} className={pathname?.startsWith("/admin/reviews") ? "text-emerald-400" : ""} /> Kelola Ulasan
           </Link>
         </nav>
         <div className="p-4 border-t border-slate-800/80">

@@ -34,6 +34,23 @@ export async function GET(
             price_per_month: "asc",
           },
         },
+        reviews: {
+          where: {
+            is_hidden: false,
+          },
+          include: {
+            user: {
+              select: {
+                id: true,
+                name: true,
+                avatar: true,
+              },
+            },
+          },
+          orderBy: {
+            created_at: "desc",
+          },
+        },
       },
     });
 
@@ -47,10 +64,26 @@ export async function GET(
       );
     }
 
+    const activeReviews = property.reviews || [];
+    const totalReviews = activeReviews.length;
+    const avgRating =
+      totalReviews > 0
+        ? Number(
+            (
+              activeReviews.reduce((sum, r) => sum + r.rating, 0) /
+              totalReviews
+            ).toFixed(1)
+          )
+        : 0;
+
     return NextResponse.json(
       {
         success: true,
-        data: property,
+        data: {
+          ...property,
+          average_rating: avgRating,
+          total_reviews: totalReviews,
+        },
       },
       { status: 200 }
     );

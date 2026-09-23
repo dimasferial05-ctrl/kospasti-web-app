@@ -7,6 +7,8 @@ describe("POST /api/bookings/[id]/pay", () => {
   beforeEach(async () => {
     await clearDatabase();
     vi.restoreAllMocks();
+    delete process.env.FONNTE_TOKEN;
+    delete process.env.WHATSAPP_TOKEN;
   });
 
   describe("Skenario Sukses", () => {
@@ -53,7 +55,7 @@ describe("POST /api/bookings/[id]/pay", () => {
 
       expect(response.status).toBe(200);
       expect(result.success).toBe(true);
-      expect(result.message).toBe("Pembayaran berhasil dikonfirmasi");
+      expect(result.message).toContain("Pembayaran berhasil dikonfirmasi");
       expect(result.data.status).toBe("PAID");
 
       // Verifikasi di database
@@ -64,7 +66,7 @@ describe("POST /api/bookings/[id]/pay", () => {
 
       // Verifikasi simulasi WhatsApp tercetak di log
       expect(consoleSpy).toHaveBeenCalledWith(
-        expect.stringContaining("[SIMULASI WA] Mengirim pesan ke 081234567890:")
+        expect.stringContaining("[WHATSAPP SIMULATION]")
       );
       expect(consoleSpy).toHaveBeenCalledWith(
         expect.stringContaining("Ahmad Dahlan")

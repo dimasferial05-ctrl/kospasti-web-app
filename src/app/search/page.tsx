@@ -17,6 +17,8 @@ interface PropertyItem {
   image_url?: string | null;
   is_pet_friendly?: boolean;
   is_24_hours?: boolean;
+  average_rating?: number;
+  total_reviews?: number;
   last_updated: string;
   updated_at?: string;
   owner?: {
@@ -205,6 +207,8 @@ export default function SearchPage() {
                   }
                   isPetFriendly={property.is_pet_friendly}
                   is24Hours={property.is_24_hours}
+                  averageRating={property.average_rating}
+                  totalReviews={property.total_reviews}
                   roomTypes={property.room_types}
                   roomTypesCount={property.room_types?.length}
                   isSaved={savedPropertyIds.has(property.id)}
