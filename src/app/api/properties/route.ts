@@ -63,6 +63,14 @@ export async function GET(request?: Request) {
             price_per_month: "asc",
           },
         },
+        reviews: {
+          where: {
+            is_hidden: false,
+          },
+          select: {
+            rating: true,
+          },
+        },
       },
     });
 
@@ -77,10 +85,24 @@ export async function GET(request?: Request) {
           ? roomTypes.reduce((sum, rt) => sum + rt.available_rooms, 0)
           : property.available_rooms;
 
+      const activeReviews = property.reviews || [];
+      const totalReviews = activeReviews.length;
+      const avgRating =
+        totalReviews > 0
+          ? Number(
+              (
+                activeReviews.reduce((sum, r) => sum + r.rating, 0) /
+                totalReviews
+              ).toFixed(1)
+            )
+          : 0;
+
       return {
         ...property,
         price_per_month: lowestPrice,
         available_rooms: totalRooms,
+        average_rating: avgRating,
+        total_reviews: totalReviews,
         image_url:
           property.image_url ||
           property.media?.find((m) => m.type === "IMAGE")?.url ||

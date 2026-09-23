@@ -31,6 +31,8 @@ interface SavedPropertyItem {
     is_pet_friendly?: boolean;
     is_24_hours?: boolean;
     address?: string | null;
+    average_rating?: number;
+    total_reviews?: number;
     updated_at: string;
     owner?: {
       id: string;
@@ -389,6 +391,8 @@ export default function FavoritPage() {
                   lastUpdated={property.updated_at || new Date().toISOString()}
                   isPetFriendly={property.is_pet_friendly}
                   is24Hours={property.is_24_hours}
+                  averageRating={property.average_rating}
+                  totalReviews={property.total_reviews}
                   roomTypes={property.room_types}
                   roomTypesCount={property.room_types?.length}
                   isSaved={true}
