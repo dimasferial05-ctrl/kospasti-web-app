@@ -31,6 +31,25 @@ export interface SendWhatsAppResult {
   error?: string;
 }
 
+export async function checkFonnteDeviceStatus(token: string): Promise<boolean> {
+  try {
+    const response = await fetch("https://api.fonnte.com/device", {
+      method: "POST",
+      headers: {
+        Authorization: token.trim(),
+      },
+    });
+
+    const result = await response.json().catch(() => null);
+
+    // Status perangkat bisa berupa "connect" atau "disconnect"
+    return result?.device_status === "connect";
+  } catch (error) {
+    console.error("[WHATSAPP DEVICE ERROR] Gagal mengecek status device:", error);
+    return false; // Asumsikan disconnected demi keamanan jika terjadi error
+  }
+}
+
 export async function sendWhatsAppMessage({
   to,
   message,
@@ -56,6 +75,17 @@ export async function sendWhatsAppMessage({
       success: true,
       simulated: true,
       data: { message: "Simulasi pengiriman WhatsApp berhasil dicatat di server log." },
+    };
+  }
+
+  // Validasi status device Fonnte sebelum mengirim pesan
+  const isDeviceConnected = await checkFonnteDeviceStatus(token);
+
+  if (!isDeviceConnected) {
+    console.warn("[WHATSAPP ABORTED] Device Fonnte sedang terputus (disconnected). Pesan dibatalkan untuk menghemat kuota.");
+    return {
+      success: false,
+      error: "Sistem pengiriman pesan sedang offline. Device WhatsApp tidak terhubung.",
     };
   }
 
