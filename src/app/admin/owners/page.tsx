@@ -358,7 +358,6 @@ export default function AdminOwnersPage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
-            <Users className="w-7 h-7 text-slate-800" />
             <span>Manajemen Pemilik Kos</span>
           </h1>
           <p className="text-sm text-slate-500 mt-1">
@@ -944,11 +943,10 @@ export default function AdminOwnersPage() {
                 <button
                   type="button"
                   onClick={handleCopyLink}
-                  className={`inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-lg text-xs font-semibold transition-all shrink-0 cursor-pointer ${
-                    copied
+                  className={`inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-lg text-xs font-semibold transition-all shrink-0 cursor-pointer ${copied
                       ? "bg-emerald-600 text-white shadow-sm"
                       : "bg-slate-900 text-white hover:bg-slate-800"
-                  }`}
+                    }`}
                   title="Salin ke Clipboard"
                 >
                   {copied ? (
