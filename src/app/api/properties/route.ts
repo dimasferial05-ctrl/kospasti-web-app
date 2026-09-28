@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { Prisma } from "@prisma/client";
+import { findPropertiesWithinRadius } from "@/lib/propertyGeospatial";
 
 export async function GET(request?: Request) {
   try {
@@ -11,8 +12,29 @@ export async function GET(request?: Request) {
     const genderType = searchParams.get("genderType");
     const isPetFriendly = searchParams.get("isPetFriendly");
     const is24Hours = searchParams.get("is24Hours");
+    const lat = searchParams.get("lat");
+    const lng = searchParams.get("lng");
+    const radius = searchParams.get("radius");
 
     const whereClause: Prisma.PropertyWhereInput = {};
+
+    let distanceMap: Map<string, number> | null = null;
+    if (lat && lng && !isNaN(parseFloat(lat)) && !isNaN(parseFloat(lng))) {
+      const radiusKm = radius && !isNaN(parseFloat(radius)) ? parseFloat(radius) : 10;
+      const nearbyList = await findPropertiesWithinRadius(
+        parseFloat(lat),
+        parseFloat(lng),
+        radiusKm,
+        50
+      );
+      distanceMap = new Map();
+      const nearbyIds: string[] = [];
+      for (const item of nearbyList) {
+        nearbyIds.push(item.id);
+        distanceMap.set(item.id, item.distance);
+      }
+      whereClause.id = { in: nearbyIds };
+    }
 
     if (name && name.trim()) {
       whereClause.name = {
@@ -110,8 +132,17 @@ export async function GET(request?: Request) {
           null,
         last_updated: property.updated_at,
         room_types: roomTypes,
+        distance_km: distanceMap ? (distanceMap.get(property.id) ?? null) : null,
       };
     });
+
+    if (distanceMap) {
+      properties.sort((a, b) => {
+        const distA = a.distance_km ?? 9999;
+        const distB = b.distance_km ?? 9999;
+        return distA - distB;
+      });
+    }
 
     return NextResponse.json(
       {

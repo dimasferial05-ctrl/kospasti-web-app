@@ -22,6 +22,8 @@ interface PropertyItem {
   total_reviews?: number;
   last_updated: string;
   updated_at?: string;
+  distance?: number | null;
+  distance_km?: number | null;
   owner?: {
     name: string;
   };
@@ -226,6 +228,7 @@ export default function SearchPage() {
                   roomTypes={property.room_types}
                   roomTypesCount={property.room_types?.length}
                   isSaved={savedPropertyIds.has(property.id)}
+                  distance={property.distance_km ?? property.distance}
                   onWishlistToggle={(isSaved) => {
                     setSavedPropertyIds((prev) => {
                       const next = new Set(prev);

@@ -32,106 +32,7 @@ interface AISearchCriteria {
   is_24_hours?: boolean | null;
 }
 
-function calculateDistanceKm(
-  lat1: number,
-  lon1: number,
-  lat2: number,
-  lon2: number
-): number {
-  const R = 6371;
-  const dLat = ((lat2 - lat1) * Math.PI) / 180;
-  const dLon = ((lon2 - lon1) * Math.PI) / 180;
-  const a =
-    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-    Math.cos((lat1 * Math.PI) / 180) *
-    Math.cos((lat2 * Math.PI) / 180) *
-    Math.sin(dLon / 2) *
-    Math.sin(dLon / 2);
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-  return Math.round(R * c * 10) / 10;
-}
-
-interface GoogleGeocodeResult {
-  geometry: {
-    location: {
-      lat: () => number;
-      lng: () => number;
-    };
-  };
-}
-
-async function geocodeLocation(
-  query: string,
-  apiKey?: string
-): Promise<{ lat: number; lng: number; name: string } | null> {
-  if (typeof window !== "undefined") {
-    const googleObj = (
-      window as unknown as {
-        google?: {
-          maps?: {
-            Geocoder: new () => {
-              geocode: (
-                req: unknown,
-                cb: (results: GoogleGeocodeResult[] | null, status: string) => void
-              ) => void;
-            };
-          };
-        };
-      }
-    ).google;
-    if (googleObj?.maps?.Geocoder) {
-      try {
-        const geocoder = new googleObj.maps.Geocoder();
-        const res = await new Promise<GoogleGeocodeResult | null>((resolve) => {
-          geocoder.geocode(
-            { address: query, componentRestrictions: { country: "ID" } },
-            (results, status) => {
-              if (status === "OK" && results && results[0]) {
-                resolve(results[0]);
-              } else {
-                geocoder.geocode({ address: query }, (r2, s2) => {
-                  if (s2 === "OK" && r2 && r2[0]) resolve(r2[0]);
-                  else resolve(null);
-                });
-              }
-            }
-          );
-        });
-        if (res) {
-          return {
-            lat: res.geometry.location.lat(),
-            lng: res.geometry.location.lng(),
-            name: query,
-          };
-        }
-      } catch (e) {
-        console.warn("Client JS Geocoder failed:", e);
-      }
-    }
-  }
-
-  if (apiKey) {
-    try {
-      const res = await fetch(
-        `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(
-          query
-        )}&region=id&key=${apiKey}`
-      );
-      const data = await res.json();
-      if (data.status === "OK" && data.results && data.results[0]) {
-        return {
-          lat: data.results[0].geometry.location.lat,
-          lng: data.results[0].geometry.location.lng,
-          name: query,
-        };
-      }
-    } catch (e) {
-      console.warn("Fetch geocoding failed:", e);
-    }
-  }
-
-  return null;
-}
+import { calculateHaversineDistanceKm, geocodeLocation } from "@/lib/geocoding";
 
 function MapSearchContent() {
   const searchParams = useSearchParams();
@@ -218,6 +119,11 @@ function MapSearchContent() {
           setFacilitiesFilter(criteria.facilities_keywords);
         }
 
+        // Perbarui list properti dari hasil backend (subset yang telah difilter jarak radius <= 10km oleh database)
+        if (Array.isArray(result.properties)) {
+          setProperties(result.properties);
+        }
+
         // Tentukan koordinat target pencarian
         if (
           criteria.location_intent &&
@@ -231,9 +137,13 @@ function MapSearchContent() {
           });
         } else if (criteria.location_intent) {
           // Fallback geocode jika backend tidak memberikan koordinat
-          const geoResult = await geocodeLocation(criteria.location_intent, mapsApiKey);
+          const geoResult = await geocodeLocation(criteria.location_intent, { apiKey: mapsApiKey });
           if (geoResult) {
-            setSearchTarget(geoResult);
+            setSearchTarget({
+              lat: geoResult.lat,
+              lng: geoResult.lng,
+              name: geoResult.name || criteria.location_intent,
+            });
           } else {
             setSearchTarget(null);
           }
@@ -261,7 +171,7 @@ function MapSearchContent() {
     }
   }, [urlQuery, handleAISearch]);
 
-  const handleResetFilters = () => {
+  const handleResetFilters = async () => {
     setAiPrompt("");
     setActiveCriteria(null);
     setSelectedGender("ALL");
@@ -271,19 +181,32 @@ function MapSearchContent() {
     setAiError(null);
     setSelectedPropertyId(null);
     processedQueryRef.current = null;
+
+    try {
+      setIsLoading(true);
+      const res = await fetch("/api/properties");
+      const json = await res.json();
+      if (json.success && Array.isArray(json.data)) {
+        setProperties(json.data);
+      }
+    } catch (err) {
+      console.error("Gagal memuat ulang seluruh properti:", err);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   // Filter & Sort properties based on criteria & search target distance
   const filteredProperties = useMemo(() => {
     const list = properties
       .map((p) => {
-        let distance: number | null = null;
+        let distance: number | null = typeof p.distance_km === "number" ? p.distance_km : null;
         if (
           searchTarget &&
           typeof p.latitude === "number" &&
           typeof p.longitude === "number"
         ) {
-          distance = calculateDistanceKm(
+          distance = calculateHaversineDistanceKm(
             searchTarget.lat,
             searchTarget.lng,
             p.latitude,
@@ -296,6 +219,15 @@ function MapSearchContent() {
         };
       })
       .filter((p) => {
+        // Filter radius maksimal 10km jika ada titik target pencarian
+        if (
+          searchTarget &&
+          typeof p.distance_km === "number" &&
+          p.distance_km > 10
+        ) {
+          return false;
+        }
+
         // Gender filter
         if (
           selectedGender !== "ALL" &&
@@ -379,6 +311,10 @@ function MapSearchContent() {
 
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
             <div>
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200/80 text-emerald-800 text-xs font-semibold mb-2">
+                <Sparkles className="w-3.5 h-3.5 text-emerald-600" />
+                <span>Pencarian Cerdas AI + Google Maps</span>
+              </div>
               <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
                 Eksplorasi Kos Berdasarkan Lokasi
               </h1>

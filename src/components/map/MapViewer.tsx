@@ -182,7 +182,7 @@ function MapViewerInner({
   const [locationError, setLocationError] = useState<string | null>(null);
 
   const effectiveApiKey =
-    apiKey || process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "";
+    apiKey !== undefined ? apiKey : (process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "");
 
   // Sinkronisasi activeProperty saat selectedPropertyId berubah dari luar (misal klik card)
   useEffect(() => {
