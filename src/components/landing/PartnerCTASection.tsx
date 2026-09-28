@@ -49,9 +49,6 @@ export function PartnerCTASection() {
             className="flex flex-col lg:flex-row lg:items-end justify-between gap-8 pb-12 border-b border-white/[0.08]"
           >
             <div className="max-w-2xl">
-              <span className="text-xs font-bold text-emerald-400 tracking-wider uppercase bg-emerald-500/10 border border-emerald-500/20 px-3.5 py-1.5 rounded-full inline-block mb-3 backdrop-blur-md">
-                Portal Pemilik &amp; Pengelola Properti
-              </span>
               <h2 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight mt-1 leading-tight">
                 Punya Properti Kos? Kelola Cerdas &amp; Maksimalkan Okupansi
               </h2>
