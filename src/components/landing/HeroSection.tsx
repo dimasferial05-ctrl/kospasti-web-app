@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Search, ArrowRight, MapPin } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
+import { TypeAnimation } from "react-type-animation";
 
 export function HeroSection() {
   const router = useRouter();
@@ -29,7 +30,20 @@ export function HeroSection() {
         {/* Big centered question headline */}
         <h1 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold text-slate-900 tracking-tight leading-[1.18] max-w-3xl">
           Temukan Kos Impian atau{" "}
-          <span className="text-emerald-600">Kelola Propertimu?</span>
+          <TypeAnimation
+            sequence={[
+              "Kelola Propertimu?",
+              2500,
+              "Cari Tempat Nyaman?",
+              2500,
+              "Mulai Bisnis Kos?",
+              2500,
+            ]}
+            wrapper="span"
+            speed={50}
+            className="text-emerald-600 inline-block"
+            repeat={Infinity}
+          />
         </h1>
 
         {/* Subtitle */}

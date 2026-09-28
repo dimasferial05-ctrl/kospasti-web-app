@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { KosPropertyCard } from "@/components/features/KosPropertyCard";
 import { SmartSearchBar } from "@/components/features/SmartSearchBar";
 import { Loader2, AlertCircle, SearchX, MapPin } from "lucide-react";
+import { TypeAnimation } from "react-type-animation";
 
 interface PropertyItem {
   id: string;
@@ -100,9 +101,22 @@ export default function SearchPage() {
         {/* Main Headline */}
         <h1 className="text-3xl sm:text-5xl font-extrabold text-slate-900 tracking-tight max-w-3xl leading-[1.15]">
           Cari Kos Sesuai{" "}
-          <span className="text-emerald-600">
-            Kebutuhanmu
-          </span>
+          <TypeAnimation
+            sequence={[
+              "Kebutuhanmu",
+              2000,
+              "Impianmu",
+              2000,
+              "Budgetmu",
+              2000,
+              "Kriteriamu",
+              2000,
+            ]}
+            wrapper="span"
+            speed={50}
+            className="text-emerald-600 inline-block"
+            repeat={Infinity}
+          />
         </h1>
 
         {/* Subtitle */}
