@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
+import Image from "next/image";
 import {
   LayoutDashboard,
   Building,
@@ -11,7 +12,6 @@ import {
   LogOut,
   Loader2,
   Star,
-  Building2,
 } from "lucide-react";
 import { Sidebar, SidebarBody, SidebarLink, type Links } from "@/components/ui/sidebar";
 import { motion } from "motion/react";
@@ -181,9 +181,13 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 function Logo() {
   return (
     <div className="flex items-center gap-2 px-1">
-      <div className="size-8 rounded-lg bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center shrink-0">
-        <Building2 size={18} className="text-emerald-400" />
-      </div>
+      <Image
+        src="/logo.jpg"
+        alt="KosPasti Admin Logo"
+        width={32}
+        height={32}
+        className="size-8 rounded-lg object-cover shrink-0"
+      />
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
@@ -202,9 +206,13 @@ function Logo() {
 function LogoIcon() {
   return (
     <div className="flex items-center justify-center py-0.5">
-      <div className="size-8 rounded-lg bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center shrink-0">
-        <Building2 size={18} className="text-emerald-400" />
-      </div>
+      <Image
+        src="/logo.jpg"
+        alt="KosPasti Admin Logo"
+        width={32}
+        height={32}
+        className="size-8 rounded-lg object-cover shrink-0"
+      />
     </div>
   );
 }
