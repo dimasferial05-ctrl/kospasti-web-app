@@ -10,24 +10,25 @@ import {
   User,
   LogOut,
   Loader2,
-  Menu,
-  X,
   Star,
+  Building2,
 } from "lucide-react";
-import Link from "next/link";
+import { Sidebar, SidebarBody, SidebarLink, type Links } from "@/components/ui/sidebar";
+import { motion } from "motion/react";
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [open, setOpen] = useState(false);
 
   // Jika halaman saat ini adalah login, langsung render children (halaman login tanpa sidebar)
   if (pathname === "/admin/login") {
     return <>{children}</>;
   }
 
-  const handleLogout = async () => {
+  const handleLogout = async (e?: React.MouseEvent) => {
+    e?.preventDefault();
     try {
       setIsLoggingOut(true);
       await fetch("/api/admin/logout", {
@@ -43,148 +44,168 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     }
   };
 
-  const closeMobileMenu = () => {
-    setIsMobileMenuOpen(false);
-  };
+  const navLinks: (Links & { active: boolean })[] = [
+    {
+      label: "Dashboard",
+      href: "/admin",
+      icon: (
+        <LayoutDashboard
+          size={20}
+          className={`shrink-0 transition-colors ${
+            pathname === "/admin" ? "text-emerald-400" : "text-slate-400"
+          }`}
+        />
+      ),
+      active: pathname === "/admin",
+    },
+    {
+      label: "Kelola Properti",
+      href: "/admin/properties",
+      icon: (
+        <Building
+          size={20}
+          className={`shrink-0 transition-colors ${
+            pathname?.startsWith("/admin/properties") ? "text-emerald-400" : "text-slate-400"
+          }`}
+        />
+      ),
+      active: Boolean(pathname?.startsWith("/admin/properties")),
+    },
+    {
+      label: "Pemilik Kos",
+      href: "/admin/owners",
+      icon: (
+        <Users
+          size={20}
+          className={`shrink-0 transition-colors ${
+            pathname?.startsWith("/admin/owners") ? "text-emerald-400" : "text-slate-400"
+          }`}
+        />
+      ),
+      active: Boolean(pathname?.startsWith("/admin/owners")),
+    },
+    {
+      label: "Data Pengguna",
+      href: "/admin/users",
+      icon: (
+        <User
+          size={20}
+          className={`shrink-0 transition-colors ${
+            pathname?.startsWith("/admin/users") ? "text-emerald-400" : "text-slate-400"
+          }`}
+        />
+      ),
+      active: Boolean(pathname?.startsWith("/admin/users")),
+    },
+    {
+      label: "Data Transaksi",
+      href: "/admin/bookings",
+      icon: (
+        <FileText
+          size={20}
+          className={`shrink-0 transition-colors ${
+            pathname?.startsWith("/admin/bookings") ? "text-emerald-400" : "text-slate-400"
+          }`}
+        />
+      ),
+      active: Boolean(pathname?.startsWith("/admin/bookings")),
+    },
+    {
+      label: "Kelola Ulasan",
+      href: "/admin/reviews",
+      icon: (
+        <Star
+          size={20}
+          className={`shrink-0 transition-colors ${
+            pathname?.startsWith("/admin/reviews") ? "text-emerald-400" : "text-slate-400"
+          }`}
+        />
+      ),
+      active: Boolean(pathname?.startsWith("/admin/reviews")),
+    },
+  ];
 
   return (
-    <div className="min-h-screen flex flex-col md:flex-row bg-slate-100">
-      {/* Mobile Header (Hanya muncul di HP/layar kecil) */}
-      <div className="md:hidden flex items-center justify-between bg-slate-950 text-white p-4 fixed w-full top-0 z-40">
-        <h1 className="text-lg font-bold flex items-center gap-2">
-          KosPasti <span className="text-xs bg-slate-800 px-2 py-0.5 rounded text-slate-300">ADMIN</span>
-        </h1>
-        <button
-          type="button"
-          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-          className="p-1 rounded text-slate-300 hover:text-white hover:bg-slate-800 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
-          aria-label={isMobileMenuOpen ? "Tutup menu navigasi" : "Buka menu navigasi"}
-        >
-          {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
-        </button>
-      </div>
+    <div className="h-screen w-full flex flex-col md:flex-row overflow-hidden bg-slate-100">
+      <Sidebar open={open} setOpen={setOpen}>
+        <SidebarBody className="justify-between gap-6 bg-slate-950 text-slate-300 border-r border-slate-800">
+          <div className="flex flex-1 flex-col overflow-x-hidden overflow-y-auto">
+            {/* Logo Admin */}
+            <div className="py-2 mb-4 border-b border-slate-800/80">
+              {open ? <Logo /> : <LogoIcon />}
+            </div>
 
-      {/* Mobile Backdrop Overlay */}
-      {isMobileMenuOpen && (
-        <div
-          className="fixed inset-0 bg-slate-950/60 backdrop-blur-xs z-40 md:hidden animate-fadeIn"
-          onClick={closeMobileMenu}
-          aria-hidden="true"
-        />
-      )}
-
-      {/* SIDEBAR (Kiri - Gelap) */}
-      <aside
-        className={`w-64 bg-slate-950 text-slate-300 flex flex-col fixed h-full z-50 transition-transform duration-300 ease-in-out ${
-          isMobileMenuOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
-        }`}
-      >
-        <div className="p-6 border-b border-slate-800 flex items-center justify-between">
-          <h1 className="text-xl font-extrabold text-white">
-            KosPasti <span className="text-xs bg-slate-800 px-2 py-1 rounded ml-2">ADMIN</span>
-          </h1>
-          <button
-            type="button"
-            onClick={closeMobileMenu}
-            className="md:hidden p-1 rounded text-slate-400 hover:text-white hover:bg-slate-800 transition-colors cursor-pointer"
-            aria-label="Tutup navigasi sidebar"
-          >
-            <X size={20} />
-          </button>
-        </div>
-        <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
-          <div className="text-[10px] font-bold text-slate-500 mb-3 tracking-widest uppercase px-3">
-            MAIN NAVIGATION
+            {/* Navigation links */}
+            <div className="flex flex-col gap-1.5">
+              {navLinks.map((link, idx) => (
+                <SidebarLink
+                  key={idx}
+                  link={link}
+                  active={link.active}
+                  className={`px-3 py-2.5 rounded-xl transition-all duration-200 text-sm ${
+                    link.active
+                      ? "bg-slate-800/90 text-white font-bold shadow-xs border border-slate-700/50"
+                      : "text-slate-400 hover:bg-slate-900 hover:text-slate-200 font-medium"
+                  }`}
+                />
+              ))}
+            </div>
           </div>
-          <Link
-            onClick={closeMobileMenu}
-            className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition-all duration-200 text-sm ${
-              pathname === "/admin"
-                ? "bg-slate-800/90 text-white font-bold shadow-xs border border-slate-700/50"
-                : "text-slate-400 hover:bg-slate-900 hover:text-slate-200 font-medium"
-            }`}
-            href="/admin"
-          >
-            <LayoutDashboard size={18} className={pathname === "/admin" ? "text-emerald-400" : ""} /> Dashboard
-          </Link>
-          <Link
-            onClick={closeMobileMenu}
-            className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition-all duration-200 text-sm ${
-              pathname?.startsWith("/admin/properties")
-                ? "bg-slate-800/90 text-white font-bold shadow-xs border border-slate-700/50"
-                : "text-slate-400 hover:bg-slate-900 hover:text-slate-200 font-medium"
-            }`}
-            href="/admin/properties"
-          >
-            <Building size={18} className={pathname?.startsWith("/admin/properties") ? "text-emerald-400" : ""} /> Kelola Properti
-          </Link>
-          <Link
-            onClick={closeMobileMenu}
-            className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition-all duration-200 text-sm ${
-              pathname?.startsWith("/admin/owners")
-                ? "bg-slate-800/90 text-white font-bold shadow-xs border border-slate-700/50"
-                : "text-slate-400 hover:bg-slate-900 hover:text-slate-200 font-medium"
-            }`}
-            href="/admin/owners"
-          >
-            <Users size={18} className={pathname?.startsWith("/admin/owners") ? "text-emerald-400" : ""} /> Pemilik Kos
-          </Link>
-          <Link
-            onClick={closeMobileMenu}
-            className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition-all duration-200 text-sm ${
-              pathname?.startsWith("/admin/users")
-                ? "bg-slate-800/90 text-white font-bold shadow-xs border border-slate-700/50"
-                : "text-slate-400 hover:bg-slate-900 hover:text-slate-200 font-medium"
-            }`}
-            href="/admin/users"
-          >
-            <User size={18} className={pathname?.startsWith("/admin/users") ? "text-emerald-400" : ""} /> Data Pengguna
-          </Link>
-          <Link
-            onClick={closeMobileMenu}
-            className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition-all duration-200 text-sm ${
-              pathname?.startsWith("/admin/bookings")
-                ? "bg-slate-800/90 text-white font-bold shadow-xs border border-slate-700/50"
-                : "text-slate-400 hover:bg-slate-900 hover:text-slate-200 font-medium"
-            }`}
-            href="/admin/bookings"
-          >
-            <FileText size={18} className={pathname?.startsWith("/admin/bookings") ? "text-emerald-400" : ""} /> Data Transaksi
-          </Link>
-          <Link
-            onClick={closeMobileMenu}
-            className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition-all duration-200 text-sm ${
-              pathname?.startsWith("/admin/reviews")
-                ? "bg-slate-800/90 text-white font-bold shadow-xs border border-slate-700/50"
-                : "text-slate-400 hover:bg-slate-900 hover:text-slate-200 font-medium"
-            }`}
-            href="/admin/reviews"
-          >
-            <Star size={18} className={pathname?.startsWith("/admin/reviews") ? "text-emerald-400" : ""} /> Kelola Ulasan
-          </Link>
-        </nav>
-        <div className="p-4 border-t border-slate-800/80">
-          <button
-            type="button"
-            onClick={handleLogout}
-            disabled={isLoggingOut}
-            className="flex items-center gap-3 px-3.5 py-2.5 w-full rounded-xl hover:bg-rose-500/20 text-rose-400 hover:text-rose-300 transition-colors text-left cursor-pointer disabled:opacity-50 text-sm font-semibold"
-          >
-            {isLoggingOut ? (
-              <Loader2 size={18} className="animate-spin" />
-            ) : (
-              <LogOut size={18} />
-            )}
-            <span>{isLoggingOut ? "Keluar..." : "Logout"}</span>
-          </button>
-        </div>
-      </aside>
 
-      {/* MAIN CONTENT (Kanan - Terang) */}
-      <main className="flex-1 md:ml-64 p-4 md:p-8 mt-14 md:mt-0 min-h-screen bg-slate-50/70">
+          {/* Bottom section: Logout */}
+          <div className="pt-3 border-t border-slate-800/80">
+            <SidebarLink
+              link={{
+                label: isLoggingOut ? "Keluar..." : "Logout",
+                href: "#",
+                icon: isLoggingOut ? (
+                  <Loader2 size={20} className="animate-spin text-rose-400 shrink-0" />
+                ) : (
+                  <LogOut size={20} className="text-rose-400 shrink-0" />
+                ),
+                onClick: handleLogout,
+              }}
+              className="px-3 py-2.5 rounded-xl hover:bg-rose-500/20 text-rose-400 hover:text-rose-300 font-semibold transition-colors"
+            />
+          </div>
+        </SidebarBody>
+      </Sidebar>
+
+      {/* Main Content */}
+      <main className="flex-1 overflow-y-auto p-4 md:p-8 bg-slate-50/70">
         {children}
       </main>
     </div>
   );
 }
 
+function Logo() {
+  return (
+    <div className="flex items-center gap-2 px-1">
+      <div className="size-8 rounded-lg bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center shrink-0">
+        <Building2 size={18} className="text-emerald-400" />
+      </div>
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.2 }}
+        className="flex items-center gap-1.5 overflow-hidden whitespace-nowrap"
+      >
+        <span className="font-extrabold text-white text-base tracking-tight">KosPasti</span>
+        <span className="text-[10px] font-bold bg-slate-800 text-slate-300 px-1.5 py-0.5 rounded border border-slate-700">
+          ADMIN
+        </span>
+      </motion.div>
+    </div>
+  );
+}
+
+function LogoIcon() {
+  return (
+    <div className="flex items-center justify-center py-0.5">
+      <div className="size-8 rounded-lg bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center shrink-0">
+        <Building2 size={18} className="text-emerald-400" />
+      </div>
+    </div>
+  );
+}
