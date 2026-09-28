@@ -44,9 +44,33 @@ export function Header({ isLoggedIn: initialIsLoggedIn = false }: HeaderProps) {
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isLandingMenuOpen, setIsLandingMenuOpen] = useState(false);
+  const [isNavbarVisible, setIsNavbarVisible] = useState(true);
+  const [lastScrollY, setLastScrollY] = useState(0);
 
   const dropdownRef = useRef<HTMLDivElement>(null);
   const landingMenuRef = useRef<HTMLDivElement>(null);
+
+  // Sembunyikan otomatis navbar saat scroll ke bawah
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      
+      if (currentScrollY < 50) {
+        setIsNavbarVisible(true);
+      } else if (currentScrollY > lastScrollY) {
+        setIsNavbarVisible(false);
+        setIsDropdownOpen(false);
+        setIsLandingMenuOpen(false);
+      } else {
+        setIsNavbarVisible(true);
+      }
+      
+      setLastScrollY(currentScrollY);
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [lastScrollY]);
 
   // Fetch authentication status & user profile info
   useEffect(() => {
@@ -191,7 +215,11 @@ export function Header({ isLoggedIn: initialIsLoggedIn = false }: HeaderProps) {
   ];
 
   return (
-    <header className="sticky top-0 z-50 w-full bg-white/80 backdrop-blur-md border-b border-slate-200/80 shadow-soft transition-all duration-300">
+    <header
+      className={`sticky top-0 z-50 w-full bg-white/80 backdrop-blur-md border-b border-slate-200/80 shadow-soft transition-all duration-300 ${
+        isNavbarVisible ? "translate-y-0" : "-translate-y-full"
+      }`}
+    >
       <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between">
         {/* Brand Logo */}
         <Link
@@ -221,7 +249,12 @@ export function Header({ isLoggedIn: initialIsLoggedIn = false }: HeaderProps) {
           <div className="flex items-center gap-2 sm:gap-3">
             {/* 1. Landing Page Section Navigation Dropdown (Desktop) */}
             {isLandingPage && (
-              <div className="relative hidden lg:block" ref={landingMenuRef}>
+              <div
+                className="relative hidden lg:block"
+                ref={landingMenuRef}
+                onMouseEnter={() => setIsLandingMenuOpen(true)}
+                onMouseLeave={() => setIsLandingMenuOpen(false)}
+              >
                 <button
                   type="button"
                   onClick={() => setIsLandingMenuOpen((prev) => !prev)}
@@ -245,7 +278,7 @@ export function Header({ isLoggedIn: initialIsLoggedIn = false }: HeaderProps) {
 
                 {/* Dropdown Menu List of Landing Sections */}
                 {isLandingMenuOpen && (
-                  <div className="absolute left-0 top-full mt-2 w-72 bg-white rounded-2xl shadow-xl border border-slate-150 py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-150">
+                  <div className="absolute left-0 top-full mt-2 w-72 bg-white rounded-2xl shadow-xl border border-slate-150 py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-150 before:absolute before:-top-2 before:left-0 before:w-full before:h-2 before:bg-transparent">
                     <div className="px-4 py-2 border-b border-slate-100">
                       <p className="text-[11px] font-bold uppercase tracking-wider text-slate-600">
                         Daftar Isi Halaman
@@ -311,7 +344,12 @@ export function Header({ isLoggedIn: initialIsLoggedIn = false }: HeaderProps) {
 
             {/* 3. Auth Actions: Logged In State */}
             {isLoggedIn ? (
-              <div className="relative" ref={dropdownRef}>
+              <div
+                className="relative"
+                ref={dropdownRef}
+                onMouseEnter={() => setIsDropdownOpen(true)}
+                onMouseLeave={() => setIsDropdownOpen(false)}
+              >
                 {/* Desktop Avatar Dropdown Trigger Button */}
                 <button
                   type="button"
@@ -367,7 +405,7 @@ export function Header({ isLoggedIn: initialIsLoggedIn = false }: HeaderProps) {
 
                 {/* Desktop Dropdown Menu Panel */}
                 {isDropdownOpen && (
-                  <div className="hidden md:block absolute right-0 top-full mt-2 w-64 bg-white rounded-2xl shadow-xl border border-slate-150 py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-150">
+                  <div className="hidden md:block absolute right-0 top-full mt-2 w-64 bg-white rounded-2xl shadow-xl border border-slate-150 py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-150 before:absolute before:-top-2 before:left-0 before:w-full before:h-2 before:bg-transparent">
                     {/* User Info Header */}
                     <div className="px-4 py-3 border-b border-slate-100 bg-slate-50/60 rounded-t-2xl">
                       <p className="text-xs font-medium text-slate-500">Masuk sebagai</p>
