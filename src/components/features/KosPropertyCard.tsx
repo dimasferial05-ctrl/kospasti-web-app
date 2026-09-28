@@ -1,14 +1,15 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Home, User, Clock, ChevronLeft, ChevronRight, Star } from "lucide-react";
+import { Home, User, Clock, ChevronLeft, ChevronRight, Star, MapPin } from "lucide-react";
 import { WishlistButton } from "@/components/features/WishlistButton";
 
 export interface RoomTypeItem {
   id?: string;
   name: string;
   price_per_month: number;
-  available_rooms: number;
+  availableRooms?: number;
+  available_rooms?: number;
   facilities?: string | null;
   image_url?: string | null;
 }
@@ -31,6 +32,8 @@ export interface KosPropertyCardProps {
   averageRating?: number;
   totalReviews?: number;
   isSaved?: boolean;
+  distance?: number | null;
+  distanceTargetName?: string | null;
   onWishlistToggle?: (isSaved: boolean) => void;
 }
 
@@ -52,6 +55,8 @@ export function KosPropertyCard({
   averageRating,
   totalReviews,
   isSaved = false,
+  distance,
+  distanceTargetName,
   onWishlistToggle,
 }: KosPropertyCardProps) {
   const isMultiType =
@@ -284,6 +289,15 @@ export function KosPropertyCard({
           </span>
 
           <div className="flex items-center gap-1.5 flex-wrap">
+            {typeof distance === "number" && (
+              <span
+                className="inline-flex items-center gap-1 font-bold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded-full text-[10px] border border-emerald-200/80 shadow-2xs"
+                title={distanceTargetName ? `Jarak ${distance} km dari ${distanceTargetName}` : `Jarak ${distance} km ke lokasi tujuan`}
+              >
+                <MapPin className="w-3 h-3 text-emerald-600" />
+                <span>{distance} km{distanceTargetName ? ` dari ${distanceTargetName}` : ""}</span>
+              </span>
+            )}
             {is24Hours && (
               <span className="text-[10px] font-medium px-2 py-0.5 rounded bg-slate-100 text-slate-600 border border-slate-200" title="Akses 24 Jam">
                 24 Jam

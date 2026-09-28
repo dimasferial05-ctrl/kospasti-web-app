@@ -1,5 +1,11 @@
 import { NextResponse } from "next/server";
 import { GoogleGenAI, Type } from "@google/genai";
+import {
+  findPropertiesWithinRadius,
+  fetchFullPropertiesByIds,
+  getAllPropertiesFallback,
+  DetailedPropertyWithDistance,
+} from "@/lib/propertyGeospatial";
 
 export interface AISearchResult {
   location_intent: string | null;
@@ -12,7 +18,7 @@ export interface AISearchResult {
   is_24_hours?: boolean | null;
 }
 
-const COMMON_LOCATION_COORDINATES: Record<string, { lat: number; lng: number }> = {
+export const COMMON_LOCATION_COORDINATES: Record<string, { lat: number; lng: number }> = {
   // Jakarta & Sekitarnya (Jabodetabek)
   "monas": { lat: -6.1754, lng: 106.8272 },
   "jakarta pusat": { lat: -6.1805, lng: 106.8284 },
@@ -331,7 +337,7 @@ const COMMON_LOCATION_COORDINATES: Record<string, { lat: number; lng: number }> 
   "malang": { lat: -7.9666, lng: 112.6326 },
 };
 
-function findCoordinateInDictionary(locationName: string): { lat: number; lng: number } | null {
+export function findCoordinateInDictionary(locationName: string): { lat: number; lng: number } | null {
   const locLower = locationName.toLowerCase().trim();
 
   // Sort keys by descending length so "polsub" or "taekwang subang" matches before "subang"
@@ -349,7 +355,7 @@ function findCoordinateInDictionary(locationName: string): { lat: number; lng: n
   return null;
 }
 
-async function fetchOnlineGeocode(query: string): Promise<{ lat: number; lng: number } | null> {
+export async function fetchOnlineGeocode(query: string): Promise<{ lat: number; lng: number } | null> {
   try {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 2000);
@@ -384,7 +390,7 @@ async function fetchOnlineGeocode(query: string): Promise<{ lat: number; lng: nu
   return null;
 }
 
-function fallbackExtractCriteria(prompt: string): AISearchResult {
+export function fallbackExtractCriteria(prompt: string): AISearchResult {
   const lower = prompt.toLowerCase();
 
   // 1. Gender extraction
@@ -632,18 +638,46 @@ Aturan Ekstraksi:
         | "CAMPUR";
     }
 
+    // Pipa Filter Geospasial & Semantik (Issue #192)
+    const { matchedProperties, candidateProperties } =
+      await fetchAndFilterProperties(parsedData);
+
     return NextResponse.json({
       success: true,
       data: parsedData,
+      properties: matchedProperties,
+      total_candidates: candidateProperties.length,
+      total_matches: matchedProperties.length,
+      radius_km: 10,
     });
   } catch (error: unknown) {
     try {
       const { prompt } = await req.clone().json();
       if (typeof prompt === "string" && prompt.trim()) {
         const fallback = fallbackExtractCriteria(prompt);
+        if (fallback.location_intent) {
+          const dictCoord = findCoordinateInDictionary(fallback.location_intent);
+          if (dictCoord) {
+            fallback.target_latitude = dictCoord.lat;
+            fallback.target_longitude = dictCoord.lng;
+          } else {
+            const osmCoord = await fetchOnlineGeocode(fallback.location_intent);
+            if (osmCoord) {
+              fallback.target_latitude = osmCoord.lat;
+              fallback.target_longitude = osmCoord.lng;
+            }
+          }
+        }
+        const { matchedProperties, candidateProperties } =
+          await fetchAndFilterProperties(fallback);
+
         return NextResponse.json({
           success: true,
           data: fallback,
+          properties: matchedProperties,
+          total_candidates: candidateProperties.length,
+          total_matches: matchedProperties.length,
+          radius_km: 10,
         });
       }
     } catch {
@@ -660,4 +694,75 @@ Aturan Ekstraksi:
       { status: 500 }
     );
   }
+}
+
+async function fetchAndFilterProperties(criteria: AISearchResult): Promise<{
+  candidateProperties: DetailedPropertyWithDistance[];
+  matchedProperties: DetailedPropertyWithDistance[];
+}> {
+  let candidateProperties: DetailedPropertyWithDistance[] = [];
+  if (
+    typeof criteria.target_latitude === "number" &&
+    typeof criteria.target_longitude === "number"
+  ) {
+    try {
+      const nearbyRaw = await findPropertiesWithinRadius(
+        criteria.target_latitude,
+        criteria.target_longitude,
+        10,
+        25
+      );
+      candidateProperties = await fetchFullPropertiesByIds(nearbyRaw);
+    } catch (err) {
+      console.error("Gagal menjalankan query geospatial:", err);
+      candidateProperties = await getAllPropertiesFallback(30);
+    }
+  } else {
+    candidateProperties = await getAllPropertiesFallback(30);
+  }
+
+  let matched = candidateProperties.filter((property) => {
+    if (
+      criteria.gender_type &&
+      property.gender_type.toUpperCase() !== criteria.gender_type.toUpperCase()
+    ) {
+      return false;
+    }
+    if (
+      criteria.max_price !== null &&
+      property.price_per_month > criteria.max_price
+    ) {
+      return false;
+    }
+    if (criteria.is_pet_friendly && !property.is_pet_friendly) {
+      return false;
+    }
+    if (criteria.is_24_hours && !property.is_24_hours) {
+      return false;
+    }
+    if (
+      criteria.facilities_keywords &&
+      criteria.facilities_keywords.length > 0
+    ) {
+      const facCombined = (
+        (property.facilities || "") +
+        " " +
+        (property.room_types?.map((rt) => rt.facilities || "").join(" ") || "")
+      ).toLowerCase();
+      const matchesAny = criteria.facilities_keywords.some((kw) =>
+        facCombined.includes(kw.toLowerCase().trim())
+      );
+      if (!matchesAny) return false;
+    }
+    return true;
+  });
+
+  if (matched.length === 0 && candidateProperties.length > 0) {
+    matched = candidateProperties;
+  }
+
+  return {
+    candidateProperties,
+    matchedProperties: matched,
+  };
 }

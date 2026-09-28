@@ -182,16 +182,18 @@ function MapViewerInner({
   const [locationError, setLocationError] = useState<string | null>(null);
 
   const effectiveApiKey =
-    apiKey || process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "";
+    apiKey !== undefined ? apiKey : (process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "");
 
   // Sinkronisasi activeProperty saat selectedPropertyId berubah dari luar (misal klik card)
   useEffect(() => {
     if (selectedPropertyId) {
       const found = properties.find((p) => p.id === selectedPropertyId);
       if (found) {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setActiveProperty(found);
       }
     } else {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setActiveProperty(null);
     }
   }, [selectedPropertyId, properties]);

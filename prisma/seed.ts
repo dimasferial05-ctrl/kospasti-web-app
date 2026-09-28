@@ -1,4 +1,6 @@
 import { PrismaClient } from "@prisma/client";
+import * as fs from "fs";
+import * as path from "path";
 
 const prisma = new PrismaClient();
 
@@ -487,6 +489,54 @@ async function main() {
       owner_id: owner2.id,
     }
   });
+
+  // --- SEED CRAWLED DATA DARI SUBANG ---
+  console.log("📥 Loading crawled data from Subang...");
+  const subangDataPath = path.join(__dirname, "data_kos_subang.json");
+  if (fs.existsSync(subangDataPath)) {
+    const rawData = fs.readFileSync(subangDataPath, "utf-8");
+    const subangKosList = JSON.parse(rawData);
+
+    let subangCount = 0;
+    for (const kos of subangKosList) {
+      await prisma.owner.create({
+        data: {
+          name: kos.owner_name,
+          whatsapp_number: kos.whatsapp,
+          properties: {
+            create: [
+              {
+                name: kos.property_name,
+                price_per_month: kos.price,
+                available_rooms: Math.floor(Math.random() * 10) + 1,
+                gender_type: kos.gender_type,
+                facilities: "WiFi, Kasur, Lemari, Kamar Mandi Dalam",
+                is_pet_friendly: Math.random() > 0.8,
+                is_24_hours: Math.random() > 0.5,
+                image_url: kos.image_url,
+                address: kos.address,
+                latitude: kos.lat,
+                longitude: kos.lng,
+                room_types: {
+                  create: [
+                    {
+                      name: "Kamar Standar",
+                      price_per_month: kos.price,
+                      available_rooms: Math.floor(Math.random() * 5) + 1,
+                      facilities: "Kasur, Lemari, Meja Belajar",
+                      image_url: "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=800&q=80",
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        }
+      });
+      subangCount++;
+    }
+    console.log(`✅ Successfully seeded ${subangCount} properties from Subang data.`);
+  }
 
   console.log("✅ Seeded owners and properties with magic links & room types:");
   console.log(` - ${owner1.name} -> ${owner1.properties.map((p) => `${p.name} (Sisa ${p.available_rooms} kamar, ${p.room_types.length} tipe, ID: ${p.id})`).join(", ")} | Token: magic-bambang-123`);
