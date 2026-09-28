@@ -22,30 +22,45 @@ export const AuroraBackground = ({
       {...props}
     >
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        {/* Layer 1: Primary Flowing Aurora Mesh */}
         <div
-          className={cn(
-            `
-            [--white-gradient:repeating-linear-gradient(100deg,rgba(255,255,255,0.08)_0%,rgba(255,255,255,0.08)_7%,transparent_10%,transparent_12%,rgba(255,255,255,0.08)_16%)]
-            [--dark-gradient:repeating-linear-gradient(100deg,rgba(6,11,20,0.95)_0%,rgba(6,11,20,0.95)_7%,transparent_10%,transparent_12%,rgba(6,11,20,0.95)_16%)]
-            [--aurora:repeating-linear-gradient(100deg,#059669_10%,#0d9488_15%,#0284c7_20%,#059669_25%,#10b981_30%)]
-            [background-image:var(--dark-gradient),var(--aurora)]
-            [background-size:300%,_200%]
-            [background-position:50%_50%,50%_50%]
-            filter blur-[24px]
-            after:content-[""] after:absolute after:inset-0
-            after:[background-image:var(--dark-gradient),var(--aurora)]
-            after:[background-size:200%,_100%]
-            after:animate-aurora after:[background-attachment:fixed] after:mix-blend-screen
-            pointer-events-none
-            absolute -inset-[20px] opacity-45 will-change-transform`,
-            showRadialGradient &&
-              `[mask-image:radial-gradient(ellipse_at_100%_0%,black_30%,transparent_80%)]`
-          )}
+          className="absolute -inset-[40px] opacity-65 filter blur-[32px] will-change-transform animate-aurora pointer-events-none"
+          style={{
+            backgroundImage: `
+              radial-gradient(ellipse 80% 50% at 50% -20%, rgba(16, 185, 129, 0.45), transparent 70%),
+              radial-gradient(ellipse 60% 40% at 20% 40%, rgba(6, 182, 212, 0.35), transparent 60%),
+              radial-gradient(ellipse 70% 50% at 80% 60%, rgba(14, 165, 233, 0.3), transparent 70%),
+              radial-gradient(ellipse 90% 60% at 50% 120%, rgba(5, 150, 105, 0.4), transparent 70%),
+              repeating-linear-gradient(100deg, rgba(6, 11, 20, 0.9) 0%, rgba(6, 11, 20, 0.9) 7%, transparent 10%, transparent 12%, rgba(6, 11, 20, 0.9) 16%),
+              repeating-linear-gradient(100deg, #059669 10%, #0d9488 15%, #0284c7 20%, #10b981 25%, #047857 30%)
+            `,
+            backgroundSize: "250% 200%",
+          }}
         />
+
+        {/* Layer 2: Secondary Shifting & Breathing Wave */}
+        <div
+          className="absolute -inset-[50px] opacity-45 filter blur-[42px] will-change-transform animate-aurora-shift pointer-events-none mix-blend-screen"
+          style={{
+            backgroundImage: `
+              radial-gradient(ellipse at 70% 30%, rgba(52, 211, 153, 0.5), transparent 55%),
+              radial-gradient(ellipse at 30% 70%, rgba(6, 182, 212, 0.45), transparent 55%),
+              repeating-linear-gradient(120deg, #10b981 0%, #06b6d4 25%, #3b82f6 50%, #10b981 75%)
+            `,
+            backgroundSize: "200% 200%",
+          }}
+        />
+
+        {/* Optional Radial Gradient Mask */}
+        {showRadialGradient && (
+          <div className="absolute inset-0 [mask-image:radial-gradient(ellipse_at_center,black_35%,transparent_85%)] pointer-events-none" />
+        )}
+
         {/* Subtle top/bottom edge ambient fade to blend seamlessly */}
-        <div className="absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-[#060b14]/80 to-transparent" />
-        <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-[#060b14]/80 to-transparent" />
+        <div className="absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-[#060b14] via-[#060b14]/75 to-transparent pointer-events-none" />
+        <div className="absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-[#060b14] via-[#060b14]/75 to-transparent pointer-events-none" />
       </div>
+
       <div className="relative z-10 w-full">
         {children}
       </div>

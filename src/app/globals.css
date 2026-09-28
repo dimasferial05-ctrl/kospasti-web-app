@@ -168,32 +168,38 @@
 }
 
 @keyframes aurora {
-  from {
-    background-position: 50% 50%, 50% 50%;
+  0% {
+    background-position: 0% 50%, 0% 50%, 0% 50%, 0% 50%, 0% 50%, 0% 50%;
   }
-  to {
-    background-position: 350% 50%, 350% 50%;
+  50% {
+    background-position: 100% 50%, 80% 30%, 60% 70%, 100% 50%, 100% 50%, 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%, 0% 50%, 0% 50%, 0% 50%, 0% 50%, 0% 50%;
   }
 }
 
-.animate-bounce-short {
-  animation: bounceShort 2s ease-in-out infinite;
-}
-
-.animate-pulse-subtle {
-  animation: pulseSubtle 3s ease-in-out infinite;
-}
-
-.animate-float {
-  animation: float 4s ease-in-out infinite;
-}
-
-.animate-float-slow {
-  animation: floatSlow 6s ease-in-out infinite;
+@keyframes auroraShift {
+  0% {
+    transform: translateY(0px) scale(1) rotate(0deg);
+    opacity: 0.35;
+  }
+  50% {
+    transform: translateY(-25px) scale(1.1) rotate(4deg);
+    opacity: 0.6;
+  }
+  100% {
+    transform: translateY(0px) scale(1) rotate(0deg);
+    opacity: 0.35;
+  }
 }
 
 .animate-aurora {
-  animation: aurora 60s linear infinite;
+  animation: aurora 12s ease-in-out infinite;
+}
+
+.animate-aurora-shift {
+  animation: auroraShift 8s ease-in-out infinite;
 }
 
 /* Bespoke Human UI Utility Classes */
