@@ -1,14 +1,17 @@
 # KosPasti Web App
 
-KosPasti adalah aplikasi web inovatif yang menjembatani pencari kos (mahasiswa) dengan pemilik kos (Ibu Kos). Aplikasi ini didesain dengan pendekatan minimalis, menghadirkan sistem pemesanan kos yang mulus bagi mahasiswa dan sistem manajemen ketersediaan kamar yang sangat mudah bagi pemilik kos (tanpa *password*, cukup menggunakan **Magic Link** via WhatsApp).
+KosPasti adalah platform cerdas dan inovatif yang menghubungkan pencari kos (mahasiswa/karyawan) dengan pemilik kos secara efisien. Dibangun dengan fokus pada kecepatan dan kemudahan (UX), aplikasi ini menghadirkan sistem pencarian kos interaktif dan pemesanan yang mulus bagi pengguna, serta sistem manajemen ketersediaan kamar yang sangat praktis bagi pemilik kos tanpa perlu menghafal *password* (menggunakan **Magic Link** via WhatsApp).
 
-## 🌟 MVP Features (Minimum Viable Product)
+Selain itu, KosPasti juga dilengkapi dengan integrasi Peta (Google Maps) untuk pencarian berbasis lokasi, serta fitur kecerdasan buatan (AI) yang siap membantu memberikan rekomendasi kos terbaik.
 
-- **Pencarian & Filter Kos:** Mahasiswa dapat mencari dan menyaring properti kos sesuai kebutuhan.
-- **Detail Properti:** Menampilkan informasi fasilitas, harga, tipe kos (putra/putri), dan ketersediaan kamar.
-- **Sistem Booking & Escrow Dummy:** Formulir pemesanan kamar lengkap dengan simulasi pembayaran QRIS (Dummy).
-- **Magic Link Auth:** Pemilik kos tidak perlu *login* menggunakan *password*. Sistem mengirimkan tautan unik (Magic Link) sekali pakai ke WhatsApp untuk memperbarui ketersediaan kamar dalam hitungan detik.
-- **Admin Dashboard:** Panel admin rahasia (berbasis PIN) untuk mengelola data properti, memantau *booking* mahasiswa, dan memvalidasi (Setujui/Tolak) transaksi.
+## 🌟 Fitur Utama (MVP)
+
+- **Pencarian Cerdas & Peta Interaktif:** Pencarian kos dengan filter lengkap dan visualisasi lokasi menggunakan Google Maps.
+- **Asisten AI Terintegrasi:** Rekomendasi dan asisten pencarian cerdas bertenaga Gemini AI.
+- **Detail Properti Komprehensif:** Informasi ketersediaan, fasilitas, harga, galeri foto, serta kebijakan kos.
+- **Sistem Booking & Pembayaran (Dummy):** Formulir pemesanan kamar real-time dengan integrasi simulasi pembayaran QRIS.
+- **Akses Tanpa Password (Magic Link):** Pemilik kos mengelola ketersediaan kamar hanya dengan sekali klik melalui tautan unik di WhatsApp.
+- **Dashboard Admin:** Panel kontrol terpusat (berbasis PIN rahasia) untuk mengelola data kos, menyetujui transaksi, dan melihat statistik performa.
 
 ## 🏗️ Architecture & Folder Structure
 
@@ -74,17 +77,19 @@ Database menggunakan relasi standar *SQL* melalui **Prisma ORM**. Terdapat 4 mod
 
 ## 💻 Technology Stack
 
-- **Framework Utama:** Next.js 14+ (App Router)
+- **Framework Utama:** Next.js 16 (App Router) + React 19
 - **Bahasa Pemrograman:** TypeScript
-- **Styling:** Tailwind CSS
+- **Styling:** Tailwind CSS v4
 - **Database & ORM:** SQLite + Prisma
 - **Testing:** Vitest
 
 ## 📚 Libraries Digunakan
 
-- `lucide-react`: Ikon SVG minimalis nan indah.
-- `clsx` & `tailwind-merge`: Utilitas manipulasi *class* untuk Tailwind.
-- `shadcn/ui` (*Radix UI primitives*): Komponen dasar bebas kerangka yang aksesibel.
+- `@google/genai`: Integrasi Gemini AI untuk fitur kecerdasan buatan.
+- `@vis.gl/react-google-maps`: Komponen Peta interaktif dari Google Maps.
+- `@base-ui/react`: Komponen *headless* modern dari MUI Base.
+- `shadcn/ui` & `lucide-react`: Primitif antarmuka aksesibel dan ikon SVG minimalis.
+- `clsx` & `tailwind-merge`: Utilitas manipulasi *class* dinamis untuk Tailwind.
 
 ## 🚀 Setup Project & Cara Menjalankan
 
@@ -116,7 +121,7 @@ Ikuti langkah-langkah di bawah ini untuk menjalankan aplikasi di lingkungan loka
    ```bash
    npm run dev
    ```
-   Buka peramban (browser) dan akses `http://localhost:3000`. Akses halaman admin di `http://localhost:3000/admin` (gunakan PIN: `778899`).
+   Buka peramban (browser) dan akses `http://localhost:3000`. Akses halaman admin di `http://localhost:3000/admin`.
 
 ## 🧪 Cara Test Aplikasi
 
