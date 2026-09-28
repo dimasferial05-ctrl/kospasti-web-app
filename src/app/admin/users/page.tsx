@@ -14,6 +14,7 @@ import {
   Eye,
   BookmarkCheck,
 } from "lucide-react";
+import { GooeyInput } from "@/components/ui/gooey-input";
 
 interface AdminUserItem {
   id: string;
@@ -153,17 +154,15 @@ export default function AdminUsersPage() {
       <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
         {/* Search Bar */}
         <div className="p-4 border-b border-slate-200 bg-slate-50 flex items-center justify-between gap-4">
-          <div className="relative w-full max-w-sm">
-            <Search
-              size={18}
-              className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"
-            />
-            <input
-              type="text"
-              placeholder="Cari nama, email, atau WhatsApp..."
+          <div className="relative w-auto flex items-center">
+            <GooeyInput
+              placeholder="Cari nama, email, WhatsApp..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 bg-white border border-slate-200 rounded-lg text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all shadow-xs"
+              collapsedWidth={160}
+              expandedWidth={280}
+              theme="slate"
+              preserveLayoutSpace={true}
             />
           </div>
           <div className="text-xs font-semibold text-slate-500 shrink-0">

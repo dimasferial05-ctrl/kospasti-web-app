@@ -17,6 +17,7 @@ import {
   ShieldCheck,
   RefreshCw,
 } from "lucide-react";
+import { GooeyInput } from "@/components/ui/gooey-input";
 
 interface AdminReviewItem {
   id: string;
@@ -262,14 +263,15 @@ export default function AdminReviewsPage() {
 
       {/* Filter and Search Bar */}
       <div className="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200/80 shadow-2xs flex flex-col md:flex-row items-center justify-between gap-4">
-        <div className="relative w-full md:w-80">
-          <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
-          <input
-            type="text"
+        <div className="relative w-full md:w-auto flex items-center">
+          <GooeyInput
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Cari nama kos, user, email, isi..."
-            className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white transition-all"
+            placeholder="Cari nama kos, user, ulasan..."
+            collapsedWidth={160}
+            expandedWidth={280}
+            theme="slate"
+            preserveLayoutSpace={true}
           />
         </div>
 

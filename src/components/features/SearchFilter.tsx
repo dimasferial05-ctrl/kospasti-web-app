@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { Search } from "lucide-react";
+import { GooeyInput } from "@/components/ui/gooey-input";
 
 export interface FilterValues {
   name: string;
@@ -34,15 +35,15 @@ export function SearchFilter({ onSearch, initialValues }: SearchFilterProps) {
       className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-col lg:flex-row lg:items-end gap-3"
     >
       {/* Search Input by Name */}
-      <div className="relative w-full lg:flex-1">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
-        <input
-          type="text"
+      <div className="relative w-full lg:flex-1 flex items-center">
+        <GooeyInput
           value={name}
           onChange={(e) => setName(e.target.value)}
           placeholder="Cari nama kos..."
-          aria-label="Cari nama kos"
-          className="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all"
+          collapsedWidth={180}
+          expandedWidth={320}
+          theme="emerald"
+          preserveLayoutSpace={true}
         />
       </div>
 

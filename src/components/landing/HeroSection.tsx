@@ -40,7 +40,7 @@ export function HeroSection() {
         {/* Floating Search Bar */}
         <form
           onSubmit={handleSearchSubmit}
-          className="w-full max-w-2xl mt-8 sm:mt-10 p-2 bg-white rounded-2xl sm:rounded-full border border-slate-200 shadow-xl hover:shadow-2xl transition-all duration-300 flex flex-col sm:flex-row items-center gap-2 relative z-20"
+          className="w-full max-w-2xl mt-8 sm:mt-10 p-2 sm:p-2.5 bg-white/95 backdrop-blur-md rounded-2xl sm:rounded-full border border-slate-200/90 shadow-xl hover:shadow-2xl transition-all duration-300 flex flex-col sm:flex-row items-center justify-between gap-3 relative z-20"
         >
           <div className="flex items-center gap-3 w-full px-4 py-1.5">
             <Search className="w-5 h-5 text-emerald-600 shrink-0" />
@@ -49,7 +49,7 @@ export function HeroSection() {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Ketik lokasi, nama kampus, atau fasilitas kos..."
-              className="w-full bg-transparent text-sm sm:text-base text-slate-800 placeholder-slate-400 focus:outline-hidden py-1"
+              className="w-full bg-transparent text-sm sm:text-base text-slate-800 placeholder-slate-400 focus:outline-hidden py-1 font-medium"
             />
           </div>
           <button
