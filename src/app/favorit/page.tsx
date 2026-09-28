@@ -16,6 +16,7 @@ import {
   RefreshCw,
 } from "lucide-react";
 import { KosPropertyCard } from "@/components/features/KosPropertyCard";
+import { GooeyInput } from "@/components/ui/gooey-input";
 
 interface SavedPropertyItem {
   id: string;
@@ -316,14 +317,15 @@ export default function FavoritPage() {
 
         {/* Filter & Search Bar */}
         <div className="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-xs flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="relative w-full sm:max-w-xs">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-            <input
-              type="text"
+          <div className="relative w-full sm:w-auto flex items-center">
+            <GooeyInput
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Cari di favorit..."
-              className="w-full pl-9 pr-4 py-2 rounded-xl bg-slate-50 border border-slate-200 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white transition-all"
+              collapsedWidth={150}
+              expandedWidth={260}
+              theme="emerald"
+              preserveLayoutSpace={true}
             />
           </div>
 

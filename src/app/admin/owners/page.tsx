@@ -21,6 +21,7 @@ import {
   AlertCircle,
   AlertTriangle,
 } from "lucide-react";
+import { GooeyInput } from "@/components/ui/gooey-input";
 
 interface OwnerItem {
   id: string;
@@ -367,14 +368,15 @@ export default function AdminOwnersPage() {
 
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
           {/* Search Bar */}
-          <div className="relative w-full sm:w-64">
-            <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
-            <input
-              type="text"
+          <div className="relative w-full sm:w-auto flex items-center">
+            <GooeyInput
               placeholder="Cari nama atau WhatsApp..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-9 pr-4 py-2 border border-slate-200 rounded-lg text-sm bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900/10 focus:border-slate-400 transition-all"
+              collapsedWidth={160}
+              expandedWidth={280}
+              theme="slate"
+              preserveLayoutSpace={true}
             />
           </div>
 
