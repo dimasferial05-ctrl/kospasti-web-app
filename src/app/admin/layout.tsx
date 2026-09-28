@@ -141,7 +141,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 <SidebarLink
                   key={idx}
                   link={link}
-                  active={link.active}
                   className={`px-3 py-2.5 rounded-xl transition-all duration-200 text-sm ${
                     link.active
                       ? "bg-slate-800/90 text-white font-bold shadow-xs border border-slate-700/50"
