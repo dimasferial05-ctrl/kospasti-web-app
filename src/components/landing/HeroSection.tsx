@@ -29,21 +29,23 @@ export function HeroSection() {
 
         {/* Big centered question headline */}
         <h1 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold text-slate-900 tracking-tight leading-[1.18] max-w-3xl">
-          Temukan Kos Impian atau{" "}
-          <TypeAnimation
-            sequence={[
-              "Kelola Propertimu?",
-              2500,
-              "Cari Tempat Nyaman?",
-              2500,
-              "Mulai Bisnis Kos?",
-              2500,
-            ]}
-            wrapper="span"
-            speed={50}
-            className="text-emerald-600 inline-block"
-            repeat={Infinity}
-          />
+          <span className="block">Temukan Kos Impian atau</span>
+          <span className="block text-emerald-600 min-h-[1.25em]">
+            <TypeAnimation
+              sequence={[
+                "Kelola Propertimu?",
+                2500,
+                "Cari Tempat Nyaman?",
+                2500,
+                "Mulai Bisnis Kos?",
+                2500,
+              ]}
+              wrapper="span"
+              speed={50}
+              className="inline-block"
+              repeat={Infinity}
+            />
+          </span>
         </h1>
 
         {/* Subtitle */}
