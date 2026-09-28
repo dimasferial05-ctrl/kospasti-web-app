@@ -157,7 +157,7 @@ export function GooeyInput({
 
   useEffect(() => {
     if (valueProp && !isExpanded) {
-      setIsExpanded(true);
+      setTimeout(() => setIsExpanded(true), 0);
     }
   }, [valueProp, isExpanded]);
 
