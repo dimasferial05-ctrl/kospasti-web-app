@@ -3,7 +3,6 @@ import { POST } from "../src/app/api/ai-search/route";
 import {
   geocodeLocation,
   calculateHaversineDistanceKm,
-  findCoordinateInDictionary,
 } from "../src/lib/geocoding";
 import { prisma } from "../src/lib/prisma";
 import { clearDatabase } from "./helpers";

@@ -189,9 +189,11 @@ function MapViewerInner({
     if (selectedPropertyId) {
       const found = properties.find((p) => p.id === selectedPropertyId);
       if (found) {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setActiveProperty(found);
       }
     } else {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setActiveProperty(null);
     }
   }, [selectedPropertyId, properties]);
