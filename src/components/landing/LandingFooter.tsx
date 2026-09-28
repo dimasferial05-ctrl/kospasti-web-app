@@ -11,9 +11,13 @@ export function LandingFooter() {
           {/* Brand Info */}
           <div className="lg:col-span-2 flex flex-col items-start gap-4">
             <Link href="/" className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-lg bg-emerald-600 flex items-center justify-center text-white shadow-xs">
-                <span className="text-base leading-none">🏠</span>
-              </div>
+              <Image
+                src="/logo.jpg"
+                alt="KosPasti Logo"
+                width={32}
+                height={32}
+                className="w-8 h-8 rounded-lg object-cover shadow-xs shrink-0"
+              />
               <div className="flex flex-col">
                 <span className="text-lg font-extrabold text-slate-900 tracking-tight leading-none">
                   KosPasti

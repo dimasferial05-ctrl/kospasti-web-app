@@ -198,9 +198,14 @@ export function Header({ isLoggedIn: initialIsLoggedIn = false }: HeaderProps) {
           href="/"
           className="group flex items-center gap-2.5 transition-transform duration-300 hover:scale-[1.02]"
         >
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-700 flex items-center justify-center text-white shadow-soft transition-transform group-hover:rotate-3">
-            <span className="text-base leading-none">🏠</span>
-          </div>
+          <Image
+            src="/logo.jpg"
+            alt="KosPasti Logo"
+            width={36}
+            height={36}
+            priority
+            className="w-9 h-9 rounded-xl object-cover shadow-soft transition-transform group-hover:rotate-3 shrink-0"
+          />
           <div className="flex flex-col">
             <span className="text-lg sm:text-xl font-extrabold text-slate-900 tracking-tight leading-none group-hover:text-emerald-600 transition-colors">
               KosPasti
