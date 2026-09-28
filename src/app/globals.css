@@ -167,20 +167,17 @@
   }
 }
 
-.animate-bounce-short {
-  animation: bounceShort 2s ease-in-out infinite;
+@keyframes aurora {
+  from {
+    background-position: 50% 50%, 50% 50%;
+  }
+  to {
+    background-position: 350% 50%, 350% 50%;
+  }
 }
 
-.animate-pulse-subtle {
-  animation: pulseSubtle 3s ease-in-out infinite;
-}
-
-.animate-float {
-  animation: float 4s ease-in-out infinite;
-}
-
-.animate-float-slow {
-  animation: floatSlow 6s ease-in-out infinite;
+.animate-aurora {
+  animation: aurora 45s linear infinite;
 }
 
 /* Bespoke Human UI Utility Classes */
