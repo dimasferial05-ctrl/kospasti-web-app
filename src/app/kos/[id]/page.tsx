@@ -536,7 +536,7 @@ export default function PropertyDetailPage() {
     : [];
 
   return (
-    <div className="max-w-7xl mx-auto min-h-screen bg-slate-50 pb-24 lg:pb-12 px-0 lg:px-8 flex flex-col relative shadow-sm w-full min-w-0 overflow-x-clip">
+    <div className="max-w-7xl mx-auto min-h-screen bg-slate-50 pb-24 lg:pb-12 px-0 lg:px-8 flex flex-col relative shadow-sm w-full min-w-0">
       {/* Top Header Bar */}
       <div className="sticky top-0 z-30 bg-white/90 backdrop-blur-md border-b border-slate-200/80 py-3">
         <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 flex items-center justify-between gap-3">
@@ -573,7 +573,7 @@ export default function PropertyDetailPage() {
         <div className="max-w-7xl mx-auto w-full min-w-0">
           <div
             ref={subnavScrollRef}
-            className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto py-2.5 px-4 sm:px-6 lg:px-8 text-xs font-semibold text-slate-600 whitespace-nowrap flex-nowrap [scrollbar-width:none] [&::-webkit-scrollbar]:hidden [-webkit-overflow-scrolling:touch]"
+            className="relative flex items-center gap-1.5 sm:gap-2 overflow-x-auto py-2.5 px-4 sm:px-6 lg:px-8 text-xs font-semibold text-slate-600 whitespace-nowrap flex-nowrap [scrollbar-width:none] [&::-webkit-scrollbar]:hidden [-webkit-overflow-scrolling:touch]"
           >
             <button
               id="subnav-btn-section-media"
