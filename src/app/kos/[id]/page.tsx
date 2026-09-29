@@ -282,17 +282,18 @@ export default function PropertyDetailPage() {
       if (hero) {
         const rect = hero.getBoundingClientRect();
         // Muncul bila bagian bawah foto properti sudah melewati batas atas navbar
-        setShowSubNav(rect.bottom < 60);
+        setShowSubNav(rect.bottom < 54);
       }
     };
     window.addEventListener("scroll", handleScroll, { passive: true });
+    handleScroll();
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   const scrollToSection = (sectionId: string) => {
     const el = document.getElementById(sectionId);
     if (el) {
-      const navOffset = 115;
+      const navOffset = 135;
       const elementPosition = el.getBoundingClientRect().top;
       const offsetPosition = elementPosition + window.pageYOffset - navOffset;
       window.scrollTo({
@@ -500,12 +501,12 @@ export default function PropertyDetailPage() {
         </div>
       </div>
 
-      {/* Sticky In-Page Navigation Bar (Hanya muncul saat scroll ke bawah dan foto properti tidak kelihatan) */}
+      {/* Sticky In-Page Navigation Bar (Smooth slide-in saat scroll ke bawah melewati foto properti) */}
       <div
-        className={`sticky top-[53px] z-20 bg-white/95 backdrop-blur-md border-b border-slate-200 transition-all duration-300 shadow-xs ${
+        className={`sticky top-[53px] z-20 bg-white/95 backdrop-blur-md border-b border-slate-200/90 shadow-xs transition-all duration-300 ease-in-out overflow-hidden ${
           showSubNav
-            ? "opacity-100 translate-y-0 pointer-events-auto"
-            : "opacity-0 -translate-y-2 pointer-events-none hidden"
+            ? "max-h-20 opacity-100 translate-y-0 pointer-events-auto"
+            : "max-h-0 opacity-0 -translate-y-3 pointer-events-none border-transparent"
         }`}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -1230,7 +1231,7 @@ export default function PropertyDetailPage() {
         {/* KOLOM KANAN (KARTU AMANKAN KAMAR STICKY DI BAWAH FOTO PROPERTI)          */}
         {/* ========================================================================= */}
         <div className="w-full lg:w-[380px] shrink-0">
-          <div className="fixed bottom-0 left-0 w-full bg-white border-t border-slate-200 p-4 flex justify-between items-center z-40 lg:static lg:block lg:p-6 lg:border lg:rounded-3xl lg:shadow-md lg:sticky lg:top-24">
+          <div className="fixed bottom-0 left-0 w-full bg-white border-t border-slate-200 p-4 flex justify-between items-center z-40 lg:static lg:block lg:p-6 lg:border lg:rounded-3xl lg:shadow-md lg:sticky lg:top-32">
             <div className="max-w-md mx-auto lg:max-w-none w-full flex justify-between lg:flex-col lg:gap-4 items-center lg:items-start">
               <div className="lg:w-full">
                 <p className="text-[10px] lg:text-xs text-slate-400 font-semibold uppercase tracking-wider">
