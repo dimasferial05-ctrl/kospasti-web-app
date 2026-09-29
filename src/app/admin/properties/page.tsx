@@ -39,6 +39,7 @@ interface RoomTypeAdminItem {
   price_per_month: number;
   available_rooms: number;
   facilities?: string | null;
+  specifications?: string | null;
   image_url?: string | null;
 }
 
@@ -48,6 +49,7 @@ interface RoomTypeFormItem {
   price_per_month: string;
   available_rooms: string;
   facilities: string;
+  specifications: string;
   image_url?: string;
   image_file?: File | null;
   image_preview?: string | null;
@@ -66,6 +68,9 @@ interface PropertyAdminItem {
   longitude?: number | null;
   is_pet_friendly?: boolean;
   is_24_hours?: boolean;
+  rules?: string | null;
+  rental_terms?: string | null;
+  youtube_url?: string | null;
   media?: PropertyMediaItem[];
   room_types?: RoomTypeAdminItem[];
   owner_id: string;
@@ -85,6 +90,9 @@ interface PropertyFormData {
   longitude: string;
   is_pet_friendly: boolean;
   is_24_hours: boolean;
+  rules: string;
+  rental_terms: string;
+  youtube_url: string;
 }
 
 const initialFormData: PropertyFormData = {
@@ -100,6 +108,9 @@ const initialFormData: PropertyFormData = {
   longitude: "",
   is_pet_friendly: false,
   is_24_hours: false,
+  rules: "",
+  rental_terms: "",
+  youtube_url: "",
 };
 
 export default function ManagePropertiesPage() {
@@ -184,6 +195,9 @@ export default function ManagePropertiesPage() {
       longitude: "",
       is_pet_friendly: false,
       is_24_hours: false,
+      rules: "",
+      rental_terms: "",
+      youtube_url: "",
     });
     setRoomTypes([
       {
@@ -191,6 +205,7 @@ export default function ManagePropertiesPage() {
         price_per_month: "",
         available_rooms: "1",
         facilities: "",
+        specifications: "",
         image_url: "",
         image_file: null,
         image_preview: null,
@@ -220,6 +235,9 @@ export default function ManagePropertiesPage() {
       longitude: prop.longitude !== undefined && prop.longitude !== null ? String(prop.longitude) : "",
       is_pet_friendly: Boolean(prop.is_pet_friendly),
       is_24_hours: Boolean(prop.is_24_hours),
+      rules: prop.rules || "",
+      rental_terms: prop.rental_terms || "",
+      youtube_url: prop.youtube_url || "",
     });
     if (prop.room_types && prop.room_types.length > 0) {
       setRoomTypes(
@@ -229,6 +247,7 @@ export default function ManagePropertiesPage() {
           price_per_month: String(rt.price_per_month),
           available_rooms: String(rt.available_rooms),
           facilities: rt.facilities || "",
+          specifications: rt.specifications || "",
           image_url: rt.image_url || "",
           image_file: null,
           image_preview: rt.image_url || null,
@@ -241,6 +260,7 @@ export default function ManagePropertiesPage() {
           price_per_month: prop.price_per_month !== undefined ? String(prop.price_per_month) : "",
           available_rooms: prop.available_rooms !== undefined ? String(prop.available_rooms) : "0",
           facilities: prop.facilities || "",
+          specifications: "",
           image_url: "",
           image_file: null,
           image_preview: null,
@@ -456,6 +476,9 @@ export default function ManagePropertiesPage() {
       data.append("longitude", formData.longitude.trim());
       data.append("is_pet_friendly", String(formData.is_pet_friendly));
       data.append("is_24_hours", String(formData.is_24_hours));
+      data.append("rules", formData.rules.trim());
+      data.append("rental_terms", formData.rental_terms.trim());
+      data.append("youtube_url", formData.youtube_url.trim());
       if (roomTypes.length > 0) {
         data.append(
           "room_types",
@@ -466,6 +489,7 @@ export default function ManagePropertiesPage() {
               price_per_month: rt.price_per_month,
               available_rooms: rt.available_rooms,
               facilities: rt.facilities,
+              specifications: rt.specifications,
               image_url: rt.image_url,
             }))
           )
@@ -832,6 +856,7 @@ export default function ManagePropertiesPage() {
                           price_per_month: "",
                           available_rooms: "1",
                           facilities: "",
+                          specifications: "",
                           image_url: "",
                           image_file: null,
                           image_preview: null,
@@ -938,6 +963,23 @@ export default function ManagePropertiesPage() {
                           onChange={(e) => {
                             const updated = [...roomTypes];
                             updated[idx].facilities = e.target.value;
+                            setRoomTypes(updated);
+                          }}
+                          className="w-full px-3 py-1.5 text-xs border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-[11px] font-semibold text-slate-600 mb-1">
+                          Spesifikasi Tipe Kamar (Opsional)
+                        </label>
+                        <input
+                          type="text"
+                          placeholder="Contoh: Ukuran 3x4 meter • Lantai 1 • Daya Listrik: 900 VA (Token mandiri)"
+                          value={rt.specifications}
+                          onChange={(e) => {
+                            const updated = [...roomTypes];
+                            updated[idx].specifications = e.target.value;
                             setRoomTypes(updated);
                           }}
                           className="w-full px-3 py-1.5 text-xs border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white"
@@ -1360,6 +1402,57 @@ export default function ManagePropertiesPage() {
                   onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
                   className="w-full px-3.5 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white"
                 />
+              </div>
+
+              {/* URL Video YouTube */}
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                  URL Video YouTube (Opsional)
+                </label>
+                <input
+                  type="url"
+                  placeholder="Contoh: https://www.youtube.com/watch?v=aqz-KE-bpKQ"
+                  value={formData.youtube_url}
+                  onChange={(e) => setFormData({ ...formData, youtube_url: e.target.value })}
+                  className="w-full px-3.5 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white"
+                />
+                <p className="text-[11px] text-slate-400 mt-1">
+                  Video tour atau review kos dari YouTube yang bisa langsung diputar calon penyewa.
+                </p>
+              </div>
+
+              {/* Peraturan Kos */}
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                  Peraturan Kos (Opsional)
+                </label>
+                <textarea
+                  rows={4}
+                  placeholder={"1. Dilarang merokok di dalam kamar\n2. Tamu lawan jenis dilarang masuk kamar\n3. Waktu tenang dimulai pukul 22:00 WIB"}
+                  value={formData.rules}
+                  onChange={(e) => setFormData({ ...formData, rules: e.target.value })}
+                  className="w-full px-3.5 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white resize-y"
+                />
+                <p className="text-[11px] text-slate-400 mt-1">
+                  Aturan tata tertib kos. Gunakan baris baru untuk memisahkan setiap poin aturan.
+                </p>
+              </div>
+
+              {/* Ketentuan Pengajuan Sewa */}
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                  Ketentuan Pengajuan Sewa (Opsional)
+                </label>
+                <textarea
+                  rows={4}
+                  placeholder={"1. Menyerahkan foto/scan KTP atau Kartu Tanda Mahasiswa yang berlaku\n2. Pembayaran sewa lunas di muka\n3. Uang deposit jaminan Rp 150.000 (dikembalikan saat checkout)"}
+                  value={formData.rental_terms}
+                  onChange={(e) => setFormData({ ...formData, rental_terms: e.target.value })}
+                  className="w-full px-3.5 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white resize-y"
+                />
+                <p className="text-[11px] text-slate-400 mt-1">
+                  Syarat dan ketentuan untuk calon penyewa saat mengajukan sewa kamar kos ini.
+                </p>
               </div>
 
               </div>

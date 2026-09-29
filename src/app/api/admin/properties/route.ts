@@ -87,11 +87,15 @@ export async function POST(request: NextRequest) {
     let owner_id: string | undefined;
     let is_pet_friendly: boolean = false;
     let is_24_hours: boolean = false;
+    let rules: string | null | undefined;
+    let rental_terms: string | null | undefined;
+    let youtube_url: string | null | undefined;
     let room_types: Array<{
       name: string;
       price_per_month: number;
       available_rooms: number;
       facilities?: string | null;
+      specifications?: string | null;
       image_url?: string | null;
     }> = [];
     const mediaToCreate: { url: string; type: string }[] = [];
@@ -108,6 +112,9 @@ export async function POST(request: NextRequest) {
       latitude = formData.get("latitude") as string | undefined;
       longitude = formData.get("longitude") as string | undefined;
       owner_id = (formData.get("owner_id") as string) || undefined;
+      rules = (formData.get("rules") as string) || null;
+      rental_terms = (formData.get("rental_terms") as string) || null;
+      youtube_url = (formData.get("youtube_url") as string) || null;
       is_pet_friendly =
         formData.get("is_pet_friendly") === "true" ||
         formData.get("is_pet_friendly") === "1";
@@ -136,6 +143,7 @@ export async function POST(request: NextRequest) {
                 price_per_month: Math.floor(Number(rt.price_per_month || 0)),
                 available_rooms: Math.floor(Number(rt.available_rooms || 0)),
                 facilities: rt.facilities ? String(rt.facilities).trim() : null,
+                specifications: rt.specifications ? String(rt.specifications).trim() : null,
                 image_url: rtImageUrl,
               });
             }
@@ -180,15 +188,19 @@ export async function POST(request: NextRequest) {
       latitude = body.latitude;
       longitude = body.longitude;
       owner_id = body.owner_id;
+      rules = body.rules;
+      rental_terms = body.rental_terms;
+      youtube_url = body.youtube_url;
       is_pet_friendly = Boolean(body.is_pet_friendly);
       is_24_hours = Boolean(body.is_24_hours);
 
       if (Array.isArray(body.room_types) && body.room_types.length > 0) {
-        room_types = body.room_types.map((rt: { name?: string; price_per_month?: number | string; available_rooms?: number | string; facilities?: string; image_url?: string }) => ({
+        room_types = body.room_types.map((rt: { name?: string; price_per_month?: number | string; available_rooms?: number | string; facilities?: string; specifications?: string; image_url?: string }) => ({
           name: String(rt.name || "Standar").trim(),
           price_per_month: Math.floor(Number(rt.price_per_month || 0)),
           available_rooms: Math.floor(Number(rt.available_rooms || 0)),
           facilities: rt.facilities ? String(rt.facilities).trim() : null,
+          specifications: rt.specifications ? String(rt.specifications).trim() : null,
           image_url: rt.image_url ? String(rt.image_url).trim() : null,
         }));
       }
@@ -333,6 +345,9 @@ export async function POST(request: NextRequest) {
         owner_id: owner_id.trim(),
         is_pet_friendly: is_pet_friendly,
         is_24_hours: is_24_hours,
+        rules: rules ? String(rules).trim() : null,
+        rental_terms: rental_terms ? String(rental_terms).trim() : null,
+        youtube_url: youtube_url ? String(youtube_url).trim() : null,
         media: {
           create: mediaToCreate,
         },
@@ -346,6 +361,7 @@ export async function POST(request: NextRequest) {
                     price_per_month: Math.floor(Number(price_per_month)),
                     available_rooms: Math.floor(Number(available_rooms)),
                     facilities: facilities.trim(),
+                    specifications: null,
                   },
                 ],
         },
