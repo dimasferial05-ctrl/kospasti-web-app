@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
@@ -123,6 +123,7 @@ export default function PropertyDetailPage() {
   // In-Page Sticky Navigation State
   const [showSubNav, setShowSubNav] = useState(false);
   const [activeSection, setActiveSection] = useState("section-media");
+  const subnavScrollRef = useRef<HTMLDivElement>(null);
 
   // Booking Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -333,12 +334,20 @@ export default function PropertyDetailPage() {
   useEffect(() => {
     if (!showSubNav) return;
     const activeBtn = document.getElementById(`subnav-btn-${activeSection}`);
-    if (activeBtn) {
-      activeBtn.scrollIntoView({
-        behavior: "smooth",
-        block: "nearest",
-        inline: "nearest",
-      });
+    const container = subnavScrollRef.current;
+    if (activeBtn && container) {
+      const btnLeft = activeBtn.offsetLeft;
+      const btnWidth = activeBtn.offsetWidth;
+      const btnRight = btnLeft + btnWidth;
+      const containerLeft = container.scrollLeft;
+      const containerWidth = container.clientWidth;
+      const containerRight = containerLeft + containerWidth;
+
+      if (btnLeft < containerLeft) {
+        container.scrollTo({ left: Math.max(0, btnLeft - 16), behavior: "smooth" });
+      } else if (btnRight > containerRight) {
+        container.scrollTo({ left: btnRight - containerWidth + 16, behavior: "smooth" });
+      }
     }
   }, [activeSection, showSubNav]);
 
@@ -527,7 +536,7 @@ export default function PropertyDetailPage() {
     : [];
 
   return (
-    <div className="max-w-7xl mx-auto min-h-screen bg-slate-50 pb-24 lg:pb-12 px-0 lg:px-8 flex flex-col relative shadow-sm">
+    <div className="max-w-7xl mx-auto min-h-screen bg-slate-50 pb-24 lg:pb-12 px-0 lg:px-8 flex flex-col relative shadow-sm w-full min-w-0">
       {/* Top Header Bar */}
       <div className="sticky top-0 z-30 bg-white/90 backdrop-blur-md border-b border-slate-200/80 py-3">
         <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 flex items-center justify-between gap-3">
@@ -555,21 +564,24 @@ export default function PropertyDetailPage() {
 
       {/* Sticky In-Page Navigation Bar (Smooth slide-in saat scroll ke bawah melewati foto properti) */}
       <div
-        className={`sticky top-[53px] z-20 bg-white/95 backdrop-blur-md border-b border-slate-200/90 shadow-xs transition-all duration-300 ease-in-out overflow-hidden ${
+        className={`sticky top-[53px] z-20 bg-white/95 backdrop-blur-md border-b border-slate-200/90 shadow-xs transition-all duration-300 ease-in-out w-full min-w-0 ${
           showSubNav
             ? "max-h-20 opacity-100 translate-y-0 pointer-events-auto"
-            : "max-h-0 opacity-0 -translate-y-3 pointer-events-none border-transparent"
+            : "max-h-0 opacity-0 -translate-y-3 pointer-events-none border-transparent overflow-hidden"
         }`}
       >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto py-2.5 scrollbar-none text-xs font-semibold text-slate-600">
+        <div className="max-w-7xl mx-auto w-full min-w-0">
+          <div
+            ref={subnavScrollRef}
+            className="relative flex items-center gap-1.5 sm:gap-2 overflow-x-auto py-2.5 px-4 sm:px-6 lg:px-8 text-xs font-semibold text-slate-600 whitespace-nowrap flex-nowrap [scrollbar-width:none] [&::-webkit-scrollbar]:hidden [-webkit-overflow-scrolling:touch]"
+          >
             <button
               id="subnav-btn-section-media"
               type="button"
               onClick={() => scrollToSection("section-media")}
-              className={`px-3 py-1.5 rounded-full transition-colors whitespace-nowrap cursor-pointer ${
+              className={`px-3 py-1.5 rounded-full transition-colors whitespace-nowrap shrink-0 cursor-pointer ${
                 activeSection === "section-media"
-                  ? "bg-emerald-600 text-white"
+                  ? "bg-emerald-600 text-white shadow-xs"
                   : "bg-slate-100 hover:bg-slate-200 text-slate-700"
               }`}
             >
@@ -580,9 +592,9 @@ export default function PropertyDetailPage() {
                 id="subnav-btn-section-tipe-kamar"
                 type="button"
                 onClick={() => scrollToSection("section-tipe-kamar")}
-                className={`px-3 py-1.5 rounded-full transition-colors whitespace-nowrap cursor-pointer ${
+                className={`px-3 py-1.5 rounded-full transition-colors whitespace-nowrap shrink-0 cursor-pointer ${
                   activeSection === "section-tipe-kamar"
-                    ? "bg-emerald-600 text-white"
+                    ? "bg-emerald-600 text-white shadow-xs"
                     : "bg-slate-100 hover:bg-slate-200 text-slate-700"
                 }`}
               >
@@ -593,9 +605,9 @@ export default function PropertyDetailPage() {
               id="subnav-btn-section-fasilitas-kamar"
               type="button"
               onClick={() => scrollToSection("section-fasilitas-kamar")}
-              className={`px-3 py-1.5 rounded-full transition-colors whitespace-nowrap cursor-pointer ${
+              className={`px-3 py-1.5 rounded-full transition-colors whitespace-nowrap shrink-0 cursor-pointer ${
                 activeSection === "section-fasilitas-kamar"
-                  ? "bg-emerald-600 text-white"
+                  ? "bg-emerald-600 text-white shadow-xs"
                   : "bg-slate-100 hover:bg-slate-200 text-slate-700"
               }`}
             >
@@ -605,9 +617,9 @@ export default function PropertyDetailPage() {
               id="subnav-btn-section-fasilitas-umum"
               type="button"
               onClick={() => scrollToSection("section-fasilitas-umum")}
-              className={`px-3 py-1.5 rounded-full transition-colors whitespace-nowrap cursor-pointer ${
+              className={`px-3 py-1.5 rounded-full transition-colors whitespace-nowrap shrink-0 cursor-pointer ${
                 activeSection === "section-fasilitas-umum"
-                  ? "bg-emerald-600 text-white"
+                  ? "bg-emerald-600 text-white shadow-xs"
                   : "bg-slate-100 hover:bg-slate-200 text-slate-700"
               }`}
             >
@@ -617,9 +629,9 @@ export default function PropertyDetailPage() {
               id="subnav-btn-section-spesifikasi-aturan"
               type="button"
               onClick={() => scrollToSection("section-spesifikasi-aturan")}
-              className={`px-3 py-1.5 rounded-full transition-colors whitespace-nowrap cursor-pointer ${
+              className={`px-3 py-1.5 rounded-full transition-colors whitespace-nowrap shrink-0 cursor-pointer ${
                 activeSection === "section-spesifikasi-aturan"
-                  ? "bg-emerald-600 text-white"
+                  ? "bg-emerald-600 text-white shadow-xs"
                   : "bg-slate-100 hover:bg-slate-200 text-slate-700"
               }`}
             >
@@ -630,9 +642,9 @@ export default function PropertyDetailPage() {
                 id="subnav-btn-section-ketentuan-sewa"
                 type="button"
                 onClick={() => scrollToSection("section-ketentuan-sewa")}
-                className={`px-3 py-1.5 rounded-full transition-colors whitespace-nowrap cursor-pointer ${
+                className={`px-3 py-1.5 rounded-full transition-colors whitespace-nowrap shrink-0 cursor-pointer ${
                   activeSection === "section-ketentuan-sewa"
-                    ? "bg-emerald-600 text-white"
+                    ? "bg-emerald-600 text-white shadow-xs"
                     : "bg-slate-100 hover:bg-slate-200 text-slate-700"
                 }`}
               >
@@ -643,9 +655,9 @@ export default function PropertyDetailPage() {
               id="subnav-btn-section-lokasi"
               type="button"
               onClick={() => scrollToSection("section-lokasi")}
-              className={`px-3 py-1.5 rounded-full transition-colors whitespace-nowrap cursor-pointer ${
+              className={`px-3 py-1.5 rounded-full transition-colors whitespace-nowrap shrink-0 cursor-pointer ${
                 activeSection === "section-lokasi"
-                  ? "bg-emerald-600 text-white"
+                  ? "bg-emerald-600 text-white shadow-xs"
                   : "bg-slate-100 hover:bg-slate-200 text-slate-700"
               }`}
             >
@@ -655,9 +667,9 @@ export default function PropertyDetailPage() {
               id="subnav-btn-reviews-section"
               type="button"
               onClick={() => scrollToSection("reviews-section")}
-              className={`px-3 py-1.5 rounded-full transition-colors whitespace-nowrap cursor-pointer ${
+              className={`px-3 py-1.5 rounded-full transition-colors whitespace-nowrap shrink-0 cursor-pointer ${
                 activeSection === "reviews-section"
-                  ? "bg-emerald-600 text-white"
+                  ? "bg-emerald-600 text-white shadow-xs"
                   : "bg-slate-100 hover:bg-slate-200 text-slate-700"
               }`}
             >
@@ -856,7 +868,7 @@ export default function PropertyDetailPage() {
       {/* ========================================================================= */}
       {/* 2. BODY CONTENT SECTION: DI BAWAH FOTO PROPERTI (KONTEN KIRI & AMANKAN KANAN) */}
       {/* ========================================================================= */}
-      <div className="flex flex-col lg:flex-row gap-6 lg:gap-8 mt-6">
+      <div className="flex flex-col lg:flex-row gap-6 lg:gap-8 mt-6 px-4 sm:px-6 lg:px-0 min-w-0">
         {/* KOLOM KIRI (Informasi Utama, Pilihan Tipe, Fasilitas Kamar, Fasilitas Umum, Aturan, dll) */}
         <div className="flex-1 min-w-0 flex flex-col gap-6">
           {/* Card 1: Informasi Dasar Properti */}
