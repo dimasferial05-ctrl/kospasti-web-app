@@ -51,7 +51,7 @@ function UserAvatar({
       );
     }
     return (
-      <div className="w-10 h-10 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center font-bold text-sm shadow-xs shrink-0 select-none">
+      <div className="w-10 h-10 rounded-full bg-emerald-100 text-emerald-800 flex items-center justify-center font-bold text-sm shadow-xs shrink-0 select-none">
         {initial || <UserIcon size={18} />}
       </div>
     );
@@ -132,7 +132,7 @@ export default function AdminUsersPage() {
   if (isLoading) {
     return (
       <div className="p-8 text-slate-500 font-medium flex items-center gap-2">
-        <Loader2 className="w-5 h-5 animate-spin text-blue-600" />
+        <Loader2 className="w-5 h-5 animate-spin text-emerald-600" />
         <span>Memuat data pengguna...</span>
       </div>
     );
@@ -244,7 +244,7 @@ export default function AdminUsersPage() {
                     {/* Kolom Total Booking */}
                     <td className="p-4 text-center">
                       <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-slate-100 text-slate-700 rounded-full text-xs font-bold">
-                        <BookmarkCheck size={13} className="text-blue-600" />
+                        <BookmarkCheck size={13} className="text-emerald-600" />
                         <span>{user._count?.bookings ?? 0}</span>
                       </span>
                     </td>
@@ -263,7 +263,7 @@ export default function AdminUsersPage() {
                       <button
                         type="button"
                         onClick={() => setSelectedUser(user)}
-                        className="inline-flex items-center gap-1 px-3 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 rounded-lg text-xs font-semibold shadow-2xs transition active:scale-95 cursor-pointer"
+                        className="inline-flex items-center gap-1 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 rounded-lg text-xs font-semibold shadow-2xs transition active:scale-95 cursor-pointer"
                         title="Lihat Detail Profil Pengguna"
                       >
                         <Eye size={14} />
@@ -301,7 +301,7 @@ export default function AdminUsersPage() {
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header Modal */}
-            <div className="bg-gradient-to-r from-blue-600 to-indigo-600 p-6 text-white relative">
+            <div className="bg-gradient-to-r from-slate-900 to-slate-800 p-6 text-white relative">
               <button
                 type="button"
                 onClick={() => setSelectedUser(null)}
@@ -313,7 +313,7 @@ export default function AdminUsersPage() {
               <div className="flex flex-col items-center text-center">
                 <UserAvatar src={selectedUser.avatar} name={selectedUser.name} size="lg" />
                 <h3 className="text-xl font-bold tracking-tight">{selectedUser.name}</h3>
-                <p className="text-blue-100 text-xs mt-0.5 font-mono">ID: {selectedUser.id}</p>
+                <p className="text-slate-300 text-xs mt-0.5 font-mono">ID: {selectedUser.id}</p>
               </div>
             </div>
 
@@ -363,7 +363,7 @@ export default function AdminUsersPage() {
                 <div className="grid grid-cols-2 gap-2.5 pt-1">
                   <div className="p-3 bg-slate-50 rounded-lg border border-slate-100 text-sm">
                     <div className="flex items-center gap-1.5 text-xs text-slate-400 font-medium mb-1">
-                      <BookmarkCheck size={14} className="text-blue-600" />
+                      <BookmarkCheck size={14} className="text-emerald-600" />
                       <span>Total Booking</span>
                     </div>
                     <div className="text-base font-bold text-slate-800">

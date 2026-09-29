@@ -593,7 +593,7 @@ export default function ManagePropertiesPage() {
   if (isLoading) {
     return (
       <div className="p-8 text-slate-500 flex items-center gap-2">
-        <Loader2 className="w-5 h-5 animate-spin text-blue-600" />
+        <Loader2 className="w-5 h-5 animate-spin text-emerald-600" />
         <span>Memuat data properti...</span>
       </div>
     );
@@ -613,7 +613,7 @@ export default function ManagePropertiesPage() {
           </div>
           <button
             onClick={handleOpenAddModal}
-            className="inline-flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-lg text-sm font-semibold transition-all shadow-sm cursor-pointer self-start sm:self-auto"
+            className="inline-flex items-center justify-center gap-2 bg-slate-900 hover:bg-slate-800 text-white px-4 py-2.5 rounded-lg text-sm font-semibold transition-all shadow-sm cursor-pointer self-start sm:self-auto"
           >
             <Plus size={16} />
             <span>Tambah Properti</span>
@@ -789,7 +789,7 @@ export default function ManagePropertiesPage() {
                   placeholder="Contoh: Kos Mawar Indah"
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className="w-full px-3.5 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white"
+                  className="w-full px-3.5 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-600/20 focus:border-emerald-600 bg-white"
                 />
               </div>
 
@@ -805,7 +805,7 @@ export default function ManagePropertiesPage() {
                     required
                     value={formData.owner_id}
                     onChange={(e) => setFormData({ ...formData, owner_id: e.target.value })}
-                    className="w-full px-3.5 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white"
+                    className="w-full px-3.5 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-600/20 focus:border-emerald-600 bg-white"
                   >
                     <option value="" disabled>
                       -- Pilih Pemilik Kos --
@@ -827,7 +827,7 @@ export default function ManagePropertiesPage() {
                 <select
                   value={formData.gender_type}
                   onChange={(e) => setFormData({ ...formData, gender_type: e.target.value })}
-                  className="w-full px-3.5 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white"
+                  className="w-full px-3.5 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-600/20 focus:border-emerald-600 bg-white"
                 >
                   <option value="PUTRA">Putra</option>
                   <option value="PUTRI">Putri</option>
@@ -909,7 +909,7 @@ export default function ManagePropertiesPage() {
                               updated[idx].name = e.target.value;
                               setRoomTypes(updated);
                             }}
-                            className="w-full px-3 py-1.5 text-xs border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white"
+                            className="w-full px-3 py-1.5 text-xs border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-600/20 focus:border-emerald-600 bg-white"
                           />
                         </div>
 
@@ -928,7 +928,7 @@ export default function ManagePropertiesPage() {
                               updated[idx].price_per_month = e.target.value;
                               setRoomTypes(updated);
                             }}
-                            className="w-full px-3 py-1.5 text-xs border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white"
+                            className="w-full px-3 py-1.5 text-xs border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-600/20 focus:border-emerald-600 bg-white"
                           />
                         </div>
 
@@ -947,7 +947,7 @@ export default function ManagePropertiesPage() {
                               updated[idx].available_rooms = e.target.value;
                               setRoomTypes(updated);
                             }}
-                            className="w-full px-3 py-1.5 text-xs border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white"
+                            className="w-full px-3 py-1.5 text-xs border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-600/20 focus:border-emerald-600 bg-white"
                           />
                         </div>
                       </div>
@@ -965,7 +965,7 @@ export default function ManagePropertiesPage() {
                             updated[idx].facilities = e.target.value;
                             setRoomTypes(updated);
                           }}
-                          className="w-full px-3 py-1.5 text-xs border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white"
+                          className="w-full px-3 py-1.5 text-xs border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-600/20 focus:border-emerald-600 bg-white"
                         />
                       </div>
 
@@ -982,7 +982,7 @@ export default function ManagePropertiesPage() {
                             updated[idx].specifications = e.target.value;
                             setRoomTypes(updated);
                           }}
-                          className="w-full px-3 py-1.5 text-xs border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white"
+                          className="w-full px-3 py-1.5 text-xs border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-600/20 focus:border-emerald-600 bg-white"
                         />
                       </div>
 
@@ -1026,7 +1026,7 @@ export default function ManagePropertiesPage() {
                           {/* Upload / URL Inputs */}
                           <div className="flex-1 space-y-1.5 w-full min-w-0">
                             <div className="flex items-center gap-2 flex-wrap">
-                              <label className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-lg text-xs font-semibold cursor-pointer border border-blue-200/80 transition-colors">
+                              <label className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 rounded-lg text-xs font-semibold cursor-pointer border border-emerald-200/80 transition-colors">
                                 <Upload size={13} />
                                 <span>{rt.image_file ? "Ganti File Foto" : "Pilih File Foto"}</span>
                                 <input
@@ -1064,7 +1064,7 @@ export default function ManagePropertiesPage() {
                                 updated[idx].image_preview = e.target.value || null;
                                 setRoomTypes(updated);
                               }}
-                              className="w-full px-3 py-1.5 text-xs border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white"
+                              className="w-full px-3 py-1.5 text-xs border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-600/20 focus:border-emerald-600 bg-white"
                             />
                           </div>
                         </div>
@@ -1085,7 +1085,7 @@ export default function ManagePropertiesPage() {
                   placeholder="Contoh: WiFi, Dapur Bersama, Parkir Motor, CCTV"
                   value={formData.facilities}
                   onChange={(e) => setFormData({ ...formData, facilities: e.target.value })}
-                  className="w-full px-3.5 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white"
+                  className="w-full px-3.5 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-600/20 focus:border-emerald-600 bg-white"
                 />
                 <p className="text-[11px] text-slate-400 mt-1">
                   Fasilitas yang bisa digunakan bersama oleh semua penghuni. Gunakan tanda koma (,) untuk memisahkan.
@@ -1110,7 +1110,7 @@ export default function ManagePropertiesPage() {
                     placeholder="Contoh: Jl. Tebet Barat Dalam VII No. 12, Jakarta Selatan"
                     value={formData.address}
                     onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                    className="w-full px-3 py-1.5 text-xs border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white"
+                    className="w-full px-3 py-1.5 text-xs border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-600/20 focus:border-emerald-600 bg-white"
                   />
                 </div>
 
@@ -1124,7 +1124,7 @@ export default function ManagePropertiesPage() {
                       placeholder="Contoh: -6.2374"
                       value={formData.latitude}
                       onChange={(e) => setFormData({ ...formData, latitude: e.target.value })}
-                      className="w-full px-3 py-1.5 text-xs font-mono border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white"
+                      className="w-full px-3 py-1.5 text-xs font-mono border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-600/20 focus:border-emerald-600 bg-white"
                     />
                   </div>
                   <div>
@@ -1136,7 +1136,7 @@ export default function ManagePropertiesPage() {
                       placeholder="Contoh: 106.8526"
                       value={formData.longitude}
                       onChange={(e) => setFormData({ ...formData, longitude: e.target.value })}
-                      className="w-full px-3 py-1.5 text-xs font-mono border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white"
+                      className="w-full px-3 py-1.5 text-xs font-mono border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-600/20 focus:border-emerald-600 bg-white"
                     />
                   </div>
                 </div>
@@ -1352,7 +1352,7 @@ export default function ManagePropertiesPage() {
                   multiple
                   accept="image/*,video/mp4,video/webm,video/*"
                   onChange={handleFileChange}
-                  className="w-full text-xs text-slate-500 file:mr-3 file:py-2 file:px-3.5 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 border border-slate-200 rounded-xl p-1.5 bg-white cursor-pointer"
+                  className="w-full text-xs text-slate-500 file:mr-3 file:py-2 file:px-3.5 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100 border border-slate-200 rounded-xl p-1.5 bg-white cursor-pointer"
                 />
                 <p className="text-[11px] text-slate-400 mt-1">
                   Unggah beberapa gambar dan video sekaligus (MP4, WebM, JPG, PNG).
@@ -1367,7 +1367,7 @@ export default function ManagePropertiesPage() {
                         className="flex items-center justify-between bg-slate-50 border border-slate-200 rounded-lg px-3 py-1.5 text-xs"
                       >
                         <div className="flex items-center gap-2 truncate">
-                          <FileText size={14} className="text-blue-600 shrink-0" />
+                          <FileText size={14} className="text-emerald-600 shrink-0" />
                           <span className="truncate text-slate-700 font-medium">
                             {file.name}
                           </span>
@@ -1400,7 +1400,7 @@ export default function ManagePropertiesPage() {
                   placeholder="Contoh: https://images.unsplash.com/photo-..."
                   value={formData.image_url}
                   onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
-                  className="w-full px-3.5 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white"
+                  className="w-full px-3.5 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-600/20 focus:border-emerald-600 bg-white"
                 />
               </div>
 
@@ -1414,7 +1414,7 @@ export default function ManagePropertiesPage() {
                   placeholder="Contoh: https://www.youtube.com/watch?v=aqz-KE-bpKQ"
                   value={formData.youtube_url}
                   onChange={(e) => setFormData({ ...formData, youtube_url: e.target.value })}
-                  className="w-full px-3.5 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white"
+                  className="w-full px-3.5 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-600/20 focus:border-emerald-600 bg-white"
                 />
                 <p className="text-[11px] text-slate-400 mt-1">
                   Video tour atau review kos dari YouTube yang bisa langsung diputar calon penyewa.
@@ -1431,7 +1431,7 @@ export default function ManagePropertiesPage() {
                   placeholder={"1. Dilarang merokok di dalam kamar\n2. Tamu lawan jenis dilarang masuk kamar\n3. Waktu tenang dimulai pukul 22:00 WIB"}
                   value={formData.rules}
                   onChange={(e) => setFormData({ ...formData, rules: e.target.value })}
-                  className="w-full px-3.5 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white resize-y"
+                  className="w-full px-3.5 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-600/20 focus:border-emerald-600 bg-white resize-y"
                 />
                 <p className="text-[11px] text-slate-400 mt-1">
                   Aturan tata tertib kos. Gunakan baris baru untuk memisahkan setiap poin aturan.
@@ -1448,7 +1448,7 @@ export default function ManagePropertiesPage() {
                   placeholder={"1. Menyerahkan foto/scan KTP atau Kartu Tanda Mahasiswa yang berlaku\n2. Pembayaran sewa lunas di muka\n3. Uang deposit jaminan Rp 150.000 (dikembalikan saat checkout)"}
                   value={formData.rental_terms}
                   onChange={(e) => setFormData({ ...formData, rental_terms: e.target.value })}
-                  className="w-full px-3.5 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white resize-y"
+                  className="w-full px-3.5 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-600/20 focus:border-emerald-600 bg-white resize-y"
                 />
                 <p className="text-[11px] text-slate-400 mt-1">
                   Syarat dan ketentuan untuk calon penyewa saat mengajukan sewa kamar kos ini.
@@ -1469,7 +1469,7 @@ export default function ManagePropertiesPage() {
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white px-5 py-2 text-xs font-semibold rounded-xl transition-all cursor-pointer shadow-sm"
+                  className="inline-flex items-center gap-2 bg-slate-900 hover:bg-slate-800 disabled:opacity-50 text-white px-5 py-2 text-xs font-semibold rounded-xl transition-all cursor-pointer shadow-sm"
                 >
                   {isSubmitting ? (
                     <>

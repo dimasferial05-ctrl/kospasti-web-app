@@ -60,7 +60,7 @@ export function SearchFilter({ onSearch, initialValues }: SearchFilterProps) {
             id="filter-price"
             value={maxPrice}
             onChange={(e) => setMaxPrice(e.target.value)}
-            className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all"
+            className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white transition-all"
           >
             <option value="">Semua Harga</option>
             <option value="500000">Max Rp 500.000</option>
@@ -80,7 +80,7 @@ export function SearchFilter({ onSearch, initialValues }: SearchFilterProps) {
             id="filter-gender"
             value={genderType}
             onChange={(e) => setGenderType(e.target.value)}
-            className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all"
+            className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white transition-all"
           >
             <option value="">Semua Tipe</option>
             <option value="PUTRA">Khusus Putra</option>
@@ -93,7 +93,7 @@ export function SearchFilter({ onSearch, initialValues }: SearchFilterProps) {
       {/* Search Button */}
       <button
         type="submit"
-        className="w-full lg:w-auto bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-medium py-2.5 px-6 rounded-lg text-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md active:translate-y-0 flex items-center justify-center gap-2 shadow-sm shrink-0 lg:h-[42px] cursor-pointer"
+        className="w-full lg:w-auto bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white font-medium py-2.5 px-6 rounded-lg text-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md active:translate-y-0 flex items-center justify-center gap-2 shadow-sm shrink-0 lg:h-[42px] cursor-pointer"
       >
         <Search className="w-4 h-4" />
         <span>Cari Kos</span>

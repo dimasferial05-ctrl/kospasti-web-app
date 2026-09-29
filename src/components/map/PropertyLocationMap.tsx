@@ -316,7 +316,7 @@ export default function PropertyLocationMap({
       {/* Header Bagian Lokasi */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div className="flex items-start gap-3">
-          <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0 border border-blue-100">
+          <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0 border border-emerald-100">
             <Compass className="w-5 h-5" />
           </div>
           <div>
@@ -335,7 +335,7 @@ export default function PropertyLocationMap({
             href={googleMapsUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 text-xs font-semibold text-blue-700 bg-blue-50 hover:bg-blue-100 active:scale-95 rounded-lg border border-blue-200 transition shrink-0"
+            className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 text-xs font-semibold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 active:scale-95 rounded-lg border border-emerald-200 transition shrink-0"
             title="Buka petunjuk arah di aplikasi Google Maps"
           >
             <ExternalLink className="w-3.5 h-3.5" />
@@ -355,7 +355,7 @@ export default function PropertyLocationMap({
                   type="button"
                   onClick={handleGetLocationAndRoute}
                   disabled={isLocating}
-                  className="inline-flex items-center gap-2 px-3.5 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white rounded-lg text-xs font-semibold shadow-xs transition active:scale-95 cursor-pointer"
+                  className="inline-flex items-center gap-2 px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 disabled:bg-emerald-400 text-white rounded-lg text-xs font-semibold shadow-xs transition active:scale-95 cursor-pointer"
                 >
                   {isLocating ? (
                     <>
@@ -379,7 +379,7 @@ export default function PropertyLocationMap({
                       disabled={isCalculatingRoute}
                       className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-medium transition ${
                         travelMode === "DRIVING"
-                          ? "bg-blue-600 text-white shadow-2xs"
+                          ? "bg-emerald-600 text-white shadow-2xs"
                           : "text-slate-600 hover:text-slate-900"
                       }`}
                       title="Mode Berkendara (Mobil / Motor)"
@@ -393,7 +393,7 @@ export default function PropertyLocationMap({
                       disabled={isCalculatingRoute}
                       className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-medium transition ${
                         travelMode === "WALKING"
-                          ? "bg-blue-600 text-white shadow-2xs"
+                          ? "bg-emerald-600 text-white shadow-2xs"
                           : "text-slate-600 hover:text-slate-900"
                       }`}
                       title="Mode Jalan Kaki"
@@ -419,7 +419,7 @@ export default function PropertyLocationMap({
             {/* Info Badge Jarak & Waktu jika rute sudah dihitung */}
             {isCalculatingRoute ? (
               <div className="flex items-center gap-1.5 text-xs text-slate-500 py-1">
-                <Loader2 className="w-3.5 h-3.5 animate-spin text-blue-600" />
+                <Loader2 className="w-3.5 h-3.5 animate-spin text-emerald-600" />
                 <span>
                   Menghitung rute {travelMode === "WALKING" ? "jalan kaki" : "berkendara"}...
                 </span>
@@ -478,7 +478,7 @@ export default function PropertyLocationMap({
                     <div className="px-2.5 py-1 bg-slate-900 text-white text-[11px] font-bold rounded-lg shadow-md mb-1 border border-slate-700 whitespace-nowrap">
                       {propertyName}
                     </div>
-                    <div className="w-8 h-8 rounded-full bg-blue-600 border-2 border-white text-white flex items-center justify-center shadow-lg transform group-hover:scale-110 transition">
+                    <div className="w-8 h-8 rounded-full bg-emerald-600 border-2 border-white text-white flex items-center justify-center shadow-lg transform group-hover:scale-110 transition">
                       <MapPin className="w-4 h-4 fill-white" />
                     </div>
                   </div>
@@ -524,7 +524,7 @@ export default function PropertyLocationMap({
               href={googleMapsUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="mt-3 inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-blue-700 bg-white hover:bg-slate-100 rounded-lg border border-slate-200 shadow-2xs transition"
+              className="mt-3 inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-emerald-700 bg-white hover:bg-slate-100 rounded-lg border border-slate-200 shadow-2xs transition"
             >
               <ExternalLink className="w-3.5 h-3.5" />
               <span>Cari Alamat di Google Maps</span>
