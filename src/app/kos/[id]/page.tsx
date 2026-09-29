@@ -275,7 +275,7 @@ export default function PropertyDetailPage() {
     };
   }, [id]);
 
-  // Observer untuk Sticky In-Page Navigation: Muncul hanya saat foto properti sudah di-scroll lewat
+  // Observer & Scrollspy untuk Sticky In-Page Navigation
   useEffect(() => {
     const handleScroll = () => {
       const hero = document.getElementById("section-media");
@@ -284,11 +284,63 @@ export default function PropertyDetailPage() {
         // Muncul bila bagian bawah foto properti sudah melewati batas atas navbar
         setShowSubNav(rect.bottom < 54);
       }
+
+      // Scrollspy: Deteksi section aktif sesuai posisi scroll
+      const sectionIds = [
+        "section-media",
+        "section-tipe-kamar",
+        "section-fasilitas-kamar",
+        "section-fasilitas-umum",
+        "section-spesifikasi-aturan",
+        "section-ketentuan-sewa",
+        "section-lokasi",
+        "reviews-section",
+      ];
+
+      const scrollPosition = window.scrollY;
+      const windowHeight = window.innerHeight;
+      const documentHeight = document.documentElement.scrollHeight;
+
+      // Jika user sudah mendekati batas bawah halaman, langsung tandai ulasan
+      if (scrollPosition + windowHeight >= documentHeight - 60) {
+        setActiveSection("reviews-section");
+        return;
+      }
+
+      // Threshold membaca (di bawah sticky subnav ~160px dari viewport top)
+      const offset = 160;
+      let currentSection = "section-media";
+
+      for (const sectionId of sectionIds) {
+        const el = document.getElementById(sectionId);
+        if (el) {
+          const top = el.getBoundingClientRect().top;
+          if (top <= offset) {
+            currentSection = sectionId;
+          }
+        }
+      }
+
+      setActiveSection(currentSection);
     };
+
     window.addEventListener("scroll", handleScroll, { passive: true });
     handleScroll();
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  // Auto-scroll tombol aktif di dalam horizontal subnav jika tersembunyi
+  useEffect(() => {
+    if (!showSubNav) return;
+    const activeBtn = document.getElementById(`subnav-btn-${activeSection}`);
+    if (activeBtn) {
+      activeBtn.scrollIntoView({
+        behavior: "smooth",
+        block: "nearest",
+        inline: "nearest",
+      });
+    }
+  }, [activeSection, showSubNav]);
 
   const scrollToSection = (sectionId: string) => {
     const el = document.getElementById(sectionId);
@@ -512,6 +564,7 @@ export default function PropertyDetailPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto py-2.5 scrollbar-none text-xs font-semibold text-slate-600">
             <button
+              id="subnav-btn-section-media"
               type="button"
               onClick={() => scrollToSection("section-media")}
               className={`px-3 py-1.5 rounded-full transition-colors whitespace-nowrap cursor-pointer ${
@@ -524,6 +577,7 @@ export default function PropertyDetailPage() {
             </button>
             {property.room_types && property.room_types.length > 0 && (
               <button
+                id="subnav-btn-section-tipe-kamar"
                 type="button"
                 onClick={() => scrollToSection("section-tipe-kamar")}
                 className={`px-3 py-1.5 rounded-full transition-colors whitespace-nowrap cursor-pointer ${
@@ -536,6 +590,7 @@ export default function PropertyDetailPage() {
               </button>
             )}
             <button
+              id="subnav-btn-section-fasilitas-kamar"
               type="button"
               onClick={() => scrollToSection("section-fasilitas-kamar")}
               className={`px-3 py-1.5 rounded-full transition-colors whitespace-nowrap cursor-pointer ${
@@ -547,6 +602,7 @@ export default function PropertyDetailPage() {
               Fasilitas Kamar
             </button>
             <button
+              id="subnav-btn-section-fasilitas-umum"
               type="button"
               onClick={() => scrollToSection("section-fasilitas-umum")}
               className={`px-3 py-1.5 rounded-full transition-colors whitespace-nowrap cursor-pointer ${
@@ -558,6 +614,7 @@ export default function PropertyDetailPage() {
               Fasilitas Umum
             </button>
             <button
+              id="subnav-btn-section-spesifikasi-aturan"
               type="button"
               onClick={() => scrollToSection("section-spesifikasi-aturan")}
               className={`px-3 py-1.5 rounded-full transition-colors whitespace-nowrap cursor-pointer ${
@@ -570,6 +627,7 @@ export default function PropertyDetailPage() {
             </button>
             {rentalTermsList.length > 0 && (
               <button
+                id="subnav-btn-section-ketentuan-sewa"
                 type="button"
                 onClick={() => scrollToSection("section-ketentuan-sewa")}
                 className={`px-3 py-1.5 rounded-full transition-colors whitespace-nowrap cursor-pointer ${
@@ -582,6 +640,7 @@ export default function PropertyDetailPage() {
               </button>
             )}
             <button
+              id="subnav-btn-section-lokasi"
               type="button"
               onClick={() => scrollToSection("section-lokasi")}
               className={`px-3 py-1.5 rounded-full transition-colors whitespace-nowrap cursor-pointer ${
@@ -593,6 +652,7 @@ export default function PropertyDetailPage() {
               Lokasi
             </button>
             <button
+              id="subnav-btn-reviews-section"
               type="button"
               onClick={() => scrollToSection("reviews-section")}
               className={`px-3 py-1.5 rounded-full transition-colors whitespace-nowrap cursor-pointer ${
