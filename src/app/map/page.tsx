@@ -311,10 +311,6 @@ function MapSearchContent() {
 
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
             <div>
-              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200/80 text-emerald-800 text-xs font-semibold mb-2">
-                <Sparkles className="w-3.5 h-3.5 text-emerald-600" />
-                <span>Pencarian Cerdas AI + Google Maps</span>
-              </div>
               <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
                 Eksplorasi Kos Berdasarkan Lokasi
               </h1>
