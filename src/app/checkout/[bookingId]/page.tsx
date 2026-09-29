@@ -213,7 +213,7 @@ export default function CheckoutPage() {
               {/* Detail Properti & Kamar */}
               {isLoading ? (
                 <div className="py-4 flex items-center justify-center gap-2 text-slate-400 text-xs">
-                  <Loader2 className="w-4 h-4 animate-spin text-blue-600" />
+                  <Loader2 className="w-4 h-4 animate-spin text-emerald-600" />
                   <span>Memuat detail pesanan...</span>
                 </div>
               ) : booking ? (
@@ -276,7 +276,7 @@ export default function CheckoutPage() {
                   <p className="text-xs text-slate-500">Total Tagihan</p>
                   <p className="text-xs text-slate-400">Sudah termasuk biaya admin</p>
                 </div>
-                <p className="text-xl font-bold text-blue-600 tracking-tight">
+                <p className="text-xl font-bold text-emerald-700 tracking-tight">
                   {isLoading
                     ? "..."
                     : booking
@@ -329,7 +329,7 @@ export default function CheckoutPage() {
                     Ref ID: <span className="font-mono text-slate-600">{bookingId}</span>
                   </p>
                 )}
-                <div className="mt-2 text-xs font-semibold text-blue-600 bg-blue-50 border border-blue-100 px-3 py-1 rounded-full">
+                <div className="mt-2 text-xs font-semibold text-emerald-700 bg-emerald-50 border border-emerald-100 px-3 py-1 rounded-full">
                   Nominal: {formatRupiah(totalPrice)}
                 </div>
               </div>
@@ -339,7 +339,7 @@ export default function CheckoutPage() {
                 type="button"
                 onClick={handleSimulatePayment}
                 disabled={isProcessing}
-                className="w-full py-3.5 px-4 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-bold rounded-xl transition-all shadow-md shadow-blue-500/20 disabled:opacity-75 disabled:cursor-not-allowed flex items-center justify-center gap-2 cursor-pointer"
+                className="w-full py-3.5 px-4 bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white font-bold rounded-xl transition-all shadow-md shadow-emerald-500/20 disabled:opacity-75 disabled:cursor-not-allowed flex items-center justify-center gap-2 cursor-pointer"
               >
                 {isProcessing ? (
                   <>

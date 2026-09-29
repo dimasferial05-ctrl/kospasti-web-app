@@ -347,7 +347,7 @@ export default function AdminOwnersPage() {
   if (isLoading) {
     return (
       <div className="p-8 text-slate-500 flex items-center gap-2">
-        <Loader2 className="w-5 h-5 animate-spin text-blue-600" />
+        <Loader2 className="w-5 h-5 animate-spin text-emerald-600" />
         <span>Memuat data pemilik kos...</span>
       </div>
     );
@@ -388,7 +388,7 @@ export default function AdminOwnersPage() {
               setAddError(null);
               setIsAddModalOpen(true);
             }}
-            className="inline-flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 text-sm font-semibold rounded-lg shadow-sm transition-colors cursor-pointer shrink-0"
+            className="inline-flex items-center justify-center gap-2 bg-slate-900 hover:bg-slate-800 text-white px-4 py-2 text-sm font-semibold rounded-lg shadow-sm transition-colors cursor-pointer shrink-0"
           >
             <Plus className="w-4 h-4" />
             <span>Tambah Pemilik</span>
@@ -437,8 +437,8 @@ export default function AdminOwnersPage() {
                       </div>
                     </td>
                     <td className="p-4 text-center">
-                      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-200/60">
-                        <Building2 className="w-3.5 h-3.5 text-blue-600" />
+                      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200/60">
+                        <Building2 className="w-3.5 h-3.5 text-emerald-600" />
                         {propertyCount} Kos
                       </span>
                     </td>
@@ -549,7 +549,7 @@ export default function AdminOwnersPage() {
             {/* Modal Header */}
             <div className="p-6 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center shrink-0 font-bold">
+                <div className="w-10 h-10 rounded-xl bg-slate-100 text-slate-700 flex items-center justify-center shrink-0 font-bold">
                   <UserPlus className="w-5 h-5" />
                 </div>
                 <div>
@@ -597,7 +597,7 @@ export default function AdminOwnersPage() {
                   onChange={(e) =>
                     setAddFormData((prev) => ({ ...prev, name: e.target.value }))
                   }
-                  className="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-sm bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-600/10 focus:border-blue-600 transition-all"
+                  className="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-sm bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-600/15 focus:border-emerald-600 transition-all"
                 />
               </div>
 
@@ -617,7 +617,7 @@ export default function AdminOwnersPage() {
                       whatsapp_number: e.target.value,
                     }))
                   }
-                  className="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-sm bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-600/10 focus:border-blue-600 transition-all font-mono"
+                  className="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-sm bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-600/15 focus:border-emerald-600 transition-all font-mono"
                 />
                 <p className="text-[11px] text-slate-400">
                   Nomor ini digunakan untuk kontak dan login via Magic Link WhatsApp.
@@ -639,7 +639,7 @@ export default function AdminOwnersPage() {
                 <button
                   type="submit"
                   disabled={isSubmittingAdd}
-                  className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-60 text-white px-5 py-2.5 text-xs font-semibold rounded-xl transition-all cursor-pointer shadow-sm"
+                  className="inline-flex items-center gap-2 bg-slate-900 hover:bg-slate-800 disabled:opacity-60 text-white px-5 py-2.5 text-xs font-semibold rounded-xl transition-all cursor-pointer shadow-sm"
                 >
                   {isSubmittingAdd ? (
                     <>
@@ -728,7 +728,7 @@ export default function AdminOwnersPage() {
                   onChange={(e) =>
                     setEditFormData((prev) => ({ ...prev, name: e.target.value }))
                   }
-                  className="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-sm bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-600/10 focus:border-blue-600 transition-all"
+                  className="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-sm bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-600/15 focus:border-emerald-600 transition-all"
                 />
               </div>
 
@@ -748,7 +748,7 @@ export default function AdminOwnersPage() {
                       whatsapp_number: e.target.value,
                     }))
                   }
-                  className="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-sm bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-600/10 focus:border-blue-600 transition-all font-mono"
+                  className="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-sm bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-600/15 focus:border-emerald-600 transition-all font-mono"
                 />
               </div>
 
@@ -767,7 +767,7 @@ export default function AdminOwnersPage() {
                 <button
                   type="submit"
                   disabled={isSubmittingEdit}
-                  className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-60 text-white px-5 py-2.5 text-xs font-semibold rounded-xl transition-all cursor-pointer shadow-sm"
+                  className="inline-flex items-center gap-2 bg-slate-900 hover:bg-slate-800 disabled:opacity-60 text-white px-5 py-2.5 text-xs font-semibold rounded-xl transition-all cursor-pointer shadow-sm"
                 >
                   {isSubmittingEdit ? (
                     <>
