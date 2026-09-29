@@ -64,13 +64,11 @@ export function WishlistButton({
       if (response.status === 401) {
         // Rollback state jika belum login
         setIsSaved(previousState);
-        const confirmLogin = window.confirm(
-          "Anda harus login untuk menyimpan kos ke favorit. Apakah Anda ingin login sekarang?"
-        );
-        if (confirmLogin) {
-          const currentPath = typeof window !== "undefined" ? window.location.pathname : "/";
-          router.push(`/login?callbackUrl=${encodeURIComponent(currentPath)}`);
-        }
+        const currentPath =
+          typeof window !== "undefined"
+            ? `${window.location.pathname}${window.location.search}`
+            : "/";
+        router.push(`/login?callbackUrl=${encodeURIComponent(currentPath)}`);
         return;
       }
 
