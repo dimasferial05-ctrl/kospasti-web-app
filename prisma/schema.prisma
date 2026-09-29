@@ -33,6 +33,9 @@ model Property {
   longitude       Float?
   is_pet_friendly Boolean         @default(false)
   is_24_hours     Boolean         @default(false)
+  rules           String?
+  rental_terms    String?
+  youtube_url     String?
   created_at      DateTime        @default(now())
   updated_at      DateTime        @updatedAt
   owner_id        String
@@ -50,6 +53,7 @@ model RoomType {
   price_per_month Int
   available_rooms Int       @default(0)
   facilities      String?
+  specifications  String?
   image_url       String?
   created_at      DateTime  @default(now())
   updated_at      DateTime  @updatedAt

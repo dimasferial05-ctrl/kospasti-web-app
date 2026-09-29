@@ -67,6 +67,9 @@ export async function PATCH(
     let owner_id: string | undefined;
     let is_pet_friendly: boolean | undefined;
     let is_24_hours: boolean | undefined;
+    let rules: string | null | undefined;
+    let rental_terms: string | null | undefined;
+    let youtube_url: string | null | undefined;
     let room_types:
       | Array<{
           id?: string;
@@ -74,6 +77,7 @@ export async function PATCH(
           price_per_month: number;
           available_rooms: number;
           facilities: string | null;
+          specifications: string | null;
           image_url?: string | null;
         }>
       | undefined;
@@ -100,6 +104,12 @@ export async function PATCH(
         longitude = formData.get("longitude") as string | undefined;
       if (formData.has("owner_id"))
         owner_id = (formData.get("owner_id") as string) ?? undefined;
+      if (formData.has("rules"))
+        rules = (formData.get("rules") as string) ?? null;
+      if (formData.has("rental_terms"))
+        rental_terms = (formData.get("rental_terms") as string) ?? null;
+      if (formData.has("youtube_url"))
+        youtube_url = (formData.get("youtube_url") as string) ?? null;
       if (formData.has("is_pet_friendly")) {
         const val = formData.get("is_pet_friendly");
         is_pet_friendly = val === "true" || val === "1";
@@ -132,6 +142,7 @@ export async function PATCH(
                 price_per_month: Math.floor(Number(rt.price_per_month || 0)),
                 available_rooms: Math.floor(Number(rt.available_rooms || 0)),
                 facilities: rt.facilities ? String(rt.facilities).trim() : null,
+                specifications: rt.specifications ? String(rt.specifications).trim() : null,
                 image_url: rtImageUrl,
               });
             }
@@ -175,6 +186,15 @@ export async function PATCH(
       latitude = body.latitude;
       longitude = body.longitude;
       owner_id = body.owner_id;
+      if (body.rules !== undefined) {
+        rules = body.rules;
+      }
+      if (body.rental_terms !== undefined) {
+        rental_terms = body.rental_terms;
+      }
+      if (body.youtube_url !== undefined) {
+        youtube_url = body.youtube_url;
+      }
       if (body.is_pet_friendly !== undefined) {
         is_pet_friendly = Boolean(body.is_pet_friendly);
       }
@@ -183,12 +203,13 @@ export async function PATCH(
       }
 
       if (Array.isArray(body.room_types)) {
-        room_types = body.room_types.map((rt: { id?: string; name?: string; price_per_month?: number | string; available_rooms?: number | string; facilities?: string; image_url?: string }) => ({
+        room_types = body.room_types.map((rt: { id?: string; name?: string; price_per_month?: number | string; available_rooms?: number | string; facilities?: string; specifications?: string; image_url?: string }) => ({
           id: rt.id ? String(rt.id) : undefined,
           name: String(rt.name || "Standar").trim(),
           price_per_month: Math.floor(Number(rt.price_per_month || 0)),
           available_rooms: Math.floor(Number(rt.available_rooms || 0)),
           facilities: rt.facilities ? String(rt.facilities).trim() : null,
+          specifications: rt.specifications ? String(rt.specifications).trim() : null,
           image_url: rt.image_url ? String(rt.image_url).trim() : null,
         }));
       }
@@ -225,6 +246,9 @@ export async function PATCH(
       owner_id?: string;
       is_pet_friendly?: boolean;
       is_24_hours?: boolean;
+      rules?: string | null;
+      rental_terms?: string | null;
+      youtube_url?: string | null;
       media?: {
         create?: { url: string; type: string }[];
       };
@@ -415,6 +439,18 @@ export async function PATCH(
       updateData.is_24_hours = is_24_hours;
     }
 
+    if (rules !== undefined) {
+      updateData.rules = rules ? String(rules).trim() : null;
+    }
+
+    if (rental_terms !== undefined) {
+      updateData.rental_terms = rental_terms ? String(rental_terms).trim() : null;
+    }
+
+    if (youtube_url !== undefined) {
+      updateData.youtube_url = youtube_url ? String(youtube_url).trim() : null;
+    }
+
     if (newMediaToCreate.length > 0) {
       updateData.media = {
         create: newMediaToCreate,
@@ -440,6 +476,7 @@ export async function PATCH(
           price_per_month: rt.price_per_month,
           available_rooms: rt.available_rooms,
           facilities: rt.facilities,
+          specifications: rt.specifications,
           image_url: rt.image_url,
         })),
       });
