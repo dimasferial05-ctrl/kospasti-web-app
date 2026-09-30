@@ -81,12 +81,12 @@ export function LandingFooter() {
             </h4>
             <ul className="flex flex-col gap-2.5 text-xs text-slate-500">
               <li>
-                <a href="#mitra" className="hover:text-emerald-600 transition-colors">
+                <Link href="/partner/login" className="hover:text-emerald-600 transition-colors">
                   Portal Mitra Kos
-                </a>
+                </Link>
               </li>
               <li>
-                <Link href="/register" className="hover:text-emerald-600 transition-colors">
+                <Link href="/partner/register" className="hover:text-emerald-600 transition-colors">
                   Daftarkan Properti Kos
                 </Link>
               </li>

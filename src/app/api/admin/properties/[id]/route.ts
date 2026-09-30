@@ -67,6 +67,7 @@ export async function PATCH(
     let owner_id: string | undefined;
     let is_pet_friendly: boolean | undefined;
     let is_24_hours: boolean | undefined;
+    let description: string | null | undefined;
     let rules: string | null | undefined;
     let rental_terms: string | null | undefined;
     let youtube_url: string | null | undefined;
@@ -104,6 +105,8 @@ export async function PATCH(
         longitude = formData.get("longitude") as string | undefined;
       if (formData.has("owner_id"))
         owner_id = (formData.get("owner_id") as string) ?? undefined;
+      if (formData.has("description"))
+        description = (formData.get("description") as string) ?? null;
       if (formData.has("rules"))
         rules = (formData.get("rules") as string) ?? null;
       if (formData.has("rental_terms"))
@@ -186,6 +189,9 @@ export async function PATCH(
       latitude = body.latitude;
       longitude = body.longitude;
       owner_id = body.owner_id;
+      if (body.description !== undefined) {
+        description = body.description;
+      }
       if (body.rules !== undefined) {
         rules = body.rules;
       }
@@ -246,6 +252,7 @@ export async function PATCH(
       owner_id?: string;
       is_pet_friendly?: boolean;
       is_24_hours?: boolean;
+      description?: string | null;
       rules?: string | null;
       rental_terms?: string | null;
       youtube_url?: string | null;
@@ -437,6 +444,10 @@ export async function PATCH(
 
     if (is_24_hours !== undefined) {
       updateData.is_24_hours = is_24_hours;
+    }
+
+    if (description !== undefined) {
+      updateData.description = description ? String(description).trim() : null;
     }
 
     if (rules !== undefined) {

@@ -59,7 +59,7 @@ export function PartnerCTASection() {
 
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 shrink-0">
               <Link
-                href="/register"
+                href="/partner/register"
                 className="px-7 py-3.5 rounded-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-sm transition-all flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/25 hover:scale-105 active:scale-95"
               >
                 <span>Daftar Sebagai Mitra Kos</span>

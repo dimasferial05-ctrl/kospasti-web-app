@@ -14,6 +14,8 @@ model Owner {
   id              String      @id @default(uuid())
   name            String
   whatsapp_number String      @unique
+  email           String?     @unique // Tambahan untuk login portal
+  password        String?             // Tambahan untuk login portal (Hashed)
   created_at      DateTime    @default(now())
   updated_at      DateTime    @updatedAt
   properties      Property[]
@@ -36,6 +38,7 @@ model Property {
   rules           String?
   rental_terms    String?
   youtube_url     String?
+  description     String?
   created_at      DateTime        @default(now())
   updated_at      DateTime        @updatedAt
   owner_id        String

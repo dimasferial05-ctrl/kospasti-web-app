@@ -127,6 +127,11 @@
   html {
     @apply font-sans scroll-smooth;
   }
+  /* Disable native browser password reveal button (Edge / Chromium) */
+  input::-ms-reveal,
+  input::-ms-clear {
+    display: none !important;
+  }
 }
 
 @keyframes bounceShort {

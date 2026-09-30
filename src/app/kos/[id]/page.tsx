@@ -289,6 +289,7 @@ export default function PropertyDetailPage() {
       // Scrollspy: Deteksi section aktif sesuai posisi scroll
       const sectionIds = [
         "section-media",
+        "section-deskripsi",
         "section-tipe-kamar",
         "section-fasilitas-kamar",
         "section-fasilitas-umum",
@@ -587,6 +588,20 @@ export default function PropertyDetailPage() {
             >
               Foto Properti
             </button>
+            {property.description && (
+              <button
+                id="subnav-btn-section-deskripsi"
+                type="button"
+                onClick={() => scrollToSection("section-deskripsi")}
+                className={`px-3 py-1.5 rounded-full transition-colors whitespace-nowrap shrink-0 cursor-pointer ${
+                  activeSection === "section-deskripsi"
+                    ? "bg-emerald-600 text-white shadow-xs"
+                    : "bg-slate-100 hover:bg-slate-200 text-slate-700"
+                }`}
+              >
+                Deskripsi
+              </button>
+            )}
             {property.room_types && property.room_types.length > 0 && (
               <button
                 id="subnav-btn-section-tipe-kamar"
@@ -929,7 +944,20 @@ export default function PropertyDetailPage() {
             </div>
           </div>
 
-          {/* Card 2: Pilihan Tipe Kamar (Tanpa Fasilitas di dalamnya sesuai instruksi) */}
+          {/* Card 2: Deskripsi Kos (Di Atas Card Tipe Kamar) */}
+          {property.description && (
+            <div id="section-deskripsi" className="bg-white p-5 sm:p-6 rounded-2xl sm:rounded-3xl border border-slate-200/80 shadow-soft flex flex-col gap-3.5">
+              <div className="flex items-center gap-2">
+                <span className="w-2.5 h-2.5 rounded-full bg-emerald-600"></span>
+                <h3 className="text-base font-bold text-slate-900">Deskripsi Kos</h3>
+              </div>
+              <p className="text-xs sm:text-sm text-slate-600 leading-relaxed whitespace-pre-line font-normal">
+                {property.description}
+              </p>
+            </div>
+          )}
+
+          {/* Card 3: Pilihan Tipe Kamar (Tanpa Fasilitas di dalamnya sesuai instruksi) */}
           {property.room_types && property.room_types.length > 0 && (
             <div id="section-tipe-kamar" className="bg-white p-5 sm:p-6 rounded-2xl sm:rounded-3xl border border-slate-200/90 shadow-xs flex flex-col gap-4">
               <div className="flex items-center justify-between">
@@ -1038,7 +1066,7 @@ export default function PropertyDetailPage() {
           )}
 
           {/* ========================================================================= */}
-          {/* Card 3: FASILITAS KAMAR (CARD BARU DI ATAS FASILITAS UMUM - DINAMIS)       */}
+          {/* Card 4: FASILITAS KAMAR (CARD BARU DI ATAS FASILITAS UMUM - DINAMIS)       */}
           {/* ========================================================================= */}
           <div id="section-fasilitas-kamar" className="bg-white p-5 sm:p-6 rounded-2xl sm:rounded-3xl border border-slate-200/80 shadow-soft flex flex-col gap-4">
             <div className="flex items-center justify-between flex-wrap gap-2">
@@ -1055,25 +1083,22 @@ export default function PropertyDetailPage() {
               )}
             </div>
 
-            {roomFacilities.length > 0 ? (
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
-                {roomFacilities.map((fac, idx) => (
-                  <div
-                    key={idx}
-                    className="flex items-center gap-2.5 text-xs text-slate-700 bg-teal-50/50 p-3 rounded-xl border border-teal-100/80 hover:border-teal-300 transition-colors"
-                  >
-                    <div className="w-5 h-5 rounded-md bg-teal-100 text-teal-700 flex items-center justify-center shrink-0">
-                      <Check className="w-3.5 h-3.5" />
-                    </div>
-                    <span className="font-semibold truncate">{fac}</span>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+              {(roomFacilities.length > 0
+                ? roomFacilities
+                : ["Kasur / Springbed", "Lemari Pakaian", "Ventilasi / Jendela", "Meja & Kursi"]
+              ).map((fac, idx) => (
+                <div
+                  key={idx}
+                  className="flex items-center gap-2.5 text-xs text-slate-700 bg-teal-50/50 p-3 rounded-xl border border-teal-100/80 hover:border-teal-300 transition-colors"
+                >
+                  <div className="w-5 h-5 rounded-md bg-teal-100 text-teal-700 flex items-center justify-center shrink-0">
+                    <Check className="w-3.5 h-3.5" />
                   </div>
-                ))}
-              </div>
-            ) : (
-              <p className="text-xs text-slate-500 italic bg-slate-50 p-3 rounded-xl border border-slate-200/80">
-                Fasilitas kamar standar (Kasur, Lemari, Ventilasi/Jendela).
-              </p>
-            )}
+                  <span className="font-semibold truncate">{fac}</span>
+                </div>
+              ))}
+            </div>
 
             {/* Spesifikasi Tipe Kamar */}
             {selectedRoomType?.specifications && (
@@ -1090,7 +1115,7 @@ export default function PropertyDetailPage() {
           </div>
 
           {/* ========================================================================= */}
-          {/* Card 4: FASILITAS UMUM (SEBELUMNYA FASILITAS BERSAMA & BANGUNAN)          */}
+          {/* Card 5: FASILITAS UMUM (SEBELUMNYA FASILITAS BERSAMA & BANGUNAN)          */}
           {/* ========================================================================= */}
           <div id="section-fasilitas-umum" className="bg-white p-5 sm:p-6 rounded-2xl sm:rounded-3xl border border-slate-200/80 shadow-soft flex flex-col gap-4">
             <div className="flex items-center gap-2">
@@ -1116,17 +1141,6 @@ export default function PropertyDetailPage() {
               <p className="text-xs text-slate-500">
                 {property.facilities || "Tidak ada rincian fasilitas umum"}
               </p>
-            )}
-
-            {property.description && (
-              <div className="mt-2 pt-4 border-t border-slate-100">
-                <h4 className="text-xs font-bold text-slate-800 uppercase tracking-wider mb-2">
-                  Deskripsi Kos
-                </h4>
-                <p className="text-xs sm:text-sm text-slate-600 leading-relaxed whitespace-pre-line font-normal">
-                  {property.description}
-                </p>
-              </div>
             )}
           </div>
 

@@ -1,75 +1,81 @@
 import { NextRequest, NextResponse } from "next/server";
+import { cookies } from "next/headers";
+import { verifyOwnerToken } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { saveUploadedFiles, saveUploadedFile, detectMediaType } from "@/lib/upload";
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
-    const adminToken = request.cookies.get("admin_token")?.value;
-    if (!adminToken) {
+    const cookieStore = await cookies();
+    const partnerToken = cookieStore.get("partner_token")?.value;
+
+    if (!partnerToken) {
       return NextResponse.json(
-        {
-          success: false,
-          error: "Unauthorized: Akses ditolak. Token autentikasi admin tidak valid.",
-        },
-        {
-          status: 401,
-        }
+        { success: false, error: "Unauthorized" },
+        { status: 401 }
+      );
+    }
+
+    const payload = await verifyOwnerToken(partnerToken);
+    if (!payload || !payload.ownerId) {
+      return NextResponse.json(
+        { success: false, error: "Unauthorized" },
+        { status: 401 }
       );
     }
 
     const properties = await prisma.property.findMany({
+      where: { owner_id: payload.ownerId },
+      orderBy: { created_at: "desc" },
       include: {
-        owner: {
-          select: {
-            id: true,
-            name: true,
-            whatsapp_number: true,
-          },
-        },
         media: true,
         room_types: {
           orderBy: {
             price_per_month: "asc",
           },
         },
-      },
-      orderBy: {
-        name: "asc",
+        _count: {
+          select: {
+            bookings: true,
+            reviews: true,
+          },
+        },
       },
     });
 
-    return NextResponse.json({
-      success: true,
-      data: properties,
-    });
-  } catch (error: unknown) {
-    const errorMessage =
-      error instanceof Error ? error.message : "Terjadi kesalahan internal server";
-    console.error("Gagal mengambil data properti admin:", error);
     return NextResponse.json(
       {
-        success: false,
-        error: errorMessage,
+        success: true,
+        properties,
       },
-      {
-        status: 500,
-      }
+      { status: 200 }
+    );
+  } catch (error) {
+    console.error("Gagal mengambil properti mitra:", error);
+    return NextResponse.json(
+      { success: false, error: "Gagal mengambil daftar properti." },
+      { status: 500 }
     );
   }
 }
 
 export async function POST(request: NextRequest) {
   try {
-    const adminToken = request.cookies.get("admin_token")?.value;
-    if (!adminToken) {
+    const cookieStore = await cookies();
+    const partnerToken = cookieStore.get("partner_token")?.value;
+
+    if (!partnerToken) {
       return NextResponse.json(
-        {
-          success: false,
-          error: "Unauthorized: Akses ditolak. Token autentikasi admin tidak valid.",
-        },
-        {
-          status: 401,
-        }
+        { success: false, error: "Unauthorized" },
+        { status: 401 }
+      );
+    }
+
+    const payload = await verifyOwnerToken(partnerToken);
+    if (!payload || !payload.ownerId) {
+      return NextResponse.json(
+        { success: false, error: "Unauthorized" },
+        { status: 401 }
       );
     }
 
@@ -84,7 +90,6 @@ export async function POST(request: NextRequest) {
     let address: string | null | undefined;
     let latitude: number | string | null | undefined;
     let longitude: number | string | null | undefined;
-    let owner_id: string | undefined;
     let is_pet_friendly: boolean = false;
     let is_24_hours: boolean = false;
     let description: string | null | undefined;
@@ -112,7 +117,6 @@ export async function POST(request: NextRequest) {
       address = (formData.get("address") as string) || null;
       latitude = formData.get("latitude") as string | undefined;
       longitude = formData.get("longitude") as string | undefined;
-      owner_id = (formData.get("owner_id") as string) || undefined;
       description = (formData.get("description") as string) || null;
       rules = (formData.get("rules") as string) || null;
       rental_terms = (formData.get("rental_terms") as string) || null;
@@ -133,7 +137,7 @@ export async function POST(request: NextRequest) {
               const rt = parsed[i];
               let rtImageUrl = rt.image_url ? String(rt.image_url).trim() : null;
 
-              // Cek file foto tipe kamar yang diunggah
+              // Cek file foto tipe kamar
               const rtFile = formData.get(`room_type_file_${i}`);
               if (rtFile && typeof rtFile === "object" && "arrayBuffer" in rtFile && (rtFile as File).size > 0) {
                 const saved = await saveUploadedFile(rtFile as File, "properties");
@@ -155,7 +159,7 @@ export async function POST(request: NextRequest) {
         }
       }
 
-      // Ambil file media yang diunggah
+      // Media upload files
       const filesFromMedia = formData.getAll("media");
       const filesFromFiles = formData.getAll("files");
       const allRawFiles = [...filesFromMedia, ...filesFromFiles];
@@ -179,7 +183,14 @@ export async function POST(request: NextRequest) {
         }
       }
     } else {
-      const body = await request.json();
+      const body = await request.json().catch(() => null);
+      if (!body) {
+        return NextResponse.json(
+          { success: false, error: "Data properti tidak valid." },
+          { status: 400 }
+        );
+      }
+
       name = body.name;
       price_per_month = body.price_per_month;
       available_rooms = body.available_rooms;
@@ -189,7 +200,6 @@ export async function POST(request: NextRequest) {
       address = body.address;
       latitude = body.latitude;
       longitude = body.longitude;
-      owner_id = body.owner_id;
       description = body.description;
       rules = body.rules;
       rental_terms = body.rental_terms;
@@ -225,64 +235,28 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    if (!name || typeof name !== "string" || !name.trim()) {
+      return NextResponse.json(
+        { success: false, error: "Nama kos wajib diisi." },
+        { status: 400 }
+      );
+    }
+
+    const validGenders = ["PUTRA", "PUTRI", "CAMPUR"];
+    const cleanGender = String(gender_type || "").toUpperCase();
+    if (!validGenders.includes(cleanGender)) {
+      return NextResponse.json(
+        { success: false, error: "Tipe kos harus PUTRA, PUTRI, atau CAMPUR." },
+        { status: 400 }
+      );
+    }
+
+    let finalPrice = Number(price_per_month) || 0;
+    let finalRooms = Number(available_rooms) || 0;
+
     if (room_types.length > 0) {
-      if (price_per_month === undefined || price_per_month === null || isNaN(Number(price_per_month)) || Number(price_per_month) <= 0) {
-        price_per_month = Math.min(...room_types.map((rt) => rt.price_per_month));
-      }
-      if (available_rooms === undefined || available_rooms === null || isNaN(Number(available_rooms)) || Number(available_rooms) < 0) {
-        available_rooms = room_types.reduce((sum, rt) => sum + rt.available_rooms, 0);
-      }
-    }
-
-    // Validasi field wajib
-    if (
-      !name ||
-      typeof name !== "string" ||
-      name.trim() === "" ||
-      price_per_month === undefined ||
-      price_per_month === null ||
-      isNaN(Number(price_per_month)) ||
-      Number(price_per_month) <= 0 ||
-      available_rooms === undefined ||
-      available_rooms === null ||
-      isNaN(Number(available_rooms)) ||
-      Number(available_rooms) < 0 ||
-      !gender_type ||
-      !["PUTRA", "PUTRI", "CAMPUR"].includes(String(gender_type).toUpperCase()) ||
-      !facilities ||
-      typeof facilities !== "string" ||
-      facilities.trim() === "" ||
-      !owner_id ||
-      typeof owner_id !== "string" ||
-      owner_id.trim() === ""
-    ) {
-      return NextResponse.json(
-        {
-          success: false,
-          error:
-            "Bad Request: Data tidak lengkap atau format tidak valid (nama, harga, kamar, tipe kos, fasilitas, dan pemilik wajib diisi).",
-        },
-        {
-          status: 400,
-        }
-      );
-    }
-
-    // Pastikan owner yang dipilih ada di database
-    const owner = await prisma.owner.findUnique({
-      where: { id: owner_id.trim() },
-    });
-
-    if (!owner) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: "Pemilik kos (Owner) tidak ditemukan.",
-        },
-        {
-          status: 400,
-        }
-      );
+      finalPrice = Math.min(...room_types.map((rt) => rt.price_per_month));
+      finalRooms = room_types.reduce((sum, rt) => sum + rt.available_rooms, 0);
     }
 
     if (image_url && typeof image_url === "string" && image_url.trim()) {
@@ -298,54 +272,36 @@ export async function POST(request: NextRequest) {
     const firstImageUrl =
       mediaToCreate.find((m) => m.type === "IMAGE")?.url ||
       mediaToCreate[0]?.url ||
-      (image_url ? String(image_url).trim() : null);
+      (image_url ? String(image_url).trim() : "https://images.unsplash.com/photo-1555854877-bab0e564b8d5?auto=format&fit=crop&w=800&q=80");
 
     let parsedLatitude: number | null = null;
     if (latitude !== undefined && latitude !== null && String(latitude).trim() !== "") {
       const parsed = parseFloat(String(latitude));
-      if (isNaN(parsed) || parsed < -90 || parsed > 90) {
-        return NextResponse.json(
-          {
-            success: false,
-            error: "Bad Request: Latitude harus berupa angka antara -90 dan 90.",
-          },
-          {
-            status: 400,
-          }
-        );
+      if (!isNaN(parsed) && parsed >= -90 && parsed <= 90) {
+        parsedLatitude = parsed;
       }
-      parsedLatitude = parsed;
     }
 
     let parsedLongitude: number | null = null;
     if (longitude !== undefined && longitude !== null && String(longitude).trim() !== "") {
       const parsed = parseFloat(String(longitude));
-      if (isNaN(parsed) || parsed < -180 || parsed > 180) {
-        return NextResponse.json(
-          {
-            success: false,
-            error: "Bad Request: Longitude harus berupa angka antara -180 dan 180.",
-          },
-          {
-            status: 400,
-          }
-        );
+      if (!isNaN(parsed) && parsed >= -180 && parsed <= 180) {
+        parsedLongitude = parsed;
       }
-      parsedLongitude = parsed;
     }
 
     const newProperty = await prisma.property.create({
       data: {
         name: name.trim(),
-        price_per_month: Math.floor(Number(price_per_month)),
-        available_rooms: Math.floor(Number(available_rooms)),
-        gender_type: String(gender_type).toUpperCase(),
-        facilities: facilities.trim(),
+        price_per_month: Math.floor(finalPrice),
+        available_rooms: Math.max(0, Math.floor(finalRooms)),
+        gender_type: cleanGender,
+        facilities: typeof facilities === "string" && facilities.trim() ? facilities.trim() : "WiFi, Kasur, Lemari, Kamar Mandi",
         image_url: firstImageUrl,
         address: address ? String(address).trim() : null,
         latitude: parsedLatitude,
         longitude: parsedLongitude,
-        owner_id: owner_id.trim(),
+        owner_id: payload.ownerId,
         is_pet_friendly: is_pet_friendly,
         is_24_hours: is_24_hours,
         description: description ? String(description).trim() : null,
@@ -362,52 +318,33 @@ export async function POST(request: NextRequest) {
               : [
                   {
                     name: "Standar",
-                    price_per_month: Math.floor(Number(price_per_month)),
-                    available_rooms: Math.floor(Number(available_rooms)),
-                    facilities: facilities.trim(),
+                    price_per_month: Math.floor(finalPrice),
+                    available_rooms: Math.max(0, Math.floor(finalRooms)),
+                    facilities: typeof facilities === "string" && facilities.trim() ? facilities.trim() : "Kasur, Lemari",
                     specifications: null,
                   },
                 ],
         },
       },
       include: {
-        owner: {
-          select: {
-            id: true,
-            name: true,
-            whatsapp_number: true,
-          },
-        },
         media: true,
-        room_types: {
-          orderBy: {
-            price_per_month: "asc",
-          },
-        },
+        room_types: true,
       },
     });
 
     return NextResponse.json(
       {
         success: true,
-        data: newProperty,
+        message: "Properti baru berhasil ditambahkan.",
+        property: newProperty,
       },
-      {
-        status: 201,
-      }
+      { status: 201 }
     );
-  } catch (error: unknown) {
-    const errorMessage =
-      error instanceof Error ? error.message : "Terjadi kesalahan internal server";
-    console.error("Gagal menambahkan properti baru:", error);
+  } catch (error) {
+    console.error("Gagal menambah properti:", error);
     return NextResponse.json(
-      {
-        success: false,
-        error: errorMessage,
-      },
-      {
-        status: 500,
-      }
+      { success: false, error: "Gagal menambahkan properti kos." },
+      { status: 500 }
     );
   }
 }
