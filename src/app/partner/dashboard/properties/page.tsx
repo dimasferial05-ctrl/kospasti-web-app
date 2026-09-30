@@ -1033,11 +1033,11 @@ export default function PartnerPropertiesPage() {
 
                         <div>
                           <label className="block text-[11px] font-bold text-slate-600 uppercase mb-1">
-                            Spesifikasi / Ukuran Kamar
+                            Spesifikasi Kamar (Opsional)
                           </label>
                           <input
                             type="text"
-                            placeholder="Ukuran 3x4 meter, Jendela Menghadap Taman"
+                            placeholder="Contoh: Ukuran 3x4, Jendela Hadap Luar, Listrik Token Mandiri"
                             value={rt.specifications || ""}
                             onChange={(e) => updateRoomType(idx, "specifications", e.target.value)}
                             className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-xs font-medium focus:ring-2 focus:ring-emerald-500 focus:outline-none"
