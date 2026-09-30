@@ -19,6 +19,7 @@ import {
   ChevronRight,
   TrendingUp,
 } from "lucide-react";
+import { HelpTooltip } from "@/components/ui/Tooltip";
 
 interface StatsData {
   totalProperties: number;
@@ -176,9 +177,12 @@ export default function PartnerOverviewPage() {
         {/* Total Kamar Tersedia */}
         <div className="p-5 rounded-2xl bg-white border border-slate-200/80 shadow-soft">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">
-              Kamar Kosong
-            </span>
+            <div className="flex items-center gap-1.5">
+              <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+                Kamar Kosong
+              </span>
+              <HelpTooltip text="Total seluruh kamar kosong dari seluruh kos aktif Anda yang siap disewa." />
+            </div>
             <div className="w-8 h-8 rounded-lg bg-teal-50 text-teal-600 flex items-center justify-center">
               <BedDouble className="w-4 h-4" />
             </div>
@@ -208,9 +212,12 @@ export default function PartnerOverviewPage() {
         {/* Pesanan Pending */}
         <div className="p-5 rounded-2xl bg-white border border-slate-200/80 shadow-soft">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">
-              Perlu Konfirmasi
-            </span>
+            <div className="flex items-center gap-1.5">
+              <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+                Perlu Konfirmasi
+              </span>
+              <HelpTooltip text="Pesanan dari penyewa yang sudah membayar DP dan menunggu persetujuan Anda." />
+            </div>
             <div className="w-8 h-8 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center">
               <Clock className="w-4 h-4" />
             </div>
@@ -230,6 +237,7 @@ export default function PartnerOverviewPage() {
             <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
               <Building2 className="w-5 h-5 text-emerald-600" />
               <span>Ketersediaan Kamar Cepat</span>
+              <HelpTooltip text="Gunakan tombol (+) atau (-) untuk menambah/mengurangi sisa kamar secara instan tanpa perlu masuk ke form edit properti." />
             </h2>
             <Link
               href="/partner/dashboard/properties"
