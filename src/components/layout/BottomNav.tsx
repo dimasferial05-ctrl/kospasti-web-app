@@ -31,10 +31,11 @@ export function BottomNav({ isLoggedIn: initialIsLoggedIn = false }: BottomNavPr
     };
   }, [pathname]);
 
-  // Sembunyikan BottomNav pada halaman admin, auth, atau jika user belum login
+  // Sembunyikan BottomNav pada halaman admin, partner, auth, atau jika user belum login
   if (!isLoggedIn) return null;
   if (
     pathname?.startsWith("/admin") ||
+    pathname?.startsWith("/partner") ||
     pathname === "/login" ||
     pathname === "/register"
   ) {

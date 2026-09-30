@@ -68,6 +68,7 @@ interface PropertyAdminItem {
   longitude?: number | null;
   is_pet_friendly?: boolean;
   is_24_hours?: boolean;
+  description?: string | null;
   rules?: string | null;
   rental_terms?: string | null;
   youtube_url?: string | null;
@@ -90,6 +91,7 @@ interface PropertyFormData {
   longitude: string;
   is_pet_friendly: boolean;
   is_24_hours: boolean;
+  description: string;
   rules: string;
   rental_terms: string;
   youtube_url: string;
@@ -108,6 +110,7 @@ const initialFormData: PropertyFormData = {
   longitude: "",
   is_pet_friendly: false,
   is_24_hours: false,
+  description: "",
   rules: "",
   rental_terms: "",
   youtube_url: "",
@@ -133,6 +136,40 @@ export default function ManagePropertiesPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [deletingMediaId, setDeletingMediaId] = useState<string | null>(null);
   const [settingThumbnailUrl, setSettingThumbnailUrl] = useState<string | null>(null);
+  const [isAiGenerating, setIsAiGenerating] = useState(false);
+
+  const handleGenerateAiDescription = async () => {
+    try {
+      setIsAiGenerating(true);
+      const res = await fetch("/api/ai/generate-description", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: formData.name || "Kos Nyaman",
+          facilities: formData.facilities,
+          price_per_month: formData.price_per_month,
+          gender_type: formData.gender_type,
+          address: formData.address,
+          is_pet_friendly: formData.is_pet_friendly,
+          is_24_hours: formData.is_24_hours,
+          rules: formData.rules,
+          rental_terms: formData.rental_terms,
+          room_types: roomTypes,
+        }),
+      });
+
+      const data = await res.json();
+      if (data.success && data.description) {
+        setFormData((prev) => ({ ...prev, description: data.description }));
+      } else {
+        alert(data.error || "Gagal membuat deskripsi AI.");
+      }
+    } catch {
+      alert("Gagal membuat deskripsi AI.");
+    } finally {
+      setIsAiGenerating(false);
+    }
+  };
 
   // Fetch daftar properti
   const fetchProperties = useCallback(async () => {
@@ -195,6 +232,7 @@ export default function ManagePropertiesPage() {
       longitude: "",
       is_pet_friendly: false,
       is_24_hours: false,
+      description: "",
       rules: "",
       rental_terms: "",
       youtube_url: "",
@@ -235,6 +273,7 @@ export default function ManagePropertiesPage() {
       longitude: prop.longitude !== undefined && prop.longitude !== null ? String(prop.longitude) : "",
       is_pet_friendly: Boolean(prop.is_pet_friendly),
       is_24_hours: Boolean(prop.is_24_hours),
+      description: prop.description || "",
       rules: prop.rules || "",
       rental_terms: prop.rental_terms || "",
       youtube_url: prop.youtube_url || "",
@@ -476,6 +515,7 @@ export default function ManagePropertiesPage() {
       data.append("longitude", formData.longitude.trim());
       data.append("is_pet_friendly", String(formData.is_pet_friendly));
       data.append("is_24_hours", String(formData.is_24_hours));
+      data.append("description", formData.description.trim());
       data.append("rules", formData.rules.trim());
       data.append("rental_terms", formData.rental_terms.trim());
       data.append("youtube_url", formData.youtube_url.trim());
@@ -1418,6 +1458,40 @@ export default function ManagePropertiesPage() {
                 />
                 <p className="text-[11px] text-slate-400 mt-1">
                   Video tour atau review kos dari YouTube yang bisa langsung diputar calon penyewa.
+                </p>
+              </div>
+
+              {/* Deskripsi Kos & AI Generator */}
+              <div>
+                <div className="flex items-center justify-between mb-1.5">
+                  <label className="block text-xs font-semibold text-slate-700">
+                    Deskripsi Kos (Opsional)
+                  </label>
+                  <button
+                    type="button"
+                    onClick={handleGenerateAiDescription}
+                    disabled={isAiGenerating}
+                    className="px-2.5 py-1 rounded-lg bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-[11px] flex items-center gap-1.5 shadow-xs transition-all disabled:opacity-50 cursor-pointer"
+                  >
+                    {isAiGenerating ? (
+                      <>
+                        <Loader2 size={12} className="animate-spin" />
+                        <span>Membuat...</span>
+                      </>
+                    ) : (
+                      <span>Generate Deskripsi AI</span>
+                    )}
+                  </button>
+                </div>
+                <textarea
+                  rows={4}
+                  placeholder="Ceritakan gambaran umum, keunggulan lingkungan, suasana kos, dan poin menarik lainnya..."
+                  value={formData.description}
+                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                  className="w-full px-3.5 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-600/20 focus:border-emerald-600 bg-white resize-y"
+                />
+                <p className="text-[11px] text-slate-400 mt-1">
+                  Deskripsi akan ditampilkan pada card khusus &quot;Deskripsi Kos&quot; di atas pilihan tipe kamar pada halaman detail kos.
                 </p>
               </div>
 

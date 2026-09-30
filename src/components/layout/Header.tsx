@@ -132,8 +132,8 @@ export function Header({ isLoggedIn: initialIsLoggedIn = false }: HeaderProps) {
     };
   }, [isDropdownOpen, isLandingMenuOpen]);
 
-  // Sembunyikan header pada seluruh rute /admin
-  if (pathname?.startsWith("/admin")) {
+  // Sembunyikan header pada seluruh rute /admin dan /partner
+  if (pathname?.startsWith("/admin") || pathname?.startsWith("/partner")) {
     return null;
   }
 

@@ -6,6 +6,7 @@ export function middleware(request: NextRequest) {
 
   const adminToken = request.cookies.get("admin_token")?.value;
   const userToken = request.cookies.get("user_token")?.value;
+  const partnerToken = request.cookies.get("partner_token")?.value;
 
   // 1. Pengecualian rute login Admin
   if (pathname === "/api/admin/login" || pathname === "/admin/login") {
@@ -35,7 +36,37 @@ export function middleware(request: NextRequest) {
     }
   }
 
-  // 3. Logika User: Pengguna yang sudah login tidak boleh mengakses /login atau /register
+  // 3. Logika Mitra: Pengguna yang sudah login sebagai mitra diarahkan ke dashboard
+  if ((pathname === "/partner/login" || pathname === "/partner/register") && partnerToken) {
+    return NextResponse.redirect(new URL("/partner/dashboard", request.url));
+  }
+
+  // 4. Proteksi Dashboard & API Mitra (Owner)
+  if (pathname.startsWith("/partner/dashboard") && !partnerToken) {
+    const currentPath = request.nextUrl.pathname;
+    const currentQuery = request.nextUrl.search;
+    const callbackUrl = encodeURIComponent(currentPath + currentQuery);
+    return NextResponse.redirect(
+      new URL(`/partner/login?callbackUrl=${callbackUrl}`, request.url)
+    );
+  }
+
+  if (
+    pathname.startsWith("/api/partner") &&
+    pathname !== "/api/partner/login" &&
+    pathname !== "/api/partner/register" &&
+    !partnerToken
+  ) {
+    return NextResponse.json(
+      {
+        success: false,
+        error: "Unauthorized: Sesi mitra tidak valid atau telah berakhir.",
+      },
+      { status: 401 }
+    );
+  }
+
+  // 5. Logika User: Pengguna yang sudah login tidak boleh mengakses /login atau /register
   if ((pathname === "/login" || pathname === "/register") && userToken) {
     const callbackUrl = request.nextUrl.searchParams.get("callbackUrl");
     if (callbackUrl && callbackUrl.startsWith("/")) {
@@ -44,7 +75,7 @@ export function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL("/", request.url));
   }
 
-  // 4. Logika User: Proteksi Halaman Khusus Pengguna (Profil/Pesanan/Checkout)
+  // 6. Logika User: Proteksi Halaman Khusus Pengguna (Profil/Pesanan/Checkout)
   const protectedUserRoutes = ["/profil", "/pesanan", "/checkout"];
   const isProtectedUserRoute = protectedUserRoutes.some((route) =>
     pathname.startsWith(route)
@@ -66,6 +97,8 @@ export const config = {
   matcher: [
     "/admin/:path*",
     "/api/admin/:path*",
+    "/partner/:path*",
+    "/api/partner/:path*",
     "/login",
     "/register",
     "/profil/:path*",

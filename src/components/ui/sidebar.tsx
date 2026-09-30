@@ -5,6 +5,7 @@ import React, { useState, createContext, useContext } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { Menu, X } from "lucide-react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 export interface Links {
   label: string;
@@ -113,6 +114,13 @@ export const MobileSidebar = ({
   ...props
 }: React.ComponentProps<"div">) => {
   const { open, setOpen } = useSidebar();
+  const pathname = usePathname();
+  const badgeText = pathname?.startsWith("/partner")
+    ? "MITRA"
+    : pathname?.startsWith("/admin")
+    ? "ADMIN"
+    : "PANEL";
+
   return (
     <div
       className={cn(
@@ -125,7 +133,10 @@ export const MobileSidebar = ({
           <span className="font-black text-emerald-400 text-xs">KP</span>
         </div>
         <div className="flex items-center gap-1.5 font-extrabold text-sm text-white">
-          KosPasti <span className="text-[10px] bg-slate-800 px-1.5 py-0.5 rounded text-slate-300 font-bold border border-slate-700">ADMIN</span>
+          KosPasti{" "}
+          <span className="text-[10px] bg-slate-800 px-1.5 py-0.5 rounded text-emerald-400 font-bold border border-slate-700">
+            {badgeText}
+          </span>
         </div>
       </div>
       <div className="flex justify-end z-20">
