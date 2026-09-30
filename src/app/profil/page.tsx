@@ -26,6 +26,7 @@ import {
   X,
   Clock,
 } from "lucide-react";
+import { HelpTooltip } from "@/components/ui/Tooltip";
 
 interface UserProfile {
   id: string;
@@ -312,32 +313,36 @@ function ProfileContent() {
     const upper = (status || "").toUpperCase();
     if (upper === "ACCEPTED" || upper === "CONFIRMED" || upper === "APPROVED" || upper === "SUCCESS") {
       return (
-        <span className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-semibold rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
-          <CheckCircle2 className="w-3.5 h-3.5" />
+        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
+          <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
           <span>Disetujui</span>
+          <HelpTooltip text="Pesanan telah disetujui pemilik kos. Anda dapat langsung berkomunikasi untuk persiapan check-in." />
         </span>
       );
     }
     if (upper === "PAID") {
       return (
-        <span className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-semibold rounded-full bg-blue-50 text-blue-700 border border-blue-200">
-          <Clock className="w-3.5 h-3.5" />
+        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold rounded-full bg-blue-50 text-blue-700 border border-blue-200">
+          <Clock className="w-3.5 h-3.5 shrink-0" />
           <span>Menunggu Konfirmasi Pemilik</span>
+          <HelpTooltip text="DP Anda telah terverifikasi lunas. Pemilik kos sedang memeriksa ketersediaan kamar untuk menyetujui pesanan Anda." />
         </span>
       );
     }
     if (upper === "CANCELLED" || upper === "REJECTED") {
       return (
-        <span className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-semibold rounded-full bg-rose-50 text-rose-700 border border-rose-200">
-          <AlertCircle className="w-3.5 h-3.5" />
-          <span>Ditolak</span>
+        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold rounded-full bg-rose-50 text-rose-700 border border-rose-200">
+          <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+          <span>Ditolak (Refund Diproses)</span>
+          <HelpTooltip text="Pesanan tidak dapat dipenuhi pemilik kos. Dana DP Anda dijamin 100% kembali ke rekening/e-wallet Anda." />
         </span>
       );
     }
     return (
-      <span className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-semibold rounded-full bg-amber-50 text-amber-700 border border-amber-200">
-        <AlertCircle className="w-3.5 h-3.5" />
-        <span>Menunggu Pembayaran</span>
+      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold rounded-full bg-amber-50 text-amber-700 border border-amber-200">
+        <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+        <span>Menunggu Pembayaran DP</span>
+        <HelpTooltip text="Silakan selesaikan pembayaran DP Anda sesuai batas waktu invoice untuk mengunci kamar kos." />
       </span>
     );
   };

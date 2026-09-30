@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import Link from "next/link";
 import {
   CalendarCheck,
   Clock,
@@ -17,7 +18,9 @@ import {
   X,
   BedDouble,
   DollarSign,
+  HelpCircle,
 } from "lucide-react";
+import { HelpTooltip } from "@/components/ui/Tooltip";
 
 interface Booking {
   id: string;
@@ -135,28 +138,32 @@ export default function PartnerBookingsPage() {
   const getStatusBadge = (status: Booking["status"]) => {
     if (status === "PAID") {
       return (
-        <span className="text-[10px] font-black px-2.5 py-0.5 rounded-full inline-block mb-1.5 bg-blue-100 text-blue-800 border border-blue-200">
-          Sudah Bayar DP (Perlu Konfirmasi)
+        <span className="text-[10px] font-black px-2.5 py-0.5 rounded-full inline-flex items-center gap-1 mb-1.5 bg-blue-100 text-blue-800 border border-blue-200">
+          <span>Sudah Bayar DP (Perlu Konfirmasi)</span>
+          <HelpTooltip text="Calon penyewa telah membayar DP. Klik 'Setujui' jika kamar siap, atau 'Tolak' untuk mengembalikan DP." />
         </span>
       );
     }
     if (status === "PENDING") {
       return (
-        <span className="text-[10px] font-black px-2.5 py-0.5 rounded-full inline-block mb-1.5 bg-amber-100 text-amber-800 border border-amber-200">
-          Menunggu Pembayaran
+        <span className="text-[10px] font-black px-2.5 py-0.5 rounded-full inline-flex items-center gap-1 mb-1.5 bg-amber-100 text-amber-800 border border-amber-200">
+          <span>Menunggu Pembayaran</span>
+          <HelpTooltip text="Calon penyewa sedang memproses pembayaran DP. Anda akan menerima notifikasi WA otomatis saat lunas." />
         </span>
       );
     }
     if (status === "APPROVED" || status === "ACCEPTED") {
       return (
-        <span className="text-[10px] font-black px-2.5 py-0.5 rounded-full inline-block mb-1.5 bg-emerald-100 text-emerald-800 border border-emerald-200">
-          Disetujui
+        <span className="text-[10px] font-black px-2.5 py-0.5 rounded-full inline-flex items-center gap-1 mb-1.5 bg-emerald-100 text-emerald-800 border border-emerald-200">
+          <span>Disetujui</span>
+          <HelpTooltip text="Pesanan telah Anda setujui. Penyewa telah menerima notifikasi WA untuk persiapan check-in." />
         </span>
       );
     }
     return (
-      <span className="text-[10px] font-black px-2.5 py-0.5 rounded-full inline-block mb-1.5 bg-rose-100 text-rose-800 border border-rose-200">
-        Ditolak
+      <span className="text-[10px] font-black px-2.5 py-0.5 rounded-full inline-flex items-center gap-1 mb-1.5 bg-rose-100 text-rose-800 border border-rose-200">
+        <span>Ditolak</span>
+        <HelpTooltip text="Pesanan dibatalkan/ditolak. Kuota kamar otomatis dikembalikan dan DP direfund ke penyewa." />
       </span>
     );
   };
@@ -173,6 +180,14 @@ export default function PartnerBookingsPage() {
             Konfirmasi pesanan masuk dari calon penyewa dan hubungi mereka langsung via WhatsApp.
           </p>
         </div>
+
+        <Link
+          href="/bantuan?tab=partner&article=persetujuan-wa-vs-dasbor"
+          className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-white border border-slate-200 text-slate-700 hover:text-emerald-700 hover:border-emerald-300 text-xs font-bold transition-all shadow-xs"
+        >
+          <HelpCircle className="w-3.5 h-3.5 text-emerald-600" />
+          <span>Panduan Konfirmasi Pesanan</span>
+        </Link>
       </div>
 
       {/* Notifications */}

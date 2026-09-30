@@ -7,6 +7,7 @@ import {
   LayoutDashboard,
   Building2,
   CalendarCheck,
+  HelpCircle,
   LogOut,
   Loader2,
   ExternalLink,
@@ -173,8 +174,28 @@ export default function PartnerDashboardLayout({
             </div>
           </div>
 
-          {/* Bottom section: Main Page Link & Logout */}
+          {/* Bottom section: Help Center, Main Page Link & Logout */}
           <div className="pt-3 border-t border-slate-800/80 space-y-1.5">
+            <SidebarLink
+              link={{
+                label: "Pusat Bantuan",
+                href: "/bantuan?tab=partner",
+                icon: (
+                  <HelpCircle
+                    size={20}
+                    className={`shrink-0 transition-colors ${
+                      pathname === "/bantuan" ? "text-emerald-400" : "text-slate-400"
+                    }`}
+                  />
+                ),
+              }}
+              className={`px-3 py-2 rounded-xl text-xs font-semibold transition-colors ${
+                pathname === "/bantuan"
+                  ? "bg-slate-800 text-white font-bold"
+                  : "text-slate-400 hover:text-slate-200 hover:bg-slate-900"
+              }`}
+            />
+
             <SidebarLink
               link={{
                 label: "Lihat Halaman Utama",

@@ -111,9 +111,9 @@ export function LandingFooter() {
             </h4>
             <ul className="flex flex-col gap-2.5 text-xs text-slate-500">
               <li>
-                <a href="#faq" className="hover:text-emerald-600 transition-colors">
-                  Pusat Bantuan &amp; FAQ
-                </a>
+                <Link href="/bantuan" className="hover:text-emerald-600 transition-colors">
+                  Pusat Bantuan &amp; Panduan
+                </Link>
               </li>
               <li>
                 <span className="text-slate-400 cursor-not-allowed">Syarat &amp; Ketentuan</span>
