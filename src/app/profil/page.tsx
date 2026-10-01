@@ -20,7 +20,6 @@ import {
   Building,
   ArrowRight,
   ArrowLeft,
-  Home,
   ExternalLink,
   Edit3,
   X,

@@ -53,7 +53,6 @@ export function KosPropertyCard({
   roomTypesCount,
   roomTypes,
   averageRating,
-  totalReviews,
   isSaved = false,
   distance,
   distanceTargetName,
@@ -99,7 +98,6 @@ export function KosPropertyCard({
   }, [slides.length, isHovered]);
 
   const currentSlide = slides[activeSlideIndex] || (imageUrl ? { imageUrl, title: "Utama", price } : null);
-  const displayedImageUrl = currentSlide ? currentSlide.imageUrl : imageUrl;
 
   const handlePrevSlide = (e: React.MouseEvent) => {
     e.preventDefault();

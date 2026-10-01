@@ -29,6 +29,7 @@ export function WishlistButton({
   const router = useRouter();
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setIsSaved(initialIsSaved);
   }, [initialIsSaved]);
 

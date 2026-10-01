@@ -13,7 +13,6 @@ import {
   AlertCircle,
   CheckCircle2,
   ArrowLeft,
-  GraduationCap,
 } from "lucide-react";
 
 interface FormErrors {

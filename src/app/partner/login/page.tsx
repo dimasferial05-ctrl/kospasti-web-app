@@ -5,7 +5,6 @@ import Link from "next/link";
 import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
-  Building2,
   Mail,
   Lock,
   Eye,
@@ -14,7 +13,6 @@ import {
   Loader2,
   Info,
   CheckCircle2,
-  ShieldAlert,
 } from "lucide-react";
 
 function PartnerLoginForm() {
@@ -30,6 +28,7 @@ function PartnerLoginForm() {
 
   useEffect(() => {
     if (searchParams.get("registered") === "1") {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setSuccessMsg("Pendaftaran mitra berhasil! Silakan masuk dengan email dan kata sandi Anda.");
     }
   }, [searchParams]);

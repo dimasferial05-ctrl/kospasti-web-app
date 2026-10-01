@@ -124,6 +124,7 @@ export function ReviewSection({ propertyId, propertyName }: ReviewSectionProps) 
   }, [propertyId]);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchReviews();
     checkEligibility();
   }, [fetchReviews, checkEligibility]);

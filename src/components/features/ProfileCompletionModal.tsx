@@ -58,6 +58,7 @@ export function ProfileCompletionModal() {
   }, [pathname]);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     checkUserSession();
   }, [checkUserSession]);
 

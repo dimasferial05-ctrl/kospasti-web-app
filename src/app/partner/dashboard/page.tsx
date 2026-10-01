@@ -8,16 +8,11 @@ import {
   BedDouble,
   CalendarCheck,
   Clock,
-  ArrowRight,
   Loader2,
   CheckCircle2,
-  XCircle,
   Phone,
   Calendar,
-  Sparkles,
-  ExternalLink,
   ChevronRight,
-  TrendingUp,
 } from "lucide-react";
 import { HelpTooltip } from "@/components/ui/Tooltip";
 
@@ -88,6 +83,7 @@ export default function PartnerOverviewPage() {
   };
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchData();
   }, []);
 

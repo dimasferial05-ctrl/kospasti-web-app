@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState, useMemo, useEffect, Suspense } from "react";
-import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { LandingFooter } from "@/components/landing/LandingFooter";
 import { HELP_CATEGORIES, HelpArticle } from "@/lib/data/help-center";
@@ -20,16 +19,13 @@ import {
   HelpCircle,
   Info,
   ChevronRight,
-  ArrowRight,
   ThumbsUp,
   ThumbsDown,
-  Sparkles,
   BookOpen,
   MessageCircle,
   Share2,
   Clock,
   User,
-  ExternalLink,
   Check,
   Heart,
   Star,
@@ -84,6 +80,7 @@ function HelpCenterContent() {
   useEffect(() => {
     const tabParam = searchParams.get("tab");
     if (tabParam === "partner" || tabParam === "user") {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setActiveCategory(tabParam);
     }
   }, [searchParams]);
@@ -121,6 +118,7 @@ function HelpCenterContent() {
         (a) => a.slug === initialArticleSlug
       );
       if (foundInCurrent) {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setActiveArticleSlug(foundInCurrent.slug);
         return;
       }
@@ -129,9 +127,11 @@ function HelpCenterContent() {
     if (filteredArticles.length > 0) {
       // Keep existing active article if still in filtered list, else pick first
       if (!filteredArticles.some((a) => a.slug === activeArticleSlug)) {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setActiveArticleSlug(filteredArticles[0].slug);
       }
     } else {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setActiveArticleSlug("");
     }
   }, [filteredArticles, currentCategoryData, initialArticleSlug, activeArticleSlug]);

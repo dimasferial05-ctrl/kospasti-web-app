@@ -12,10 +12,7 @@ import {
   CheckCircle2,
   ArrowLeft,
   Building2,
-  ShieldCheck,
   BedDouble,
-  Sparkles,
-  Layers,
 } from "lucide-react";
 
 interface RoomType {

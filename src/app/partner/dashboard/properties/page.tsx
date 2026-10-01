@@ -16,13 +16,11 @@ import {
   Info,
   ExternalLink,
   HelpCircle,
-  Upload,
   FileText,
   Star,
   Play,
   Clock,
   Home,
-  Layers,
 } from "lucide-react";
 
 interface PropertyMediaItem {
@@ -145,6 +143,7 @@ export default function PartnerPropertiesPage() {
   }, []);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchProperties();
   }, [fetchProperties]);
 

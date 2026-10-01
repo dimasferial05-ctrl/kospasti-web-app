@@ -17,7 +17,6 @@ import {
   Car,
   Footprints,
   RotateCcw,
-  CheckCircle2,
   Compass,
 } from "lucide-react";
 
