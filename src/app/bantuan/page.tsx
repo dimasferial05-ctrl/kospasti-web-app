@@ -31,6 +31,8 @@ import {
   User,
   ExternalLink,
   Check,
+  Heart,
+  Star,
 } from "lucide-react";
 
 // Icon mapping helper
@@ -54,6 +56,14 @@ function renderArticleIcon(name: string, className: string = "w-5 h-5") {
       return <DollarSign className={className} />;
     case "TrendingUp":
       return <TrendingUp className={className} />;
+    case "Info":
+      return <Info className={className} />;
+    case "User":
+      return <User className={className} />;
+    case "Heart":
+      return <Heart className={className} />;
+    case "Star":
+      return <Star className={className} />;
     default:
       return <BookOpen className={className} />;
   }
