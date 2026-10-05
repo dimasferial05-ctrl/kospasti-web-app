@@ -6,7 +6,6 @@ import {
   Map,
   AdvancedMarker,
   useMap,
-  useMapsLibrary,
 } from "@vis.gl/react-google-maps";
 import {
   MapPin,
@@ -83,55 +82,6 @@ function MapInteractionController({
 }
 
 /**
- * Controller untuk melakukan reverse-geocoding (mengubah lat/lng menjadi alamat jalan lengkap)
- */
-function GeocodingController({
-  markerPosition,
-  onAddressChange,
-  onAddressResolved,
-}: {
-  markerPosition: { lat: number; lng: number } | null;
-  onAddressChange?: (address: string) => void;
-  onAddressResolved?: (address: string) => void;
-}) {
-  const geocodingLib = useMapsLibrary("geocoding");
-  const geocoder = useMemo(() => {
-    if (!geocodingLib || typeof geocodingLib.Geocoder !== "function") return null;
-    try {
-      return new geocodingLib.Geocoder();
-    } catch {
-      return null;
-    }
-  }, [geocodingLib]);
-
-  const lastCoords = useRef<{ lat: number; lng: number } | null>(null);
-
-  useEffect(() => {
-    if (!geocoder || !markerPosition || !markerPosition.lat || !markerPosition.lng) return;
-
-    if (
-      lastCoords.current &&
-      Math.abs(lastCoords.current.lat - markerPosition.lat) < 0.00001 &&
-      Math.abs(lastCoords.current.lng - markerPosition.lng) < 0.00001
-    ) {
-      return;
-    }
-
-    lastCoords.current = markerPosition;
-
-    geocoder.geocode({ location: markerPosition }, (results, status) => {
-      if (status === "OK" && results && results[0]?.formatted_address) {
-        const address = results[0].formatted_address;
-        onAddressChange?.(address);
-        onAddressResolved?.(address);
-      }
-    });
-  }, [geocoder, markerPosition, onAddressChange, onAddressResolved]);
-
-  return null;
-}
-
-/**
  * Komponen Error Boundary sederhana untuk menangkap kegagalan Google Maps
  */
 class MapErrorBoundary extends React.Component<
@@ -195,6 +145,42 @@ export default function LocationPicker({
   const [panTrigger, setPanTrigger] = useState(0);
   const [targetZoom, setTargetZoom] = useState(DEFAULT_ZOOM);
   const hasAttemptedAutoLocate = useRef(false);
+  const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Reverse geocoding via server-side API (Gratis & tidak butuh Billing Google Cloud)
+  const fetchAddress = useCallback(
+    (lat: number, lng: number) => {
+      if (!onAddressChange) return;
+
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+      }
+
+      debounceTimerRef.current = setTimeout(async () => {
+        try {
+          const res = await fetch(`/api/geocode/reverse?lat=${lat}&lng=${lng}`);
+          if (!res.ok) return;
+          const data = await res.json();
+          if (data?.success && data?.address) {
+            setDetectedAddress(data.address);
+            onAddressChange(data.address);
+          }
+        } catch {
+          // Gracefully ignore
+        }
+      }, 500);
+    },
+    [onAddressChange]
+  );
+
+  const handleLocationUpdate = useCallback(
+    (lat: number, lng: number) => {
+      onChange(lat, lng);
+      fetchAddress(lat, lng);
+      setLocationError(null);
+    },
+    [onChange, fetchAddress]
+  );
 
   // Ambil lokasi terkini dari browser Geolocation API
   const handleGetCurrentLocation = useCallback(() => {
@@ -212,7 +198,7 @@ export default function LocationPicker({
         const lat = Number(position.coords.latitude.toFixed(6));
         const lng = Number(position.coords.longitude.toFixed(6));
 
-        onChange(lat, lng);
+        handleLocationUpdate(lat, lng);
         setTargetZoom(DETAIL_ZOOM);
         setPanTrigger((prev) => prev + 1);
         setIsLocating(false);
@@ -240,7 +226,7 @@ export default function LocationPicker({
         maximumAge: 0,
       }
     );
-  }, [onChange]);
+  }, [handleLocationUpdate]);
 
   // Efek saat pertama kali dimount: jika belum ada koordinat, otomatis minta lokasi terkini
   useEffect(() => {
@@ -250,6 +236,13 @@ export default function LocationPicker({
     }
   }, [hasValidCoordinates, handleGetCurrentLocation, disabled]);
 
+  // Efek jika koordinat sudah ada saat diedit, panggil geocode jika belum ada detectedAddress
+  useEffect(() => {
+    if (hasValidCoordinates && !detectedAddress && onAddressChange) {
+      fetchAddress(latitude as number, longitude as number);
+    }
+  }, [hasValidCoordinates, latitude, longitude, detectedAddress, onAddressChange, fetchAddress]);
+
   // Handler saat pin selesai digeser (dragend)
   const handleMarkerDragEnd = useCallback(
     (e: google.maps.MapMouseEvent) => {
@@ -257,10 +250,9 @@ export default function LocationPicker({
       const lat = typeof e.latLng.lat === "function" ? e.latLng.lat() : Number(e.latLng.lat);
       const lng = typeof e.latLng.lng === "function" ? e.latLng.lng() : Number(e.latLng.lng);
 
-      onChange(Number(lat.toFixed(6)), Number(lng.toFixed(6)));
-      setLocationError(null);
+      handleLocationUpdate(Number(lat.toFixed(6)), Number(lng.toFixed(6)));
     },
-    [onChange]
+    [handleLocationUpdate]
   );
 
   // Fallback jika API key tidak tersedia atau error
@@ -387,14 +379,8 @@ export default function LocationPicker({
                 markerPosition={currentMarker}
                 panTrigger={panTrigger}
                 zoomLevel={targetZoom}
-                onChange={onChange}
+                onChange={handleLocationUpdate}
                 disabled={disabled}
-              />
-
-              <GeocodingController
-                markerPosition={currentMarker}
-                onAddressChange={onAddressChange}
-                onAddressResolved={setDetectedAddress}
               />
 
               {/* Marker Draggable untuk Lokasi Kos */}
