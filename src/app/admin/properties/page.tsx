@@ -19,6 +19,7 @@ import {
   MapPin,
   Upload,
   Image as ImageIcon,
+  Check,
 } from "lucide-react";
 import LocationPicker from "@/components/map/LocationPicker";
 
@@ -77,6 +78,8 @@ interface PropertyAdminItem {
   room_types?: RoomTypeAdminItem[];
   owner_id: string;
   owner?: OwnerOption | null;
+  status?: string;
+  rejectionReason?: string | null;
 }
 
 interface PropertyFormData {
@@ -126,6 +129,80 @@ export default function ManagePropertiesPage() {
   const [deletingPropertyId, setDeletingPropertyId] = useState<string | null>(null);
   const [confirmDeleteModal, setConfirmDeleteModal] = useState<{ id: string; name: string } | null>(null);
   const [deleteError, setDeleteError] = useState<string | null>(null);
+
+  // Status Tab Filter & Approval States
+  const [selectedStatusTab, setSelectedStatusTab] = useState<"ALL" | "PENDING_REVIEW" | "PUBLISHED" | "REJECTED">("ALL");
+  const [rejectModalOpen, setRejectModalOpen] = useState(false);
+  const [propertyToReject, setPropertyToReject] = useState<PropertyAdminItem | null>(null);
+  const [rejectionReasonText, setRejectionReasonText] = useState("");
+  const [rejectModalError, setRejectModalError] = useState<string | null>(null);
+  const [isUpdatingStatusId, setIsUpdatingStatusId] = useState<string | null>(null);
+  const [statusAlert, setStatusAlert] = useState<{ type: "success" | "error"; message: string } | null>(null);
+
+  const handleApproveProperty = async (prop: PropertyAdminItem) => {
+    try {
+      setIsUpdatingStatusId(prop.id);
+      setStatusAlert(null);
+      const res = await fetch(`/api/admin/properties/${prop.id}/status`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: "PUBLISHED" }),
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setStatusAlert({ type: "success", message: `Properti "${prop.name}" berhasil disetujui dan aktif tayang publik!` });
+        await fetchProperties();
+      } else {
+        setStatusAlert({ type: "error", message: data.error || "Gagal menyetujui properti." });
+      }
+    } catch {
+      setStatusAlert({ type: "error", message: "Terjadi gangguan jaringan saat menyetujui properti." });
+    } finally {
+      setIsUpdatingStatusId(null);
+    }
+  };
+
+  const handleOpenRejectModal = (prop: PropertyAdminItem) => {
+    setPropertyToReject(prop);
+    setRejectionReasonText(prop.rejectionReason || "");
+    setRejectModalError(null);
+    setRejectModalOpen(true);
+  };
+
+  const handleConfirmRejectProperty = async () => {
+    if (!propertyToReject) return;
+    if (!rejectionReasonText.trim()) {
+      setRejectModalError("Alasan penolakan wajib diisi untuk menginfokan pemilik kos.");
+      return;
+    }
+
+    try {
+      setIsUpdatingStatusId(propertyToReject.id);
+      setRejectModalError(null);
+      const res = await fetch(`/api/admin/properties/${propertyToReject.id}/status`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          status: "REJECTED",
+          rejectionReason: rejectionReasonText.trim(),
+        }),
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setStatusAlert({ type: "success", message: `Properti "${propertyToReject.name}" berhasil ditolak.` });
+        setRejectModalOpen(false);
+        setPropertyToReject(null);
+        setRejectionReasonText("");
+        await fetchProperties();
+      } else {
+        setRejectModalError(data.error || "Gagal menolak properti.");
+      }
+    } catch {
+      setRejectModalError("Terjadi gangguan jaringan saat menolak properti.");
+    } finally {
+      setIsUpdatingStatusId(null);
+    }
+  };
 
   // State Modal Form (Tambah / Edit)
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -661,126 +738,279 @@ export default function ManagePropertiesPage() {
           </button>
         </div>
 
+        {/* Status Notification Alert */}
+        {statusAlert && (
+          <div
+            className={`p-4 border-b flex items-center justify-between text-xs font-semibold ${
+              statusAlert.type === "success"
+                ? "bg-emerald-50 text-emerald-800 border-emerald-200"
+                : "bg-rose-50 text-rose-800 border-rose-200"
+            }`}
+          >
+            <div className="flex items-center gap-2">
+              {statusAlert.type === "success" ? (
+                <CheckCircle2 size={16} className="text-emerald-600 shrink-0" />
+              ) : (
+                <AlertCircle size={16} className="text-rose-600 shrink-0" />
+              )}
+              <span>{statusAlert.message}</span>
+            </div>
+            <button
+              onClick={() => setStatusAlert(null)}
+              className="text-slate-400 hover:text-slate-600 cursor-pointer"
+            >
+              <X size={14} />
+            </button>
+          </div>
+        )}
+
+        {/* Status Filter Tabs */}
+        <div className="px-6 py-3 border-b border-slate-200 bg-slate-50/50 flex items-center gap-2 overflow-x-auto">
+          <button
+            type="button"
+            onClick={() => setSelectedStatusTab("ALL")}
+            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 shrink-0 ${
+              selectedStatusTab === "ALL"
+                ? "bg-slate-900 text-white shadow-xs"
+                : "bg-white text-slate-600 hover:bg-slate-100 border border-slate-200"
+            }`}
+          >
+            <span>Semua Kos</span>
+            <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-slate-200 text-slate-800 font-black">
+              {properties.length}
+            </span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setSelectedStatusTab("PENDING_REVIEW")}
+            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 shrink-0 ${
+              selectedStatusTab === "PENDING_REVIEW"
+                ? "bg-amber-600 text-white shadow-xs"
+                : "bg-white text-amber-700 hover:bg-amber-50 border border-amber-200"
+            }`}
+          >
+            <span>Butuh Persetujuan</span>
+            {properties.filter((p) => (p.status || "PENDING_REVIEW") === "PENDING_REVIEW").length > 0 && (
+              <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-amber-100 text-amber-900 font-black animate-pulse">
+                {properties.filter((p) => (p.status || "PENDING_REVIEW") === "PENDING_REVIEW").length}
+              </span>
+            )}
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setSelectedStatusTab("PUBLISHED")}
+            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 shrink-0 ${
+              selectedStatusTab === "PUBLISHED"
+                ? "bg-emerald-600 text-white shadow-xs"
+                : "bg-white text-emerald-700 hover:bg-emerald-50 border border-emerald-200"
+            }`}
+          >
+            <span>Disetujui / Aktif</span>
+            <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-emerald-100 text-emerald-800 font-black">
+              {properties.filter((p) => p.status === "PUBLISHED").length}
+            </span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setSelectedStatusTab("REJECTED")}
+            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 shrink-0 ${
+              selectedStatusTab === "REJECTED"
+                ? "bg-rose-600 text-white shadow-xs"
+                : "bg-white text-rose-700 hover:bg-rose-50 border border-rose-200"
+            }`}
+          >
+            <span>Ditolak</span>
+            <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-rose-100 text-rose-800 font-black">
+              {properties.filter((p) => p.status === "REJECTED").length}
+            </span>
+          </button>
+        </div>
+
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm min-w-[800px]">
+          <table className="w-full text-left text-sm min-w-[900px]">
             <thead className="bg-slate-100 text-slate-600 font-semibold uppercase text-xs tracking-wider">
               <tr>
                 <th className="p-4 border-b border-slate-200">Nama Kos</th>
                 <th className="p-4 border-b border-slate-200">Nama Pemilik</th>
                 <th className="p-4 border-b border-slate-200 text-center">Tipe Kos</th>
                 <th className="p-4 border-b border-slate-200">Harga</th>
-                <th className="p-4 border-b border-slate-200 text-center">
-                  Kapasitas (Sisa)
-                </th>
+                <th className="p-4 border-b border-slate-200 text-center">Kapasitas</th>
+                <th className="p-4 border-b border-slate-200 text-center">Status Review</th>
                 <th className="p-4 border-b border-slate-200 text-right">Aksi</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
-              {properties.map((prop) => (
-                <tr key={prop.id} className="hover:bg-slate-50 transition-colors">
-                  <td className="p-4">
-                    <div className="font-bold text-slate-800">{prop.name}</div>
-                    {(prop.is_24_hours || prop.is_pet_friendly) && (
-                      <div className="flex items-center gap-1.5 flex-wrap mt-1">
-                        {prop.is_24_hours && (
-                          <span className="inline-flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 border border-slate-200/80">
-                            <Clock size={10} className="text-slate-500" />
-                            <span>24 Jam</span>
-                          </span>
-                        )}
-                        {prop.is_pet_friendly && (
-                          <span className="inline-flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-800 border border-emerald-200/80">
-                            <Sparkles size={10} className="text-emerald-600" />
-                            <span>Pet Friendly</span>
-                          </span>
-                        )}
+              {properties
+                .filter((prop) => {
+                  const effectiveStatus = prop.status || "PENDING_REVIEW";
+                  if (selectedStatusTab === "ALL") return true;
+                  return effectiveStatus === selectedStatusTab;
+                })
+                .map((prop) => (
+                  <tr key={prop.id} className="hover:bg-slate-50 transition-colors">
+                    <td className="p-4">
+                      <div className="font-bold text-slate-800">{prop.name}</div>
+                      {(prop.is_24_hours || prop.is_pet_friendly) && (
+                        <div className="flex items-center gap-1.5 flex-wrap mt-1">
+                          {prop.is_24_hours && (
+                            <span className="inline-flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 border border-slate-200/80">
+                              <Clock size={10} className="text-slate-500" />
+                              <span>24 Jam</span>
+                            </span>
+                          )}
+                          {prop.is_pet_friendly && (
+                            <span className="inline-flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-800 border border-emerald-200/80">
+                              <Sparkles size={10} className="text-emerald-600" />
+                              <span>Pet Friendly</span>
+                            </span>
+                          )}
+                        </div>
+                      )}
+                      {prop.facilities && (
+                        <div className="text-xs text-slate-400 truncate max-w-xs mt-0.5">
+                          {prop.facilities}
+                        </div>
+                      )}
+                    </td>
+                    <td className="p-4">
+                      <div className="font-medium text-slate-700">
+                        {prop.owner?.name || "-"}
                       </div>
-                    )}
-                    {prop.facilities && (
-                      <div className="text-xs text-slate-400 truncate max-w-xs mt-0.5">
-                        {prop.facilities}
+                      <div className="text-xs text-slate-500">
+                        {prop.owner?.whatsapp_number || "-"}
                       </div>
-                    )}
-                  </td>
-                  <td className="p-4">
-                    <div className="font-medium text-slate-700">
-                      {prop.owner?.name || "-"}
-                    </div>
-                    <div className="text-xs text-slate-500">
-                      {prop.owner?.whatsapp_number || "-"}
-                    </div>
-                  </td>
-                  <td className="p-4 text-center">
-                    <span
-                      className={`px-2.5 py-0.5 rounded-full text-xs font-semibold ${
-                        prop.gender_type === "PUTRI"
-                          ? "bg-pink-100 text-pink-700"
-                          : prop.gender_type === "PUTRA"
-                          ? "bg-blue-100 text-blue-700"
-                          : "bg-purple-100 text-purple-700"
-                      }`}
-                    >
-                      {prop.gender_type || "CAMPUR"}
-                    </span>
-                  </td>
-                  <td className="p-4 font-semibold text-slate-700">
-                    <div>
-                      {prop.price_per_month
-                        ? `Rp ${prop.price_per_month.toLocaleString("id-ID")}/bln`
-                        : "-"}
-                    </div>
-                    {prop.room_types && prop.room_types.length > 1 && (
-                      <span className="inline-block mt-0.5 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-teal-50 text-teal-700 border border-teal-200">
-                        {prop.room_types.length} Tipe Kamar
+                    </td>
+                    <td className="p-4 text-center">
+                      <span
+                        className={`px-2.5 py-0.5 rounded-full text-xs font-semibold ${
+                          prop.gender_type === "PUTRI"
+                            ? "bg-pink-100 text-pink-700"
+                            : prop.gender_type === "PUTRA"
+                            ? "bg-blue-100 text-blue-700"
+                            : "bg-purple-100 text-purple-700"
+                        }`}
+                      >
+                        {prop.gender_type || "CAMPUR"}
                       </span>
-                    )}
-                  </td>
-                  <td className="p-4 text-center">
-                    <span
-                      className={`px-3 py-1 rounded-full text-xs font-bold ${
-                        prop.available_rooms > 0
-                          ? "bg-green-100 text-green-700"
-                          : "bg-red-100 text-red-700"
-                      }`}
-                    >
-                      {prop.available_rooms} Kamar
-                    </span>
-                  </td>
-                  <td className="p-4 text-right">
-                    <div className="inline-flex items-center gap-2">
-                      <button
-                        onClick={() => handleOpenEditModal(prop)}
-                        className="inline-flex items-center gap-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-2 rounded-lg text-xs font-semibold transition-all cursor-pointer border border-slate-200"
-                        title="Edit Properti"
+                    </td>
+                    <td className="p-4 font-semibold text-slate-700">
+                      <div>
+                        {prop.price_per_month
+                          ? `Rp ${prop.price_per_month.toLocaleString("id-ID")}/bln`
+                          : "-"}
+                      </div>
+                      {prop.room_types && prop.room_types.length > 1 && (
+                        <span className="inline-block mt-0.5 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-teal-50 text-teal-700 border border-teal-200">
+                          {prop.room_types.length} Tipe Kamar
+                        </span>
+                      )}
+                    </td>
+                    <td className="p-4 text-center">
+                      <span
+                        className={`px-3 py-1 rounded-full text-xs font-bold ${
+                          prop.available_rooms > 0
+                            ? "bg-green-100 text-green-700"
+                            : "bg-red-100 text-red-700"
+                        }`}
                       >
-                        <Pencil size={13} />
-                        <span>Edit</span>
-                      </button>
-                      <button
-                        disabled={deletingPropertyId === prop.id}
-                        onClick={() => handleDeleteProperty(prop.id, prop.name)}
-                        className="inline-flex items-center gap-1.5 bg-white hover:bg-rose-50 disabled:opacity-50 text-rose-600 px-3 py-2 rounded-lg text-xs font-semibold transition-all cursor-pointer border border-rose-200"
-                        title="Hapus Properti"
-                      >
-                        {deletingPropertyId === prop.id ? (
-                          <>
-                            <Loader2 size={13} className="animate-spin" />
-                            <span>Menghapus...</span>
-                          </>
-                        ) : (
-                          <>
-                            <Trash2 size={13} />
-                            <span>Hapus</span>
-                          </>
+                        {prop.available_rooms} Kamar
+                      </span>
+                    </td>
+                    <td className="p-4 text-center">
+                      {prop.status === "PUBLISHED" ? (
+                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">
+                          <CheckCircle2 size={12} className="text-emerald-600" />
+                          <span>Aktif (Disetujui)</span>
+                        </span>
+                      ) : prop.status === "REJECTED" ? (
+                        <div className="inline-flex flex-col items-center">
+                          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-rose-100 text-rose-800 border border-rose-200">
+                            <X size={12} className="text-rose-600" />
+                            <span>Ditolak</span>
+                          </span>
+                          {prop.rejectionReason && (
+                            <span
+                              className="text-[10px] text-rose-600 hover:underline cursor-pointer max-w-[150px] truncate mt-1"
+                              title={prop.rejectionReason}
+                              onClick={() => handleOpenRejectModal(prop)}
+                            >
+                              Alasan: {prop.rejectionReason}
+                            </span>
+                          )}
+                        </div>
+                      ) : (
+                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-800 border border-amber-200 animate-pulse">
+                          <Clock size={12} className="text-amber-600" />
+                          <span>Menunggu Review</span>
+                        </span>
+                      )}
+                    </td>
+                    <td className="p-4 text-right">
+                      <div className="inline-flex items-center gap-1.5 flex-wrap justify-end">
+                        {/* Tombol Persetujuan Admin */}
+                        {prop.status !== "PUBLISHED" && (
+                          <button
+                            type="button"
+                            disabled={isUpdatingStatusId === prop.id}
+                            onClick={() => handleApproveProperty(prop)}
+                            className="inline-flex items-center gap-1 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all shadow-xs cursor-pointer"
+                            title="Setujui dan Publikasikan Kos"
+                          >
+                            {isUpdatingStatusId === prop.id ? (
+                              <Loader2 size={12} className="animate-spin" />
+                            ) : (
+                              <Check size={12} />
+                            )}
+                            <span>Setujui</span>
+                          </button>
                         )}
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
+
+                        {prop.status !== "REJECTED" && (
+                          <button
+                            type="button"
+                            disabled={isUpdatingStatusId === prop.id}
+                            onClick={() => handleOpenRejectModal(prop)}
+                            className="inline-flex items-center gap-1 bg-white hover:bg-rose-50 text-rose-700 disabled:opacity-50 border border-rose-200 px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer"
+                            title="Tolak Properti Kos"
+                          >
+                            <X size={12} />
+                            <span>Tolak</span>
+                          </button>
+                        )}
+
+                        <button
+                          type="button"
+                          onClick={() => handleOpenEditModal(prop)}
+                          className="inline-flex items-center gap-1 bg-slate-100 hover:bg-slate-200 text-slate-700 px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer border border-slate-200"
+                          title="Edit Properti"
+                        >
+                          <Pencil size={12} />
+                          <span>Edit</span>
+                        </button>
+
+                        <button
+                          type="button"
+                          disabled={deletingPropertyId === prop.id}
+                          onClick={() => handleDeleteProperty(prop.id, prop.name)}
+                          className="inline-flex items-center gap-1 bg-white hover:bg-rose-50 disabled:opacity-50 text-rose-600 px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer border border-rose-200"
+                          title="Hapus Properti"
+                        >
+                          {deletingPropertyId === prop.id ? (
+                            <Loader2 size={12} className="animate-spin" />
+                          ) : (
+                            <Trash2 size={12} />
+                          )}
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
               {properties.length === 0 && (
                 <tr>
-                  <td colSpan={6} className="p-8 text-center text-slate-500">
+                  <td colSpan={7} className="p-8 text-center text-slate-500">
                     Belum ada data kos.
                   </td>
                 </tr>
@@ -1620,6 +1850,89 @@ export default function ManagePropertiesPage() {
                   <>
                     <Trash2 size={13} />
                     <span>Ya, Hapus</span>
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Konfirmasi Penolakan Properti Kos */}
+      {rejectModalOpen && propertyToReject && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-200">
+          <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-100 animate-in zoom-in-95 duration-200">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+              <div className="flex items-center gap-2 text-rose-600">
+                <AlertCircle size={20} />
+                <h3 className="font-extrabold text-slate-900 text-base">
+                  Tolak Properti Kos
+                </h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setRejectModalOpen(false)}
+                className="text-slate-400 hover:text-slate-600 p-1 rounded-lg cursor-pointer"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <div className="py-4 space-y-3">
+              <p className="text-xs text-slate-600">
+                Anda akan menolak pengajuan properti{" "}
+                <span className="font-bold text-slate-900">
+                  &quot;{propertyToReject.name}&quot;
+                </span>
+                . Mohon tuliskan alasan penolakan secara jelas agar pemilik kos dapat memperbaiki datanya.
+              </p>
+
+              {rejectModalError && (
+                <div className="p-2.5 rounded-lg bg-rose-50 border border-rose-200 text-rose-700 text-xs font-medium flex items-center gap-1.5">
+                  <AlertCircle size={14} className="shrink-0 text-rose-600" />
+                  <span>{rejectModalError}</span>
+                </div>
+              )}
+
+              <div>
+                <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
+                  Alasan Penolakan <span className="text-rose-500">*</span>
+                </label>
+                <textarea
+                  rows={4}
+                  required
+                  placeholder="Contoh: Foto tampak depan kos buram, alamat belum lengkap, atau harga tidak sesuai standar..."
+                  value={rejectionReasonText}
+                  onChange={(e) => setRejectionReasonText(e.target.value)}
+                  className="w-full text-xs p-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-rose-500 bg-slate-50 focus:bg-white resize-y font-medium"
+                />
+              </div>
+            </div>
+
+            <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
+              <button
+                type="button"
+                onClick={() => setRejectModalOpen(false)}
+                disabled={isUpdatingStatusId === propertyToReject.id}
+                className="px-4 py-2 text-xs font-bold text-slate-600 hover:bg-slate-100 rounded-xl transition-colors cursor-pointer"
+              >
+                Batal
+              </button>
+              <button
+                type="button"
+                onClick={handleConfirmRejectProperty}
+                disabled={isUpdatingStatusId === propertyToReject.id}
+                className="px-4 py-2 text-xs font-bold bg-rose-600 hover:bg-rose-700 text-white rounded-xl shadow-xs disabled:opacity-50 transition-all flex items-center gap-1.5 cursor-pointer"
+              >
+                {isUpdatingStatusId === propertyToReject.id ? (
+                  <>
+                    <Loader2 size={13} className="animate-spin" />
+                    <span>Menyimpan...</span>
+                  </>
+                ) : (
+                  <>
+                    <X size={13} />
+                    <span>Kirim Penolakan</span>
                   </>
                 )}
               </button>

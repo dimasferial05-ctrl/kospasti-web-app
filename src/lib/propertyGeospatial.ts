@@ -21,6 +21,8 @@ export interface DetailedPropertyWithDistance {
   longitude: number | null;
   is_pet_friendly: boolean;
   is_24_hours: boolean;
+  status?: string;
+  rejectionReason?: string | null;
   average_rating: number;
   total_reviews: number;
   last_updated: Date | string;
@@ -57,6 +59,7 @@ export async function findPropertiesWithinRadius(
         )) ) ) AS distance
       FROM "Property"
       WHERE latitude IS NOT NULL AND longitude IS NOT NULL
+        AND status = 'PUBLISHED'
         AND ( 6371 * acos( LEAST(1.0, GREATEST(-1.0,
           cos(radians(${targetLat})) * cos(radians(latitude)) * cos(radians(longitude) - radians(${targetLng})) +
           sin(radians(${targetLat})) * sin(radians(latitude))
@@ -94,6 +97,7 @@ export async function fetchFullPropertiesByIds(
   const rawProperties = await prisma.property.findMany({
     where: {
       id: { in: ids },
+      status: "PUBLISHED",
     },
     include: {
       owner: {
@@ -158,6 +162,8 @@ export async function fetchFullPropertiesByIds(
       longitude: property.longitude,
       is_pet_friendly: property.is_pet_friendly,
       is_24_hours: property.is_24_hours,
+      status: property.status,
+      rejectionReason: property.rejectionReason,
       average_rating: avgRating,
       total_reviews: totalReviews,
       last_updated: property.updated_at,
@@ -186,6 +192,9 @@ export async function getAllPropertiesFallback(
   try {
     const rawProperties = await prisma.property.findMany({
       take: limit,
+      where: {
+        status: "PUBLISHED",
+      },
       orderBy: {
         updated_at: "desc",
       },
@@ -252,6 +261,8 @@ export async function getAllPropertiesFallback(
         longitude: property.longitude,
         is_pet_friendly: property.is_pet_friendly,
         is_24_hours: property.is_24_hours,
+        status: property.status,
+        rejectionReason: property.rejectionReason,
         average_rating: avgRating,
         total_reviews: totalReviews,
         last_updated: property.updated_at,

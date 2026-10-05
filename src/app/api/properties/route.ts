@@ -16,7 +16,9 @@ export async function GET(request?: Request) {
     const lng = searchParams.get("lng");
     const radius = searchParams.get("radius");
 
-    const whereClause: Prisma.PropertyWhereInput = {};
+    const whereClause: Prisma.PropertyWhereInput = {
+      status: "PUBLISHED",
+    };
 
     let distanceMap: Map<string, number> | null = null;
     if (lat && lng && !isNaN(parseFloat(lat)) && !isNaN(parseFloat(lng))) {

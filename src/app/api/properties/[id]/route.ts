@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { verifyOwnerToken } from "@/lib/auth";
 
 export async function GET(
   request: Request,
@@ -62,6 +63,30 @@ export async function GET(
         },
         { status: 404 }
       );
+    }
+
+    // Jika properti belum PUBLISHED, hanya izinkan jika diakses oleh admin atau pemilik properti
+    if (property.status !== "PUBLISHED") {
+      const cookieHeader = request.headers.get("cookie") || "";
+      const hasAdminToken = cookieHeader.includes("admin_token=");
+      let isOwner = false;
+      const partnerTokenMatch = cookieHeader.match(/partner_token=([^;]+)/);
+      if (partnerTokenMatch) {
+        const payload = await verifyOwnerToken(partnerTokenMatch[1]);
+        if (payload?.ownerId === property.owner_id) {
+          isOwner = true;
+        }
+      }
+
+      if (!hasAdminToken && !isOwner) {
+        return NextResponse.json(
+          {
+            success: false,
+            error: "Properti tidak ditemukan atau masih dalam peninjauan admin.",
+          },
+          { status: 404 }
+        );
+      }
     }
 
     const activeReviews = property.reviews || [];

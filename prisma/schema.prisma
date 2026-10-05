@@ -35,6 +35,8 @@ model Property {
   longitude       Float?
   is_pet_friendly Boolean         @default(false)
   is_24_hours     Boolean         @default(false)
+  status          String          @default("PENDING_REVIEW")
+  rejectionReason String?
   rules           String?
   rental_terms    String?
   youtube_url     String?

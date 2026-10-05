@@ -21,6 +21,7 @@ import {
   Play,
   Clock,
   Home,
+  AlertCircle,
 } from "lucide-react";
 import LocationPicker from "@/components/map/LocationPicker";
 
@@ -59,6 +60,8 @@ interface Property {
   image_url: string | null;
   is_pet_friendly: boolean;
   is_24_hours: boolean;
+  status: string;
+  rejectionReason?: string | null;
   created_at: string;
   media?: PropertyMediaItem[];
   room_types?: RoomTypeItem[];
@@ -660,6 +663,26 @@ export default function PartnerPropertiesPage() {
               {/* Content Body */}
               <div className="p-5 flex-1 flex flex-col justify-between space-y-4">
                 <div>
+                  {/* Status Approval Badge */}
+                  <div className="mb-2.5">
+                    {prop.status === "PUBLISHED" ? (
+                      <span className="inline-flex items-center gap-1.5 text-[11px] font-bold px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                        <span>Aktif (Disetujui)</span>
+                      </span>
+                    ) : prop.status === "REJECTED" ? (
+                      <span className="inline-flex items-center gap-1.5 text-[11px] font-bold px-2.5 py-1 rounded-full bg-rose-50 text-rose-700 border border-rose-200">
+                        <span className="w-1.5 h-1.5 rounded-full bg-rose-500"></span>
+                        <span>Ditolak Admin</span>
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-1.5 text-[11px] font-bold px-2.5 py-1 rounded-full bg-amber-50 text-amber-700 border border-amber-200">
+                        <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
+                        <span>Menunggu Persetujuan Admin</span>
+                      </span>
+                    )}
+                  </div>
+
                   <h3 className="font-extrabold text-slate-900 text-base group-hover:text-emerald-700 transition-colors">
                     {prop.name}
                   </h3>
@@ -667,6 +690,26 @@ export default function PartnerPropertiesPage() {
                     <MapPin className="w-3.5 h-3.5 text-slate-400 shrink-0 mt-0.5" />
                     <span>{prop.address || "Lokasi belum diatur"}</span>
                   </p>
+
+                  {/* Rejection / Pending info */}
+                  {prop.status === "REJECTED" && (
+                    <div className="mt-3 p-3 rounded-2xl bg-rose-50/80 border border-rose-200 text-rose-800 text-xs">
+                      <div className="font-bold flex items-center gap-1 text-rose-900 mb-0.5">
+                        <AlertCircle className="w-3.5 h-3.5 text-rose-600 shrink-0" />
+                        <span>Alasan Penolakan:</span>
+                      </div>
+                      <p className="text-rose-700 text-[11px] leading-relaxed">
+                        {prop.rejectionReason || "Data properti belum memenuhi standar listing KosPasti. Silakan edit dan lengkapi foto atau informasi kos untuk diajukan kembali."}
+                      </p>
+                    </div>
+                  )}
+
+                  {prop.status === "PENDING_REVIEW" && (
+                    <div className="mt-3 p-2.5 rounded-xl bg-amber-50/80 border border-amber-200 text-amber-800 text-[11px] flex items-center gap-2">
+                      <Clock className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+                      <span>Kos sedang direview admin dan belum tayang di pencarian publik.</span>
+                    </div>
+                  )}
 
                   <div className="mt-3 pt-3 border-t border-slate-100 flex items-center justify-between">
                     <div>

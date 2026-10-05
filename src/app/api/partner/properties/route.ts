@@ -302,6 +302,7 @@ export async function POST(request: NextRequest) {
         latitude: parsedLatitude,
         longitude: parsedLongitude,
         owner_id: payload.ownerId,
+        status: "PENDING_REVIEW",
         is_pet_friendly: is_pet_friendly,
         is_24_hours: is_24_hours,
         description: description ? String(description).trim() : null,

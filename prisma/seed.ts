@@ -577,6 +577,11 @@ async function main() {
     console.log(`✅ Successfully seeded ${subangCount} properties from Subang data.`);
   }
 
+  // Set seeded properties to PUBLISHED by default for development
+  await prisma.property.updateMany({
+    data: { status: "PUBLISHED" },
+  });
+
   console.log("✅ Seeded owners and properties with magic links & room types:");
   console.log(` - ${owner1.name} -> ${owner1.properties.map((p) => `${p.name} (Sisa ${p.available_rooms} kamar, ${p.room_types.length} tipe, ID: ${p.id})`).join(", ")} | Token: magic-bambang-123`);
   console.log(` - ${owner2.name} -> ${owner2.properties.map((p) => `${p.name} (Sisa ${p.available_rooms} kamar, ${p.room_types.length} tipe, ID: ${p.id})`).join(", ")} | Token: magic-sri-456`);
