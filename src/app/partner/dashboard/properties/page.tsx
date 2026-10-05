@@ -22,6 +22,7 @@ import {
   Clock,
   Home,
 } from "lucide-react";
+import LocationPicker from "@/components/map/LocationPicker";
 
 interface PropertyMediaItem {
   id: string;
@@ -805,44 +806,23 @@ export default function PartnerPropertiesPage() {
                 />
               </div>
 
-              {/* Titik Koordinat */}
+              {/* Titik Koordinat Peta Interaktif */}
               <div>
-                <div className="flex items-center justify-between mb-1">
-                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
-                    Titik Koordinat Peta (Latitude &amp; Longitude)
-                  </label>
-                  <button
-                    type="button"
-                    onClick={() => setShowCoordHelp(!showCoordHelp)}
-                    className="text-xs text-emerald-600 font-semibold flex items-center gap-1 cursor-pointer"
-                  >
-                    <HelpCircle className="w-3.5 h-3.5" />
-                    <span>Petunjuk Peta</span>
-                  </button>
-                </div>
-
-                {showCoordHelp && (
-                  <div className="mb-2 p-3 rounded-xl bg-slate-100 text-xs text-slate-600">
-                    Buka Google Maps, klik kanan atau tekan lokasi kos Anda, lalu salin angka Latitude dan Longitude.
-                  </div>
-                )}
-
-                <div className="grid grid-cols-2 gap-3">
-                  <input
-                    type="text"
-                    placeholder="Latitude (misal: -6.5622)"
-                    value={formData.latitude}
-                    onChange={(e) => setFormData({ ...formData, latitude: e.target.value })}
-                    className="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-xs font-medium focus:ring-2 focus:ring-emerald-500 focus:outline-none"
-                  />
-                  <input
-                    type="text"
-                    placeholder="Longitude (misal: 107.7680)"
-                    value={formData.longitude}
-                    onChange={(e) => setFormData({ ...formData, longitude: e.target.value })}
-                    className="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-xs font-medium focus:ring-2 focus:ring-emerald-500 focus:outline-none"
-                  />
-                </div>
+                <LocationPicker
+                  latitude={formData.latitude ? Number(formData.latitude) : null}
+                  longitude={formData.longitude ? Number(formData.longitude) : null}
+                  onChange={(lat, lng) => {
+                    setFormData((prev) => ({
+                      ...prev,
+                      latitude: String(lat),
+                      longitude: String(lng),
+                    }));
+                  }}
+                  label="Titik Koordinat Peta (Latitude &amp; Longitude)"
+                  helperText="Geser pin merah atau klik peta untuk menentukan lokasi kos yang presisi."
+                />
+                <input type="hidden" name="latitude" value={formData.latitude} />
+                <input type="hidden" name="longitude" value={formData.longitude} />
               </div>
 
               {/* Fasilitas Umum */}
