@@ -20,6 +20,7 @@ import {
   Upload,
   Image as ImageIcon,
 } from "lucide-react";
+import LocationPicker from "@/components/map/LocationPicker";
 
 interface OwnerOption {
   id: string;
@@ -1154,35 +1155,29 @@ export default function ManagePropertiesPage() {
                   />
                 </div>
 
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className="block text-[11px] font-semibold text-slate-600 mb-1">
-                      Latitude (Lintang)
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="Contoh: -6.2374"
-                      value={formData.latitude}
-                      onChange={(e) => setFormData({ ...formData, latitude: e.target.value })}
-                      className="w-full px-3 py-1.5 text-xs font-mono border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-600/20 focus:border-emerald-600 bg-white"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-[11px] font-semibold text-slate-600 mb-1">
-                      Longitude (Bujur)
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="Contoh: 106.8526"
-                      value={formData.longitude}
-                      onChange={(e) => setFormData({ ...formData, longitude: e.target.value })}
-                      className="w-full px-3 py-1.5 text-xs font-mono border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-600/20 focus:border-emerald-600 bg-white"
-                    />
-                  </div>
+                <div className="pt-1">
+                  <LocationPicker
+                    latitude={formData.latitude ? Number(formData.latitude) : null}
+                    longitude={formData.longitude ? Number(formData.longitude) : null}
+                    onChange={(lat, lng) => {
+                      setFormData((prev) => ({
+                        ...prev,
+                        latitude: String(lat),
+                        longitude: String(lng),
+                      }));
+                    }}
+                    onAddressChange={(address) => {
+                      setFormData((prev) => ({
+                        ...prev,
+                        address: prev.address.trim() ? prev.address : address,
+                      }));
+                    }}
+                    label="Titik Koordinat Lokasi Properti"
+                    helperText="Geser pin merah atau klik pada peta untuk menentukan posisi bangunan kos secara akurat."
+                  />
+                  <input type="hidden" name="latitude" value={formData.latitude} />
+                  <input type="hidden" name="longitude" value={formData.longitude} />
                 </div>
-                <p className="text-[11px] text-slate-400">
-                  Salin koordinat dari Google Maps (klik kanan pada lokasi kos &rarr; salin angka koordinat).
-                </p>
               </div>
 
               {/* Kebijakan & Akses */}

@@ -24,6 +24,7 @@ import {
   EyeOff,
   ShieldCheck,
 } from "lucide-react";
+import LocationPicker from "@/components/map/LocationPicker";
 
 export default function PartnerRegisterPage() {
   const router = useRouter();
@@ -482,52 +483,30 @@ export default function PartnerRegisterPage() {
                   </div>
                 </div>
 
-                {/* Titik Koordinat Peta */}
+                {/* Titik Koordinat Peta Interaktif */}
                 <div>
-                  <div className="flex items-center justify-between mb-1.5">
-                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
-                      Titik Koordinat Geografis (Latitude &amp; Longitude)
-                    </label>
-                    <button
-                      type="button"
-                      onClick={() => setShowCoordHelp(!showCoordHelp)}
-                      className="text-xs text-emerald-600 hover:text-emerald-700 font-semibold flex items-center gap-1"
-                    >
-                      <HelpCircle className="w-3.5 h-3.5" />
-                      <span>Cara dapatkan koordinat</span>
-                    </button>
-                  </div>
-
-                  {showCoordHelp && (
-                    <div className="mb-3 p-3.5 rounded-xl bg-slate-100 border border-slate-200 text-xs text-slate-600 space-y-1.5">
-                      <p className="font-bold text-slate-800">📌 Cara mendapatkan koordinat dari Google Maps:</p>
-                      <ol className="list-decimal pl-4 space-y-1">
-                        <li>Buka aplikasi Google Maps di HP atau browser komputer.</li>
-                        <li>Cari dan klik/tahan titik lokasi kos Anda di peta hingga muncul pin merah.</li>
-                        <li>
-                          Lihat angka koordinat pada kolom pencarian (contoh: <code className="bg-white px-1 py-0.5 rounded text-emerald-700">-6.5622, 107.7680</code>).
-                        </li>
-                        <li>Salin angka pertama (Latitude) dan angka kedua (Longitude) ke kolom di bawah.</li>
-                      </ol>
-                    </div>
-                  )}
-
-                  <div className="grid grid-cols-2 gap-3">
-                    <input
-                      type="text"
-                      placeholder="Latitude (Contoh: -6.5622)"
-                      value={formData.latitude}
-                      onChange={(e) => setFormData({ ...formData, latitude: e.target.value })}
-                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm font-medium focus:ring-2 focus:ring-emerald-500 focus:outline-none"
-                    />
-                    <input
-                      type="text"
-                      placeholder="Longitude (Contoh: 107.7680)"
-                      value={formData.longitude}
-                      onChange={(e) => setFormData({ ...formData, longitude: e.target.value })}
-                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm font-medium focus:ring-2 focus:ring-emerald-500 focus:outline-none"
-                    />
-                  </div>
+                  <LocationPicker
+                    latitude={formData.latitude ? Number(formData.latitude) : null}
+                    longitude={formData.longitude ? Number(formData.longitude) : null}
+                    onChange={(lat, lng) => {
+                      setFormData((prev) => ({
+                        ...prev,
+                        latitude: String(lat),
+                        longitude: String(lng),
+                      }));
+                    }}
+                    onAddressChange={(address) => {
+                      setFormData((prev) => ({
+                        ...prev,
+                        address,
+                      }));
+                    }}
+                    label="Titik Koordinat Lokasi Kos (Peta)"
+                    helperText="Geser pin merah atau klik peta untuk menentukan lokasi akurat. Koordinat dan alamat lengkap akan terisi secara otomatis."
+                  />
+                  {/* Input hidden untuk menjamin kompatibilitas form submission */}
+                  <input type="hidden" name="latitude" value={formData.latitude} />
+                  <input type="hidden" name="longitude" value={formData.longitude} />
                 </div>
 
                 {/* Aturan & Kebijakan Tambahan */}
