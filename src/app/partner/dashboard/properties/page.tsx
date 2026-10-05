@@ -21,6 +21,7 @@ import {
   Play,
   Clock,
   Home,
+  AlertCircle,
 } from "lucide-react";
 import LocationPicker from "@/components/map/LocationPicker";
 
@@ -59,6 +60,8 @@ interface Property {
   image_url: string | null;
   is_pet_friendly: boolean;
   is_24_hours: boolean;
+  status: string;
+  rejectionReason?: string | null;
   created_at: string;
   media?: PropertyMediaItem[];
   room_types?: RoomTypeItem[];
@@ -509,12 +512,15 @@ export default function PartnerPropertiesPage() {
         return;
       }
 
+      const wasRejected = isEdit && editingProperty?.status === "REJECTED";
       setSuccessMsg(
         isEdit
-          ? "Properti berhasil diperbarui!"
-          : "Properti baru berhasil ditambahkan!"
+          ? wasRejected
+            ? "Revisi berhasil disimpan! Properti kos telah diajukan kembali ke Admin untuk ditinjau ulang."
+            : "Properti berhasil diperbarui!"
+          : "Properti baru berhasil ditambahkan! Menunggu persetujuan Admin sebelum tayang."
       );
-      setTimeout(() => setSuccessMsg(null), 3000);
+      setTimeout(() => setSuccessMsg(null), 4000);
       closeModal();
       fetchProperties();
     } catch {
@@ -660,6 +666,26 @@ export default function PartnerPropertiesPage() {
               {/* Content Body */}
               <div className="p-5 flex-1 flex flex-col justify-between space-y-4">
                 <div>
+                  {/* Status Approval Badge */}
+                  <div className="mb-2.5">
+                    {prop.status === "PUBLISHED" ? (
+                      <span className="inline-flex items-center gap-1.5 text-[11px] font-bold px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                        <span>Aktif (Disetujui)</span>
+                      </span>
+                    ) : prop.status === "REJECTED" ? (
+                      <span className="inline-flex items-center gap-1.5 text-[11px] font-bold px-2.5 py-1 rounded-full bg-rose-50 text-rose-700 border border-rose-200">
+                        <span className="w-1.5 h-1.5 rounded-full bg-rose-500"></span>
+                        <span>Ditolak Admin</span>
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-1.5 text-[11px] font-bold px-2.5 py-1 rounded-full bg-amber-50 text-amber-700 border border-amber-200">
+                        <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
+                        <span>Menunggu Persetujuan Admin</span>
+                      </span>
+                    )}
+                  </div>
+
                   <h3 className="font-extrabold text-slate-900 text-base group-hover:text-emerald-700 transition-colors">
                     {prop.name}
                   </h3>
@@ -667,6 +693,35 @@ export default function PartnerPropertiesPage() {
                     <MapPin className="w-3.5 h-3.5 text-slate-400 shrink-0 mt-0.5" />
                     <span>{prop.address || "Lokasi belum diatur"}</span>
                   </p>
+
+                  {/* Rejection / Pending info */}
+                  {prop.status === "REJECTED" && (
+                    <div className="mt-3 p-3 rounded-2xl bg-rose-50/90 border border-rose-200 text-rose-800 text-xs space-y-2">
+                      <div>
+                        <div className="font-bold flex items-center gap-1.5 text-rose-900 mb-0.5">
+                          <AlertCircle className="w-3.5 h-3.5 text-rose-600 shrink-0" />
+                          <span>Alasan Penolakan:</span>
+                        </div>
+                        <p className="text-rose-700 text-[11px] leading-relaxed pl-5">
+                          {prop.rejectionReason || "Data properti belum memenuhi standar listing KosPasti. Harap periksa dan lengkapi data kos."}
+                        </p>
+                      </div>
+
+                      <div className="pt-2 border-t border-rose-200/60 flex items-start gap-1.5 text-rose-900 text-[11px] bg-white/70 p-2 rounded-xl">
+                        <span className="text-sm leading-none shrink-0">💡</span>
+                        <p className="leading-snug">
+                          <span className="font-bold">Cara Mengajukan Ulang:</span> Klik tombol <strong>&ldquo;Perbaiki &amp; Ajukan Ulang&rdquo;</strong> di bawah untuk merevisi data kos. Setelah disimpan, kos akan otomatis diajukan kembali ke Admin untuk ditinjau.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {prop.status === "PENDING_REVIEW" && (
+                    <div className="mt-3 p-2.5 rounded-xl bg-amber-50/80 border border-amber-200 text-amber-800 text-[11px] flex items-center gap-2">
+                      <Clock className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+                      <span>Kos sedang direview admin dan belum tayang di pencarian publik.</span>
+                    </div>
+                  )}
 
                   <div className="mt-3 pt-3 border-t border-slate-100 flex items-center justify-between">
                     <div>
@@ -720,15 +775,19 @@ export default function PartnerPropertiesPage() {
                     <button
                       type="button"
                       onClick={() => openEditModal(prop)}
-                      className="flex-1 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                      className={`flex-1 py-2 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all hover:-translate-y-px active:scale-95 cursor-pointer ${
+                        prop.status === "REJECTED"
+                          ? "bg-amber-500 hover:bg-amber-600 text-white shadow-xs hover:shadow-sm"
+                          : "bg-slate-100 hover:bg-slate-200 text-slate-700 hover:shadow-sm"
+                      }`}
                     >
-                      <Edit className="w-3.5 h-3.5 text-slate-600" />
-                      <span>Edit Rincian</span>
+                      <Edit className="w-3.5 h-3.5" />
+                      <span>{prop.status === "REJECTED" ? "Perbaiki & Ajukan Ulang" : "Edit Rincian"}</span>
                     </button>
                     <button
                       type="button"
                       onClick={() => setDeleteConfirmId(prop.id)}
-                      className="p-2 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-600 font-bold text-xs transition-colors cursor-pointer"
+                      className="p-2 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-600 font-bold text-xs transition-all hover:-translate-y-px active:scale-95 cursor-pointer hover:shadow-sm"
                       title="Hapus Properti"
                     >
                       <Trash2 className="w-4 h-4" />
@@ -748,7 +807,13 @@ export default function PartnerPropertiesPage() {
             <div className="flex items-center justify-between pb-4 border-b border-slate-100">
               <h2 className="text-lg sm:text-xl font-extrabold text-slate-900 flex items-center gap-2">
                 <Building2 className="w-5 h-5 text-emerald-600" />
-                <span>{modalMode === "EDIT" ? "Edit Data Kos" : "Tambah Kos Baru"}</span>
+                <span>
+                  {modalMode === "EDIT"
+                    ? editingProperty?.status === "REJECTED"
+                      ? "Perbaiki Data Kos (Revisi)"
+                      : "Edit Data Kos"
+                    : "Tambah Kos Baru"}
+                </span>
               </h2>
               <button
                 type="button"
@@ -758,6 +823,24 @@ export default function PartnerPropertiesPage() {
                 <X className="w-5 h-5" />
               </button>
             </div>
+
+            {modalMode === "EDIT" && editingProperty?.status === "REJECTED" && (
+              <div className="mt-4 p-4 rounded-2xl bg-amber-50 border border-amber-200 text-amber-900 text-xs space-y-2">
+                <div className="flex items-center gap-1.5 font-bold text-amber-950">
+                  <AlertCircle className="w-4 h-4 text-amber-600 shrink-0" />
+                  <span>Properti Memerlukan Revisi</span>
+                </div>
+                <div className="bg-white/80 p-2.5 rounded-xl border border-amber-200/60 text-[11px] text-amber-900">
+                  <span className="font-semibold block text-slate-500 mb-0.5">Catatan Penolakan dari Admin:</span>
+                  <p className="font-medium text-rose-700 italic">
+                    &ldquo;{editingProperty.rejectionReason || "Data belum memenuhi standar listing KosPasti."}&rdquo;
+                  </p>
+                </div>
+                <p className="text-[11px] text-amber-800 leading-relaxed">
+                  💡 Silakan perbaiki data atau foto kos sesuai catatan di atas. Begitu Anda klik tombol <strong>&ldquo;Simpan &amp; Ajukan Ulang ke Admin&rdquo;</strong> di bawah, kos ini akan otomatis diajukan kembali ke Admin untuk ditinjau ulang.
+                </p>
+              </div>
+            )}
 
             <form onSubmit={handleSaveProperty} className="mt-5 space-y-5">
               {/* Nama Kos & Kategori */}
@@ -1286,7 +1369,13 @@ export default function PartnerPropertiesPage() {
                       <span>Menyimpan...</span>
                     </>
                   ) : (
-                    <span>{modalMode === "EDIT" ? "Simpan Perubahan" : "Tambah Properti"}</span>
+                    <span>
+                      {modalMode === "EDIT"
+                        ? editingProperty?.status === "REJECTED"
+                          ? "Simpan & Ajukan Ulang ke Admin"
+                          : "Simpan Perubahan"
+                        : "Tambah Properti"}
+                    </span>
                   )}
                 </button>
               </div>

@@ -346,6 +346,7 @@ export async function POST(request: NextRequest) {
         latitude: parsedLatitude,
         longitude: parsedLongitude,
         owner_id: owner_id.trim(),
+        status: "PUBLISHED",
         is_pet_friendly: is_pet_friendly,
         is_24_hours: is_24_hours,
         description: description ? String(description).trim() : null,

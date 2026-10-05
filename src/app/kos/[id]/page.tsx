@@ -374,8 +374,14 @@ export default function PropertyDetailPage() {
       const imagesOnly = property.media.filter((m) => m.type !== "VIDEO");
       list.push(...imagesOnly);
     }
-    if (property.image_url && !list.some((m) => m.url === property.image_url)) {
-      list.unshift({ url: property.image_url, type: "IMAGE" });
+    if (property.image_url) {
+      const thumbIndex = list.findIndex((m) => m.url === property.image_url);
+      if (thumbIndex > 0) {
+        const [thumb] = list.splice(thumbIndex, 1);
+        list.unshift(thumb);
+      } else if (thumbIndex === -1) {
+        list.unshift({ url: property.image_url, type: "IMAGE" });
+      }
     }
     if (property.room_types && property.room_types.length > 0) {
       for (const rt of property.room_types) {

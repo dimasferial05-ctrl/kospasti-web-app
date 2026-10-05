@@ -286,6 +286,8 @@ export async function PATCH(
       rules?: string | null;
       rental_terms?: string | null;
       youtube_url?: string | null;
+      status?: string;
+      rejectionReason?: string | null;
       media?: {
         create?: { url: string; type: string }[];
       };
@@ -322,6 +324,11 @@ export async function PATCH(
     if (rental_terms !== undefined) updateData.rental_terms = rental_terms ? String(rental_terms).trim() : null;
     if (youtube_url !== undefined) updateData.youtube_url = youtube_url ? String(youtube_url).trim() : null;
     if (image_url !== undefined) updateData.image_url = image_url ? String(image_url).trim() : null;
+
+    if (existing.status === "REJECTED") {
+      updateData.status = "PENDING_REVIEW";
+      updateData.rejectionReason = null;
+    }
 
     if (newMediaToCreate.length > 0) {
       updateData.media = {

@@ -11,9 +11,18 @@ import fs from "fs";
 import path from "path";
 
 describe("Fitur Manajemen Media di Halaman Edit Properti (Issue #93)", () => {
+  let ownerId: string;
+
   beforeEach(async () => {
     await clearDatabase();
     vi.restoreAllMocks();
+    const owner = await prisma.owner.create({
+      data: {
+        name: "Owner Media Test",
+        whatsapp_number: `08123${Date.now().toString().slice(-7)}`,
+      },
+    });
+    ownerId = owner.id;
   });
 
   describe("1. Helper deleteUploadedFile (src/lib/upload.ts)", () => {
@@ -42,17 +51,6 @@ describe("Fitur Manajemen Media di Halaman Edit Properti (Issue #93)", () => {
   });
 
   describe("2. DELETE /api/admin/media/[id]", () => {
-    let ownerId: string;
-
-    beforeEach(async () => {
-      const owner = await prisma.owner.create({
-        data: {
-          name: "Owner Media Test",
-          whatsapp_number: "081233445566",
-        },
-      });
-      ownerId = owner.id;
-    });
 
     it("menolak akses jika tidak ada token admin (401 Unauthorized)", async () => {
       const request = new NextRequest("http://localhost:3000/api/admin/media/fake-id", {
@@ -271,6 +269,7 @@ describe("Fitur Manajemen Media di Halaman Edit Properti (Issue #93)", () => {
           available_rooms: 2,
           gender_type: "CAMPUR",
           facilities: "WiFi, Kasur",
+          status: "PUBLISHED",
           // User memilih foto kedua sebagai thumbnail
           image_url: "/uploads/properties/foto-kedua-thumbnail.jpg",
           owner_id: owner.id,
