@@ -104,7 +104,7 @@ export function HowItWorksSection() {
                   <h3 className="text-lg sm:text-xl font-bold text-slate-900 mb-2">
                     {step.title}
                   </h3>
-                  <p className="text-sm sm:text-base text-slate-600 leading-relaxed font-normal">
+                  <p className="text-sm sm:text-base text-slate-600 leading-relaxed font-medium">
                     {step.description}
                   </p>
                 </div>

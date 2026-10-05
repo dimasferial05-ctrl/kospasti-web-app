@@ -122,7 +122,7 @@ export default function SearchPage() {
         </h1>
 
         {/* Subtitle */}
-        <p className="mt-3 text-sm sm:text-base text-slate-600 max-w-2xl leading-relaxed font-normal">
+        <p className="mt-3 text-sm sm:text-base text-slate-600 max-w-2xl leading-relaxed font-medium">
           Temukan info kos dengan fasilitas lengkap, harga transparan, dan ketersediaan kamar terupdate secara real-time.
         </p>
 

@@ -226,6 +226,7 @@ export function Header({ isLoggedIn: initialIsLoggedIn = false }: HeaderProps) {
           href="/"
           className="group flex items-center gap-2.5 transition-transform duration-300 hover:scale-[1.02]"
         >
+          <span className="sr-only">🏠</span>
           <Image
             src="/logo.jpg"
             alt="KosPasti Logo"
@@ -278,7 +279,7 @@ export function Header({ isLoggedIn: initialIsLoggedIn = false }: HeaderProps) {
 
                 {/* Dropdown Menu List of Landing Sections */}
                 {isLandingMenuOpen && (
-                  <div className="absolute left-0 top-full mt-2 w-72 bg-white rounded-2xl shadow-xl border border-slate-150 py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-150 before:absolute before:-top-2 before:left-0 before:w-full before:h-2 before:bg-transparent">
+                  <div className="absolute left-0 top-full mt-2 w-72 bg-white rounded-xl shadow-float border border-slate-200/80 py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-150 before:absolute before:-top-2 before:left-0 before:w-full before:h-2 before:bg-transparent">
                     <div className="px-4 py-2 border-b border-slate-100">
                       <p className="text-[11px] font-bold uppercase tracking-wider text-slate-600">
                         Daftar Isi Halaman
@@ -319,7 +320,7 @@ export function Header({ isLoggedIn: initialIsLoggedIn = false }: HeaderProps) {
             <div className="flex items-center gap-2">
               <Link
                 href="/search"
-                className={`hidden sm:flex items-center gap-1.5 px-3.5 py-2 text-sm font-semibold rounded-full transition-all duration-200 ${
+                className={`hidden sm:flex items-center gap-1.5 px-3.5 py-2 text-sm font-semibold rounded-full transition-all duration-200 hover:-translate-y-0.5 active:scale-95 ${
                   pathname === "/search" || pathname?.startsWith("/kos/")
                     ? "text-emerald-700 bg-emerald-500/10 border border-emerald-500/20 shadow-xs"
                     : "text-slate-600 hover:text-emerald-700 hover:bg-emerald-50/60"
@@ -331,7 +332,7 @@ export function Header({ isLoggedIn: initialIsLoggedIn = false }: HeaderProps) {
 
               <Link
                 href="/map"
-                className={`hidden sm:flex items-center gap-2 px-3.5 py-2 text-sm font-semibold rounded-full transition-all duration-200 ${
+                className={`hidden sm:flex items-center gap-2 px-3.5 py-2 text-sm font-semibold rounded-full transition-all duration-200 hover:-translate-y-0.5 active:scale-95 ${
                   pathname === "/map"
                     ? "text-emerald-700 bg-emerald-500/10 border border-emerald-500/20 shadow-xs"
                     : "text-slate-600 hover:text-emerald-700 hover:bg-emerald-50/60"
@@ -343,7 +344,7 @@ export function Header({ isLoggedIn: initialIsLoggedIn = false }: HeaderProps) {
 
               <Link
                 href="/bantuan"
-                className={`hidden md:flex items-center gap-1.5 px-3.5 py-2 text-sm font-semibold rounded-full transition-all duration-200 ${
+                className={`hidden md:flex items-center gap-1.5 px-3.5 py-2 text-sm font-semibold rounded-full transition-all duration-200 hover:-translate-y-0.5 active:scale-95 ${
                   pathname === "/bantuan"
                     ? "text-emerald-700 bg-emerald-500/10 border border-emerald-500/20 shadow-xs"
                     : "text-slate-600 hover:text-emerald-700 hover:bg-emerald-50/60"
@@ -417,9 +418,9 @@ export function Header({ isLoggedIn: initialIsLoggedIn = false }: HeaderProps) {
 
                 {/* Desktop Dropdown Menu Panel */}
                 {isDropdownOpen && (
-                  <div className="hidden md:block absolute right-0 top-full mt-2 w-64 bg-white rounded-2xl shadow-xl border border-slate-150 py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-150 before:absolute before:-top-2 before:left-0 before:w-full before:h-2 before:bg-transparent">
+                  <div className="hidden md:block absolute right-0 top-full mt-2 w-64 bg-white rounded-xl shadow-float border border-slate-200/80 py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-150 before:absolute before:-top-2 before:left-0 before:w-full before:h-2 before:bg-transparent">
                     {/* User Info Header */}
-                    <div className="px-4 py-3 border-b border-slate-100 bg-slate-50/60 rounded-t-2xl">
+                    <div className="px-4 py-3 border-b border-slate-100 bg-slate-50/80 rounded-t-xl">
                       <p className="text-xs font-medium text-slate-500">Masuk sebagai</p>
                       <p className="text-sm font-bold text-slate-900 truncate">
                         {user?.name || "Pengguna KosPasti"}
@@ -506,7 +507,7 @@ export function Header({ isLoggedIn: initialIsLoggedIn = false }: HeaderProps) {
               /* Auth Actions: Guest / Not Logged In State */
               <Link
                 href="/login"
-                className="flex items-center gap-2 px-4 py-2 text-sm font-bold text-white bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 rounded-full shadow-soft transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 cursor-pointer"
+                className="flex items-center gap-2 px-4 py-2 text-sm font-bold text-white bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 rounded-full shadow-soft hover:shadow-float transition-all duration-200 hover:-translate-y-0.5 active:scale-95 cursor-pointer"
               >
                 <LogIn className="w-4 h-4" />
                 <span>Masuk / Daftar</span>

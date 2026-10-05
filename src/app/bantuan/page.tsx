@@ -420,7 +420,7 @@ function HelpCenterContent() {
                     {activeArticle.title}
                   </h2>
 
-                  <p className="text-sm sm:text-base text-slate-600 leading-relaxed font-normal">
+                  <p className="text-sm sm:text-base text-slate-600 leading-relaxed font-medium">
                     {activeArticle.subtitle}
                   </p>
 

@@ -69,7 +69,7 @@ function PartnerLoginForm() {
   };
 
   return (
-    <div className="bg-white rounded-3xl p-6 sm:p-10 shadow-xl border border-slate-200/80">
+    <div className="bg-white rounded-2xl p-6 sm:p-10 shadow-soft border border-slate-200/60">
       {successMsg && (
         <div className="mb-6 p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs sm:text-sm font-medium flex items-start gap-3">
           <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0 mt-0.5" />
@@ -129,7 +129,7 @@ function PartnerLoginForm() {
         <button
           type="submit"
           disabled={isLoading}
-          className="w-full py-3 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-sm transition-all flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/25 active:scale-95 disabled:opacity-50 mt-2 cursor-pointer"
+          className="w-full py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm transition-all duration-200 flex items-center justify-center gap-2 shadow-soft hover:shadow-float hover:-translate-y-0.5 active:scale-95 disabled:opacity-50 mt-2 cursor-pointer"
         >
           {isLoading ? (
             <>

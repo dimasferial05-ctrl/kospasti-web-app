@@ -26,7 +26,7 @@ export function RoleCardsSection() {
               Saya Pencari Kos
             </h3>
 
-            <p className="text-sm text-slate-600 leading-relaxed max-w-xs mb-6 font-normal">
+            <p className="text-sm text-slate-600 leading-relaxed max-w-xs mb-6 font-medium">
               Temukan kamar kos impian dengan kepastian fasilitas, ulasan asli, dan garansi pembayaran aman.
             </p>
 
@@ -67,7 +67,7 @@ export function RoleCardsSection() {
               Saya Pemilik Kos
             </h3>
 
-            <p className="text-sm text-slate-600 leading-relaxed max-w-xs mb-6 font-normal">
+            <p className="text-sm text-slate-600 leading-relaxed max-w-xs mb-6 font-medium">
               Kelola kamar kos secara otomatis, otomasi penagihan via WhatsApp, dan maksimalkan okupansi properti Anda.
             </p>
 

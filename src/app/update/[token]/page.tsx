@@ -369,7 +369,7 @@ export default function UpdateRoomPage() {
                         </h3>
                         {formattedPrice && (
                           <p className="text-xs font-semibold text-emerald-700 mt-0.5">
-                            {formattedPrice} <span className="text-slate-400 font-normal">/ bulan</span>
+                            {formattedPrice} <span className="text-slate-400 font-medium">/ bulan</span>
                           </p>
                         )}
                       </div>

@@ -849,7 +849,7 @@ function ProfileContent() {
                             <span className="text-xs text-slate-500 block">Biaya Sewa</span>
                             <span className="text-sm sm:text-base font-bold text-emerald-700">
                               {formatRupiah(booking.property?.price_per_month || 0)}
-                              <span className="text-xs font-normal text-slate-500">/bln</span>
+                              <span className="text-xs font-medium text-slate-500">/bln</span>
                             </span>
                           </div>
 
