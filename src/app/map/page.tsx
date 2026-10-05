@@ -483,12 +483,12 @@ function MapSearchContent() {
             </div>
 
             {isLoading ? (
-              <div className="flex-1 flex flex-col items-center justify-center p-12 text-slate-400 bg-white rounded-2xl border border-slate-200">
+              <div className="flex-1 flex flex-col items-center justify-center p-12 text-slate-400 bg-white rounded-2xl border border-slate-200/60 shadow-soft">
                 <div className="w-8 h-8 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin mb-3"></div>
                 <p className="text-sm font-medium">Memuat data kos...</p>
               </div>
             ) : filteredProperties.length === 0 ? (
-              <div className="flex-1 flex flex-col items-center justify-center p-8 text-center bg-white rounded-2xl border border-slate-200">
+              <div className="flex-1 flex flex-col items-center justify-center p-8 text-center bg-white rounded-2xl border border-slate-200/60 shadow-soft">
                 <Home className="w-12 h-12 text-slate-300 mb-3" />
                 <h3 className="font-bold text-slate-800 text-base mb-1">
                   Kos Tidak Ditemukan
@@ -498,7 +498,7 @@ function MapSearchContent() {
                 </p>
                 <button
                   onClick={handleResetFilters}
-                  className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition-colors cursor-pointer"
+                  className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold shadow-soft hover:shadow-float active:scale-95 transition-all duration-200 cursor-pointer"
                 >
                   Reset Semua Filter
                 </button>
@@ -522,10 +522,10 @@ function MapSearchContent() {
                         }
                       }}
                       className={`group bg-white rounded-2xl p-3.5 border transition-all duration-200 cursor-pointer ${isSelected
-                          ? "border-emerald-500 ring-2 ring-emerald-500/20 shadow-md bg-emerald-50/20"
+                          ? "border-emerald-500 ring-2 ring-emerald-500/20 shadow-float bg-emerald-50/20 -translate-y-0.5"
                           : isHovered
-                            ? "border-slate-400 shadow-md translate-x-1"
-                            : "border-slate-200 hover:border-slate-300 shadow-sm"
+                            ? "border-slate-400/80 shadow-float -translate-y-0.5"
+                            : "border-slate-200/60 hover:border-slate-300 shadow-soft hover:shadow-float"
                         }`}
                     >
                       <div className="flex gap-3.5">

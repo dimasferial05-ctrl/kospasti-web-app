@@ -49,14 +49,14 @@ export function HeroSection() {
         </h1>
 
         {/* Subtitle */}
-        <p className="mt-4 text-sm sm:text-base md:text-lg text-slate-600 max-w-2xl font-normal leading-relaxed">
+        <p className="mt-4 text-sm sm:text-base md:text-lg text-slate-600 max-w-2xl font-medium leading-relaxed">
           Cari info kos dengan kepastian kamar real-time, transaksi aman bergaransi, atau kembangkan bisnis kos Anda bersama KosPasti.
         </p>
 
         {/* Floating Search Bar */}
         <form
           onSubmit={handleSearchSubmit}
-          className="w-full max-w-2xl mt-8 sm:mt-10 p-2 sm:p-2.5 bg-white/95 backdrop-blur-md rounded-2xl sm:rounded-full border border-slate-200/90 shadow-xl hover:shadow-2xl transition-all duration-300 flex flex-col sm:flex-row items-center justify-between gap-3 relative z-20"
+          className="w-full max-w-2xl mt-8 sm:mt-10 p-2 sm:p-2.5 bg-white/95 backdrop-blur-md rounded-2xl sm:rounded-full border border-slate-200/80 shadow-soft-lg hover:shadow-float transition-all duration-300 flex flex-col sm:flex-row items-center justify-between gap-3 relative z-20"
         >
           <div className="flex items-center gap-3 w-full px-4 py-1.5">
             <Search className="w-5 h-5 text-emerald-600 shrink-0" />
@@ -70,7 +70,7 @@ export function HeroSection() {
           </div>
           <button
             type="submit"
-            className="w-full sm:w-auto px-7 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm sm:text-base rounded-xl sm:rounded-full transition-all flex items-center justify-center gap-2 shrink-0 cursor-pointer shadow-md hover:scale-[1.02] active:scale-98"
+            className="w-full sm:w-auto px-7 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm sm:text-base rounded-xl sm:rounded-full transition-all duration-200 flex items-center justify-center gap-2 shrink-0 cursor-pointer shadow-soft hover:shadow-float hover:-translate-y-0.5 active:scale-95"
           >
             <span>Cari Kos</span>
             <ArrowRight className="w-4 h-4" />

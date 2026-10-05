@@ -917,7 +917,7 @@ export default function PropertyDetailPage() {
                   >
                     <Star className="w-3.5 h-3.5 text-amber-500 fill-amber-500" />
                     <span>{property.average_rating.toFixed(1)}</span>
-                    <span className="text-slate-400 font-normal underline decoration-slate-300 underline-offset-2">
+                    <span className="text-slate-400 font-medium underline decoration-slate-300 underline-offset-2">
                       ({property.total_reviews} ulasan)
                     </span>
                   </a>
@@ -951,7 +951,7 @@ export default function PropertyDetailPage() {
                 <span className="w-2.5 h-2.5 rounded-full bg-emerald-600"></span>
                 <h3 className="text-base font-bold text-slate-900">Deskripsi Kos</h3>
               </div>
-              <p className="text-xs sm:text-sm text-slate-600 leading-relaxed whitespace-pre-line font-normal">
+              <p className="text-xs sm:text-sm text-slate-600 leading-relaxed whitespace-pre-line font-medium">
                 {property.description}
               </p>
             </div>
@@ -1036,7 +1036,7 @@ export default function PropertyDetailPage() {
                           <p className="text-[10px] sm:text-xs text-slate-400 font-medium">Harga Kamar</p>
                           <p className="text-base sm:text-lg font-bold text-emerald-600">
                             Rp {rt.price_per_month.toLocaleString("id-ID")}
-                            <span className="text-xs font-normal text-slate-500"> /bln</span>
+                            <span className="text-xs font-medium text-slate-500"> /bln</span>
                           </p>
                         </div>
                         <button
@@ -1317,7 +1317,7 @@ export default function PropertyDetailPage() {
         {/* KOLOM KANAN (KARTU AMANKAN KAMAR STICKY DI BAWAH FOTO PROPERTI)          */}
         {/* ========================================================================= */}
         <div className="w-full lg:w-[380px] shrink-0">
-          <div className="fixed bottom-0 left-0 w-full bg-white border-t border-slate-200 p-4 flex justify-between items-center z-40 lg:static lg:block lg:p-6 lg:border lg:rounded-3xl lg:shadow-md lg:sticky lg:top-32">
+          <div className="fixed bottom-0 left-0 w-full bg-white border-t border-slate-200/80 p-4 flex justify-between items-center z-40 lg:static lg:block lg:p-6 lg:border lg:border-slate-200/60 lg:rounded-2xl lg:shadow-soft lg:sticky lg:top-32">
             <div className="max-w-md mx-auto lg:max-w-none w-full flex justify-between lg:flex-col lg:gap-4 items-center lg:items-start">
               <div className="lg:w-full">
                 <p className="text-[10px] lg:text-xs text-slate-400 font-semibold uppercase tracking-wider">
@@ -1325,7 +1325,7 @@ export default function PropertyDetailPage() {
                 </p>
                 <p className="text-lg lg:text-3xl font-black text-slate-900 mt-0.5">
                   {formattedPrice}{" "}
-                  <span className="text-xs lg:text-sm font-normal text-slate-500">
+                  <span className="text-xs lg:text-sm font-medium text-slate-500">
                     / bln
                   </span>
                 </p>

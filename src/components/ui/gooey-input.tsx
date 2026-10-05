@@ -267,7 +267,7 @@ export function GooeyInput({
               disabled={disabled || !isExpanded}
               placeholder={placeholder}
               className={cn(
-                "h-full min-w-0 flex-1 bg-transparent text-sm text-slate-800 placeholder:text-slate-400 outline-none font-normal",
+                "h-full min-w-0 flex-1 bg-transparent text-sm text-slate-800 placeholder:text-slate-400 outline-none font-medium",
                 isExpanded
                   ? "pointer-events-auto"
                   : "pointer-events-none opacity-80",

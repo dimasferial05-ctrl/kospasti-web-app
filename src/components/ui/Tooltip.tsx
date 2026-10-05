@@ -75,7 +75,7 @@ export function Tooltip({
           className={`absolute z-50 transition-all duration-150 animate-in fade-in zoom-in-95 ${positionClasses[position]}`}
         >
           <div
-            className={`bg-slate-900/95 backdrop-blur-md text-slate-100 text-xs font-normal px-3.5 py-2.5 rounded-xl shadow-2xl border border-slate-700/80 ${widthClass} whitespace-normal text-left leading-relaxed`}
+            className={`bg-slate-900/95 backdrop-blur-md text-slate-100 text-xs font-medium px-3.5 py-2.5 rounded-xl shadow-float border border-slate-700/80 ${widthClass} whitespace-normal text-left leading-relaxed`}
           >
             {content}
           </div>

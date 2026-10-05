@@ -152,7 +152,7 @@ export function KosPropertyCard({
     <div
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      className="group bg-white rounded-2xl border border-slate-200/90 overflow-hidden flex flex-col hover:shadow-lg hover:shadow-slate-200/50 hover:-translate-y-1 transition-all duration-300 h-full relative"
+      className="group bg-white rounded-2xl border border-slate-200/60 shadow-soft overflow-hidden flex flex-col hover:shadow-lg hover:shadow-float hover:-translate-y-1 transition-all duration-300 h-full relative"
     >
       {/* Image Section */}
       <div className="aspect-[4/3] w-full relative overflow-hidden bg-slate-100 flex items-center justify-center">
@@ -174,7 +174,7 @@ export function KosPropertyCard({
 
             {/* Room Type Tag when cycling */}
             {slides.length > 1 && currentSlide && currentSlide.title !== "Utama" && (
-              <div className="absolute top-3 left-3 z-20 bg-slate-900/80 backdrop-blur-md text-white text-[11px] font-medium px-2.5 py-1 rounded-md border border-white/10 shadow-xs flex items-center gap-1.5 transition-all duration-300">
+              <div className="absolute top-3 left-3 z-20 bg-slate-900/80 backdrop-blur-md text-white text-[11px] font-medium px-3 py-1 rounded-full border border-white/10 shadow-xs flex items-center gap-1.5 transition-all duration-300">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
                 <span className="truncate max-w-[150px]">{currentSlide.title}</span>
               </div>
@@ -187,7 +187,7 @@ export function KosPropertyCard({
                   type="button"
                   onClick={handlePrevSlide}
                   aria-label="Foto sebelumnya"
-                  className="absolute left-2 top-1/2 -translate-y-1/2 z-20 w-7 h-7 rounded-full bg-white/90 hover:bg-white text-slate-700 shadow-md flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 cursor-pointer"
+                  className="absolute left-2 top-1/2 -translate-y-1/2 z-20 w-7 h-7 rounded-full bg-white/95 hover:bg-white text-slate-700 shadow-soft hover:shadow-float hover:scale-105 active:scale-95 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-200 cursor-pointer"
                 >
                   <ChevronLeft className="w-4 h-4" />
                 </button>
@@ -195,7 +195,7 @@ export function KosPropertyCard({
                   type="button"
                   onClick={handleNextSlide}
                   aria-label="Foto berikutnya"
-                  className="absolute right-2 top-1/2 -translate-y-1/2 z-20 w-7 h-7 rounded-full bg-white/90 hover:bg-white text-slate-700 shadow-md flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 cursor-pointer"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 z-20 w-7 h-7 rounded-full bg-white/95 hover:bg-white text-slate-700 shadow-soft hover:shadow-float hover:scale-105 active:scale-95 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-200 cursor-pointer"
                 >
                   <ChevronRight className="w-4 h-4" />
                 </button>
@@ -267,13 +267,13 @@ export function KosPropertyCard({
           </h3>
           <div className="flex items-center gap-1.5 shrink-0">
             {averageRating !== undefined && averageRating > 0 && (
-              <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-slate-800 bg-slate-50 border border-slate-200/80 px-1.5 py-0.5 rounded-md">
+              <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-slate-800 bg-slate-50 border border-slate-200/80 px-2 py-0.5 rounded-full">
                 <Star className="w-3 h-3 text-amber-400 fill-amber-400" />
                 {averageRating.toFixed(1)}
               </span>
             )}
             <span
-              className={`text-[11px] px-2.5 py-0.5 rounded-md font-semibold border ${genderBadgeStyle}`}
+              className={`text-[11px] px-2.5 py-0.5 rounded-full font-semibold border ${genderBadgeStyle}`}
             >
               {genderType}
             </span>
@@ -282,14 +282,14 @@ export function KosPropertyCard({
 
         {/* Price & Lifestyle Badges */}
         <div className="flex flex-wrap items-baseline justify-between gap-2">
-          <span className="text-lg font-bold text-emerald-600 tracking-tight">
+          <span className="text-lg font-black text-emerald-600 tracking-tight">
             {formattedPrice}
           </span>
 
           <div className="flex items-center gap-1.5 flex-wrap">
             {typeof distance === "number" && (
               <span
-                className="inline-flex items-center gap-1 font-bold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded-full text-[10px] border border-emerald-200/80 shadow-2xs"
+                className="inline-flex items-center gap-1 font-bold text-emerald-800 bg-emerald-50 px-2.5 py-0.5 rounded-full text-[10px] border border-emerald-200/80 shadow-2xs"
                 title={distanceTargetName ? `Jarak ${distance} km dari ${distanceTargetName}` : `Jarak ${distance} km ke lokasi tujuan`}
               >
                 <MapPin className="w-3 h-3 text-emerald-600" />
@@ -297,12 +297,12 @@ export function KosPropertyCard({
               </span>
             )}
             {is24Hours && (
-              <span className="text-[10px] font-medium px-2 py-0.5 rounded bg-slate-100 text-slate-600 border border-slate-200" title="Akses 24 Jam">
+              <span className="text-[10px] font-medium px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-600 border border-slate-200" title="Akses 24 Jam">
                 24 Jam
               </span>
             )}
             {isPetFriendly && (
-              <span className="text-[10px] font-medium px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200/80" title="Pet Friendly">
+              <span className="text-[10px] font-medium px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200/80" title="Pet Friendly">
                 Pet Friendly
               </span>
             )}
@@ -316,7 +316,7 @@ export function KosPropertyCard({
             <span className="font-medium text-slate-700 truncate">{ownerName}</span>
           </div>
           {facilities && (
-            <p className="line-clamp-1 text-slate-500 text-[11px]">
+            <p className="line-clamp-1 text-slate-500 text-[11px] font-medium">
               {facilities}
             </p>
           )}
@@ -335,7 +335,7 @@ export function KosPropertyCard({
               </span>
             )}
             {isMultiType && (
-              <span className="bg-slate-100 text-slate-700 text-[11px] font-medium px-2 py-0.5 rounded-md border border-slate-200">
+              <span className="bg-slate-100 text-slate-700 text-[11px] font-medium px-2.5 py-0.5 rounded-full border border-slate-200">
                 {roomTypesCount ? `${roomTypesCount} Tipe` : "Multi Tipe"}
               </span>
             )}

@@ -255,7 +255,7 @@ export default function PartnerRegisterPage() {
         </div>
 
         {/* Stepper Progress Bar */}
-        <div className="bg-white rounded-2xl p-4 sm:p-6 shadow-soft border border-slate-200/80 mb-6">
+        <div className="bg-white rounded-2xl p-4 sm:p-6 shadow-soft border border-slate-200/60 mb-6">
           <div className="flex items-center justify-between relative">
             <div className="absolute top-1/2 left-0 right-0 h-1 bg-slate-100 -translate-y-1/2 z-0" />
             <div
@@ -300,7 +300,7 @@ export default function PartnerRegisterPage() {
         </div>
 
         {/* Card Form */}
-        <div className="bg-white rounded-3xl p-6 sm:p-10 shadow-xl border border-slate-200/80">
+        <div className="bg-white rounded-2xl p-6 sm:p-10 shadow-soft border border-slate-200/60">
           {errorMsg && (
             <div className="mb-6 p-4 rounded-2xl bg-rose-50 border border-rose-200 text-rose-700 text-sm font-medium flex items-start gap-3">
               <Info className="w-5 h-5 text-rose-500 shrink-0 mt-0.5" />
@@ -785,7 +785,7 @@ export default function PartnerRegisterPage() {
                   type="button"
                   onClick={prevStep}
                   disabled={isLoading || isSuccess}
-                  className="px-5 py-2.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs sm:text-sm font-bold flex items-center gap-2 transition-all disabled:opacity-50"
+                  className="px-5 py-2.5 rounded-xl border border-slate-200/80 bg-white hover:bg-slate-50 text-slate-700 text-xs sm:text-sm font-bold flex items-center gap-2 shadow-soft hover:shadow-float active:scale-95 transition-all duration-200 disabled:opacity-50 cursor-pointer"
                 >
                   <ArrowLeft className="w-4 h-4" />
                   <span>Kembali</span>
@@ -793,7 +793,7 @@ export default function PartnerRegisterPage() {
               ) : (
                 <Link
                   href="/partner/login"
-                  className="text-xs sm:text-sm font-semibold text-slate-500 hover:text-emerald-600"
+                  className="text-xs sm:text-sm font-semibold text-slate-500 hover:text-emerald-600 transition-colors"
                 >
                   Sudah punya akun Mitra? Masuk
                 </Link>
@@ -803,7 +803,7 @@ export default function PartnerRegisterPage() {
                 <button
                   type="button"
                   onClick={nextStep}
-                  className="px-6 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs sm:text-sm font-bold flex items-center gap-2 transition-all shadow-md shadow-emerald-500/20 active:scale-95"
+                  className="px-6 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs sm:text-sm font-bold flex items-center gap-2 transition-all duration-200 shadow-soft hover:shadow-float hover:-translate-y-0.5 active:scale-95 cursor-pointer"
                 >
                   <span>Lanjutkan</span>
                   <ArrowRight className="w-4 h-4" />
@@ -812,7 +812,7 @@ export default function PartnerRegisterPage() {
                 <button
                   type="submit"
                   disabled={isLoading || isSuccess}
-                  className="px-7 py-3 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white text-sm font-bold flex items-center gap-2 transition-all shadow-lg shadow-emerald-500/25 active:scale-95 disabled:opacity-50 cursor-pointer"
+                  className="px-7 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold flex items-center gap-2 transition-all duration-200 shadow-soft hover:shadow-float hover:-translate-y-0.5 active:scale-95 disabled:opacity-50 cursor-pointer"
                 >
                   {isLoading ? (
                     <>
