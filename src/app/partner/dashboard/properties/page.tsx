@@ -818,6 +818,12 @@ export default function PartnerPropertiesPage() {
                       longitude: String(lng),
                     }));
                   }}
+                  onAddressChange={(address) => {
+                    setFormData((prev) => ({
+                      ...prev,
+                      address: prev.address.trim() ? prev.address : address,
+                    }));
+                  }}
                   label="Titik Koordinat Peta (Latitude &amp; Longitude)"
                   helperText="Geser pin merah atau klik peta untuk menentukan lokasi kos yang presisi."
                 />

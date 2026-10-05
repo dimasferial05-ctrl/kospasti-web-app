@@ -1166,6 +1166,12 @@ export default function ManagePropertiesPage() {
                         longitude: String(lng),
                       }));
                     }}
+                    onAddressChange={(address) => {
+                      setFormData((prev) => ({
+                        ...prev,
+                        address: prev.address.trim() ? prev.address : address,
+                      }));
+                    }}
                     label="Titik Koordinat Lokasi Properti"
                     helperText="Geser pin merah atau klik pada peta untuk menentukan posisi bangunan kos secara akurat."
                   />

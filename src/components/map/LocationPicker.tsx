@@ -6,6 +6,7 @@ import {
   Map,
   AdvancedMarker,
   useMap,
+  useMapsLibrary,
 } from "@vis.gl/react-google-maps";
 import {
   MapPin,
@@ -22,6 +23,7 @@ export interface LocationPickerProps {
   latitude?: number | null;
   longitude?: number | null;
   onChange: (lat: number, lng: number) => void;
+  onAddressChange?: (address: string) => void;
   label?: string;
   helperText?: string;
   className?: string;
@@ -81,6 +83,55 @@ function MapInteractionController({
 }
 
 /**
+ * Controller untuk melakukan reverse-geocoding (mengubah lat/lng menjadi alamat jalan lengkap)
+ */
+function GeocodingController({
+  markerPosition,
+  onAddressChange,
+  onAddressResolved,
+}: {
+  markerPosition: { lat: number; lng: number } | null;
+  onAddressChange?: (address: string) => void;
+  onAddressResolved?: (address: string) => void;
+}) {
+  const geocodingLib = useMapsLibrary("geocoding");
+  const geocoder = useMemo(() => {
+    if (!geocodingLib || typeof geocodingLib.Geocoder !== "function") return null;
+    try {
+      return new geocodingLib.Geocoder();
+    } catch {
+      return null;
+    }
+  }, [geocodingLib]);
+
+  const lastCoords = useRef<{ lat: number; lng: number } | null>(null);
+
+  useEffect(() => {
+    if (!geocoder || !markerPosition || !markerPosition.lat || !markerPosition.lng) return;
+
+    if (
+      lastCoords.current &&
+      Math.abs(lastCoords.current.lat - markerPosition.lat) < 0.00001 &&
+      Math.abs(lastCoords.current.lng - markerPosition.lng) < 0.00001
+    ) {
+      return;
+    }
+
+    lastCoords.current = markerPosition;
+
+    geocoder.geocode({ location: markerPosition }, (results, status) => {
+      if (status === "OK" && results && results[0]?.formatted_address) {
+        const address = results[0].formatted_address;
+        onAddressChange?.(address);
+        onAddressResolved?.(address);
+      }
+    });
+  }, [geocoder, markerPosition, onAddressChange, onAddressResolved]);
+
+  return null;
+}
+
+/**
  * Komponen Error Boundary sederhana untuk menangkap kegagalan Google Maps
  */
 class MapErrorBoundary extends React.Component<
@@ -112,6 +163,7 @@ export default function LocationPicker({
   latitude,
   longitude,
   onChange,
+  onAddressChange,
   label = "Titik Lokasi di Peta",
   helperText = "Geser pin merah atau klik pada peta untuk menentukan posisi akurat bangunan kos Anda.",
   className = "",
@@ -139,6 +191,7 @@ export default function LocationPicker({
   const [isLocating, setIsLocating] = useState(false);
   const [locationError, setLocationError] = useState<string | null>(null);
   const [locationSuccess, setLocationSuccess] = useState<string | null>(null);
+  const [detectedAddress, setDetectedAddress] = useState<string | null>(null);
   const [panTrigger, setPanTrigger] = useState(0);
   const [targetZoom, setTargetZoom] = useState(DEFAULT_ZOOM);
   const hasAttemptedAutoLocate = useRef(false);
@@ -338,6 +391,12 @@ export default function LocationPicker({
                 disabled={disabled}
               />
 
+              <GeocodingController
+                markerPosition={currentMarker}
+                onAddressChange={onAddressChange}
+                onAddressResolved={setDetectedAddress}
+              />
+
               {/* Marker Draggable untuk Lokasi Kos */}
               {currentMarker && (
                 <AdvancedMarker
@@ -360,6 +419,17 @@ export default function LocationPicker({
           </APIProvider>
         </MapErrorBoundary>
       </div>
+
+      {/* Alamat Terdeteksi Otomatis */}
+      {detectedAddress && (
+        <div className="flex items-start gap-2 p-2.5 bg-emerald-50/90 border border-emerald-200/90 rounded-xl text-xs text-emerald-900 animate-fadeIn">
+          <MapPin className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+          <div className="leading-snug">
+            <span className="font-bold text-emerald-950">Alamat Terdeteksi: </span>
+            <span className="text-emerald-800">{detectedAddress}</span>
+          </div>
+        </div>
+      )}
 
       {/* Coordinate Badges & Petunjuk Interaksi */}
       <div className="flex flex-wrap items-center justify-between gap-2 pt-1 text-xs">

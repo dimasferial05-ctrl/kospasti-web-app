@@ -495,8 +495,14 @@ export default function PartnerRegisterPage() {
                         longitude: String(lng),
                       }));
                     }}
+                    onAddressChange={(address) => {
+                      setFormData((prev) => ({
+                        ...prev,
+                        address,
+                      }));
+                    }}
                     label="Titik Koordinat Lokasi Kos (Peta)"
-                    helperText="Geser pin merah atau klik peta untuk menentukan lokasi akurat. Koordinat akan terisi secara otomatis."
+                    helperText="Geser pin merah atau klik peta untuk menentukan lokasi akurat. Koordinat dan alamat lengkap akan terisi secara otomatis."
                   />
                   {/* Input hidden untuk menjamin kompatibilitas form submission */}
                   <input type="hidden" name="latitude" value={formData.latitude} />

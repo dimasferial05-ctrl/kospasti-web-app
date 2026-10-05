@@ -21,6 +21,11 @@ vi.mock("@vis.gl/react-google-maps", () => ({
     getZoom: vi.fn(() => 15),
     addListener: vi.fn(() => ({ remove: vi.fn() })),
   }),
+  useMapsLibrary: () => ({
+    Geocoder: class {
+      geocode = vi.fn();
+    },
+  }),
 }));
 
 import LocationPicker from "../src/components/map/LocationPicker";

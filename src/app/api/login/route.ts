@@ -13,12 +13,10 @@ export const userLoginAttempts = new Map<string, RateLimitRecord>();
 const MAX_ATTEMPTS = 5;
 const LOCKOUT_PERIOD_MS = 15 * 60 * 1000; // 15 menit
 
-function getClientIdentifier(request: Request): string {
+function getClientIdentifier(request: Request, email?: string): string {
   const forwarded = request.headers.get("x-forwarded-for");
-  if (forwarded) {
-    return forwarded.split(",")[0].trim();
-  }
-  return request.headers.get("x-real-ip") || "default_client";
+  const ip = forwarded ? forwarded.split(",")[0].trim() : (request.headers.get("x-real-ip") || "localhost");
+  return email ? `${ip}_${email.trim().toLowerCase()}` : ip;
 }
 
 function checkRateLimit(key: string): { limited: boolean; retryAfterSeconds: number } {
@@ -55,7 +53,11 @@ function recordFailedAttempt(key: string): void {
 
 export async function POST(request: Request) {
   try {
-    const clientKey = getClientIdentifier(request);
+    const body = await request.json().catch(() => null);
+    const email = body?.email?.trim?.()?.toLowerCase?.();
+    const password = body?.password;
+
+    const clientKey = getClientIdentifier(request, email);
 
     // 1. Periksa rate limit
     const { limited, retryAfterSeconds } = checkRateLimit(clientKey);
@@ -63,7 +65,7 @@ export async function POST(request: Request) {
       return NextResponse.json(
         {
           success: false,
-          error: "Terlalu banyak percobaan login gagal. Silakan coba lagi beberapa saat lagi.",
+          error: `Terlalu banyak percobaan login gagal. Silakan coba lagi dalam ${retryAfterSeconds} detik.`,
         },
         {
           status: 429,
@@ -73,10 +75,6 @@ export async function POST(request: Request) {
         }
       );
     }
-
-    const body = await request.json().catch(() => null);
-    const email = body?.email?.trim?.()?.toLowerCase?.();
-    const password = body?.password;
 
     // 2. Validasi input
     if (!email || !password) {
