@@ -775,10 +775,10 @@ export default function PartnerPropertiesPage() {
                     <button
                       type="button"
                       onClick={() => openEditModal(prop)}
-                      className={`flex-1 py-2 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
+                      className={`flex-1 py-2 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all hover:-translate-y-px active:scale-95 cursor-pointer ${
                         prop.status === "REJECTED"
-                          ? "bg-amber-500 hover:bg-amber-600 text-white shadow-xs"
-                          : "bg-slate-100 hover:bg-slate-200 text-slate-700"
+                          ? "bg-amber-500 hover:bg-amber-600 text-white shadow-xs hover:shadow-sm"
+                          : "bg-slate-100 hover:bg-slate-200 text-slate-700 hover:shadow-sm"
                       }`}
                     >
                       <Edit className="w-3.5 h-3.5" />
@@ -787,7 +787,7 @@ export default function PartnerPropertiesPage() {
                     <button
                       type="button"
                       onClick={() => setDeleteConfirmId(prop.id)}
-                      className="p-2 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-600 font-bold text-xs transition-colors cursor-pointer"
+                      className="p-2 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-600 font-bold text-xs transition-all hover:-translate-y-px active:scale-95 cursor-pointer hover:shadow-sm"
                       title="Hapus Properti"
                     >
                       <Trash2 className="w-4 h-4" />

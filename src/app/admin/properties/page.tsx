@@ -957,7 +957,7 @@ export default function ManagePropertiesPage() {
                               type="button"
                               disabled={isUpdatingStatusId === prop.id}
                               onClick={() => handleApproveProperty(prop)}
-                              className="inline-flex items-center gap-1 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all shadow-xs cursor-pointer"
+                              className="inline-flex items-center gap-1 bg-emerald-600 hover:bg-emerald-700 hover:shadow-sm hover:-translate-y-px active:scale-95 disabled:hover:translate-y-0 disabled:active:scale-100 disabled:opacity-50 text-white px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all shadow-xs cursor-pointer"
                               title="Setujui dan Publikasikan Kos"
                             >
                               {isUpdatingStatusId === prop.id ? (
@@ -972,7 +972,7 @@ export default function ManagePropertiesPage() {
                               type="button"
                               disabled={isUpdatingStatusId === prop.id}
                               onClick={() => handleOpenRejectModal(prop)}
-                              className="inline-flex items-center gap-1 bg-white hover:bg-rose-50 text-rose-700 disabled:opacity-50 border border-rose-200 px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer"
+                              className="inline-flex items-center gap-1 bg-white hover:bg-rose-50 hover:-translate-y-px active:scale-95 disabled:hover:translate-y-0 disabled:active:scale-100 text-rose-700 disabled:opacity-50 border border-rose-200 px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer shadow-xs"
                               title="Tolak Properti Kos"
                             >
                               <X size={12} />
@@ -984,7 +984,7 @@ export default function ManagePropertiesPage() {
                         <button
                           type="button"
                           onClick={() => handleOpenEditModal(prop)}
-                          className="inline-flex items-center gap-1 bg-slate-100 hover:bg-slate-200 text-slate-700 px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer border border-slate-200"
+                          className="inline-flex items-center gap-1 bg-white hover:bg-slate-50 hover:-translate-y-px active:scale-95 text-slate-700 px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer border border-slate-200 shadow-xs"
                           title="Edit Properti"
                         >
                           <Pencil size={12} />
@@ -995,7 +995,7 @@ export default function ManagePropertiesPage() {
                           type="button"
                           disabled={deletingPropertyId === prop.id}
                           onClick={() => handleDeleteProperty(prop.id, prop.name)}
-                          className="inline-flex items-center gap-1 bg-white hover:bg-rose-50 disabled:opacity-50 text-rose-600 px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer border border-rose-200"
+                          className="inline-flex items-center gap-1 bg-white hover:bg-rose-50 hover:-translate-y-px active:scale-95 disabled:hover:translate-y-0 disabled:active:scale-100 disabled:opacity-50 text-rose-600 px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer border border-rose-200 shadow-xs"
                           title="Hapus Properti"
                         >
                           {deletingPropertyId === prop.id ? (
