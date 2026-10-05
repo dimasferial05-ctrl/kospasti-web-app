@@ -950,14 +950,44 @@ export default function ManagePropertiesPage() {
                     </td>
                     <td className="p-4 text-right">
                       <div className="inline-flex items-center gap-1.5 flex-wrap justify-end">
-                        {/* Tombol Persetujuan Admin */}
-                        {prop.status !== "PUBLISHED" && (
+                        {/* Tombol Aksi Persetujuan / Review */}
+                        {(prop.status === "PENDING_REVIEW" || !prop.status) && (
+                          <>
+                            <button
+                              type="button"
+                              disabled={isUpdatingStatusId === prop.id}
+                              onClick={() => handleApproveProperty(prop)}
+                              className="inline-flex items-center gap-1 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all shadow-xs cursor-pointer"
+                              title="Setujui dan Publikasikan Kos"
+                            >
+                              {isUpdatingStatusId === prop.id ? (
+                                <Loader2 size={12} className="animate-spin" />
+                              ) : (
+                                <Check size={12} />
+                              )}
+                              <span>Setujui</span>
+                            </button>
+
+                            <button
+                              type="button"
+                              disabled={isUpdatingStatusId === prop.id}
+                              onClick={() => handleOpenRejectModal(prop)}
+                              className="inline-flex items-center gap-1 bg-white hover:bg-rose-50 text-rose-700 disabled:opacity-50 border border-rose-200 px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer"
+                              title="Tolak Properti Kos"
+                            >
+                              <X size={12} />
+                              <span>Tolak</span>
+                            </button>
+                          </>
+                        )}
+
+                        {prop.status === "REJECTED" && (
                           <button
                             type="button"
                             disabled={isUpdatingStatusId === prop.id}
                             onClick={() => handleApproveProperty(prop)}
                             className="inline-flex items-center gap-1 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all shadow-xs cursor-pointer"
-                            title="Setujui dan Publikasikan Kos"
+                            title="Setujui Ulang dan Publikasikan Kos"
                           >
                             {isUpdatingStatusId === prop.id ? (
                               <Loader2 size={12} className="animate-spin" />
@@ -965,19 +995,6 @@ export default function ManagePropertiesPage() {
                               <Check size={12} />
                             )}
                             <span>Setujui</span>
-                          </button>
-                        )}
-
-                        {prop.status !== "REJECTED" && (
-                          <button
-                            type="button"
-                            disabled={isUpdatingStatusId === prop.id}
-                            onClick={() => handleOpenRejectModal(prop)}
-                            className="inline-flex items-center gap-1 bg-white hover:bg-rose-50 text-rose-700 disabled:opacity-50 border border-rose-200 px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer"
-                            title="Tolak Properti Kos"
-                          >
-                            <X size={12} />
-                            <span>Tolak</span>
                           </button>
                         )}
 
