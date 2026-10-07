@@ -113,13 +113,12 @@ export async function GET(request: NextRequest) {
       },
     });
 
-    // Hitung statistik ulasan keseluruhan owner
+    // Hitung statistik ulasan (mengikuti filter property dan tipe kamar yang dipilih, namun mengabaikan filter rating spesifik agar distribusi rating tetap lengkap)
+    const statsWhereClause = { ...whereClause };
+    delete statsWhereClause.rating;
+
     const allReviews = await prisma.review.findMany({
-      where: {
-        property: {
-          owner_id: payload.ownerId,
-        },
-      },
+      where: statsWhereClause,
       select: {
         rating: true,
       },

@@ -144,7 +144,9 @@ describe("Partner Reviews Dashboard API (Issue #223)", () => {
     expect(data.success).toBe(true);
     expect(data.reviews).toEqual([]);
 
-    expect(reviewSpy).toHaveBeenCalledWith(
+    // Panggilan pertama: list ulasan (termasuk filter rating)
+    expect(reviewSpy).toHaveBeenNthCalledWith(
+      1,
       expect.objectContaining({
         where: expect.objectContaining({
           property: {
@@ -156,6 +158,25 @@ describe("Partner Reviews Dashboard API (Issue #223)", () => {
           },
           rating: 4,
         }),
+      })
+    );
+
+    // Panggilan kedua: kalkulasi statistik ulasan (property & room_type terfilter, namun filter rating diabaikan)
+    expect(reviewSpy).toHaveBeenNthCalledWith(
+      2,
+      expect.objectContaining({
+        where: {
+          property: {
+            owner_id: ownerId,
+          },
+          property_id: "prop-1",
+          booking: {
+            room_type_id: "rt-1",
+          },
+        },
+        select: {
+          rating: true,
+        },
       })
     );
   });
