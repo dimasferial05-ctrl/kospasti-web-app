@@ -150,7 +150,7 @@ export async function POST(
           user_id: userId,
           property_id: propertyId,
           status: {
-            in: ["SUCCESS", "PAID"],
+            in: ["SUCCESS", "PAID", "APPROVED", "ACCEPTED"],
           },
         },
         include: {
@@ -184,7 +184,7 @@ export async function POST(
           user_id: userId,
           property_id: propertyId,
           status: {
-            in: ["SUCCESS", "PAID"],
+            in: ["SUCCESS", "PAID", "APPROVED", "ACCEPTED"],
           },
         },
         include: {

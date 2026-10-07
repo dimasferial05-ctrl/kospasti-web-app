@@ -52,7 +52,7 @@ export async function GET(
         property_id: propertyId,
         user_id: userId,
         status: {
-          in: ["SUCCESS", "PAID"],
+          in: ["SUCCESS", "PAID", "APPROVED", "ACCEPTED"],
         },
       },
       include: {
