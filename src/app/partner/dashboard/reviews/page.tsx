@@ -121,17 +121,30 @@ export default function PartnerReviewsPage() {
     return reviews.filter((r) => {
       const studentName = r.user?.name || r.booking?.student_name || "";
       const comment = r.comment || "";
+      const reply = r.reply || "";
       const propertyName = r.property?.name || "";
       const roomTypeName = r.booking?.room_type?.name || "";
 
       return (
         studentName.toLowerCase().includes(q) ||
         comment.toLowerCase().includes(q) ||
+        reply.toLowerCase().includes(q) ||
         propertyName.toLowerCase().includes(q) ||
         roomTypeName.toLowerCase().includes(q)
       );
     });
   }, [reviews, searchQuery]);
+
+  const handleReplyUpdated = useCallback(
+    (reviewId: string, reply: string | null, repliedAt: string | null) => {
+      setReviews((prev) =>
+        prev.map((r) =>
+          r.id === reviewId ? { ...r, reply, replied_at: repliedAt } : r
+        )
+      );
+    },
+    []
+  );
 
   const resetFilters = () => {
     setSelectedPropertyId("ALL");
@@ -452,7 +465,11 @@ export default function PartnerReviewsPage() {
 
           <div className="grid grid-cols-1 gap-4">
             {filteredReviews.map((review) => (
-              <ReviewCard key={review.id} review={review} />
+              <ReviewCard
+                key={review.id}
+                review={review}
+                onReplyUpdated={handleReplyUpdated}
+              />
             ))}
           </div>
         </div>

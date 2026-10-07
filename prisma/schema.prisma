@@ -141,6 +141,8 @@ model Review {
   id          String   @id @default(uuid())
   rating      Int
   comment     String?
+  reply       String?
+  replied_at  DateTime?
   is_hidden   Boolean  @default(false)
   created_at  DateTime @default(now())
   updated_at  DateTime @updatedAt
