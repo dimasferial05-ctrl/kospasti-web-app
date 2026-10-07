@@ -7,6 +7,7 @@ import {
   LayoutDashboard,
   Building2,
   CalendarCheck,
+  Star,
   HelpCircle,
   LogOut,
   Loader2,
@@ -120,6 +121,21 @@ export default function PartnerDashboardLayout({
         />
       ),
       active: Boolean(pathname?.startsWith("/partner/dashboard/bookings")),
+    },
+    {
+      label: "Ulasan Penyewa",
+      href: "/partner/dashboard/reviews",
+      icon: (
+        <Star
+          size={20}
+          className={`shrink-0 transition-colors ${
+            pathname?.startsWith("/partner/dashboard/reviews")
+              ? "text-emerald-400"
+              : "text-slate-400"
+          }`}
+        />
+      ),
+      active: Boolean(pathname?.startsWith("/partner/dashboard/reviews")),
     },
   ];
 
