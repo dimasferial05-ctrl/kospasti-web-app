@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { cookies } from "next/headers";
+import { Analytics } from "@vercel/analytics/next";
 import { Header } from "@/components/layout/Header";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { ProfileCompletionModal } from "@/components/features/ProfileCompletionModal";
@@ -40,6 +41,7 @@ export default async function RootLayout({
           {children}
         </div>
         <BottomNav isLoggedIn={isLoggedIn} />
+        <Analytics />
       </body>
     </html>
   );
