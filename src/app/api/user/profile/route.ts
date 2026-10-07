@@ -51,6 +51,8 @@ export async function GET() {
         bio: true,
         avatar: true,
         created_at: true,
+        password: true,
+        google_id: true,
       },
     });
 
@@ -64,10 +66,16 @@ export async function GET() {
       );
     }
 
+    const { password, google_id, ...userData } = user;
+
     return NextResponse.json(
       {
         success: true,
-        user,
+        user: {
+          ...userData,
+          hasPassword: Boolean(password),
+          isGoogleLinked: Boolean(google_id),
+        },
       },
       { status: 200 }
     );
