@@ -8,12 +8,15 @@ import {
   Loader2,
   Send,
   PenSquare,
+  Building2,
 } from "lucide-react";
 
 export interface ReviewItem {
   id: string;
   rating: number;
   comment?: string | null;
+  reply?: string | null;
+  replied_at?: string | null;
   created_at: string;
   user?: {
     id: string;
@@ -450,6 +453,30 @@ export function ReviewSection({ propertyId, propertyName }: ReviewSectionProps) 
                   <p className="text-slate-700 text-xs sm:text-sm mt-2.5 leading-relaxed pl-12">
                     {rev.comment}
                   </p>
+                )}
+
+                {rev.reply && (
+                  <div className="mt-3 ml-12 bg-slate-50 border border-slate-200/80 rounded-xl p-3 sm:p-3.5 transition-all">
+                    <div className="flex items-center gap-2 mb-1">
+                      <div className="flex items-center gap-1.5 text-xs font-bold text-slate-800">
+                        <Building2 className="w-3.5 h-3.5 text-emerald-600" />
+                        <span>Respon Pemilik Kos</span>
+                      </div>
+                      {rev.replied_at && (
+                        <span className="text-[10px] text-slate-400">
+                          •{" "}
+                          {new Date(rev.replied_at).toLocaleDateString("id-ID", {
+                            day: "numeric",
+                            month: "short",
+                            year: "numeric",
+                          })}
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-xs sm:text-sm text-slate-600 leading-relaxed whitespace-pre-line pl-5">
+                      {rev.reply}
+                    </p>
+                  </div>
                 )}
               </div>
             );
