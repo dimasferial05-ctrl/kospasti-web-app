@@ -1,19 +1,15 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Plus_Jakarta_Sans } from "next/font/google";
 import { cookies } from "next/headers";
 import { Header } from "@/components/layout/Header";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { ProfileCompletionModal } from "@/components/features/ProfileCompletionModal";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const plusJakartaSans = Plus_Jakarta_Sans({
+  variable: "--font-plus-jakarta-sans",
   subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
+  display: "swap",
 });
 
 export const metadata: Metadata = {
@@ -32,7 +28,7 @@ export default async function RootLayout({
   const isLoggedIn = Boolean(userToken);
 
   return (
-    <html lang="id" className={`${geistSans.variable} ${geistMono.variable} h-full scroll-smooth`}>
+    <html lang="id" className={`${plusJakartaSans.variable} h-full scroll-smooth`}>
       <body className="bg-slate-50 text-slate-900 antialiased font-sans min-h-screen flex flex-col">
         <Header isLoggedIn={isLoggedIn} />
         <ProfileCompletionModal />
