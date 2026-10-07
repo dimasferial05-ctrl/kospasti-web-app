@@ -162,7 +162,8 @@ export async function POST(
         return NextResponse.json(
           {
             success: false,
-            error: "Booking tidak ditemukan atau status belum terverifikasi (SUCCESS/PAID).",
+            error:
+              "Booking tidak ditemukan atau status belum terverifikasi (SUCCESS/PAID/APPROVED/ACCEPTED).",
           },
           { status: 403 }
         );
