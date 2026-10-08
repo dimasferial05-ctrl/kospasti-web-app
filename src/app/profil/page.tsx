@@ -1244,6 +1244,16 @@ function ProfileContent() {
                             </span>
                           </div>
 
+                          {booking.status?.toUpperCase() === "PENDING" && (
+                            <Link
+                              href={`/checkout/${booking.id}`}
+                              className="inline-flex items-center justify-center gap-1.5 px-4 py-2 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 active:scale-95 rounded-xl shadow-soft hover:shadow-float transition-all cursor-pointer w-full sm:w-auto text-center mt-1"
+                            >
+                              <span>Bayar Sekarang</span>
+                              <ArrowRight className="w-3.5 h-3.5" />
+                            </Link>
+                          )}
+
                           {booking.property?.id && (
                             <Link
                               href={`/kos/${booking.property.id}`}

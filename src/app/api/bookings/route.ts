@@ -109,7 +109,49 @@ export async function POST(request: Request) {
       );
     }
 
+    // Validasi Anti-Spam / Double-Booking:
+    // Cek apakah pengguna masih memiliki pesanan dengan status PENDING
+    const existingPendingBooking = await prisma.booking.findFirst({
+      where: {
+        user_id: userPayload.userId,
+        status: "PENDING",
+      },
+      include: {
+        property: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+      },
+    });
+
+    if (existingPendingBooking) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Anda masih memiliki pesanan yang belum dibayar. Silakan lunasi pesanan sebelumnya di menu Profil.",
+          hasPendingBooking: true,
+          pendingBookingId: existingPendingBooking.id,
+          propertyName: existingPendingBooking.property?.name,
+        },
+        { status: 400 }
+      );
+    }
+
     const result = await prisma.$transaction(async (tx) => {
+      // Verifikasi ulang di dalam transaksi untuk mencegah race-condition
+      const existingPendingInTx = await tx.booking.findFirst({
+        where: {
+          user_id: userPayload.userId,
+          status: "PENDING",
+        },
+      });
+
+      if (existingPendingInTx) {
+        throw new Error("ACTIVE_PENDING_EXISTS");
+      }
+
       let resolvedRoomTypeId: string | null = null;
       if (roomTypeId && typeof roomTypeId === "string" && roomTypeId.trim()) {
         const updatedRoomType = await tx.roomType.updateMany({
@@ -173,6 +215,17 @@ export async function POST(request: Request) {
     );
   } catch (error: unknown) {
     const errorMessage = error instanceof Error ? error.message : "";
+
+    if (errorMessage === "ACTIVE_PENDING_EXISTS") {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Anda masih memiliki pesanan yang belum dibayar. Silakan lunasi pesanan sebelumnya di menu Profil.",
+          hasPendingBooking: true,
+        },
+        { status: 400 }
+      );
+    }
     if (
       errorMessage === "Kamar sudah penuh atau tidak ditemukan" ||
       errorMessage === "Tipe kamar sudah penuh atau tidak ditemukan" ||
