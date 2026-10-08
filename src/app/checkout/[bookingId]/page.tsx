@@ -154,13 +154,20 @@ export default function CheckoutPage() {
       <div className="w-full max-w-5xl mx-auto">
         {/* Tombol Kembali / Header Brand */}
         <div className="mb-6 flex items-center justify-between">
-          <Link
-            href="/"
-            className="inline-flex items-center text-sm font-medium text-slate-500 hover:text-slate-800 transition-colors"
+          <button
+            type="button"
+            onClick={() => {
+              if (typeof window !== "undefined" && window.history.length > 1) {
+                router.back();
+              } else {
+                router.push("/profil?tab=bookings");
+              }
+            }}
+            className="inline-flex items-center text-sm font-medium text-slate-500 hover:text-slate-800 transition-colors cursor-pointer"
           >
             <ArrowLeft className="w-4 h-4 mr-1.5" />
-            Kembali ke Beranda
-          </Link>
+            Kembali
+          </button>
           <div className="flex items-center gap-1 text-xs font-medium text-emerald-700 bg-emerald-50 border border-emerald-200/60 px-2.5 py-1 rounded-full">
             <ShieldCheck className="w-3.5 h-3.5" />
             <span>Pembayaran Aman</span>

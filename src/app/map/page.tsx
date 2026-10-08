@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useMemo, useRef, useCallback, Suspense } from "react";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import MapViewer, { PropertyMapItem, SearchTargetLocation } from "@/components/map/MapViewer";
 import { SmartSearchBar } from "@/components/features/SmartSearchBar";
 import Link from "next/link";
@@ -35,6 +35,7 @@ interface AISearchCriteria {
 import { calculateHaversineDistanceKm, geocodeLocation } from "@/lib/geocoding";
 
 function MapSearchContent() {
+  const router = useRouter();
   const searchParams = useSearchParams();
   const urlQuery = searchParams.get("q");
   const processedQueryRef = useRef<string | null>(null);
@@ -298,15 +299,22 @@ function MapSearchContent() {
         <div className="mb-6">
           {/* Tombol Kembali ke Beranda */}
           <div className="mb-3">
-            <Link
-              href="/"
-              className="inline-flex items-center gap-2 text-xs font-semibold text-slate-500 hover:text-emerald-700 transition-colors group py-1"
+            <button
+              type="button"
+              onClick={() => {
+                if (typeof window !== "undefined" && window.history.length > 1) {
+                  router.back();
+                } else {
+                  router.push("/search");
+                }
+              }}
+              className="inline-flex items-center gap-2 text-xs font-semibold text-slate-500 hover:text-emerald-700 transition-colors group py-1 cursor-pointer"
             >
               <div className="w-6 h-6 rounded-full bg-slate-200/70 group-hover:bg-emerald-100 flex items-center justify-center transition-colors">
                 <ArrowLeft className="w-3.5 h-3.5 text-slate-600 group-hover:text-emerald-700" />
               </div>
               <span>Kembali ke Beranda</span>
-            </Link>
+            </button>
           </div>
 
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
