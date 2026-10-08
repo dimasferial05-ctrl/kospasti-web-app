@@ -8,6 +8,7 @@ import {
   Loader2,
   AlertCircle,
   ArrowLeft,
+  ArrowRight,
   Check,
   Home,
   User,
@@ -134,6 +135,14 @@ export default function PropertyDetailPage() {
   const [userAvatar, setUserAvatar] = useState<string | null>(null);
   const [moveInDate, setMoveInDate] = useState("");
   const [minDate, setMinDate] = useState("");
+  const [pendingBookingNotice, setPendingBookingNotice] = useState<{
+    isOpen: boolean;
+    message: string;
+    bookingId?: string;
+  }>({
+    isOpen: false,
+    message: "",
+  });
 
   const handleOpenBookingModal = async (roomTypeToBook?: RoomTypeItem) => {
     if (roomTypeToBook) {
@@ -202,6 +211,17 @@ export default function PropertyDetailPage() {
       }
 
       if (!response.ok) {
+        if (responseData.hasPendingBooking) {
+          setIsModalOpen(false);
+          setPendingBookingNotice({
+            isOpen: true,
+            message:
+              responseData.error ||
+              "Ups! Kamu masih punya pesanan yang menunggu pembayaran. Yuk, selesaikan dulu pembayarannya di menu Profil.",
+            bookingId: responseData.pendingBookingId,
+          });
+          return;
+        }
         throw new Error(responseData.error || "Gagal melakukan pemesanan.");
       }
 
@@ -1574,6 +1594,53 @@ export default function PropertyDetailPage() {
                   {isSubmitting ? "Memproses..." : "Lanjut Pembayaran"}
                 </button>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* 5. MODAL PERINGATAN PESANAN PENDING (ANTI-SPAM BOOKING)                   */}
+      {/* ========================================================================= */}
+      {pendingBookingNotice.isOpen && (
+        <div className="fixed inset-0 z-[70] bg-black/60 flex items-center justify-center p-4 animate-in fade-in duration-200">
+          <div className="bg-white w-full max-w-md p-6 rounded-2xl shadow-xl flex flex-col gap-4 animate-in zoom-in-95 duration-200">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-amber-100 text-amber-700 flex items-center justify-center shrink-0">
+                <AlertCircle className="w-5 h-5 text-amber-600" />
+              </div>
+              <div>
+                <h3 className="text-base font-bold text-slate-900">
+                  Pesanan Masih Menunggu Pembayaran
+                </h3>
+                <p className="text-xs text-slate-500">
+                  Selesaikan pesanan sebelumnya terlebih dahulu
+                </p>
+              </div>
+            </div>
+
+            <p className="text-sm text-slate-600 leading-relaxed bg-amber-50/70 p-3.5 rounded-xl border border-amber-200/80">
+              {pendingBookingNotice.message}
+            </p>
+
+            <div className="flex flex-col sm:flex-row gap-2.5 pt-1">
+              <button
+                type="button"
+                onClick={() =>
+                  setPendingBookingNotice({ isOpen: false, message: "" })
+                }
+                className="w-full sm:w-1/2 py-2.5 px-4 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold transition-colors cursor-pointer text-sm order-2 sm:order-1"
+              >
+                Tutup
+              </button>
+              <button
+                type="button"
+                onClick={() => router.push("/profil?tab=bookings")}
+                className="w-full sm:w-1/2 py-2.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold shadow-soft hover:shadow-float transition-all cursor-pointer text-sm flex items-center justify-center gap-1.5 order-1 sm:order-2"
+              >
+                <span>Riwayat Pesanan</span>
+                <ArrowRight className="w-4 h-4" />
+              </button>
             </div>
           </div>
         </div>
