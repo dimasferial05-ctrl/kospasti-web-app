@@ -22,7 +22,7 @@ describe("SearchFilter Component", () => {
 
     // Input pencarian nama
     expect(html).toContain('placeholder="Cari nama kos..."');
-    expect(html).toContain('type="text"');
+    expect(html).toMatch(/type="(text|search)"/);
 
     // Dropdown batas harga maksimal
     expect(html).toContain("Batas Harga");

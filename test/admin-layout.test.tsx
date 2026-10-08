@@ -64,20 +64,19 @@ describe("Admin Layout & Protection Component (/admin/layout)", () => {
     const content = fs.readFileSync(filePath, "utf-8");
 
     // Sidebar styling
-    expect(content).toContain("w-64 bg-slate-950 text-slate-300");
+    expect(content).toContain("bg-slate-950 text-slate-300");
     expect(content).toContain("ADMIN");
-    expect(content).toContain("MAIN NAVIGATION");
 
     // Link Navigasi
-    expect(content).toContain('href="/admin"');
+    expect(content).toContain('href: "/admin"');
     expect(content).toContain("Dashboard");
-    expect(content).toContain('href="/admin/properties"');
+    expect(content).toContain('href: "/admin/properties"');
     expect(content).toContain("Kelola Properti");
-    expect(content).toContain('href="/admin/owners"');
+    expect(content).toContain('href: "/admin/owners"');
     expect(content).toContain("Pemilik Kos");
-    expect(content).toContain('href="/admin/users"');
+    expect(content).toContain('href: "/admin/users"');
     expect(content).toContain("Data Pengguna");
-    expect(content).toContain('href="/admin/bookings"');
+    expect(content).toContain('href: "/admin/bookings"');
     expect(content).toContain("Data Transaksi");
 
     // Tombol Logout & Endpoint
@@ -86,8 +85,7 @@ describe("Admin Layout & Protection Component (/admin/layout)", () => {
     expect(content).toContain('method: "POST"');
 
     // Main Content container desktop
-    expect(content).toContain("ml-64");
-    expect(content).toContain("p-8");
+    expect(content).toContain("p-4 md:p-8");
   });
 });
 

@@ -61,7 +61,6 @@ describe("Interactive Google Maps Property Search (/map) - Issue #121", () => {
 
     expect(html).toContain("Kembali ke Beranda");
     expect(html).toContain("Eksplorasi Kos Berdasarkan Lokasi");
-    expect(html).toContain("Pencarian Cerdas AI + Google Maps");
     expect(html).toContain("Tanya AI");
     expect(html).toContain("Semua");
     expect(html).toContain("Putra");

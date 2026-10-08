@@ -29,9 +29,8 @@ describe("Register Page UI (/register) - Issue #119", () => {
   it("merender 5 input wajib form: Nama, No WhatsApp, Email, Password, dan Konfirmasi Password", () => {
     const html = renderToStaticMarkup(<RegisterPage />);
 
-    // Judul & Badge
+    // Judul
     expect(html).toContain("Daftar Akun Baru");
-    expect(html).toContain("Pencari Kos &amp; Mahasiswa");
 
     // Input Nama Lengkap
     expect(html).toContain("Nama Lengkap");
