@@ -49,6 +49,15 @@ export async function GET(
             avatar: true,
           },
         },
+        property: {
+          select: {
+            owner: {
+              select: {
+                name: true,
+              },
+            },
+          },
+        },
       },
       orderBy: {
         created_at: "desc",
