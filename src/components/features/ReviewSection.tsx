@@ -8,7 +8,6 @@ import {
   Loader2,
   Send,
   PenSquare,
-  Building2,
 } from "lucide-react";
 
 export interface ReviewItem {
@@ -23,6 +22,11 @@ export interface ReviewItem {
     name: string;
     avatar?: string | null;
   };
+  property?: {
+    owner?: {
+      name: string;
+    } | null;
+  } | null;
 }
 
 export interface ReviewStats {
@@ -455,29 +459,48 @@ export function ReviewSection({ propertyId, propertyName }: ReviewSectionProps) 
                   </p>
                 )}
 
-                {rev.reply && (
-                  <div className="mt-3 ml-12 bg-slate-50 border border-slate-200/80 rounded-xl p-3 sm:p-3.5 transition-all">
-                    <div className="flex items-center gap-2 mb-1">
-                      <div className="flex items-center gap-1.5 text-xs font-bold text-slate-800">
-                        <Building2 className="w-3.5 h-3.5 text-emerald-600" />
-                        <span>Respon Pemilik Kos</span>
+                {rev.reply && (() => {
+                  const ownerName = rev.property?.owner?.name || "Pemilik Kos";
+                  const ownerInitial = (ownerName || "P").trim().charAt(0).toUpperCase() || "P";
+
+                  return (
+                    <div className="mt-4 ml-8 sm:ml-12 bg-emerald-50/50 border border-emerald-100/70 rounded-2xl p-4 sm:p-5 transition-all shadow-xs">
+                      <div className="flex items-center gap-3 mb-3">
+                        {/* Avatar Inisial */}
+                        <div className="w-8 h-8 rounded-full bg-emerald-100 text-emerald-800 font-extrabold flex items-center justify-center shrink-0 border border-emerald-200/80 text-xs select-none">
+                          {ownerInitial}
+                        </div>
+
+                        {/* Detail Nama & Badge */}
+                        <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
+                          <span className="font-bold text-slate-900 text-sm tracking-tight">
+                            {ownerName}
+                          </span>
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-600 text-white text-[10px] font-bold tracking-wide shadow-xs">
+                            <Check className="w-3 h-3" strokeWidth={3} />
+                            Mitra KosPasti
+                          </span>
+                        </div>
+
+                        {/* Waktu Balasan */}
+                        {rev.replied_at && (
+                          <span className="text-[11px] text-slate-400 font-medium ml-auto">
+                            {new Date(rev.replied_at).toLocaleDateString("id-ID", {
+                              day: "numeric",
+                              month: "short",
+                              year: "numeric",
+                            })}
+                          </span>
+                        )}
                       </div>
-                      {rev.replied_at && (
-                        <span className="text-[10px] text-slate-400">
-                          •{" "}
-                          {new Date(rev.replied_at).toLocaleDateString("id-ID", {
-                            day: "numeric",
-                            month: "short",
-                            year: "numeric",
-                          })}
-                        </span>
-                      )}
+
+                      {/* Isi Balasan */}
+                      <p className="text-sm text-slate-700 leading-relaxed whitespace-pre-line pl-11">
+                        {rev.reply}
+                      </p>
                     </div>
-                    <p className="text-xs sm:text-sm text-slate-600 leading-relaxed whitespace-pre-line pl-5">
-                      {rev.reply}
-                    </p>
-                  </div>
-                )}
+                  );
+                })()}
               </div>
             );
           })}
