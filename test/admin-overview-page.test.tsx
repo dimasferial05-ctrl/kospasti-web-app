@@ -72,14 +72,15 @@ describe("Admin Dashboard Overview Page (/admin)", () => {
     expect(content).toContain("Pesanan");
   });
 
-  it("memiliki area placeholder untuk analitik grafik di masa depan", () => {
+  it("memiliki area tabel ringkasan aktivitas terbaru (Booking & Magic Link)", () => {
     const filePath = path.resolve(
       __dirname,
       "../src/app/admin/page.tsx"
     );
     const content = fs.readFileSync(filePath, "utf-8");
 
-    expect(content).toContain("Area ini disiapkan untuk grafik analitik di masa mendatang");
+    expect(content).toContain("Booking Terbaru");
+    expect(content).toContain("Aktivitas Magic Link");
   });
 
   it("memanggil API /api/admin/stats secara otomatis via cookie dan menangani redirect status 401 ke /admin/login", () => {

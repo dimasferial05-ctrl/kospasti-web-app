@@ -225,6 +225,7 @@ describe("Fitur Multi-Upload Media dan Galeri (Issue #88)", () => {
           gender_type: "CAMPUR",
           facilities: "WiFi",
           owner_id: ownerId,
+          status: "PUBLISHED",
           media: {
             create: [
               { url: "/uploads/properties/foto-depan.jpg", type: "IMAGE" },

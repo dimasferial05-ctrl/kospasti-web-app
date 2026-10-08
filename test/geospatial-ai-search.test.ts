@@ -92,6 +92,7 @@ describe("Feature: AI Smart Search dengan Filter Jarak Radius Geospatial (Issue 
           latitude: -6.5650,
           longitude: 107.7600,
           owner_id: owner.id,
+          status: "PUBLISHED",
         },
       });
 
@@ -106,6 +107,7 @@ describe("Feature: AI Smart Search dengan Filter Jarak Radius Geospatial (Issue 
           latitude: -6.5615,
           longitude: 107.8278,
           owner_id: owner.id,
+          status: "PUBLISHED",
         },
       });
 
@@ -120,6 +122,7 @@ describe("Feature: AI Smart Search dengan Filter Jarak Radius Geospatial (Issue 
           latitude: -6.7591,
           longitude: 107.6099,
           owner_id: owner.id,
+          status: "PUBLISHED",
         },
       });
 
@@ -181,6 +184,7 @@ describe("Feature: AI Smart Search dengan Filter Jarak Radius Geospatial (Issue 
           latitude: -6.5620,
           longitude: 107.8270,
           owner_id: owner.id,
+          status: "PUBLISHED",
         },
       });
 
@@ -195,6 +199,7 @@ describe("Feature: AI Smart Search dengan Filter Jarak Radius Geospatial (Issue 
           latitude: -6.5622,
           longitude: 107.8272,
           owner_id: owner.id,
+          status: "PUBLISHED",
         },
       });
 
@@ -247,6 +252,7 @@ describe("Feature: AI Smart Search dengan Filter Jarak Radius Geospatial (Issue 
           latitude: -6.9175,
           longitude: 107.6191,
           owner_id: owner.id,
+          status: "PUBLISHED",
         },
       });
 
@@ -260,6 +266,7 @@ describe("Feature: AI Smart Search dengan Filter Jarak Radius Geospatial (Issue 
           latitude: -6.5709,
           longitude: 107.7615,
           owner_id: owner.id,
+          status: "PUBLISHED",
         },
       });
 

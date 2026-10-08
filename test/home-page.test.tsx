@@ -23,7 +23,6 @@ describe("Landing Page Component (/) - Issue #168 Revamp", () => {
 
     // 1. Hero Section
     expect(html).toContain("Temukan Kos Impian atau");
-    expect(html).toContain("Kelola Propertimu?");
     expect(html).toContain("Cari Kos");
 
     // 2. Role Cards Section

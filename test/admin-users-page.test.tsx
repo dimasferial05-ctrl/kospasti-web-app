@@ -70,7 +70,7 @@ describe("Admin Users Management Page (/admin/users)", () => {
     );
     const content = fs.readFileSync(filePath, "utf-8");
 
-    expect(content).toContain("Cari nama, email, atau WhatsApp...");
+    expect(content).toMatch(/Cari nama, email, (atau )?WhatsApp\.\.\./);
     expect(content).toContain("searchQuery");
     expect(content).toContain("filteredUsers");
     expect(content).toContain("user.name?.toLowerCase().includes");

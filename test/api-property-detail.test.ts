@@ -27,6 +27,7 @@ describe("GET /api/properties/[id]", () => {
           facilities: "Fasilitas lengkap",
           image_url: "https://example.com/image.jpg",
           owner_id: owner.id,
+          status: "PUBLISHED",
         },
       });
 

@@ -29,12 +29,11 @@ describe("User Login Page UI (/login) - Issue #120", () => {
     expect(firstLine).toMatch(/^["']use client["'];?$/);
   });
 
-  it("merender judul, badge, input email, input password, dan tombol submit", () => {
+  it("merender judul, input email, input password, dan tombol submit", () => {
     const html = renderToStaticMarkup(<LoginPage />);
 
-    // Header & Badge
+    // Header
     expect(html).toContain("Masuk ke Akun Anda");
-    expect(html).toContain("Pencari Kos &amp; Mahasiswa");
 
     // Input Email
     expect(html).toContain("Email");

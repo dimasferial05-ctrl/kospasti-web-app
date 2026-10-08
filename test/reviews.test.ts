@@ -50,6 +50,7 @@ describe("Review & Rating Feature (Issue #118)", () => {
         gender_type: "CAMPUR",
         facilities: "WiFi, AC, Kasur",
         owner_id: owner.id,
+        status: "PUBLISHED",
       },
     });
 

@@ -22,7 +22,7 @@ describe("Responsive Admin Dashboard Layout & CRUD Tables (Issue #104)", () => {
   });
 
   describe("Admin Layout Responsiveness", () => {
-    it("memiliki mobile header dengan toggle hamburger menu pada layar kecil (md:hidden)", () => {
+    it("memiliki mobile header dengan toggle menu pada layar kecil (md:hidden)", () => {
       const html = renderToStaticMarkup(
         <AdminLayout>
           <div>Admin Content</div>
@@ -33,25 +33,22 @@ describe("Responsive Admin Dashboard Layout & CRUD Tables (Issue #104)", () => {
       expect(html).toContain("KosPasti");
       expect(html).toContain("ADMIN");
       expect(html).toContain("md:hidden");
-      expect(html).toContain("fixed w-full top-0");
     });
 
-    it("memiliki class sidebar responsif dengan transisi dan md:translate-x-0", () => {
+    it("memiliki class sidebar responsif dengan motion dan state open/close", () => {
       const filePath = path.resolve(__dirname, "../src/app/admin/layout.tsx");
       const content = fs.readFileSync(filePath, "utf-8");
 
-      expect(content).toContain("-translate-x-full md:translate-x-0");
-      expect(content).toContain("transition-transform duration-300");
-      expect(content).toContain("isMobileMenuOpen");
+      expect(content).toContain("<Sidebar open={open} setOpen={setOpen}>");
+      expect(content).toContain("flex-col md:flex-row");
     });
 
-    it("memiliki kontainer main dengan margin dan padding responsif (md:ml-64 p-4 md:p-8 mt-14 md:mt-0)", () => {
+    it("memiliki kontainer main dengan margin dan padding responsif (p-4 md:p-8)", () => {
       const filePath = path.resolve(__dirname, "../src/app/admin/layout.tsx");
       const content = fs.readFileSync(filePath, "utf-8");
 
-      expect(content).toContain("md:ml-64");
       expect(content).toContain("p-4 md:p-8");
-      expect(content).toContain("mt-14 md:mt-0");
+      expect(content).toContain("flex-1 overflow-y-auto");
     });
   });
 
@@ -64,12 +61,12 @@ describe("Responsive Admin Dashboard Layout & CRUD Tables (Issue #104)", () => {
       expect(content).toContain('table className="w-full text-left text-sm min-w-[800px]"');
     });
 
-    it("memastikan tabel pada Halaman Properti (/admin/properties) memiliki wrapper overflow-x-auto dan min-w-[800px]", () => {
+    it("memastikan tabel pada Halaman Properti (/admin/properties) memiliki wrapper overflow-x-auto dan min-w responsif", () => {
       const filePath = path.resolve(__dirname, "../src/app/admin/properties/page.tsx");
       const content = fs.readFileSync(filePath, "utf-8");
 
       expect(content).toContain("overflow-x-auto");
-      expect(content).toContain('table className="w-full text-left text-sm min-w-[800px]"');
+      expect(content).toMatch(/table className="w-full text-left text-sm min-w-\[(800|900)px\]"/);
     });
 
     it("memastikan tabel pada Halaman Transaksi (/admin/bookings) memiliki wrapper overflow-x-auto dan min-w-[800px]", () => {

@@ -26,6 +26,7 @@ describe("GET /api/properties", () => {
           gender_type: "PUTRA",
           facilities: "WiFi, Kasur",
           owner_id: owner.id,
+          status: "PUBLISHED",
         },
       });
 
@@ -77,6 +78,7 @@ describe("GET /api/properties", () => {
           gender_type: "PUTRI",
           facilities: "WiFi",
           owner_id: owner.id,
+          status: "PUBLISHED",
         },
       });
 
@@ -89,6 +91,7 @@ describe("GET /api/properties", () => {
           gender_type: "PUTRI",
           facilities: "WiFi, AC",
           owner_id: owner.id,
+          status: "PUBLISHED",
         },
       });
 
@@ -141,6 +144,7 @@ describe("GET /api/properties", () => {
               gender_type: "PUTRA",
               facilities: "Kasur",
               owner_id: ownerId,
+              status: "PUBLISHED",
             },
             {
               name: "Kos Mawar Putri Indah",
@@ -149,6 +153,7 @@ describe("GET /api/properties", () => {
               gender_type: "PUTRI",
               facilities: "WiFi, Kasur",
               owner_id: ownerId,
+              status: "PUBLISHED",
             },
             {
               name: "Kos Melati Campur Exclusive",
@@ -157,6 +162,7 @@ describe("GET /api/properties", () => {
               gender_type: "CAMPUR",
               facilities: "AC, WiFi, Kasur",
               owner_id: ownerId,
+              status: "PUBLISHED",
             },
           ],
         });

@@ -93,8 +93,12 @@ describe("Portal Mitra (Partner Portal) & Self-Onboarding Tests", () => {
 
   it("4. Update cepat ketersediaan kamar (+/-) secara langsung", async () => {
     // Buat properti dummy
-    const owner = await prisma.owner.findFirst();
-    expect(owner).not.toBeNull();
+    const owner = await prisma.owner.create({
+      data: {
+        name: "Owner Update Kamar",
+        whatsapp_number: "0812" + Math.floor(10000000 + Math.random() * 90000000),
+      },
+    });
 
     const prop = await prisma.property.create({
       data: {
@@ -103,7 +107,8 @@ describe("Portal Mitra (Partner Portal) & Self-Onboarding Tests", () => {
         price_per_month: 600000,
         available_rooms: 4,
         facilities: "WiFi, Kasur",
-        owner_id: owner!.id,
+        owner_id: owner.id,
+        status: "PUBLISHED",
       },
     });
 
@@ -123,8 +128,23 @@ describe("Portal Mitra (Partner Portal) & Self-Onboarding Tests", () => {
   });
 
   it("5. Persetujuan & Penolakan Pesanan Sewa oleh Mitra", async () => {
-    const property = await prisma.property.findFirst();
-    expect(property).not.toBeNull();
+    const owner = await prisma.owner.create({
+      data: {
+        name: "Owner Booking Approval",
+        whatsapp_number: "0812" + Math.floor(10000000 + Math.random() * 90000000),
+      },
+    });
+    const property = await prisma.property.create({
+      data: {
+        name: "Kos Approval Test",
+        gender_type: "CAMPUR",
+        price_per_month: 500000,
+        available_rooms: 2,
+        facilities: "WiFi",
+        owner_id: owner.id,
+        status: "PUBLISHED",
+      },
+    });
 
     const booking = await prisma.booking.create({
       data: {
@@ -132,7 +152,7 @@ describe("Portal Mitra (Partner Portal) & Self-Onboarding Tests", () => {
         student_whatsapp: "085812345678",
         move_in_date: new Date(),
         status: "PENDING",
-        property_id: property!.id,
+        property_id: property.id,
       },
     });
 

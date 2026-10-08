@@ -62,7 +62,7 @@ describe("Manage Properties Page (/admin/properties)", () => {
     expect(content).toContain("Nama Pemilik");
     expect(content).toContain("Tipe Kos");
     expect(content).toContain("Harga");
-    expect(content).toContain("Kapasitas (Sisa)");
+    expect(content).toContain("Kapasitas");
     expect(content).toContain("Aksi");
   });
 
