@@ -261,13 +261,20 @@ export default function FavoritPage() {
               <Search className="w-4 h-4" />
               <span>Jelajahi Kos Sekarang</span>
             </Link>
-            <Link
-              href="/"
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-white hover:bg-slate-100 text-slate-700 font-semibold text-sm border border-slate-200 shadow-xs transition-all"
+            <button
+              type="button"
+              onClick={() => {
+                if (typeof window !== "undefined" && window.history.length > 1) {
+                  router.back();
+                } else {
+                  router.push("/search");
+                }
+              }}
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-white hover:bg-slate-100 text-slate-700 font-semibold text-sm border border-slate-200 shadow-xs transition-all cursor-pointer"
             >
               <ArrowLeft className="w-4 h-4" />
-              <span>Ke Beranda</span>
-            </Link>
+              <span>Kembali</span>
+            </button>
           </div>
         </div>
       </div>

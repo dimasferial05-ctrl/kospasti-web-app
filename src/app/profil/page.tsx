@@ -444,13 +444,20 @@ function ProfileContent() {
       <div className="max-w-5xl mx-auto space-y-6">
         {/* Top Back Navigation Link */}
         <div>
-          <Link
-            href="/"
-            className="inline-flex items-center gap-2 text-sm font-medium text-slate-600 hover:text-emerald-600 transition-colors group"
+          <button
+            type="button"
+            onClick={() => {
+              if (typeof window !== "undefined" && window.history.length > 1) {
+                router.back();
+              } else {
+                router.push("/search");
+              }
+            }}
+            className="inline-flex items-center gap-2 text-sm font-medium text-slate-600 hover:text-emerald-600 transition-colors group cursor-pointer"
           >
             <ArrowLeft className="w-4 h-4 text-slate-400 group-hover:-translate-x-0.5 group-hover:text-emerald-600 transition-all" />
             <span>Kembali ke Beranda</span>
-          </Link>
+          </button>
         </div>
 
         {/* Header Title Card */}
@@ -1171,7 +1178,7 @@ function ProfileContent() {
                       Anda belum pernah mengajukan sewa kos. Temukan kos impian Anda sekarang!
                     </p>
                     <Link
-                      href="/"
+                      href="/search"
                       className="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-semibold text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl shadow-sm transition-colors"
                     >
                       <span>Cari Kos Sekarang</span>

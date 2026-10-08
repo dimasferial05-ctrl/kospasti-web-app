@@ -568,13 +568,20 @@ export default function PropertyDetailPage() {
       <div className="sticky top-0 z-30 bg-white/90 backdrop-blur-md border-b border-slate-200/80 py-3">
         <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 flex items-center justify-between gap-3">
           <div className="flex items-center gap-3 min-w-0">
-            <Link
-              href="/"
-              className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors shrink-0"
-              aria-label="Kembali ke beranda"
+            <button
+              type="button"
+              onClick={() => {
+                if (typeof window !== "undefined" && window.history.length > 1) {
+                  router.back();
+                } else {
+                  router.push("/search");
+                }
+              }}
+              className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors shrink-0 cursor-pointer"
+              aria-label="Kembali ke halaman sebelumnya"
             >
               <ArrowLeft className="w-4 h-4" />
-            </Link>
+            </button>
             <h1 className="text-sm font-bold text-slate-800 truncate">
               {property.name}
             </h1>
