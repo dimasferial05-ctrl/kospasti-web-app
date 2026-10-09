@@ -1064,6 +1064,11 @@ export default function PartnerPropertiesPage() {
                             step="10000"
                             placeholder="850000"
                             value={rt.price_per_month}
+                            onKeyDown={(e) => {
+                              if (["e", "E", "+", "-"].includes(e.key)) {
+                                e.preventDefault();
+                              }
+                            }}
                             onChange={(e) => updateRoomType(idx, "price_per_month", e.target.value)}
                             className="w-full px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 text-xs font-medium focus:ring-2 focus:ring-emerald-500 focus:outline-none"
                           />
@@ -1079,6 +1084,11 @@ export default function PartnerPropertiesPage() {
                             min="0"
                             placeholder="3"
                             value={rt.available_rooms}
+                            onKeyDown={(e) => {
+                              if (["e", "E", "+", "-"].includes(e.key)) {
+                                e.preventDefault();
+                              }
+                            }}
                             onChange={(e) => updateRoomType(idx, "available_rooms", e.target.value)}
                             className="w-full px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 text-xs font-medium focus:ring-2 focus:ring-emerald-500 focus:outline-none"
                           />

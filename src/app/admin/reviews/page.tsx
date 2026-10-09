@@ -54,7 +54,7 @@ function AdminReviewAvatar({
 
   if (!src || hasError) {
     return (
-      <div className="w-8 h-8 rounded-full bg-slate-100 text-slate-700 font-semibold flex items-center justify-center text-xs shrink-0 border border-slate-200 select-none">
+      <div className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-semibold flex items-center justify-center text-xs shrink-0 border border-slate-200 dark:border-slate-700 select-none">
         <span className="uppercase">{initial || "U"}</span>
       </div>
     );
@@ -68,7 +68,7 @@ function AdminReviewAvatar({
       referrerPolicy="no-referrer"
       crossOrigin="anonymous"
       onError={() => setHasError(true)}
-      className="w-8 h-8 rounded-full object-cover shrink-0 border border-slate-200"
+      className="w-8 h-8 rounded-full object-cover shrink-0 border border-slate-200 dark:border-slate-700"
     />
   );
 }
@@ -186,10 +186,10 @@ export default function AdminReviewsPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight flex items-center gap-2.5">
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight flex items-center gap-2.5">
             Moderasi Ulasan Kos
           </h1>
-          <p className="text-sm text-slate-500 mt-1">
+          <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
             Pantau ulasan dari penyewa terverifikasi dan kelola visibilitas ulasan publik.
           </p>
         </div>
@@ -197,23 +197,23 @@ export default function AdminReviewsPage() {
         <button
           onClick={fetchReviews}
           disabled={isLoading}
-          className="inline-flex items-center gap-2 px-4 py-2 bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 text-sm font-semibold rounded-xl shadow-2xs transition-all active:scale-95"
+          className="inline-flex items-center gap-2 px-4 py-2 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-200 text-sm font-semibold rounded-xl shadow-2xs transition-all active:scale-95"
         >
-          <RefreshCw className={`w-4 h-4 ${isLoading ? "animate-spin text-emerald-600" : ""}`} />
+          <RefreshCw className={`w-4 h-4 ${isLoading ? "animate-spin text-emerald-600 dark:text-emerald-400" : ""}`} />
           Segarkan Data
         </button>
       </div>
 
       {/* Alert Messages */}
       {actionSuccess && (
-        <div className="p-4 bg-emerald-50 text-emerald-800 border border-emerald-200 rounded-2xl text-sm flex items-center justify-between gap-3">
+        <div className="p-4 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-200 border border-emerald-200 dark:border-emerald-800 rounded-2xl text-sm flex items-center justify-between gap-3">
           <div className="flex items-center gap-2">
-            <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />
+            <CheckCircle2 className="w-5 h-5 text-emerald-600 dark:text-emerald-400 shrink-0" />
             <span>{actionSuccess}</span>
           </div>
           <button
             onClick={() => setActionSuccess(null)}
-            className="text-xs font-semibold text-emerald-700 hover:text-emerald-900"
+            className="text-xs font-semibold text-emerald-700 dark:text-emerald-300 hover:underline"
           >
             Tutup
           </button>
@@ -221,14 +221,14 @@ export default function AdminReviewsPage() {
       )}
 
       {error && (
-        <div className="p-4 bg-rose-50 text-rose-800 border border-rose-200 rounded-2xl text-sm flex items-center justify-between gap-3">
+        <div className="p-4 bg-rose-50 dark:bg-rose-950/40 text-rose-800 dark:text-rose-200 border border-rose-200 dark:border-rose-800 rounded-2xl text-sm flex items-center justify-between gap-3">
           <div className="flex items-center gap-2">
-            <AlertCircle className="w-5 h-5 text-rose-600 shrink-0" />
+            <AlertCircle className="w-5 h-5 text-rose-600 dark:text-rose-400 shrink-0" />
             <span>{error}</span>
           </div>
           <button
             onClick={() => setError(null)}
-            className="text-xs font-semibold text-rose-700 hover:text-rose-900"
+            className="text-xs font-semibold text-rose-700 dark:text-rose-300 hover:underline"
           >
             Tutup
           </button>
@@ -237,32 +237,32 @@ export default function AdminReviewsPage() {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-2xs">
-          <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Total Ulasan</p>
-          <p className="text-2xl sm:text-3xl font-bold text-slate-900 mt-1">{stats.total}</p>
+        <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-2xs">
+          <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Total Ulasan</p>
+          <p className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white mt-1">{stats.total}</p>
         </div>
 
-        <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-2xs">
-          <p className="text-xs font-semibold text-emerald-600 uppercase tracking-wider">Tampil Publik</p>
-          <p className="text-2xl sm:text-3xl font-bold text-emerald-700 mt-1">{stats.publicCount}</p>
+        <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-2xs">
+          <p className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">Tampil Publik</p>
+          <p className="text-2xl sm:text-3xl font-bold text-emerald-700 dark:text-emerald-400 mt-1">{stats.publicCount}</p>
         </div>
 
-        <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-2xs">
-          <p className="text-xs font-semibold text-rose-500 uppercase tracking-wider">Disembunyikan</p>
-          <p className="text-2xl sm:text-3xl font-bold text-rose-600 mt-1">{stats.hiddenCount}</p>
+        <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-2xs">
+          <p className="text-xs font-semibold text-rose-500 dark:text-rose-400 uppercase tracking-wider">Disembunyikan</p>
+          <p className="text-2xl sm:text-3xl font-bold text-rose-600 dark:text-rose-400 mt-1">{stats.hiddenCount}</p>
         </div>
 
-        <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-2xs">
-          <p className="text-xs font-semibold text-amber-600 uppercase tracking-wider">Rata-rata Rating</p>
+        <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-2xs">
+          <p className="text-xs font-semibold text-amber-600 dark:text-amber-400 uppercase tracking-wider">Rata-rata Rating</p>
           <div className="flex items-center gap-2 mt-1">
-            <span className="text-2xl sm:text-3xl font-bold text-slate-900">{stats.avg}</span>
+            <span className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white">{stats.avg}</span>
             <Star className="w-5 h-5 text-amber-400 fill-amber-400" />
           </div>
         </div>
       </div>
 
       {/* Filter and Search Bar */}
-      <div className="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200/80 shadow-2xs flex flex-col md:flex-row items-center justify-between gap-4">
+      <div className="bg-white dark:bg-slate-900 p-4 sm:p-5 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-2xs flex flex-col md:flex-row items-center justify-between gap-4">
         <div className="relative w-full md:w-auto flex items-center">
           <GooeyInput
             value={searchQuery}
@@ -276,7 +276,7 @@ export default function AdminReviewsPage() {
         </div>
 
         <div className="flex items-center gap-2 w-full md:w-auto overflow-x-auto pb-1 md:pb-0">
-          <span className="text-xs font-semibold text-slate-500 flex items-center gap-1 shrink-0 mr-1">
+          <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 flex items-center gap-1 shrink-0 mr-1">
             <SlidersHorizontal className="w-3.5 h-3.5" />
             Filter:
           </span>
@@ -288,8 +288,8 @@ export default function AdminReviewsPage() {
               type="button"
               onClick={() => setFilterStatus(st)}
               className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all shrink-0 ${filterStatus === st
-                  ? "bg-slate-900 text-white shadow-2xs"
-                  : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                  ? "bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 shadow-2xs"
+                  : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700"
                 }`}
             >
               {st === "ALL" && "Semua"}
@@ -298,7 +298,7 @@ export default function AdminReviewsPage() {
             </button>
           ))}
 
-          <div className="h-4 w-px bg-slate-200 mx-1"></div>
+          <div className="h-4 w-px bg-slate-200 dark:bg-slate-700 mx-1"></div>
 
           {/* Rating Dropdown */}
           <select
@@ -306,7 +306,7 @@ export default function AdminReviewsPage() {
             onChange={(e) =>
               setFilterRating(e.target.value === "ALL" ? "ALL" : Number(e.target.value))
             }
-            className="px-3 py-1.5 bg-slate-100 border border-slate-200 rounded-lg text-xs font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-900"
+            className="px-3 py-1.5 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-xs font-semibold text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-slate-900 dark:focus:ring-slate-600"
           >
             <option value="ALL">Semua Rating</option>
             <option value="5">5 Bintang</option>
@@ -319,17 +319,17 @@ export default function AdminReviewsPage() {
       </div>
 
       {/* Reviews Table */}
-      <div className="bg-white rounded-2xl border border-slate-200/80 shadow-2xs overflow-hidden">
+      <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-2xs overflow-hidden">
         {isLoading ? (
-          <div className="flex flex-col items-center justify-center py-16 text-slate-400">
-            <Loader2 className="w-8 h-8 animate-spin text-emerald-600 mb-2" />
+          <div className="flex flex-col items-center justify-center py-16 text-slate-400 dark:text-slate-500">
+            <Loader2 className="w-8 h-8 animate-spin text-emerald-600 dark:text-emerald-400 mb-2" />
             <p className="text-sm">Memuat data ulasan...</p>
           </div>
         ) : filteredReviews.length === 0 ? (
           <div className="text-center py-14 px-4">
-            <MessageSquare className="w-12 h-12 text-slate-300 mx-auto mb-2" />
-            <h4 className="text-base font-bold text-slate-700">Tidak Ada Ulasan Ditemukan</h4>
-            <p className="text-sm text-slate-500 mt-1 max-w-sm mx-auto">
+            <MessageSquare className="w-12 h-12 text-slate-300 dark:text-slate-600 mx-auto mb-2" />
+            <h4 className="text-base font-bold text-slate-700 dark:text-slate-200">Tidak Ada Ulasan Ditemukan</h4>
+            <p className="text-sm text-slate-500 dark:text-slate-400 mt-1 max-w-sm mx-auto">
               Tidak ada data ulasan yang cocok dengan kriteria pencarian dan filter Anda.
             </p>
           </div>
@@ -337,7 +337,7 @@ export default function AdminReviewsPage() {
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="bg-slate-50/80 border-b border-slate-200 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                <tr className="bg-slate-50/80 dark:bg-slate-800/80 border-b border-slate-200 dark:border-slate-700 text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
                   <th className="py-3.5 px-4">Tanggal</th>
                   <th className="py-3.5 px-4">Kos / Properti</th>
                   <th className="py-3.5 px-4">Pengguna</th>
@@ -347,7 +347,7 @@ export default function AdminReviewsPage() {
                   <th className="py-3.5 px-4 text-right">Aksi Moderasi</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100 text-sm">
+              <tbody className="divide-y divide-slate-100 dark:divide-slate-800 text-sm">
                 {filteredReviews.map((r) => {
                   const formattedDate = new Date(r.created_at).toLocaleDateString("id-ID", {
                     day: "numeric",
@@ -356,8 +356,8 @@ export default function AdminReviewsPage() {
                   });
 
                   return (
-                    <tr key={r.id} className="hover:bg-slate-50/60 transition-colors">
-                      <td className="py-3.5 px-4 text-xs text-slate-500 whitespace-nowrap">
+                    <tr key={r.id} className="hover:bg-slate-50/60 dark:hover:bg-slate-850/60 transition-colors">
+                      <td className="py-3.5 px-4 text-xs text-slate-500 dark:text-slate-400 whitespace-nowrap">
                         {formattedDate}
                       </td>
 
@@ -365,9 +365,9 @@ export default function AdminReviewsPage() {
                         <Link
                           href={`/kos/${r.property?.id}`}
                           target="_blank"
-                          className="font-bold text-slate-900 hover:text-emerald-600 transition-colors inline-flex items-center gap-1.5"
+                          className="font-bold text-slate-900 dark:text-white hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors inline-flex items-center gap-1.5"
                         >
-                          <Building className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                          <Building className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500 shrink-0" />
                           <span className="truncate max-w-[180px]">{r.property?.name || "Kos"}</span>
                         </Link>
                       </td>
@@ -376,10 +376,10 @@ export default function AdminReviewsPage() {
                         <div className="flex items-center gap-2.5">
                           <AdminReviewAvatar src={r.user?.avatar} name={r.user?.name} />
                           <div className="min-w-0">
-                            <p className="font-semibold text-slate-900 text-xs truncate max-w-[140px]">
+                            <p className="font-semibold text-slate-900 dark:text-white text-xs truncate max-w-[140px]">
                               {r.user?.name || "Penyewa"}
                             </p>
-                            <p className="text-[11px] text-slate-400 truncate max-w-[140px]">
+                            <p className="text-[11px] text-slate-400 dark:text-slate-500 truncate max-w-[140px]">
                               {r.user?.email || "-"}
                             </p>
                           </div>
@@ -388,14 +388,14 @@ export default function AdminReviewsPage() {
 
                       <td className="py-3.5 px-4 whitespace-nowrap">
                         <div className="flex items-center gap-1">
-                          <span className="font-bold text-slate-900 text-xs">{r.rating}</span>
+                          <span className="font-bold text-slate-900 dark:text-white text-xs">{r.rating}</span>
                           <div className="flex items-center">
                             {[1, 2, 3, 4, 5].map((s) => (
                               <Star
                                 key={s}
                                 className={`w-3 h-3 ${s <= r.rating
                                     ? "text-amber-400 fill-amber-400"
-                                    : "text-slate-200"
+                                    : "text-slate-200 dark:text-slate-700"
                                   }`}
                               />
                             ))}
@@ -403,22 +403,22 @@ export default function AdminReviewsPage() {
                         </div>
                       </td>
 
-                      <td className="py-3.5 px-4 text-xs text-slate-700 max-w-xs">
+                      <td className="py-3.5 px-4 text-xs text-slate-700 dark:text-slate-300 max-w-xs">
                         {r.comment ? (
                           <p className="line-clamp-2">{r.comment}</p>
                         ) : (
-                          <span className="text-slate-400 italic">Hanya memberi rating</span>
+                          <span className="text-slate-400 dark:text-slate-500 italic">Hanya memberi rating</span>
                         )}
                       </td>
 
                       <td className="py-3.5 px-4 whitespace-nowrap">
                         {r.is_hidden ? (
-                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-rose-50 text-rose-700 border border-rose-200">
+                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-rose-50 dark:bg-rose-950/50 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-800">
                             <EyeOff className="w-3 h-3" />
                             Disembunyikan
                           </span>
                         ) : (
-                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
                             <Eye className="w-3 h-3" />
                             Publik
                           </span>
@@ -431,8 +431,8 @@ export default function AdminReviewsPage() {
                           onClick={() => handleToggleHide(r)}
                           disabled={updatingId === r.id}
                           className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all shadow-2xs active:scale-95 ${r.is_hidden
-                              ? "bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200"
-                              : "bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200"
+                              ? "bg-emerald-50 dark:bg-emerald-950/50 hover:bg-emerald-100 dark:hover:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800"
+                              : "bg-rose-50 dark:bg-rose-950/50 hover:bg-rose-100 dark:hover:bg-rose-900/50 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-800"
                             }`}
                         >
                           {updatingId === r.id ? (

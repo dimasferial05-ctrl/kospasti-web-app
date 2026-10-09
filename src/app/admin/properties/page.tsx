@@ -908,12 +908,12 @@ export default function ManagePropertiesPage() {
                         </span>
                       )}
                     </td>
-                    <td className="p-4 text-center">
+                    <td className="p-4 text-center whitespace-nowrap">
                       <span
-                        className={`px-3 py-1 rounded-full text-xs font-bold ${
+                        className={`inline-flex items-center justify-center whitespace-nowrap px-3 py-1 rounded-full text-xs font-bold ${
                           prop.available_rooms > 0
-                            ? "bg-green-100 text-green-700"
-                            : "bg-red-100 text-red-700"
+                            ? "bg-green-100 text-green-700 dark:bg-emerald-950/50 dark:text-emerald-300 dark:border dark:border-emerald-800/60"
+                            : "bg-red-100 text-red-700 dark:bg-rose-950/50 dark:text-rose-300 dark:border dark:border-rose-800/60"
                         }`}
                       >
                         {prop.available_rooms} Kamar
@@ -1194,6 +1194,11 @@ export default function ManagePropertiesPage() {
                             min="1"
                             placeholder="Contoh: 850000"
                             value={rt.price_per_month}
+                            onKeyDown={(e) => {
+                              if (["e", "E", "+", "-"].includes(e.key)) {
+                                e.preventDefault();
+                              }
+                            }}
                             onChange={(e) => {
                               const updated = [...roomTypes];
                               updated[idx].price_per_month = e.target.value;
@@ -1213,6 +1218,11 @@ export default function ManagePropertiesPage() {
                             min="0"
                             placeholder="Contoh: 3"
                             value={rt.available_rooms}
+                            onKeyDown={(e) => {
+                              if (["e", "E", "+", "-"].includes(e.key)) {
+                                e.preventDefault();
+                              }
+                            }}
                             onChange={(e) => {
                               const updated = [...roomTypes];
                               updated[idx].available_rooms = e.target.value;

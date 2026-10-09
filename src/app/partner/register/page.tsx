@@ -572,13 +572,21 @@ export default function PartnerRegisterPage() {
                     <div className="relative">
                       <DollarSign className="w-4 h-4 text-slate-400 dark:text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
                       <input
-                        type="number"
+                        type="text"
+                        inputMode="numeric"
+                        pattern="[0-9]*"
                         required
-                        min="0"
-                        step="10000"
                         placeholder="Contoh: 850000"
                         value={formData.price_per_month}
-                        onChange={(e) => setFormData({ ...formData, price_per_month: e.target.value })}
+                        onKeyDown={(e) => {
+                          if (["e", "E", "+", "-", "."].includes(e.key)) {
+                            e.preventDefault();
+                          }
+                        }}
+                        onChange={(e) => {
+                          const val = e.target.value.replace(/\D/g, "");
+                          setFormData({ ...formData, price_per_month: val });
+                        }}
                         className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-800/80 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 text-sm font-medium focus:ring-2 focus:ring-emerald-500 focus:outline-none transition-all"
                       />
                     </div>
@@ -591,12 +599,21 @@ export default function PartnerRegisterPage() {
                     <div className="relative">
                       <BedDouble className="w-4 h-4 text-slate-400 dark:text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
                       <input
-                        type="number"
+                        type="text"
+                        inputMode="numeric"
+                        pattern="[0-9]*"
                         required
-                        min="0"
                         placeholder="Contoh: 5"
                         value={formData.available_rooms}
-                        onChange={(e) => setFormData({ ...formData, available_rooms: e.target.value })}
+                        onKeyDown={(e) => {
+                          if (["e", "E", "+", "-", "."].includes(e.key)) {
+                            e.preventDefault();
+                          }
+                        }}
+                        onChange={(e) => {
+                          const val = e.target.value.replace(/\D/g, "");
+                          setFormData({ ...formData, available_rooms: val });
+                        }}
                         className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-800/80 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 text-sm font-medium focus:ring-2 focus:ring-emerald-500 focus:outline-none transition-all"
                       />
                     </div>

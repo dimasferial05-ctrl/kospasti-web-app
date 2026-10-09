@@ -14,6 +14,7 @@ import {
   Star,
 } from "lucide-react";
 import { Sidebar, SidebarBody, SidebarLink, type Links } from "@/components/ui/sidebar";
+import { SidebarThemeToggle } from "@/components/ui/SidebarThemeToggle";
 import { motion } from "motion/react";
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -151,8 +152,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             </div>
           </div>
 
-          {/* Bottom section: Logout */}
-          <div className="pt-3 border-t border-slate-800/80">
+          {/* Bottom section: Theme Toggle & Logout */}
+          <div className="pt-3 border-t border-slate-800/80 space-y-1">
+            <SidebarThemeToggle />
             <SidebarLink
               link={{
                 label: isLoggingOut ? "Keluar..." : "Logout",

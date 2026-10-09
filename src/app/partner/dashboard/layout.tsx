@@ -14,6 +14,7 @@ import {
   ExternalLink,
 } from "lucide-react";
 import { Sidebar, SidebarBody, SidebarLink, type Links } from "@/components/ui/sidebar";
+import { SidebarThemeToggle } from "@/components/ui/SidebarThemeToggle";
 import { motion } from "motion/react";
 
 interface PartnerInfo {
@@ -190,8 +191,9 @@ export default function PartnerDashboardLayout({
             </div>
           </div>
 
-          {/* Bottom section: Help Center, Main Page Link & Logout */}
+          {/* Bottom section: Theme Toggle, Help Center, Main Page Link & Logout */}
           <div className="pt-3 border-t border-slate-800/80 space-y-1.5">
+            <SidebarThemeToggle />
             <SidebarLink
               link={{
                 label: "Pusat Bantuan",
