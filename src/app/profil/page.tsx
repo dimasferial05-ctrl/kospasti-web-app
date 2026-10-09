@@ -30,7 +30,11 @@ import {
   Eye,
   EyeOff,
   Check,
+  Sun,
+  Moon,
+  Monitor,
 } from "lucide-react";
+import { useTheme } from "next-themes";
 import { HelpTooltip } from "@/components/ui/Tooltip";
 
 interface UserProfile {
@@ -80,6 +84,13 @@ function ProfileContent() {
   const [manualTab, setManualTab] = useState<"profile" | "bookings" | "security" | null>(null);
   const activeTab = manualTab ?? queryTab;
   const setActiveTab = (tab: "profile" | "bookings" | "security") => setManualTab(tab);
+
+  const { theme, setTheme } = useTheme();
+  const [themeMounted, setThemeMounted] = useState(false);
+
+  useEffect(() => {
+    setThemeMounted(true);
+  }, []);
 
   const [isLoadingUser, setIsLoadingUser] = useState(true);
   const [user, setUser] = useState<UserProfile | null>(null);
@@ -440,7 +451,7 @@ function ProfileContent() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 py-8 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 py-8 px-4 sm:px-6 lg:px-8 transition-colors duration-200">
       <div className="max-w-5xl mx-auto space-y-6">
         {/* Top Back Navigation Link */}
         <div>
@@ -453,7 +464,7 @@ function ProfileContent() {
                 router.push("/search");
               }
             }}
-            className="inline-flex items-center gap-2 text-sm font-medium text-slate-600 hover:text-emerald-600 transition-colors group cursor-pointer"
+            className="inline-flex items-center gap-2 text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors group cursor-pointer"
           >
             <ArrowLeft className="w-4 h-4 text-slate-400 group-hover:-translate-x-0.5 group-hover:text-emerald-600 transition-all" />
             <span>Kembali ke Beranda</span>
@@ -461,9 +472,9 @@ function ProfileContent() {
         </div>
 
         {/* Header Title Card */}
-        <div className="bg-white rounded-2xl p-6 sm:p-8 border border-slate-200 shadow-sm flex items-center justify-between gap-4">
+        <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 sm:p-8 border border-slate-200 dark:border-slate-800 shadow-sm flex items-center justify-between gap-4">
           <div className="flex items-center gap-4">
-            <div className="relative w-16 h-16 sm:w-20 sm:h-20 rounded-full overflow-hidden bg-slate-100 border-2 border-emerald-500 flex items-center justify-center shrink-0">
+            <div className="relative w-16 h-16 sm:w-20 sm:h-20 rounded-full overflow-hidden bg-slate-100 dark:bg-slate-800 border-2 border-emerald-500 flex items-center justify-center shrink-0">
               {avatarPreview ? (
                 <Image
                   src={avatarPreview}
@@ -477,12 +488,12 @@ function ProfileContent() {
               )}
             </div>
             <div>
-              <h1 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
+              <h1 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white tracking-tight">
                 {user?.name || "Pengguna KosPasti"}
               </h1>
-              <p className="text-sm text-slate-500">{user?.email}</p>
+              <p className="text-sm text-slate-500 dark:text-slate-400">{user?.email}</p>
               {user?.bio && (
-                <p className="text-xs sm:text-sm text-slate-600 mt-1 italic line-clamp-1 max-w-md">
+                <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 mt-1 italic line-clamp-1 max-w-md">
                   &ldquo;{user.bio}&rdquo;
                 </p>
               )}
@@ -493,15 +504,15 @@ function ProfileContent() {
         {/* Dashboard Layout: Sidebar Navigation + Content Panel */}
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 items-start">
           {/* Sidebar Menu */}
-          <aside className="lg:col-span-1 bg-white rounded-2xl border border-slate-200 p-3 shadow-sm">
+          <aside className="lg:col-span-1 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-3 shadow-sm">
             <nav className="flex lg:flex-col gap-1.5 overflow-x-auto lg:overflow-visible">
               <button
                 type="button"
                 onClick={() => setActiveTab("profile")}
                 className={`flex-1 lg:flex-none flex items-center justify-center lg:justify-start gap-2.5 px-4 py-3 rounded-xl text-sm font-semibold transition-colors cursor-pointer whitespace-nowrap ${
                   activeTab === "profile"
-                    ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
-                    : "text-slate-650 hover:bg-slate-50 hover:text-slate-900"
+                    ? "bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800"
+                    : "text-slate-650 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white"
                 }`}
               >
                 <UserIcon className="w-4 h-4" />
@@ -513,8 +524,8 @@ function ProfileContent() {
                 onClick={() => setActiveTab("security")}
                 className={`flex-1 lg:flex-none flex items-center justify-between gap-2.5 px-4 py-3 rounded-xl text-sm font-semibold transition-colors cursor-pointer whitespace-nowrap ${
                   activeTab === "security"
-                    ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
-                    : "text-slate-650 hover:bg-slate-50 hover:text-slate-900"
+                    ? "bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800"
+                    : "text-slate-650 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white"
                 }`}
               >
                 <div className="flex items-center gap-2.5">
@@ -522,7 +533,7 @@ function ProfileContent() {
                   <span>Keamanan Akun</span>
                 </div>
                 {!user?.hasPassword && (
-                  <span className="hidden sm:inline-block text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-amber-100 text-amber-800 border border-amber-200">
+                  <span className="hidden sm:inline-block text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-amber-100 dark:bg-amber-950/70 text-amber-800 dark:text-amber-300 border border-amber-200 dark:border-amber-800">
                     Set Sandi
                   </span>
                 )}
@@ -533,21 +544,21 @@ function ProfileContent() {
                 onClick={() => setActiveTab("bookings")}
                 className={`flex-1 lg:flex-none flex items-center justify-center lg:justify-start gap-2.5 px-4 py-3 rounded-xl text-sm font-semibold transition-colors cursor-pointer whitespace-nowrap ${
                   activeTab === "bookings"
-                    ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
-                    : "text-slate-650 hover:bg-slate-50 hover:text-slate-900"
+                    ? "bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800"
+                    : "text-slate-650 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white"
                 }`}
               >
                 <History className="w-4 h-4" />
                 <span>Riwayat Pesanan</span>
               </button>
 
-              <hr className="my-1 border-slate-100 hidden lg:block" />
+              <hr className="my-1 border-slate-100 dark:border-slate-800 hidden lg:block" />
 
               <button
                 type="button"
                 onClick={handleLogout}
                 disabled={isLoggingOut}
-                className="flex-1 lg:flex-none flex items-center justify-center lg:justify-start gap-2.5 px-4 py-3 rounded-xl text-sm font-medium text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer disabled:opacity-50 whitespace-nowrap"
+                className="flex-1 lg:flex-none flex items-center justify-center lg:justify-start gap-2.5 px-4 py-3 rounded-xl text-sm font-medium text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-colors cursor-pointer disabled:opacity-50 whitespace-nowrap"
               >
                 {isLoggingOut ? (
                   <Loader2 className="w-4 h-4 animate-spin" />
@@ -563,11 +574,11 @@ function ProfileContent() {
           <main className="lg:col-span-3">
             {/* TAB 1: DATA DIRI */}
             {activeTab === "profile" && (
-              <div className="bg-white rounded-2xl border border-slate-200 p-6 sm:p-8 shadow-sm">
-                <div className="border-b border-slate-100 pb-4 mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 sm:p-8 shadow-sm">
+                <div className="border-b border-slate-100 dark:border-slate-800 pb-4 mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                   <div>
-                    <h2 className="text-lg font-bold text-slate-900">Data Diri & Profil</h2>
-                    <p className="text-sm text-slate-500">
+                    <h2 className="text-lg font-bold text-slate-900 dark:text-white">Data Diri & Profil</h2>
+                    <p className="text-sm text-slate-500 dark:text-slate-400">
                       {isEditing
                         ? "Ubah data diri Anda pada formulir di bawah ini lalu klik Simpan Perubahan."
                         : "Informasi akun dan data diri yang tersimpan di sistem KosPasti."}
@@ -582,7 +593,7 @@ function ProfileContent() {
                         setSaveErrorMessage(null);
                         setIsEditing(true);
                       }}
-                      className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 rounded-xl transition-colors cursor-pointer self-start sm:self-auto"
+                      className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/60 hover:bg-emerald-100 dark:hover:bg-emerald-900/60 border border-emerald-200 dark:border-emerald-800 rounded-xl transition-colors cursor-pointer self-start sm:self-auto"
                     >
                       <Edit3 className="w-4 h-4" />
                       <span>Edit Profil</span>
@@ -635,41 +646,41 @@ function ProfileContent() {
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div className="p-4 rounded-xl border border-slate-150 bg-white">
-                        <span className="text-xs font-medium text-slate-500 block mb-1 flex items-center gap-1.5">
-                          <UserIcon className="w-3.5 h-3.5 text-slate-400" />
+                      <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60">
+                        <span className="text-xs font-medium text-slate-500 dark:text-slate-400 block mb-1 flex items-center gap-1.5">
+                          <UserIcon className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500" />
                           Nama Lengkap
                         </span>
-                        <p className="text-sm font-semibold text-slate-900">{user?.name || "-"}</p>
+                        <p className="text-sm font-semibold text-slate-900 dark:text-white">{user?.name || "-"}</p>
                       </div>
 
-                      <div className="p-4 rounded-xl border border-slate-150 bg-white">
-                        <span className="text-xs font-medium text-slate-500 block mb-1 flex items-center gap-1.5">
-                          <Phone className="w-3.5 h-3.5 text-slate-400" />
+                      <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60">
+                        <span className="text-xs font-medium text-slate-500 dark:text-slate-400 block mb-1 flex items-center gap-1.5">
+                          <Phone className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500" />
                           Nomor WhatsApp
                         </span>
-                        <p className="text-sm font-semibold text-slate-900">{user?.whatsapp || "-"}</p>
+                        <p className="text-sm font-semibold text-slate-900 dark:text-white">{user?.whatsapp || "-"}</p>
                       </div>
 
-                      <div className="p-4 rounded-xl border border-slate-150 bg-white md:col-span-2">
-                        <span className="text-xs font-medium text-slate-500 block mb-1 flex items-center gap-1.5">
-                          <Mail className="w-3.5 h-3.5 text-slate-400" />
+                      <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 md:col-span-2">
+                        <span className="text-xs font-medium text-slate-500 dark:text-slate-400 block mb-1 flex items-center gap-1.5">
+                          <Mail className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500" />
                           Alamat Email
                         </span>
-                        <p className="text-sm font-semibold text-slate-900">{user?.email || "-"}</p>
+                        <p className="text-sm font-semibold text-slate-900 dark:text-white">{user?.email || "-"}</p>
                       </div>
 
-                      <div className="p-4 rounded-xl border border-slate-150 bg-white md:col-span-2">
-                        <span className="text-xs font-medium text-slate-500 block mb-1 flex items-center gap-1.5">
-                          <FileText className="w-3.5 h-3.5 text-slate-400" />
+                      <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 md:col-span-2">
+                        <span className="text-xs font-medium text-slate-500 dark:text-slate-400 block mb-1 flex items-center gap-1.5">
+                          <FileText className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500" />
                           Bio Singkat
                         </span>
                         {user?.bio ? (
-                          <p className="text-sm text-slate-700 whitespace-pre-wrap leading-relaxed">
+                          <p className="text-sm text-slate-700 dark:text-slate-300 whitespace-pre-wrap leading-relaxed">
                             {user.bio}
                           </p>
                         ) : (
-                          <p className="text-sm text-slate-400 italic">
+                          <p className="text-sm text-slate-400 dark:text-slate-500 italic">
                             Belum ada bio singkat. Klik &quot;Edit Profil&quot; untuk menambahkan deskripsi diri.
                           </p>
                         )}
@@ -677,22 +688,22 @@ function ProfileContent() {
                     </div>
 
                     {/* Keamanan & Password Banner Card */}
-                    <div className="p-4 sm:p-5 rounded-xl border border-slate-200 bg-slate-50/70 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div className="p-4 sm:p-5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-850/60 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                       <div className="space-y-1">
                         <div className="flex items-center gap-2 flex-wrap">
-                          <ShieldCheck className="w-4 h-4 text-emerald-600" />
-                          <span className="text-sm font-bold text-slate-900">Keamanan & Password Akun</span>
+                          <ShieldCheck className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                          <span className="text-sm font-bold text-slate-900 dark:text-white">Keamanan & Password Akun</span>
                           {user?.hasPassword ? (
-                            <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200">
+                            <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950/70 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
                               Password Aktif
                             </span>
                           ) : (
-                            <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 border border-amber-200">
+                            <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-950/70 text-amber-800 dark:text-amber-300 border border-amber-200 dark:border-amber-800">
                               Password Belum Diatur
                             </span>
                           )}
                         </div>
-                        <p className="text-xs text-slate-500">
+                        <p className="text-xs text-slate-500 dark:text-slate-400">
                           {user?.hasPassword
                             ? "Akun Anda memiliki password mandiri dan dapat login via email & password."
                             : "Akun ini masuk melalui Google dan belum memiliki password mandiri. Atur password agar dapat login biasa."}
@@ -702,11 +713,116 @@ function ProfileContent() {
                       <button
                         type="button"
                         onClick={() => setActiveTab("security")}
-                        className="inline-flex items-center justify-center gap-1.5 px-4 py-2 text-xs font-semibold text-emerald-700 bg-white hover:bg-emerald-50 border border-slate-200 hover:border-emerald-300 rounded-xl transition-all shadow-2xs shrink-0 cursor-pointer"
+                        className="inline-flex items-center justify-center gap-1.5 px-4 py-2 text-xs font-semibold text-emerald-700 dark:text-emerald-300 bg-white dark:bg-slate-800 hover:bg-emerald-50 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 hover:border-emerald-300 dark:hover:border-emerald-700 rounded-xl transition-all shadow-2xs shrink-0 cursor-pointer"
                       >
-                        <KeyRound className="w-3.5 h-3.5 text-emerald-600" />
+                        <KeyRound className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
                         <span>{user?.hasPassword ? "Ubah Password" : "Buat Password"}</span>
                       </button>
+                    </div>
+
+                    {/* Seksi Tampilan Aplikasi (Pengaturan Akun) */}
+                    <div className="p-4 sm:p-5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-850/60 space-y-3">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <div className="w-8 h-8 rounded-lg bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800 flex items-center justify-center text-emerald-600 dark:text-emerald-400 shrink-0">
+                            {themeMounted && (theme === "dark" ? <Moon className="w-4 h-4" /> : theme === "light" ? <Sun className="w-4 h-4 text-amber-500" /> : <Monitor className="w-4 h-4" />)}
+                          </div>
+                          <div>
+                            <span className="text-sm font-bold text-slate-900 dark:text-white block">
+                              Tampilan Aplikasi
+                            </span>
+                            <span className="text-xs text-slate-500 dark:text-slate-400">
+                              Pilih tema visual antarmuka yang nyaman untuk mata Anda
+                            </span>
+                          </div>
+                        </div>
+
+                        <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950/70 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 capitalize">
+                          {themeMounted ? (theme === "dark" ? "Mode Gelap" : theme === "light" ? "Mode Terang" : "Sistem") : "Sistem"}
+                        </span>
+                      </div>
+
+                      {/* Interactive Radio Button Cards */}
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
+                        {[
+                          {
+                            id: "light",
+                            title: "Mode Terang",
+                            desc: "Warna latar cerah bersih",
+                            icon: Sun,
+                            iconColor: "text-amber-500",
+                          },
+                          {
+                            id: "dark",
+                            title: "Mode Gelap",
+                            desc: "Nyaman di kondisi minim cahaya",
+                            icon: Moon,
+                            iconColor: "text-emerald-400",
+                          },
+                          {
+                            id: "system",
+                            title: "Ikuti Sistem",
+                            desc: "Otomatis sinkron dengan perangkat",
+                            icon: Monitor,
+                            iconColor: "text-slate-500 dark:text-slate-400",
+                          },
+                        ].map((item) => {
+                          const Icon = item.icon;
+                          const isSelected = themeMounted && theme === item.id;
+                          return (
+                            <label
+                              key={item.id}
+                              onClick={() => setTheme(item.id)}
+                              className={`relative flex items-start gap-3 p-3.5 rounded-xl border transition-all cursor-pointer select-none ${
+                                isSelected
+                                  ? "bg-white dark:bg-slate-800 border-emerald-500 shadow-sm ring-2 ring-emerald-500/20"
+                                  : "bg-white/80 dark:bg-slate-900/60 border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 hover:bg-white dark:hover:bg-slate-800/80"
+                              }`}
+                            >
+                              {/* Custom Radio Button */}
+                              <div className="mt-0.5 flex items-center justify-center">
+                                <input
+                                  type="radio"
+                                  name="theme-selection"
+                                  value={item.id}
+                                  checked={isSelected}
+                                  onChange={() => setTheme(item.id)}
+                                  className="sr-only"
+                                />
+                                <div
+                                  className={`w-4 h-4 rounded-full border flex items-center justify-center transition-colors ${
+                                    isSelected
+                                      ? "border-emerald-600 bg-emerald-600"
+                                      : "border-slate-300 dark:border-slate-600 bg-transparent"
+                                  }`}
+                                >
+                                  {isSelected && (
+                                    <div className="w-1.5 h-1.5 rounded-full bg-white" />
+                                  )}
+                                </div>
+                              </div>
+
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-1.5 mb-0.5">
+                                  <Icon className={`w-3.5 h-3.5 ${item.iconColor} shrink-0`} />
+                                  <span
+                                    className={`text-xs font-bold leading-none ${
+                                      isSelected
+                                        ? "text-slate-900 dark:text-white"
+                                        : "text-slate-700 dark:text-slate-300"
+                                    }`}
+                                  >
+                                    {item.title}
+                                  </span>
+                                </div>
+                                <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-tight">
+                                  {item.desc}
+                                </p>
+                              </div>
+                            </label>
+                          );
+                        })}
+                      </div>
                     </div>
                   </div>
                 ) : (
@@ -765,7 +881,7 @@ function ProfileContent() {
 
                     {/* Input Email (Read-Only) */}
                     <div>
-                      <label className="block text-sm font-semibold text-slate-800 mb-1.5">
+                      <label className="block text-sm font-semibold text-slate-800 dark:text-slate-200 mb-1.5">
                         Alamat Email
                       </label>
                       <div className="relative">
@@ -777,7 +893,7 @@ function ProfileContent() {
                           value={user?.email || ""}
                           readOnly
                           disabled
-                          className="w-full pl-10 pr-4 py-2.5 text-sm bg-slate-100 border border-slate-200 rounded-xl text-slate-500 cursor-not-allowed select-none"
+                          className="w-full pl-10 pr-4 py-2.5 text-sm bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-500 dark:text-slate-400 cursor-not-allowed select-none"
                         />
                       </div>
                       <p className="text-xs text-slate-400 mt-1">
@@ -789,7 +905,7 @@ function ProfileContent() {
                     <div>
                       <label
                         htmlFor="user-name"
-                        className="block text-sm font-semibold text-slate-800 mb-1.5"
+                        className="block text-sm font-semibold text-slate-800 dark:text-slate-200 mb-1.5"
                       >
                         Nama Lengkap <span className="text-rose-500">*</span>
                       </label>
@@ -805,7 +921,7 @@ function ProfileContent() {
                           value={name}
                           onChange={(e) => setName(e.target.value)}
                           placeholder="Contoh: Budi Pratama"
-                          className="w-full pl-10 pr-4 py-2.5 text-sm bg-white border border-slate-200 rounded-xl text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-colors"
+                          className="w-full pl-10 pr-4 py-2.5 text-sm bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-colors"
                         />
                       </div>
                     </div>
@@ -814,7 +930,7 @@ function ProfileContent() {
                     <div>
                       <label
                         htmlFor="user-whatsapp"
-                        className="block text-sm font-semibold text-slate-800 mb-1.5"
+                        className="block text-sm font-semibold text-slate-800 dark:text-slate-200 mb-1.5"
                       >
                         Nomor WhatsApp <span className="text-rose-500">*</span>
                       </label>
@@ -830,10 +946,10 @@ function ProfileContent() {
                           value={whatsapp}
                           onChange={(e) => setWhatsapp(e.target.value)}
                           placeholder="Contoh: 08123456789 atau +628123456789"
-                          className="w-full pl-10 pr-4 py-2.5 text-sm bg-white border border-slate-200 rounded-xl text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-colors"
+                          className="w-full pl-10 pr-4 py-2.5 text-sm bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-colors"
                         />
                       </div>
-                      <p className="text-xs text-slate-500 mt-1">
+                      <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
                         Nomor ini digunakan oleh pemilik kos untuk mengonfirmasi pemesanan Anda.
                       </p>
                     </div>
@@ -843,7 +959,7 @@ function ProfileContent() {
                       <div className="flex items-center justify-between mb-1.5">
                         <label
                           htmlFor="user-bio"
-                          className="block text-sm font-semibold text-slate-800"
+                          className="block text-sm font-semibold text-slate-800 dark:text-slate-200"
                         >
                           Bio Singkat
                         </label>
@@ -863,7 +979,7 @@ function ProfileContent() {
                           value={bio}
                           onChange={(e) => setBio(e.target.value)}
                           placeholder="Tuliskan sedikit tentang diri Anda, kampus/pekerjaan, dsb..."
-                          className="w-full p-3.5 text-sm bg-white border border-slate-200 rounded-xl text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-colors resize-none"
+                          className="w-full p-3.5 text-sm bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-colors resize-none"
                         />
                       </div>
                     </div>
@@ -873,7 +989,7 @@ function ProfileContent() {
                         type="button"
                         onClick={handleCancelEdit}
                         disabled={isSaving}
-                        className="inline-flex items-center gap-1.5 px-5 py-2.5 text-sm font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-xl transition-colors cursor-pointer disabled:opacity-50"
+                        className="inline-flex items-center gap-1.5 px-5 py-2.5 text-sm font-semibold text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-xl transition-colors cursor-pointer disabled:opacity-50"
                       >
                         <X className="w-4 h-4" />
                         <span>Batal</span>
@@ -896,20 +1012,148 @@ function ProfileContent() {
                     </div>
                   </form>
                 )}
+
+                {/* PENGATURAN TAMPILAN APLIKASI (Issue #237) */}
+                <div className="mt-8 pt-6 border-t border-slate-100 dark:border-slate-800">
+                  <div className="mb-4">
+                    <h3 className="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-wider">
+                      Tampilan Aplikasi
+                    </h3>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                      Pilih tema tampilan yang paling nyaman untuk mata Anda saat mencari kos.
+                    </p>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    {/* Mode Terang */}
+                    <button
+                      type="button"
+                      onClick={() => setTheme("light")}
+                      className={`flex items-center gap-3 p-3.5 rounded-xl border text-left transition-all cursor-pointer ${
+                        themeMounted && theme === "light"
+                          ? "border-emerald-500 bg-emerald-50/50 dark:bg-emerald-950/20 text-emerald-900 dark:text-emerald-300 ring-2 ring-emerald-500/20"
+                          : "border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-800/60 text-slate-700 dark:text-slate-300 hover:border-slate-300 dark:hover:border-slate-700"
+                      }`}
+                    >
+                      <div
+                        className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 ${
+                          themeMounted && theme === "light"
+                            ? "bg-amber-100 dark:bg-amber-900/40 text-amber-600 dark:text-amber-400"
+                            : "bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400"
+                        }`}
+                      >
+                        <Sun className="w-4 h-4" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm font-semibold">Mode Terang</span>
+                          <span
+                            className={`w-4 h-4 rounded-full border flex items-center justify-center shrink-0 ${
+                              themeMounted && theme === "light"
+                                ? "border-emerald-600 bg-emerald-600 text-white"
+                                : "border-slate-300 dark:border-slate-600"
+                            }`}
+                          >
+                            {themeMounted && theme === "light" && <Check className="w-2.5 h-2.5" />}
+                          </span>
+                        </div>
+                        <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+                          Tampilan terang standar
+                        </p>
+                      </div>
+                    </button>
+
+                    {/* Mode Gelap */}
+                    <button
+                      type="button"
+                      onClick={() => setTheme("dark")}
+                      className={`flex items-center gap-3 p-3.5 rounded-xl border text-left transition-all cursor-pointer ${
+                        themeMounted && theme === "dark"
+                          ? "border-emerald-500 bg-emerald-50/50 dark:bg-emerald-950/20 text-emerald-900 dark:text-emerald-300 ring-2 ring-emerald-500/20"
+                          : "border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-800/60 text-slate-700 dark:text-slate-300 hover:border-slate-300 dark:hover:border-slate-700"
+                      }`}
+                    >
+                      <div
+                        className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 ${
+                          themeMounted && theme === "dark"
+                            ? "bg-indigo-100 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-400"
+                            : "bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400"
+                        }`}
+                      >
+                        <Moon className="w-4 h-4" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm font-semibold">Mode Gelap</span>
+                          <span
+                            className={`w-4 h-4 rounded-full border flex items-center justify-center shrink-0 ${
+                              themeMounted && theme === "dark"
+                                ? "border-emerald-600 bg-emerald-600 text-white"
+                                : "border-slate-300 dark:border-slate-600"
+                            }`}
+                          >
+                            {themeMounted && theme === "dark" && <Check className="w-2.5 h-2.5" />}
+                          </span>
+                        </div>
+                        <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+                          Lebih nyaman di malam hari
+                        </p>
+                      </div>
+                    </button>
+
+                    {/* Ikuti Sistem */}
+                    <button
+                      type="button"
+                      onClick={() => setTheme("system")}
+                      className={`flex items-center gap-3 p-3.5 rounded-xl border text-left transition-all cursor-pointer ${
+                        themeMounted && theme === "system"
+                          ? "border-emerald-500 bg-emerald-50/50 dark:bg-emerald-950/20 text-emerald-900 dark:text-emerald-300 ring-2 ring-emerald-500/20"
+                          : "border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-800/60 text-slate-700 dark:text-slate-300 hover:border-slate-300 dark:hover:border-slate-700"
+                      }`}
+                    >
+                      <div
+                        className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 ${
+                          themeMounted && theme === "system"
+                            ? "bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300"
+                            : "bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400"
+                        }`}
+                      >
+                        <Monitor className="w-4 h-4" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm font-semibold">Ikuti Sistem</span>
+                          <span
+                            className={`w-4 h-4 rounded-full border flex items-center justify-center shrink-0 ${
+                              themeMounted && theme === "system"
+                                ? "border-emerald-600 bg-emerald-600 text-white"
+                                : "border-slate-300 dark:border-slate-600"
+                            }`}
+                          >
+                            {themeMounted && theme === "system" && <Check className="w-2.5 h-2.5" />}
+                          </span>
+                        </div>
+                        <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+                          Otomatis sesuai HP / Laptop
+                        </p>
+                      </div>
+                    </button>
+                  </div>
+                </div>
               </div>
             )}
 
             {/* TAB 2: KEAMANAN & PASSWORD */}
             {activeTab === "security" && (
-              <div className="bg-white rounded-2xl border border-slate-200 p-6 sm:p-8 shadow-sm">
-                <div className="border-b border-slate-100 pb-4 mb-6">
+              <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 sm:p-8 shadow-sm">
+                <div className="border-b border-slate-100 dark:border-slate-800 pb-4 mb-6">
                   <div className="flex items-center gap-2.5 mb-1">
-                    <div className="w-8 h-8 rounded-lg bg-emerald-50 border border-emerald-200 flex items-center justify-center text-emerald-600">
+                    <div className="w-8 h-8 rounded-lg bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800 flex items-center justify-center text-emerald-600 dark:text-emerald-400">
                       <ShieldCheck className="w-4 h-4" />
                     </div>
-                    <h2 className="text-lg font-bold text-slate-900">Keamanan & Password Akun</h2>
+                    <h2 className="text-lg font-bold text-slate-900 dark:text-white">Keamanan & Password Akun</h2>
                   </div>
-                  <p className="text-sm text-slate-500">
+                  <p className="text-sm text-slate-500 dark:text-slate-400">
                     {user?.hasPassword
                       ? "Perbarui password akun Anda untuk menjaga keamanan akses."
                       : "Akun Anda belum memiliki password mandiri karena masuk menggunakan Google. Buat password sekarang agar bisa login dengan email dan password biasa."}
@@ -919,9 +1163,9 @@ function ProfileContent() {
                 {/* Status Ringkasan Akun */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
                   {/* Provider Google */}
-                  <div className="p-4 rounded-xl border border-slate-200 bg-slate-50/70 flex items-center justify-between">
+                  <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-800/50 flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                      <div className="w-9 h-9 rounded-full bg-white border border-slate-200 flex items-center justify-center shrink-0">
+                      <div className="w-9 h-9 rounded-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center shrink-0">
                         <svg className="w-4 h-4" viewBox="0 0 24 24">
                           <path
                             fill="#4285F4"
@@ -942,14 +1186,14 @@ function ProfileContent() {
                         </svg>
                       </div>
                       <div>
-                        <span className="text-xs font-medium text-slate-500 block">Metode Google</span>
-                        <span className="text-sm font-bold text-slate-900">
+                        <span className="text-xs font-medium text-slate-500 dark:text-slate-400 block">Metode Google</span>
+                        <span className="text-sm font-bold text-slate-900 dark:text-white">
                           {user?.isGoogleLinked ? "Terhubung" : "Tidak Terhubung"}
                         </span>
                       </div>
                     </div>
                     {user?.isGoogleLinked && (
-                      <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full">
+                      <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/70 border border-emerald-200 dark:border-emerald-800 px-2 py-0.5 rounded-full">
                         <Check className="w-3 h-3" />
                         <span>Aktif</span>
                       </span>
@@ -957,25 +1201,25 @@ function ProfileContent() {
                   </div>
 
                   {/* Password Akun */}
-                  <div className="p-4 rounded-xl border border-slate-200 bg-slate-50/70 flex items-center justify-between">
+                  <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-800/50 flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                      <div className="w-9 h-9 rounded-full bg-white border border-slate-200 flex items-center justify-center shrink-0 text-slate-600">
-                        <Lock className="w-4 h-4 text-emerald-600" />
+                      <div className="w-9 h-9 rounded-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center shrink-0 text-slate-600 dark:text-slate-300">
+                        <Lock className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
                       </div>
                       <div>
-                        <span className="text-xs font-medium text-slate-500 block">Password Mandiri</span>
-                        <span className="text-sm font-bold text-slate-900">
+                        <span className="text-xs font-medium text-slate-500 dark:text-slate-400 block">Password Mandiri</span>
+                        <span className="text-sm font-bold text-slate-900 dark:text-white">
                           {user?.hasPassword ? "Telah Diatur" : "Belum Diatur"}
                         </span>
                       </div>
                     </div>
                     {user?.hasPassword ? (
-                      <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full">
+                      <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/70 border border-emerald-200 dark:border-emerald-800 px-2 py-0.5 rounded-full">
                         <Check className="w-3 h-3" />
                         <span>Aktif</span>
                       </span>
                     ) : (
-                      <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-amber-800 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-full">
+                      <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-amber-800 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/70 border border-amber-200 dark:border-amber-800 px-2 py-0.5 rounded-full">
                         <AlertCircle className="w-3 h-3" />
                         <span>Belum Ada</span>
                       </span>
@@ -985,13 +1229,13 @@ function ProfileContent() {
 
                 {/* Banner edukasi jika belum ada password */}
                 {!user?.hasPassword && (
-                  <div className="mb-6 p-4 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 text-xs sm:text-sm flex items-start gap-3">
-                    <AlertCircle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
+                  <div className="mb-6 p-4 rounded-xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 text-amber-900 dark:text-amber-200 text-xs sm:text-sm flex items-start gap-3">
+                    <AlertCircle className="w-5 h-5 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
                     <div>
-                      <p className="font-semibold text-amber-900 mb-0.5">
+                      <p className="font-semibold text-amber-900 dark:text-amber-200 mb-0.5">
                         Aktifkan Password untuk Akses Fleksibel
                       </p>
-                      <p className="text-amber-800 leading-relaxed">
+                      <p className="text-amber-800 dark:text-amber-300 leading-relaxed">
                         Dengan mengatur password, Anda dapat masuk menggunakan alamat email ({user?.email}) dan password ini di perangkat mana saja tanpa harus selalu login via akun Google.
                       </p>
                     </div>
@@ -1000,15 +1244,15 @@ function ProfileContent() {
 
                 {/* Feedback Pesan Sukses / Error */}
                 {passwordSuccessMessage && (
-                  <div className="mb-6 p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-sm flex items-center gap-3">
-                    <CheckCircle2 className="w-5 h-5 shrink-0 text-emerald-600" />
+                  <div className="mb-6 p-4 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-200 text-sm flex items-center gap-3">
+                    <CheckCircle2 className="w-5 h-5 shrink-0 text-emerald-600 dark:text-emerald-400" />
                     <span>{passwordSuccessMessage}</span>
                   </div>
                 )}
 
                 {passwordErrorMessage && (
-                  <div className="mb-6 p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-sm flex items-center gap-3">
-                    <AlertCircle className="w-5 h-5 shrink-0 text-rose-600" />
+                  <div className="mb-6 p-4 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 text-rose-800 dark:text-rose-200 text-sm flex items-center gap-3">
+                    <AlertCircle className="w-5 h-5 shrink-0 text-rose-600 dark:text-rose-400" />
                     <span>{passwordErrorMessage}</span>
                   </div>
                 )}
@@ -1020,7 +1264,7 @@ function ProfileContent() {
                     <div>
                       <label
                         htmlFor="current-password"
-                        className="block text-sm font-semibold text-slate-800 mb-1.5"
+                        className="block text-sm font-semibold text-slate-800 dark:text-slate-200 mb-1.5"
                       >
                         Password Saat Ini <span className="text-rose-500">*</span>
                       </label>
@@ -1035,12 +1279,12 @@ function ProfileContent() {
                           value={currentPassword}
                           onChange={(e) => setCurrentPassword(e.target.value)}
                           placeholder="Masukkan password saat ini"
-                          className="w-full pl-10 pr-10 py-2.5 text-sm bg-white border border-slate-200 rounded-xl text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-colors"
+                          className="w-full pl-10 pr-10 py-2.5 text-sm bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-colors"
                         />
                         <button
                           type="button"
                           onClick={() => setShowCurrentPassword(!showCurrentPassword)}
-                          className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600 transition-colors cursor-pointer"
+                          className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors cursor-pointer"
                         >
                           {showCurrentPassword ? (
                             <EyeOff className="w-4 h-4" />
@@ -1056,7 +1300,7 @@ function ProfileContent() {
                   <div>
                     <label
                       htmlFor="new-password"
-                      className="block text-sm font-semibold text-slate-800 mb-1.5"
+                      className="block text-sm font-semibold text-slate-800 dark:text-slate-200 mb-1.5"
                     >
                       {user?.hasPassword ? "Password Baru" : "Buat Password"} <span className="text-rose-500">*</span>
                     </label>
@@ -1073,12 +1317,12 @@ function ProfileContent() {
                         value={newPassword}
                         onChange={(e) => setNewPassword(e.target.value)}
                         placeholder="Minimal 8 karakter"
-                        className="w-full pl-10 pr-10 py-2.5 text-sm bg-white border border-slate-200 rounded-xl text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-colors"
+                        className="w-full pl-10 pr-10 py-2.5 text-sm bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-colors"
                       />
                       <button
                         type="button"
                         onClick={() => setShowNewPassword(!showNewPassword)}
-                        className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600 transition-colors cursor-pointer"
+                        className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors cursor-pointer"
                       >
                         {showNewPassword ? (
                           <EyeOff className="w-4 h-4" />
@@ -1087,7 +1331,7 @@ function ProfileContent() {
                         )}
                       </button>
                     </div>
-                    <p className="text-xs text-slate-500 mt-1">
+                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
                       Gunakan kombinasi minimal 8 karakter dengan huruf dan angka.
                     </p>
                   </div>
@@ -1096,7 +1340,7 @@ function ProfileContent() {
                   <div>
                     <label
                       htmlFor="confirm-password"
-                      className="block text-sm font-semibold text-slate-800 mb-1.5"
+                      className="block text-sm font-semibold text-slate-800 dark:text-slate-200 mb-1.5"
                     >
                       Ulangi Password Baru <span className="text-rose-500">*</span>
                     </label>
@@ -1113,12 +1357,12 @@ function ProfileContent() {
                         value={confirmPassword}
                         onChange={(e) => setConfirmPassword(e.target.value)}
                         placeholder="Ketik ulang password baru"
-                        className="w-full pl-10 pr-10 py-2.5 text-sm bg-white border border-slate-200 rounded-xl text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-colors"
+                        className="w-full pl-10 pr-10 py-2.5 text-sm bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-colors"
                       />
                       <button
                         type="button"
                         onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                        className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600 transition-colors cursor-pointer"
+                        className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors cursor-pointer"
                       >
                         {showConfirmPassword ? (
                           <EyeOff className="w-4 h-4" />
@@ -1155,26 +1399,26 @@ function ProfileContent() {
 
             {/* TAB 3: RIWAYAT PESANAN */}
             {activeTab === "bookings" && (
-              <div className="bg-white rounded-2xl border border-slate-200 p-6 sm:p-8 shadow-sm">
-                <div className="border-b border-slate-100 pb-4 mb-6">
-                  <h2 className="text-lg font-bold text-slate-900">Riwayat Pemesanan Kos</h2>
-                  <p className="text-sm text-slate-500">
+              <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 sm:p-8 shadow-sm">
+                <div className="border-b border-slate-100 dark:border-slate-800 pb-4 mb-6">
+                  <h2 className="text-lg font-bold text-slate-900 dark:text-white">Riwayat Pemesanan Kos</h2>
+                  <p className="text-sm text-slate-500 dark:text-slate-400">
                     Daftar semua permohonan dan transaksi sewa kos yang pernah Anda buat.
                   </p>
                 </div>
 
                 {isLoadingBookings ? (
-                  <div className="py-12 flex flex-col items-center justify-center text-slate-500">
+                  <div className="py-12 flex flex-col items-center justify-center text-slate-500 dark:text-slate-400">
                     <Loader2 className="w-7 h-7 animate-spin text-emerald-600 mb-2" />
                     <p className="text-sm">Memuat riwayat pesanan...</p>
                   </div>
                 ) : bookings.length === 0 ? (
-                  <div className="py-12 px-4 text-center border-2 border-dashed border-slate-200 rounded-2xl">
-                    <div className="w-14 h-14 bg-slate-100 text-slate-400 rounded-full flex items-center justify-center mx-auto mb-3">
+                  <div className="py-12 px-4 text-center border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-2xl">
+                    <div className="w-14 h-14 bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-500 rounded-full flex items-center justify-center mx-auto mb-3">
                       <Building className="w-7 h-7" />
                     </div>
-                    <h3 className="text-base font-bold text-slate-800">Belum Ada Riwayat Pesanan</h3>
-                    <p className="text-sm text-slate-500 max-w-sm mx-auto mt-1 mb-5">
+                    <h3 className="text-base font-bold text-slate-800 dark:text-slate-200">Belum Ada Riwayat Pesanan</h3>
+                    <p className="text-sm text-slate-500 dark:text-slate-400 max-w-sm mx-auto mt-1 mb-5">
                       Anda belum pernah mengajukan sewa kos. Temukan kos impian Anda sekarang!
                     </p>
                     <Link
@@ -1190,10 +1434,10 @@ function ProfileContent() {
                     {bookings.map((booking) => (
                       <div
                         key={booking.id}
-                        className="border border-slate-200 rounded-2xl p-4 sm:p-5 hover:border-slate-300 transition-colors flex flex-col sm:flex-row gap-4 justify-between items-start"
+                        className="border border-slate-200 dark:border-slate-800 rounded-2xl p-4 sm:p-5 hover:border-slate-300 dark:hover:border-slate-700 bg-white dark:bg-slate-900/60 transition-colors flex flex-col sm:flex-row gap-4 justify-between items-start"
                       >
                         <div className="flex gap-4">
-                          <div className="relative w-20 h-20 sm:w-24 sm:h-24 rounded-xl overflow-hidden bg-slate-100 shrink-0">
+                          <div className="relative w-20 h-20 sm:w-24 sm:h-24 rounded-xl overflow-hidden bg-slate-100 dark:bg-slate-800 shrink-0">
                             {booking.property?.image_url ? (
                               <Image
                                 src={booking.property.image_url}
@@ -1202,7 +1446,7 @@ function ProfileContent() {
                                 className="object-cover"
                               />
                             ) : (
-                              <div className="w-full h-full flex items-center justify-center text-slate-400">
+                              <div className="w-full h-full flex items-center justify-center text-slate-400 dark:text-slate-500">
                                 <Building className="w-8 h-8" />
                               </div>
                             )}
@@ -1210,24 +1454,24 @@ function ProfileContent() {
 
                           <div className="space-y-1.5">
                             <div className="flex items-center gap-2 flex-wrap">
-                              <h3 className="font-bold text-slate-900 text-base">
+                              <h3 className="font-bold text-slate-900 dark:text-white text-base">
                                 {booking.property?.name || "Kos"}
                               </h3>
                               {booking.property?.gender_type && (
-                                <span className="text-[11px] font-medium px-2 py-0.5 rounded-md bg-slate-100 text-slate-600">
+                                <span className="text-[11px] font-medium px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
                                   {booking.property.gender_type}
                                 </span>
                               )}
                             </div>
 
                             {booking.property?.address && (
-                              <p className="text-xs text-slate-500 flex items-center gap-1 line-clamp-1">
+                              <p className="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-1 line-clamp-1">
                                 <MapPin className="w-3.5 h-3.5 shrink-0 text-slate-400" />
                                 <span>{booking.property.address}</span>
                               </p>
                             )}
 
-                            <div className="flex items-center gap-4 text-xs text-slate-600 pt-1">
+                            <div className="flex items-center gap-4 text-xs text-slate-600 dark:text-slate-300 pt-1">
                               <span className="flex items-center gap-1">
                                 <Calendar className="w-3.5 h-3.5 text-slate-400" />
                                 <span>Rencana Masuk: {formatDate(booking.move_in_date)}</span>

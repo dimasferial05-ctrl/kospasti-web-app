@@ -75,7 +75,7 @@ export function BottomNav({ isLoggedIn: initialIsLoggedIn = false }: BottomNavPr
   return (
     <nav
       aria-label="Mobile Navigation Bar"
-      className="fixed bottom-0 left-0 right-0 z-50 md:hidden bg-white/95 backdrop-blur-lg border-t border-slate-200/90 shadow-[0_-4px_24px_rgba(0,0,0,0.06)] pb-[max(0.6rem,env(safe-area-inset-bottom))] pt-2 transition-all duration-300"
+      className="fixed bottom-0 left-0 right-0 z-50 md:hidden bg-white/95 dark:bg-slate-900/95 backdrop-blur-lg border-t border-slate-200/90 dark:border-slate-800 shadow-[0_-4px_24px_rgba(0,0,0,0.06)] pb-[max(0.6rem,env(safe-area-inset-bottom))] pt-2 transition-all duration-300"
     >
       <div className="max-w-md mx-auto grid grid-cols-4 px-2">
         {navItems.map((item) => {
@@ -88,8 +88,8 @@ export function BottomNav({ isLoggedIn: initialIsLoggedIn = false }: BottomNavPr
               href={item.href}
               className={`flex flex-col items-center justify-center py-1 rounded-xl transition-all duration-200 active:scale-95 group relative ${
                 active
-                  ? "text-emerald-600 font-bold"
-                  : "text-slate-500 hover:text-slate-800 font-medium"
+                  ? "text-emerald-600 dark:text-emerald-400 font-bold"
+                  : "text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 font-medium"
               }`}
             >
               {/* Active Indicator Top Pill */}
@@ -100,8 +100,8 @@ export function BottomNav({ isLoggedIn: initialIsLoggedIn = false }: BottomNavPr
               <div
                 className={`p-1 rounded-xl transition-colors duration-200 ${
                   active
-                    ? "bg-emerald-50 text-emerald-600"
-                    : "group-hover:bg-slate-50 text-slate-500"
+                    ? "bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400"
+                    : "group-hover:bg-slate-50 dark:group-hover:bg-slate-800 text-slate-500 dark:text-slate-400"
                 }`}
               >
                 <Icon
