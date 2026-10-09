@@ -14,7 +14,6 @@ import {
   XCircle,
   ChevronLeft,
   ChevronRight,
-  Sparkles,
 } from "lucide-react";
 
 interface AdminStats {

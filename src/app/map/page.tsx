@@ -4,6 +4,7 @@ import React, { useState, useEffect, useMemo, useRef, useCallback, Suspense } fr
 import { useSearchParams, useRouter } from "next/navigation";
 import MapViewer, { PropertyMapItem, SearchTargetLocation } from "@/components/map/MapViewer";
 import { SmartSearchBar } from "@/components/features/SmartSearchBar";
+import IsolineBloom from "@/components/ui/isoline-bloom";
 import Link from "next/link";
 import {
   MapPin,
@@ -355,7 +356,11 @@ function MapSearchContent() {
           </div>
 
           {/* Search Card */}
-          <div className="bg-white p-4 sm:p-6 rounded-3xl border border-slate-200/80 shadow-soft-lg mb-4 relative overflow-hidden">
+          <div className="bg-white/95 backdrop-blur-md p-4 sm:p-6 rounded-3xl border border-slate-200/80 shadow-soft-lg mb-4 relative overflow-hidden">
+            {/* Topographical Contour Lines Shader Decoration */}
+            <div className="absolute inset-0 pointer-events-none opacity-20 -z-10 overflow-hidden">
+              <IsolineBloom height="100%" preset="emerald" interactive={true} />
+            </div>
             <div className="absolute -right-8 -top-8 w-40 h-40 bg-emerald-100/30 rounded-full blur-3xl pointer-events-none -z-10"></div>
 
             <div className="relative z-10">
