@@ -627,11 +627,11 @@ export function Header({ isLoggedIn: initialIsLoggedIn = false }: HeaderProps) {
                     <button
                       type="button"
                       onClick={promptInstall}
-                      className="hidden md:flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/60 hover:bg-emerald-100 dark:hover:bg-emerald-900/60 border border-emerald-200 dark:border-emerald-800 rounded-full transition-colors cursor-pointer"
-                      title="Install Aplikasi Desktop"
+                      className="hidden md:flex items-center gap-2 px-3.5 py-2 text-sm font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/70 hover:bg-emerald-100 dark:hover:bg-emerald-900/70 border border-emerald-200/90 dark:border-emerald-800 rounded-full shadow-2xs hover:shadow-xs transition-all duration-200 hover:-translate-y-0.5 active:scale-95 cursor-pointer"
+                      title="Unduh / Install Aplikasi Desktop"
                     >
-                      <MonitorSmartphone className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
-                      <span>Install Aplikasi</span>
+                      <MonitorSmartphone className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                      <span>Unduh Aplikasi</span>
                     </button>
                   )}
 
@@ -640,9 +640,9 @@ export function Header({ isLoggedIn: initialIsLoggedIn = false }: HeaderProps) {
                     <button
                       type="button"
                       onClick={promptInstall}
-                      className="md:hidden flex items-center justify-center w-9 h-9 rounded-full bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-emerald-900/60 transition-colors cursor-pointer"
+                      className="md:hidden flex items-center justify-center w-9 h-9 rounded-full bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-emerald-900/60 transition-colors shadow-2xs active:scale-95 cursor-pointer"
                       aria-label="Install Aplikasi KosPasti"
-                      title="Install Aplikasi"
+                      title="Unduh / Install Aplikasi"
                     >
                       <Download className="w-4 h-4" />
                     </button>
@@ -761,8 +761,21 @@ export function Header({ isLoggedIn: initialIsLoggedIn = false }: HeaderProps) {
                 </Link>
               </nav>
 
-              {/* CTA Masuk / Daftar */}
-              <div className="mt-6 pt-4 border-t border-slate-100 dark:border-slate-800">
+              {/* CTA Unduh Aplikasi & Masuk / Daftar */}
+              <div className="mt-6 pt-4 border-t border-slate-100 dark:border-slate-800 space-y-2">
+                {isInstallable && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsMobileDrawerOpen(false);
+                      promptInstall();
+                    }}
+                    className="w-full flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/60 hover:bg-emerald-100 dark:hover:bg-emerald-900/60 border border-emerald-200 dark:border-emerald-800 rounded-xl transition-all cursor-pointer"
+                  >
+                    <Download className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                    <span>Unduh Aplikasi KosPasti</span>
+                  </button>
+                )}
                 <Link
                   href="/login"
                   onClick={() => setIsMobileDrawerOpen(false)}

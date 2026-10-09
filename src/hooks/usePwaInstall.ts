@@ -84,26 +84,32 @@ export function usePwaInstall() {
 
   const promptInstall = useCallback(async () => {
     const promptEvent = deferredPrompt || savedPromptEvent;
-    if (!promptEvent) {
-      return false;
+    if (promptEvent) {
+      try {
+        await promptEvent.prompt();
+        const choiceResult = await promptEvent.userChoice;
+        if (choiceResult.outcome === "accepted") {
+          setDeferredPrompt(null);
+          savedPromptEvent = null;
+          setIsInstalled(true);
+          return true;
+        }
+        return false;
+      } catch (err) {
+        console.error("Error prompting PWA install:", err);
+      }
     }
 
-    try {
-      await promptEvent.prompt();
-      const choiceResult = await promptEvent.userChoice;
-      if (choiceResult.outcome === "accepted") {
-        setDeferredPrompt(null);
-        savedPromptEvent = null;
-        return true;
-      }
-      return false;
-    } catch (err) {
-      console.error("Error prompting PWA install:", err);
-      return false;
-    }
+    // Fallback info jika browser belum memicu event beforeinstallprompt
+    alert(
+      "Untuk memasang aplikasi KosPasti:\n" +
+        "• Di Chrome / Edge Desktop: Klik ikon 'Install KosPasti' di address bar browser atau buka menu (⋮) > 'Install KosPasti'.\n" +
+        "• Di Ponsel (Android / iOS): Buka menu browser (⋮) lalu pilih 'Tambahkan ke Layar Utama' / 'Install Aplikasi'."
+    );
+    return false;
   }, [deferredPrompt]);
 
-  const isInstallable = Boolean(deferredPrompt && !isStandalone && !isInstalled);
+  const isInstallable = !isStandalone && !isInstalled;
 
   return {
     isInstallable,
