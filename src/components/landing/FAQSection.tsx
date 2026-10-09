@@ -49,15 +49,15 @@ export function FAQSection() {
   };
 
   return (
-    <section className="py-20 sm:py-28 bg-white border-t border-slate-200/80 relative">
+    <section className="py-20 sm:py-28 bg-white dark:bg-slate-900 border-t border-slate-200/80 dark:border-slate-800 relative">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header (without '? Tanya Jawab' pill badge) */}
         <div className="text-center mb-12 sm:mb-16">
-          <div className="w-8 h-0.5 bg-slate-900 mx-auto mb-6" />
-          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-slate-900 tracking-tight">
+          <div className="w-8 h-0.5 bg-slate-900 dark:bg-emerald-400 mx-auto mb-6" />
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight">
             Pertanyaan yang Sering Diajukan (FAQ)
           </h2>
-          <p className="mt-3.5 text-slate-600 text-sm sm:text-base leading-relaxed">
+          <p className="mt-3.5 text-slate-600 dark:text-slate-400 text-sm sm:text-base leading-relaxed">
             Semua jawaban atas keraguan dan pertanyaan penting seputar penggunaan platform KosPasti.
           </p>
         </div>
@@ -71,8 +71,8 @@ export function FAQSection() {
                 key={idx}
                 className={`rounded-2xl border transition-all duration-200 overflow-hidden ${
                   isOpen
-                    ? "bg-slate-50 border-emerald-300/80 shadow-soft ring-1 ring-emerald-500/10"
-                    : "bg-white border-slate-200/80 hover:border-slate-300 shadow-2xs"
+                    ? "bg-slate-50 dark:bg-slate-800/80 border-emerald-300/80 dark:border-emerald-600/80 shadow-soft ring-1 ring-emerald-500/10"
+                    : "bg-white dark:bg-slate-900 border-slate-200/80 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 shadow-2xs"
                 }`}
               >
                 <button
@@ -81,14 +81,14 @@ export function FAQSection() {
                   className="w-full text-left px-5 sm:px-6 py-4 sm:py-5 flex items-center justify-between gap-4 cursor-pointer focus:outline-hidden"
                   aria-expanded={isOpen}
                 >
-                  <span className="font-bold text-slate-900 text-sm sm:text-base leading-snug">
+                  <span className="font-bold text-slate-900 dark:text-white text-sm sm:text-base leading-snug">
                     {faq.question}
                   </span>
                   <div
                     className={`w-7 h-7 rounded-full flex items-center justify-center shrink-0 transition-transform duration-200 ${
                       isOpen
-                        ? "rotate-180 bg-emerald-100 text-emerald-700"
-                        : "bg-slate-100 text-slate-500"
+                        ? "rotate-180 bg-emerald-100 dark:bg-emerald-950/80 text-emerald-700 dark:text-emerald-400"
+                        : "bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400"
                     }`}
                   >
                     <ChevronDown className="w-4 h-4" />
@@ -96,7 +96,7 @@ export function FAQSection() {
                 </button>
 
                 {isOpen && (
-                  <div className="px-5 sm:px-6 pb-5 pt-1 text-slate-600 text-xs sm:text-sm leading-relaxed border-t border-slate-100 animate-fade-in">
+                  <div className="px-5 sm:px-6 pb-5 pt-1 text-slate-600 dark:text-slate-300 text-xs sm:text-sm leading-relaxed border-t border-slate-100 dark:border-slate-800 animate-fade-in">
                     {faq.answer}
                   </div>
                 )}

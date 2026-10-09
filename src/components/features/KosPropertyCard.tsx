@@ -136,13 +136,13 @@ export function KosPropertyCard({
   const genderBadgeStyle = (() => {
     switch (normalizedGender) {
       case "PUTRA":
-        return "bg-blue-50 text-blue-700 border-blue-200/80";
+        return "bg-blue-50 text-blue-700 border-blue-200/80 dark:bg-blue-950/60 dark:text-blue-300 dark:border-blue-800";
       case "PUTRI":
-        return "bg-rose-50 text-rose-700 border-rose-200/80";
+        return "bg-rose-50 text-rose-700 border-rose-200/80 dark:bg-rose-950/60 dark:text-rose-300 dark:border-rose-800";
       case "CAMPUR":
-        return "bg-purple-50 text-purple-700 border-purple-200/80";
+        return "bg-purple-50 text-purple-700 border-purple-200/80 dark:bg-purple-950/60 dark:text-purple-300 dark:border-purple-800";
       default:
-        return "bg-slate-50 text-slate-700 border-slate-200/80";
+        return "bg-slate-50 text-slate-700 border-slate-200/80 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700";
     }
   })();
 
@@ -187,7 +187,7 @@ export function KosPropertyCard({
                   type="button"
                   onClick={handlePrevSlide}
                   aria-label="Foto sebelumnya"
-                  className="absolute left-2 top-1/2 -translate-y-1/2 z-20 w-7 h-7 rounded-full bg-white/95 hover:bg-white text-slate-700 shadow-soft hover:shadow-float hover:scale-105 active:scale-95 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-200 cursor-pointer"
+                  className="absolute left-2 top-1/2 -translate-y-1/2 z-20 w-7 h-7 rounded-full bg-white/95 hover:bg-white text-slate-700 dark:bg-slate-800/90 dark:hover:bg-slate-800 dark:text-slate-200 shadow-soft hover:shadow-float hover:scale-105 active:scale-95 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-200 cursor-pointer"
                 >
                   <ChevronLeft className="w-4 h-4" />
                 </button>
@@ -195,7 +195,7 @@ export function KosPropertyCard({
                   type="button"
                   onClick={handleNextSlide}
                   aria-label="Foto berikutnya"
-                  className="absolute right-2 top-1/2 -translate-y-1/2 z-20 w-7 h-7 rounded-full bg-white/95 hover:bg-white text-slate-700 shadow-soft hover:shadow-float hover:scale-105 active:scale-95 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-200 cursor-pointer"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 z-20 w-7 h-7 rounded-full bg-white/95 hover:bg-white text-slate-700 dark:bg-slate-800/90 dark:hover:bg-slate-800 dark:text-slate-200 shadow-soft hover:shadow-float hover:scale-105 active:scale-95 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-200 cursor-pointer"
                 >
                   <ChevronRight className="w-4 h-4" />
                 </button>

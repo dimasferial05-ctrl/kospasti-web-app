@@ -520,13 +520,13 @@ export default function PropertyDetailPage() {
   const genderBadgeStyle = (() => {
     switch (normalizedGender) {
       case "PUTRA":
-        return "bg-blue-50 text-blue-700 border-blue-200";
+        return "bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800";
       case "PUTRI":
-        return "bg-pink-50 text-pink-700 border-pink-200";
+        return "bg-pink-50 dark:bg-pink-950/60 text-pink-700 dark:text-pink-300 border-pink-200 dark:border-pink-800";
       case "CAMPUR":
-        return "bg-purple-50 text-purple-700 border-purple-200";
+        return "bg-purple-50 dark:purple-950/60 text-purple-700 dark:text-purple-300 border-purple-200 dark:border-purple-800";
       default:
-        return "bg-slate-50 text-slate-700 border-slate-200";
+        return "bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700";
     }
   })();
 
@@ -563,9 +563,9 @@ export default function PropertyDetailPage() {
     : [];
 
   return (
-    <div className="max-w-7xl mx-auto min-h-screen bg-slate-50 pb-24 lg:pb-12 px-0 lg:px-8 flex flex-col relative shadow-sm w-full min-w-0">
+    <div className="max-w-7xl mx-auto min-h-screen bg-slate-50 dark:bg-slate-950 pb-24 lg:pb-12 px-0 lg:px-8 flex flex-col relative shadow-sm w-full min-w-0">
       {/* Top Header Bar */}
-      <div className="sticky top-0 z-30 bg-white/90 backdrop-blur-md border-b border-slate-200/80 py-3">
+      <div className="sticky top-0 z-30 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border-b border-slate-200/80 dark:border-slate-800 py-3">
         <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 flex items-center justify-between gap-3">
           <div className="flex items-center gap-3 min-w-0">
             <button
@@ -577,12 +577,12 @@ export default function PropertyDetailPage() {
                   router.push("/search");
                 }
               }}
-              className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors shrink-0 cursor-pointer"
+              className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 transition-colors shrink-0 cursor-pointer"
               aria-label="Kembali ke halaman sebelumnya"
             >
               <ArrowLeft className="w-4 h-4" />
             </button>
-            <h1 className="text-sm font-bold text-slate-800 truncate">
+            <h1 className="text-sm font-bold text-slate-800 dark:text-white truncate">
               {property.name}
             </h1>
           </div>
@@ -598,7 +598,7 @@ export default function PropertyDetailPage() {
 
       {/* Sticky In-Page Navigation Bar (Smooth slide-in saat scroll ke bawah melewati foto properti) */}
       <div
-        className={`sticky top-[53px] z-20 bg-white/95 backdrop-blur-md border-b border-slate-200/90 shadow-xs transition-all duration-300 ease-in-out w-full min-w-0 ${
+        className={`sticky top-[53px] z-20 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-slate-200/90 dark:border-slate-800 shadow-xs transition-all duration-300 ease-in-out w-full min-w-0 ${
           showSubNav
             ? "max-h-20 opacity-100 translate-y-0 pointer-events-auto"
             : "max-h-0 opacity-0 -translate-y-3 pointer-events-none border-transparent overflow-hidden"
@@ -607,7 +607,7 @@ export default function PropertyDetailPage() {
         <div className="max-w-7xl mx-auto w-full min-w-0">
           <div
             ref={subnavScrollRef}
-            className="relative flex items-center gap-1.5 sm:gap-2 overflow-x-auto py-2.5 px-4 sm:px-6 lg:px-8 text-xs font-semibold text-slate-600 whitespace-nowrap flex-nowrap [scrollbar-width:none] [&::-webkit-scrollbar]:hidden [-webkit-overflow-scrolling:touch]"
+            className="relative flex items-center gap-1.5 sm:gap-2 overflow-x-auto py-2.5 px-4 sm:px-6 lg:px-8 text-xs font-semibold text-slate-600 dark:text-slate-300 whitespace-nowrap flex-nowrap [scrollbar-width:none] [&::-webkit-scrollbar]:hidden [-webkit-overflow-scrolling:touch]"
           >
             <button
               id="subnav-btn-section-media"
@@ -616,7 +616,7 @@ export default function PropertyDetailPage() {
               className={`px-3 py-1.5 rounded-full transition-colors whitespace-nowrap shrink-0 cursor-pointer ${
                 activeSection === "section-media"
                   ? "bg-emerald-600 text-white shadow-xs"
-                  : "bg-slate-100 hover:bg-slate-200 text-slate-700"
+                  : "bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300"
               }`}
             >
               Foto Properti
@@ -629,7 +629,7 @@ export default function PropertyDetailPage() {
                 className={`px-3 py-1.5 rounded-full transition-colors whitespace-nowrap shrink-0 cursor-pointer ${
                   activeSection === "section-deskripsi"
                     ? "bg-emerald-600 text-white shadow-xs"
-                    : "bg-slate-100 hover:bg-slate-200 text-slate-700"
+                    : "bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300"
                 }`}
               >
                 Deskripsi
@@ -643,7 +643,7 @@ export default function PropertyDetailPage() {
                 className={`px-3 py-1.5 rounded-full transition-colors whitespace-nowrap shrink-0 cursor-pointer ${
                   activeSection === "section-tipe-kamar"
                     ? "bg-emerald-600 text-white shadow-xs"
-                    : "bg-slate-100 hover:bg-slate-200 text-slate-700"
+                    : "bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300"
                 }`}
               >
                 Tipe Kamar
@@ -656,7 +656,7 @@ export default function PropertyDetailPage() {
               className={`px-3 py-1.5 rounded-full transition-colors whitespace-nowrap shrink-0 cursor-pointer ${
                 activeSection === "section-fasilitas-kamar"
                   ? "bg-emerald-600 text-white shadow-xs"
-                  : "bg-slate-100 hover:bg-slate-200 text-slate-700"
+                  : "bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300"
               }`}
             >
               Fasilitas Kamar
@@ -668,7 +668,7 @@ export default function PropertyDetailPage() {
               className={`px-3 py-1.5 rounded-full transition-colors whitespace-nowrap shrink-0 cursor-pointer ${
                 activeSection === "section-fasilitas-umum"
                   ? "bg-emerald-600 text-white shadow-xs"
-                  : "bg-slate-100 hover:bg-slate-200 text-slate-700"
+                  : "bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300"
               }`}
             >
               Fasilitas Umum
@@ -680,7 +680,7 @@ export default function PropertyDetailPage() {
               className={`px-3 py-1.5 rounded-full transition-colors whitespace-nowrap shrink-0 cursor-pointer ${
                 activeSection === "section-spesifikasi-aturan"
                   ? "bg-emerald-600 text-white shadow-xs"
-                  : "bg-slate-100 hover:bg-slate-200 text-slate-700"
+                  : "bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300"
               }`}
             >
               Spesifikasi &amp; Aturan
@@ -693,7 +693,7 @@ export default function PropertyDetailPage() {
                 className={`px-3 py-1.5 rounded-full transition-colors whitespace-nowrap shrink-0 cursor-pointer ${
                   activeSection === "section-ketentuan-sewa"
                     ? "bg-emerald-600 text-white shadow-xs"
-                    : "bg-slate-100 hover:bg-slate-200 text-slate-700"
+                    : "bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300"
                 }`}
               >
                 Ketentuan Sewa
@@ -706,7 +706,7 @@ export default function PropertyDetailPage() {
               className={`px-3 py-1.5 rounded-full transition-colors whitespace-nowrap shrink-0 cursor-pointer ${
                 activeSection === "section-lokasi"
                   ? "bg-emerald-600 text-white shadow-xs"
-                  : "bg-slate-100 hover:bg-slate-200 text-slate-700"
+                  : "bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300"
               }`}
             >
               Lokasi
@@ -718,7 +718,7 @@ export default function PropertyDetailPage() {
               className={`px-3 py-1.5 rounded-full transition-colors whitespace-nowrap shrink-0 cursor-pointer ${
                 activeSection === "reviews-section"
                   ? "bg-emerald-600 text-white shadow-xs"
-                  : "bg-slate-100 hover:bg-slate-200 text-slate-700"
+                  : "bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300"
               }`}
             >
               Ulasan
@@ -920,7 +920,7 @@ export default function PropertyDetailPage() {
         {/* KOLOM KIRI (Informasi Utama, Pilihan Tipe, Fasilitas Kamar, Fasilitas Umum, Aturan, dll) */}
         <div className="flex-1 min-w-0 flex flex-col gap-6">
           {/* Card 1: Informasi Dasar Properti */}
-          <div className="bg-white p-5 sm:p-6 rounded-2xl sm:rounded-3xl border border-slate-200/80 shadow-soft flex flex-col gap-4">
+          <div className="bg-white dark:bg-slate-900 p-5 sm:p-6 rounded-2xl sm:rounded-3xl border border-slate-200/80 dark:border-slate-800 shadow-soft flex flex-col gap-4">
             <div className="flex items-start justify-between gap-2.5">
               <span
                 className={`text-xs px-3 py-1 rounded-full font-bold border ${genderBadgeStyle}`}
@@ -928,11 +928,11 @@ export default function PropertyDetailPage() {
                 {property.gender_type}
               </span>
               {isAvailable ? (
-                <span className="bg-emerald-50 text-emerald-700 border border-emerald-200/80 text-xs font-bold px-3 py-1 rounded-full shadow-2xs">
+                <span className="bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200/80 dark:border-emerald-800 text-xs font-bold px-3 py-1 rounded-full shadow-2xs">
                   Tersedia {property.available_rooms} Kamar
                 </span>
               ) : (
-                <span className="bg-rose-50 text-rose-700 border border-rose-200/80 text-xs font-bold px-3 py-1 rounded-full">
+                <span className="bg-rose-50 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300 border border-rose-200/80 dark:border-rose-800 text-xs font-bold px-3 py-1 rounded-full">
                   Kamar Penuh
                 </span>
               )}
@@ -940,24 +940,24 @@ export default function PropertyDetailPage() {
 
             <div>
               <div className="flex items-center justify-between gap-2 flex-wrap">
-                <h2 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight leading-tight">
+                <h2 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight leading-tight">
                   {property.name}
                 </h2>
                 {property.average_rating !== undefined && property.average_rating > 0 ? (
                   <a
                     href="#reviews-section"
-                    className="inline-flex items-center gap-1.5 text-xs text-slate-700 hover:text-slate-900 font-semibold transition-colors cursor-pointer"
+                    className="inline-flex items-center gap-1.5 text-xs text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white font-semibold transition-colors cursor-pointer"
                   >
                     <Star className="w-3.5 h-3.5 text-amber-500 fill-amber-500" />
                     <span>{property.average_rating.toFixed(1)}</span>
-                    <span className="text-slate-400 font-medium underline decoration-slate-300 underline-offset-2">
+                    <span className="text-slate-400 font-medium underline decoration-slate-300 dark:decoration-slate-600 underline-offset-2">
                       ({property.total_reviews} ulasan)
                     </span>
                   </a>
                 ) : (
                   <a
                     href="#reviews-section"
-                    className="text-xs text-slate-400 hover:text-slate-600 transition-colors"
+                    className="text-xs text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
                   >
                     Belum ada ulasan
                   </a>
@@ -965,11 +965,11 @@ export default function PropertyDetailPage() {
               </div>
 
               <div className="flex items-baseline gap-1.5 mt-2">
-                <p className="text-xl sm:text-2xl font-black text-emerald-600 tracking-tight">
+                <p className="text-xl sm:text-2xl font-black text-emerald-600 dark:text-emerald-400 tracking-tight">
                   {formattedPrice}
                 </p>
                 {selectedRoomType && (
-                  <span className="text-xs font-semibold text-slate-500">
+                  <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">
                     ({selectedRoomType.name})
                   </span>
                 )}
@@ -979,12 +979,12 @@ export default function PropertyDetailPage() {
 
           {/* Card 2: Deskripsi Kos (Di Atas Card Tipe Kamar) */}
           {property.description && (
-            <div id="section-deskripsi" className="bg-white p-5 sm:p-6 rounded-2xl sm:rounded-3xl border border-slate-200/80 shadow-soft flex flex-col gap-3.5">
+            <div id="section-deskripsi" className="bg-white dark:bg-slate-900 p-5 sm:p-6 rounded-2xl sm:rounded-3xl border border-slate-200/80 dark:border-slate-800 shadow-soft flex flex-col gap-3.5">
               <div className="flex items-center gap-2">
                 <span className="w-2.5 h-2.5 rounded-full bg-emerald-600"></span>
-                <h3 className="text-base font-bold text-slate-900">Deskripsi Kos</h3>
+                <h3 className="text-base font-bold text-slate-900 dark:text-white">Deskripsi Kos</h3>
               </div>
-              <p className="text-xs sm:text-sm text-slate-600 leading-relaxed whitespace-pre-line font-medium">
+              <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed whitespace-pre-line font-medium">
                 {property.description}
               </p>
             </div>
@@ -992,13 +992,13 @@ export default function PropertyDetailPage() {
 
           {/* Card 3: Pilihan Tipe Kamar (Tanpa Fasilitas di dalamnya sesuai instruksi) */}
           {property.room_types && property.room_types.length > 0 && (
-            <div id="section-tipe-kamar" className="bg-white p-5 sm:p-6 rounded-2xl sm:rounded-3xl border border-slate-200/90 shadow-xs flex flex-col gap-4">
+            <div id="section-tipe-kamar" className="bg-white dark:bg-slate-900 p-5 sm:p-6 rounded-2xl sm:rounded-3xl border border-slate-200/90 dark:border-slate-800 shadow-xs flex flex-col gap-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <span className="w-2.5 h-2.5 rounded-full bg-emerald-600"></span>
-                  <h3 className="text-base font-bold text-slate-900">Pilihan Tipe Kamar</h3>
+                  <h3 className="text-base font-bold text-slate-900 dark:text-white">Pilihan Tipe Kamar</h3>
                 </div>
-                <span className="text-xs font-medium text-slate-600 bg-slate-100 px-2.5 py-1 rounded-md border border-slate-200">
+                <span className="text-xs font-medium text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 px-2.5 py-1 rounded-md border border-slate-200 dark:border-slate-700">
                   {property.room_types.length} Tipe Tersedia
                 </span>
               </div>
@@ -1014,13 +1014,13 @@ export default function PropertyDetailPage() {
                       onClick={() => handleSelectRoomType(rt)}
                       className={`group p-3.5 sm:p-4 rounded-xl border transition-all duration-200 cursor-pointer flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3.5 ${
                         isSelected
-                          ? "border-emerald-600 bg-emerald-50/40 shadow-xs ring-1 ring-emerald-500/20"
-                          : "border-slate-200 hover:border-slate-300 bg-white hover:bg-slate-50/50"
+                          ? "border-emerald-600 bg-emerald-50/40 dark:bg-emerald-950/40 shadow-xs ring-1 ring-emerald-500/20"
+                          : "border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 bg-white dark:bg-slate-800/80 hover:bg-slate-50/50 dark:hover:bg-slate-800"
                       }`}
                     >
                       <div className="flex items-center gap-3.5 flex-1 min-w-0">
                         {rt.image_url ? (
-                          <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-lg overflow-hidden bg-slate-100 shrink-0 relative border border-slate-200/80">
+                          <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-lg overflow-hidden bg-slate-100 dark:bg-slate-700 shrink-0 relative border border-slate-200/80 dark:border-slate-700">
                             {/* eslint-disable-next-line @next/next/no-img-element */}
                             <img
                               src={rt.image_url}
@@ -1029,22 +1029,22 @@ export default function PropertyDetailPage() {
                             />
                           </div>
                         ) : (
-                          <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-lg bg-slate-100 flex items-center justify-center shrink-0 border border-slate-200/60 text-slate-400">
+                          <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-lg bg-slate-100 dark:bg-slate-700 flex items-center justify-center shrink-0 border border-slate-200/60 dark:border-slate-700 text-slate-400">
                             <Home className="w-6 h-6 stroke-[1.5]" />
                           </div>
                         )}
 
                         <div className="flex flex-col gap-1 flex-1 min-w-0">
                           <div className="flex items-center gap-2 flex-wrap">
-                            <span className="font-bold text-slate-900 text-sm sm:text-base group-hover:text-emerald-700 transition-colors">
+                            <span className="font-bold text-slate-900 dark:text-white text-sm sm:text-base group-hover:text-emerald-700 dark:group-hover:text-emerald-400 transition-colors">
                               {rt.name}
                             </span>
                             {isRoomAvailable ? (
-                              <span className="text-[11px] font-medium px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200/80">
+                              <span className="text-[11px] font-medium px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200/80 dark:border-emerald-800">
                                 Sisa {rt.available_rooms} Kamar
                               </span>
                             ) : (
-                              <span className="text-[11px] font-medium px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 border border-slate-200">
+                              <span className="text-[11px] font-medium px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-600">
                                 Penuh
                               </span>
                             )}
@@ -1064,12 +1064,12 @@ export default function PropertyDetailPage() {
                       </div>
 
                       {/* Price & Select Button */}
-                      <div className="flex sm:flex-col items-center sm:items-end justify-between sm:justify-center gap-2 w-full sm:w-auto pt-2 sm:pt-0 border-t sm:border-t-0 border-slate-100 shrink-0">
+                      <div className="flex sm:flex-col items-center sm:items-end justify-between sm:justify-center gap-2 w-full sm:w-auto pt-2 sm:pt-0 border-t sm:border-t-0 border-slate-100 dark:border-slate-800 shrink-0">
                         <div className="text-left sm:text-right">
                           <p className="text-[10px] sm:text-xs text-slate-400 font-medium">Harga Kamar</p>
-                          <p className="text-base sm:text-lg font-bold text-emerald-600">
+                          <p className="text-base sm:text-lg font-bold text-emerald-600 dark:text-emerald-400">
                             Rp {rt.price_per_month.toLocaleString("id-ID")}
-                            <span className="text-xs font-medium text-slate-500"> /bln</span>
+                            <span className="text-xs font-medium text-slate-500 dark:text-slate-400"> /bln</span>
                           </p>
                         </div>
                         <button
@@ -1082,10 +1082,10 @@ export default function PropertyDetailPage() {
                           disabled={!isRoomAvailable || isCheckingAuth}
                           className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
                             !isRoomAvailable
-                              ? "bg-slate-100 text-slate-400 cursor-not-allowed border border-slate-200"
+                              ? "bg-slate-100 dark:bg-slate-800 text-slate-400 cursor-not-allowed border border-slate-200 dark:border-slate-700"
                               : isSelected
                               ? "bg-emerald-600 hover:bg-emerald-700 text-white shadow-xs"
-                              : "bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 hover:border-slate-300"
+                              : "bg-white dark:bg-slate-700 hover:bg-slate-50 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-600 hover:border-slate-300"
                           }`}
                         >
                           {!isRoomAvailable ? "Penuh" : isSelected ? "Pilih & Pesan" : "Pilih Tipe Ini"}
@@ -1101,16 +1101,16 @@ export default function PropertyDetailPage() {
           {/* ========================================================================= */}
           {/* Card 4: FASILITAS KAMAR (CARD BARU DI ATAS FASILITAS UMUM - DINAMIS)       */}
           {/* ========================================================================= */}
-          <div id="section-fasilitas-kamar" className="bg-white p-5 sm:p-6 rounded-2xl sm:rounded-3xl border border-slate-200/80 shadow-soft flex flex-col gap-4">
+          <div id="section-fasilitas-kamar" className="bg-white dark:bg-slate-900 p-5 sm:p-6 rounded-2xl sm:rounded-3xl border border-slate-200/80 dark:border-slate-800 shadow-soft flex flex-col gap-4">
             <div className="flex items-center justify-between flex-wrap gap-2">
               <div className="flex items-center gap-2">
                 <span className="w-2.5 h-2.5 rounded-full bg-teal-600"></span>
-                <h3 className="text-base font-bold text-slate-900">
+                <h3 className="text-base font-bold text-slate-900 dark:text-white">
                   Fasilitas Kamar
                 </h3>
               </div>
               {selectedRoomType && (
-                <span className="text-xs font-bold text-teal-800 bg-teal-50 border border-teal-200 px-3 py-1 rounded-full">
+                <span className="text-xs font-bold text-teal-800 dark:text-teal-200 bg-teal-50 dark:bg-teal-950/60 border border-teal-200 dark:border-teal-800 px-3 py-1 rounded-full">
                   Tipe: {selectedRoomType.name}
                 </span>
               )}
@@ -1123,9 +1123,9 @@ export default function PropertyDetailPage() {
               ).map((fac, idx) => (
                 <div
                   key={idx}
-                  className="flex items-center gap-2.5 text-xs text-slate-700 bg-teal-50/50 p-3 rounded-xl border border-teal-100/80 hover:border-teal-300 transition-colors"
+                  className="flex items-center gap-2.5 text-xs text-slate-700 dark:text-slate-200 bg-teal-50/50 dark:bg-teal-950/30 p-3 rounded-xl border border-teal-100/80 dark:border-teal-900/50 hover:border-teal-300 dark:hover:border-teal-700 transition-colors"
                 >
-                  <div className="w-5 h-5 rounded-md bg-teal-100 text-teal-700 flex items-center justify-center shrink-0">
+                  <div className="w-5 h-5 rounded-md bg-teal-100 dark:bg-teal-900 text-teal-700 dark:text-teal-300 flex items-center justify-center shrink-0">
                     <Check className="w-3.5 h-3.5" />
                   </div>
                   <span className="font-semibold truncate">{fac}</span>
@@ -1135,12 +1135,12 @@ export default function PropertyDetailPage() {
 
             {/* Spesifikasi Tipe Kamar */}
             {selectedRoomType?.specifications && (
-              <div className="mt-2 pt-3 border-t border-slate-100">
-                <div className="flex items-center gap-1.5 text-xs font-bold text-slate-800 uppercase tracking-wider mb-2">
-                  <Layers className="w-3.5 h-3.5 text-teal-600" />
+              <div className="mt-2 pt-3 border-t border-slate-100 dark:border-slate-800">
+                <div className="flex items-center gap-1.5 text-xs font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wider mb-2">
+                  <Layers className="w-3.5 h-3.5 text-teal-600 dark:text-teal-400" />
                   <span>Spesifikasi Kamar ({selectedRoomType.name})</span>
                 </div>
-                <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-700 leading-relaxed font-medium">
+                <div className="p-3 bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-700 dark:text-slate-300 leading-relaxed font-medium">
                   {selectedRoomType.specifications}
                 </div>
               </div>
@@ -1150,10 +1150,10 @@ export default function PropertyDetailPage() {
           {/* ========================================================================= */}
           {/* Card 5: FASILITAS UMUM (SEBELUMNYA FASILITAS BERSAMA & BANGUNAN)          */}
           {/* ========================================================================= */}
-          <div id="section-fasilitas-umum" className="bg-white p-5 sm:p-6 rounded-2xl sm:rounded-3xl border border-slate-200/80 shadow-soft flex flex-col gap-4">
+          <div id="section-fasilitas-umum" className="bg-white dark:bg-slate-900 p-5 sm:p-6 rounded-2xl sm:rounded-3xl border border-slate-200/80 dark:border-slate-800 shadow-soft flex flex-col gap-4">
             <div className="flex items-center gap-2">
               <span className="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
-              <h3 className="text-base font-bold text-slate-900">Fasilitas Umum</h3>
+              <h3 className="text-base font-bold text-slate-900 dark:text-white">Fasilitas Umum</h3>
             </div>
 
             {generalFacilities.length > 0 ? (
@@ -1161,17 +1161,17 @@ export default function PropertyDetailPage() {
                 {generalFacilities.map((facility, idx) => (
                   <div
                     key={idx}
-                    className="flex items-center gap-2.5 text-xs text-slate-700 bg-slate-50/80 p-3 rounded-xl border border-slate-100 hover:border-emerald-200 transition-colors"
+                    className="flex items-center gap-2.5 text-xs text-slate-700 dark:text-slate-200 bg-slate-50/80 dark:bg-slate-800/80 p-3 rounded-xl border border-slate-100 dark:border-slate-800 hover:border-emerald-200 dark:hover:border-emerald-700 transition-colors"
                   >
-                    <div className="w-5 h-5 rounded-md bg-emerald-100/70 flex items-center justify-center shrink-0">
-                      <Check className="w-3.5 h-3.5 text-emerald-700" />
+                    <div className="w-5 h-5 rounded-md bg-emerald-100/70 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 flex items-center justify-center shrink-0">
+                      <Check className="w-3.5 h-3.5" />
                     </div>
                     <span className="truncate font-medium">{facility}</span>
                   </div>
                 ))}
               </div>
             ) : (
-              <p className="text-xs text-slate-500">
+              <p className="text-xs text-slate-500 dark:text-slate-400">
                 {property.facilities || "Tidak ada rincian fasilitas umum"}
               </p>
             )}
@@ -1180,10 +1180,10 @@ export default function PropertyDetailPage() {
           {/* ========================================================================= */}
           {/* Card 5: SPESIFIKASI, KEBIJAKAN & PERATURAN TIAP KOSAN                     */}
           {/* ========================================================================= */}
-          <div id="section-spesifikasi-aturan" className="bg-white p-5 sm:p-6 rounded-2xl sm:rounded-3xl border border-slate-200/80 shadow-soft flex flex-col gap-4">
+          <div id="section-spesifikasi-aturan" className="bg-white dark:bg-slate-900 p-5 sm:p-6 rounded-2xl sm:rounded-3xl border border-slate-200/80 dark:border-slate-800 shadow-soft flex flex-col gap-4">
             <div className="flex items-center gap-2">
               <span className="w-2.5 h-2.5 rounded-full bg-amber-500"></span>
-              <h3 className="text-base font-bold text-slate-900">Peraturan &amp; Kebijakan Kos</h3>
+              <h3 className="text-base font-bold text-slate-900 dark:text-white">Peraturan &amp; Kebijakan Kos</h3>
             </div>
 
             {/* Badges Akses & Hewan */}
@@ -1191,15 +1191,15 @@ export default function PropertyDetailPage() {
               <div
                 className={`flex items-center gap-3 text-xs p-3.5 rounded-xl border transition-colors ${
                   property.is_24_hours
-                    ? "bg-slate-50/80 text-slate-800 border-slate-200/90 shadow-2xs"
-                    : "bg-slate-50/40 text-slate-500 border-slate-200/60"
+                    ? "bg-slate-50/80 dark:bg-slate-800/80 text-slate-800 dark:text-slate-200 border-slate-200/90 dark:border-slate-700 shadow-2xs"
+                    : "bg-slate-50/40 dark:bg-slate-800/40 text-slate-500 dark:text-slate-400 border-slate-200/60 dark:border-slate-800"
                 }`}
               >
                 <div
                   className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 ${
                     property.is_24_hours
-                      ? "bg-slate-200 text-slate-800"
-                      : "bg-slate-100 text-slate-400"
+                      ? "bg-slate-200 dark:bg-slate-700 text-slate-800 dark:text-slate-200"
+                      : "bg-slate-100 dark:bg-slate-800 text-slate-400"
                   }`}
                 >
                   <Clock className="w-4 h-4" />
@@ -1208,7 +1208,7 @@ export default function PropertyDetailPage() {
                   <p className="font-bold">
                     {property.is_24_hours ? "Akses Bebas 24 Jam" : "Ada Jam Malam"}
                   </p>
-                  <p className="text-[11px] text-slate-500">
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400">
                     {property.is_24_hours
                       ? "Bebas keluar masuk tanpa pembatasan jam malam"
                       : "Gerbang ditutup pada jam tertentu demi keamanan"}
@@ -1219,15 +1219,15 @@ export default function PropertyDetailPage() {
               <div
                 className={`flex items-center gap-3 text-xs p-3.5 rounded-xl border transition-colors ${
                   property.is_pet_friendly
-                    ? "bg-emerald-50/40 text-emerald-900 border-emerald-200 shadow-2xs"
-                    : "bg-slate-50/40 text-slate-500 border-slate-200/60"
+                    ? "bg-emerald-50/40 dark:bg-emerald-950/40 text-emerald-900 dark:text-emerald-200 border-emerald-200 dark:border-emerald-800 shadow-2xs"
+                    : "bg-slate-50/40 dark:bg-slate-800/40 text-slate-500 dark:text-slate-400 border-slate-200/60 dark:border-slate-800"
                 }`}
               >
                 <div
                   className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 ${
                     property.is_pet_friendly
-                      ? "bg-emerald-100 text-emerald-700"
-                      : "bg-slate-100 text-slate-400"
+                      ? "bg-emerald-100 dark:bg-emerald-900 text-emerald-700 dark:text-emerald-300"
+                      : "bg-slate-100 dark:bg-slate-800 text-slate-400"
                   }`}
                 >
                   <Sparkles className="w-4 h-4" />
@@ -1236,7 +1236,7 @@ export default function PropertyDetailPage() {
                   <p className="font-bold">
                     {property.is_pet_friendly ? "Boleh Bawa Hewan" : "Dilarang Bawa Hewan"}
                   </p>
-                  <p className="text-[11px] text-slate-500">
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400">
                     {property.is_pet_friendly
                       ? "Hewan peliharaan (kucing/anjing kecil) diizinkan"
                       : "Tidak diperkenankan membawa hewan peliharaan"}
@@ -1246,9 +1246,9 @@ export default function PropertyDetailPage() {
             </div>
 
             {/* List Peraturan Kos */}
-            <div className="mt-2 pt-4 border-t border-slate-100 space-y-2.5">
-              <div className="flex items-center gap-1.5 text-xs font-bold text-slate-800 uppercase tracking-wider">
-                <ShieldAlert className="w-3.5 h-3.5 text-amber-600" />
+            <div className="mt-2 pt-4 border-t border-slate-100 dark:border-slate-800 space-y-2.5">
+              <div className="flex items-center gap-1.5 text-xs font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wider">
+                <ShieldAlert className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
                 <span>Tata Tertib &amp; Peraturan Kos</span>
               </div>
 
@@ -1257,9 +1257,9 @@ export default function PropertyDetailPage() {
                   {rulesList.map((rule, idx) => (
                     <div
                       key={idx}
-                      className="flex items-start gap-2.5 text-xs text-slate-700 bg-amber-50/40 p-3 rounded-xl border border-amber-100/70"
+                      className="flex items-start gap-2.5 text-xs text-slate-700 dark:text-slate-300 bg-amber-50/40 dark:bg-amber-950/30 p-3 rounded-xl border border-amber-100/70 dark:border-amber-900/50"
                     >
-                      <span className="w-5 h-5 rounded-full bg-amber-200/70 text-amber-900 font-bold text-[10px] flex items-center justify-center shrink-0 mt-0.5">
+                      <span className="w-5 h-5 rounded-full bg-amber-200/70 dark:bg-amber-900 text-amber-900 dark:text-amber-200 font-bold text-[10px] flex items-center justify-center shrink-0 mt-0.5">
                         {idx + 1}
                       </span>
                       <p className="leading-relaxed font-medium">{rule}</p>
@@ -1267,7 +1267,7 @@ export default function PropertyDetailPage() {
                   ))}
                 </div>
               ) : (
-                <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-500">
+                <div className="p-3 bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-500 dark:text-slate-400">
                   Penyewa diwajibkan menjaga ketertiban, kebersihan, dan saling menghormati kenyamanan sesama penghuni kos.
                 </div>
               )}
@@ -1277,10 +1277,10 @@ export default function PropertyDetailPage() {
           {/* ========================================================================= */}
           {/* Card 6: KETENTUAN PENGAJUAN SEWA                                         */}
           {/* ========================================================================= */}
-          <div id="section-ketentuan-sewa" className="bg-white p-5 sm:p-6 rounded-2xl sm:rounded-3xl border border-slate-200/80 shadow-soft flex flex-col gap-4">
+          <div id="section-ketentuan-sewa" className="bg-white dark:bg-slate-900 p-5 sm:p-6 rounded-2xl sm:rounded-3xl border border-slate-200/80 dark:border-slate-800 shadow-soft flex flex-col gap-4">
             <div className="flex items-center gap-2">
               <span className="w-2.5 h-2.5 rounded-full bg-blue-600"></span>
-              <h3 className="text-base font-bold text-slate-900">Ketentuan Pengajuan Sewa</h3>
+              <h3 className="text-base font-bold text-slate-900 dark:text-white">Ketentuan Pengajuan Sewa</h3>
             </div>
 
             {rentalTermsList.length > 0 ? (
@@ -1288,25 +1288,25 @@ export default function PropertyDetailPage() {
                 {rentalTermsList.map((term, idx) => (
                   <div
                     key={idx}
-                    className="flex items-start gap-3 text-xs text-slate-700 bg-blue-50/40 p-3.5 rounded-xl border border-blue-100/70"
+                    className="flex items-start gap-3 text-xs text-slate-700 dark:text-slate-300 bg-blue-50/40 dark:bg-blue-950/30 p-3.5 rounded-xl border border-blue-100/70 dark:border-blue-900/50"
                   >
-                    <BadgeCheck className="w-4 h-4 text-blue-600 shrink-0 mt-0.5" />
+                    <BadgeCheck className="w-4 h-4 text-blue-600 dark:text-blue-400 shrink-0 mt-0.5" />
                     <p className="leading-relaxed font-medium">{term}</p>
                   </div>
                 ))}
               </div>
             ) : (
-              <div className="space-y-2 text-xs text-slate-600">
-                <div className="flex items-start gap-2.5 p-3 bg-slate-50 rounded-xl border border-slate-100">
-                  <Check className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+              <div className="space-y-2 text-xs text-slate-600 dark:text-slate-300">
+                <div className="flex items-start gap-2.5 p-3 bg-slate-50 dark:bg-slate-800/60 rounded-xl border border-slate-100 dark:border-slate-800">
+                  <Check className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
                   <span>Wajib melampirkan foto KTP atau Kartu Tanda Mahasiswa yang masih berlaku.</span>
                 </div>
-                <div className="flex items-start gap-2.5 p-3 bg-slate-50 rounded-xl border border-slate-100">
-                  <Check className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                <div className="flex items-start gap-2.5 p-3 bg-slate-50 dark:bg-slate-800/60 rounded-xl border border-slate-100 dark:border-slate-800">
+                  <Check className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
                   <span>Pembayaran sewa dilakukan di muka saat konfirmasi pemesanan diterima.</span>
                 </div>
-                <div className="flex items-start gap-2.5 p-3 bg-slate-50 rounded-xl border border-slate-100">
-                  <Check className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                <div className="flex items-start gap-2.5 p-3 bg-slate-50 dark:bg-slate-800/60 rounded-xl border border-slate-100 dark:border-slate-800">
+                  <Check className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
                   <span>Konfirmasi sewa berlaku setelah pemilik kos memverifikasi data Anda.</span>
                 </div>
               </div>
@@ -1324,16 +1324,16 @@ export default function PropertyDetailPage() {
           </div>
 
           {/* Card 8: Info Pemilik / Pengelola */}
-          <div className="bg-white p-5 rounded-2xl sm:rounded-3xl border border-slate-200/80 shadow-soft flex items-center justify-between">
+          <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl sm:rounded-3xl border border-slate-200/80 dark:border-slate-800 shadow-soft flex items-center justify-between">
             <div className="flex items-center gap-3.5">
-              <div className="w-11 h-11 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold text-sm shadow-2xs">
+              <div className="w-11 h-11 rounded-2xl bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center font-bold text-sm shadow-2xs">
                 <User className="w-5 h-5" />
               </div>
               <div>
                 <p className="text-[11px] font-medium text-slate-400 uppercase tracking-wider">
                   Dikelola oleh
                 </p>
-                <p className="text-sm font-bold text-slate-900">
+                <p className="text-sm font-bold text-slate-900 dark:text-white">
                   {property.owner?.name || "Pemilik Kos"}
                 </p>
               </div>
@@ -1350,15 +1350,15 @@ export default function PropertyDetailPage() {
         {/* KOLOM KANAN (KARTU AMANKAN KAMAR STICKY DI BAWAH FOTO PROPERTI)          */}
         {/* ========================================================================= */}
         <div className="w-full lg:w-[380px] shrink-0">
-          <div className="fixed bottom-0 left-0 w-full bg-white border-t border-slate-200/80 p-4 flex justify-between items-center z-40 lg:static lg:block lg:p-6 lg:border lg:border-slate-200/60 lg:rounded-2xl lg:shadow-soft lg:sticky lg:top-32">
+          <div className="fixed bottom-0 left-0 w-full bg-white dark:bg-slate-900 border-t border-slate-200/80 dark:border-slate-800 p-4 flex justify-between items-center z-40 lg:static lg:block lg:p-6 lg:border lg:border-slate-200/60 dark:lg:border-slate-800 lg:rounded-2xl lg:shadow-soft lg:sticky lg:top-32">
             <div className="max-w-md mx-auto lg:max-w-none w-full flex justify-between lg:flex-col lg:gap-4 items-center lg:items-start">
               <div className="lg:w-full">
                 <p className="text-[10px] lg:text-xs text-slate-400 font-semibold uppercase tracking-wider">
                   {selectedRoomType ? `Harga (${selectedRoomType.name})` : "Harga per bulan"}
                 </p>
-                <p className="text-lg lg:text-3xl font-black text-slate-900 mt-0.5">
+                <p className="text-lg lg:text-3xl font-black text-slate-900 dark:text-white mt-0.5">
                   {formattedPrice}{" "}
-                  <span className="text-xs lg:text-sm font-medium text-slate-500">
+                  <span className="text-xs lg:text-sm font-medium text-slate-500 dark:text-slate-400">
                     / bln
                   </span>
                 </p>
@@ -1387,17 +1387,17 @@ export default function PropertyDetailPage() {
               </button>
 
               {/* Jaminan KosPasti */}
-              <div className="hidden lg:flex flex-col gap-2 pt-3 border-t border-slate-100 text-[11px] text-slate-500 w-full">
+              <div className="hidden lg:flex flex-col gap-2 pt-3 border-t border-slate-100 dark:border-slate-800 text-[11px] text-slate-500 dark:text-slate-400 w-full">
                 <div className="flex items-center gap-2">
-                  <Check className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                  <Check className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
                   <span>Pasti Sesuai Deskripsi &amp; Foto</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Check className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                  <Check className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
                   <span>Tanpa Biaya Tambahan Tersembunyi</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Check className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                  <Check className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
                   <span>Konfirmasi Langsung Pemilik</span>
                 </div>
               </div>
@@ -1495,43 +1495,43 @@ export default function PropertyDetailPage() {
       {/* ========================================================================= */}
       {isModalOpen && (
         <div className="fixed inset-0 z-[60] bg-black/60 flex items-end sm:items-center justify-center p-0 sm:p-4">
-          <div className="bg-white w-full max-w-md p-6 rounded-t-2xl sm:rounded-2xl shadow-xl flex flex-col gap-4 animate-in fade-in zoom-in-95 duration-200">
+          <div className="bg-white dark:bg-slate-900 w-full max-w-md p-6 rounded-t-2xl sm:rounded-2xl shadow-xl border border-transparent dark:border-slate-800 flex flex-col gap-4 animate-in fade-in zoom-in-95 duration-200">
             <div>
-              <h3 className="text-lg font-bold text-slate-900">
+              <h3 className="text-lg font-bold text-slate-900 dark:text-white">
                 Konfirmasi Pemesanan
               </h3>
-              <p className="text-xs text-slate-500 mt-0.5">
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
                 Pilih rencana tanggal mulai masuk untuk kamar kos ini.
               </p>
             </div>
 
             {/* Selected Room Type Info */}
             {selectedRoomType && (
-              <div className="bg-emerald-50/70 border border-emerald-200/90 rounded-xl p-3 flex items-center justify-between">
+              <div className="bg-emerald-50/70 dark:bg-emerald-950/40 border border-emerald-200/90 dark:border-emerald-800 rounded-xl p-3 flex items-center justify-between">
                 <div>
-                  <p className="text-[11px] font-semibold text-emerald-800 uppercase tracking-wide">
+                  <p className="text-[11px] font-semibold text-emerald-800 dark:text-emerald-300 uppercase tracking-wide">
                     Tipe Kamar Dipilih
                   </p>
-                  <p className="text-sm font-bold text-slate-900">
+                  <p className="text-sm font-bold text-slate-900 dark:text-white">
                     {selectedRoomType.name}
                   </p>
                 </div>
                 <div className="text-right">
-                  <p className="text-xs font-extrabold text-emerald-700">
+                  <p className="text-xs font-extrabold text-emerald-700 dark:text-emerald-400">
                     Rp {selectedRoomType.price_per_month.toLocaleString("id-ID")}
                   </p>
-                  <p className="text-[10px] text-slate-500">/ bulan</p>
+                  <p className="text-[10px] text-slate-500 dark:text-slate-400">/ bulan</p>
                 </div>
               </div>
             )}
 
             {/* User Profile Summary Card */}
-            <div className="bg-slate-50 border border-slate-200/80 rounded-xl p-3.5 flex flex-col gap-2">
+            <div className="bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-700 rounded-xl p-3.5 flex flex-col gap-2">
               <div className="flex items-center justify-between">
-                <span className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">
+                <span className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
                   Data Pemesan (Akun Anda)
                 </span>
-                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-100 text-emerald-800">
+                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300">
                   Terverifikasi
                 </span>
               </div>
@@ -1559,10 +1559,10 @@ export default function PropertyDetailPage() {
                   )}
                 </div>
                 <div className="min-w-0 flex-1">
-                  <p className="text-sm font-bold text-slate-900 truncate">
+                  <p className="text-sm font-bold text-slate-900 dark:text-white truncate">
                     {studentName || "Pengguna"}
                   </p>
-                  <p className="text-xs text-slate-500 truncate">
+                  <p className="text-xs text-slate-500 dark:text-slate-400 truncate">
                     {waNumber ? `WhatsApp: ${waNumber}` : "Nomor WhatsApp akun"}
                   </p>
                 </div>
@@ -1571,7 +1571,7 @@ export default function PropertyDetailPage() {
 
             <div className="flex flex-col gap-4 mt-1">
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">
+                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
                   Rencana Tanggal Masuk <span className="text-rose-500">*</span>
                 </label>
                 <input
@@ -1580,7 +1580,7 @@ export default function PropertyDetailPage() {
                   value={moveInDate}
                   onChange={(e) => setMoveInDate(e.target.value)}
                   required
-                  className="w-full px-3.5 py-2.5 text-sm border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent text-slate-800 bg-white"
+                  className="w-full px-3.5 py-2.5 text-sm border border-slate-300 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent text-slate-800 dark:text-white bg-white dark:bg-slate-800"
                 />
               </div>
 
@@ -1588,7 +1588,7 @@ export default function PropertyDetailPage() {
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
-                  className="w-full py-2.5 px-4 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold transition-colors cursor-pointer text-sm"
+                  className="w-full py-2.5 px-4 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-semibold transition-colors cursor-pointer text-sm"
                 >
                   Batal
                 </button>
@@ -1611,22 +1611,22 @@ export default function PropertyDetailPage() {
       {/* ========================================================================= */}
       {pendingBookingNotice.isOpen && (
         <div className="fixed inset-0 z-[70] bg-black/60 flex items-center justify-center p-4 animate-in fade-in duration-200">
-          <div className="bg-white w-full max-w-md p-6 rounded-2xl shadow-xl flex flex-col gap-4 animate-in zoom-in-95 duration-200">
+          <div className="bg-white dark:bg-slate-900 w-full max-w-md p-6 rounded-2xl shadow-xl border border-transparent dark:border-slate-800 flex flex-col gap-4 animate-in zoom-in-95 duration-200">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-amber-100 text-amber-700 flex items-center justify-center shrink-0">
-                <AlertCircle className="w-5 h-5 text-amber-600" />
+              <div className="w-10 h-10 rounded-full bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-400 flex items-center justify-center shrink-0">
+                <AlertCircle className="w-5 h-5 text-amber-600 dark:text-amber-400" />
               </div>
               <div>
-                <h3 className="text-base font-bold text-slate-900">
+                <h3 className="text-base font-bold text-slate-900 dark:text-white">
                   Pesanan Masih Menunggu Pembayaran
                 </h3>
-                <p className="text-xs text-slate-500">
+                <p className="text-xs text-slate-500 dark:text-slate-400">
                   Selesaikan pesanan sebelumnya terlebih dahulu
                 </p>
               </div>
             </div>
 
-            <p className="text-sm text-slate-600 leading-relaxed bg-amber-50/70 p-3.5 rounded-xl border border-amber-200/80">
+            <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed bg-amber-50/70 dark:bg-amber-950/40 p-3.5 rounded-xl border border-amber-200/80 dark:border-amber-800">
               {pendingBookingNotice.message}
             </p>
 
@@ -1636,7 +1636,7 @@ export default function PropertyDetailPage() {
                 onClick={() =>
                   setPendingBookingNotice({ isOpen: false, message: "" })
                 }
-                className="w-full sm:w-1/2 py-2.5 px-4 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold transition-colors cursor-pointer text-sm order-2 sm:order-1"
+                className="w-full sm:w-1/2 py-2.5 px-4 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-semibold transition-colors cursor-pointer text-sm order-2 sm:order-1"
               >
                 Tutup
               </button>

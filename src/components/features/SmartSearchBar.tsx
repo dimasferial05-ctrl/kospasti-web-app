@@ -80,13 +80,13 @@ export function SmartSearchBar({
     <div className="w-full flex flex-col gap-3.5">
       <form onSubmit={handleSubmit} className="w-full">
         <div
-          className={`relative flex items-center bg-white/95 backdrop-blur-md border border-slate-200/90 rounded-2xl sm:rounded-full transition-all duration-300 shadow-soft-lg hover:shadow-float focus-within:ring-4 focus-within:ring-emerald-500/15 focus-within:border-emerald-500 ${
+          className={`relative flex items-center bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border border-slate-200/90 dark:border-slate-800 rounded-2xl sm:rounded-full transition-all duration-300 shadow-soft-lg hover:shadow-float focus-within:ring-4 focus-within:ring-emerald-500/15 focus-within:border-emerald-500 ${
             isHero ? "p-2 sm:p-2.5" : "p-1.5"
           }`}
         >
           {/* Left Icon (Search Icon standard) */}
-          <div className="pl-3 sm:pl-4 pr-2 text-slate-400 flex items-center justify-center shrink-0">
-            <Search className={isHero ? "w-5 h-5 sm:w-6 sm:h-6 text-emerald-600/70" : "w-4 h-4 text-emerald-600/70"} />
+          <div className="pl-3 sm:pl-4 pr-2 text-slate-400 dark:text-slate-500 flex items-center justify-center shrink-0">
+            <Search className={isHero ? "w-5 h-5 sm:w-6 sm:h-6 text-emerald-600/70 dark:text-emerald-400" : "w-4 h-4 text-emerald-600/70 dark:text-emerald-400"} />
           </div>
 
           {/* Text Input */}
@@ -97,7 +97,7 @@ export function SmartSearchBar({
             disabled={isLoading}
             autoFocus={autoFocus}
             placeholder={placeholder}
-            className={`w-full bg-transparent border-0 focus:outline-none focus:ring-0 text-slate-800 placeholder:text-slate-400 font-medium disabled:opacity-60 ${
+            className={`w-full bg-transparent border-0 focus:outline-none focus:ring-0 text-slate-800 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 font-medium disabled:opacity-60 ${
               isHero
                 ? "py-2.5 sm:py-3.5 text-sm sm:text-base"
                 : "py-2 text-sm"
@@ -110,7 +110,7 @@ export function SmartSearchBar({
               <button
                 type="button"
                 onClick={onReset}
-                className="p-2 sm:px-3.5 sm:py-2 text-xs font-semibold text-slate-500 hover:text-slate-800 bg-slate-100/80 hover:bg-slate-200/80 rounded-xl sm:rounded-full transition-all flex items-center gap-1 cursor-pointer active:scale-95"
+                className="p-2 sm:px-3.5 sm:py-2 text-xs font-semibold text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200 bg-slate-100/80 hover:bg-slate-200/80 dark:bg-slate-800 dark:hover:bg-slate-700 rounded-xl sm:rounded-full transition-all flex items-center gap-1 cursor-pointer active:scale-95"
                 title="Reset Pencarian"
               >
                 <RotateCcw className="w-3.5 h-3.5" />
@@ -147,7 +147,7 @@ export function SmartSearchBar({
       {/* Suggestion Chips: Horizontal scrollable carousel on mobile */}
       {showSuggestions && suggestions.length > 0 && (
         <div className="flex items-center gap-2 overflow-x-auto sm:flex-wrap no-scrollbar pb-1 sm:pb-0 px-1 text-xs">
-          <span className="font-bold text-slate-400 uppercase tracking-wider text-[10px] shrink-0">
+          <span className="font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider text-[10px] shrink-0">
             Saran:
           </span>
           <div className="flex items-center gap-2 sm:flex-wrap shrink-0">
@@ -156,7 +156,7 @@ export function SmartSearchBar({
                 key={idx}
                 type="button"
                 onClick={() => handleSuggestionClick(item.prompt)}
-                className="inline-flex items-center px-3 py-1 rounded-full bg-slate-100/90 hover:bg-emerald-50 text-slate-600 hover:text-emerald-700 border border-slate-200/80 hover:border-emerald-300 text-[11px] sm:text-xs font-medium transition-all duration-200 hover:-translate-y-0.5 cursor-pointer whitespace-nowrap shrink-0 text-left shadow-2xs"
+                className="inline-flex items-center px-3 py-1 rounded-full bg-slate-100/90 hover:bg-emerald-50 text-slate-600 hover:text-emerald-700 border border-slate-200/80 hover:border-emerald-300 dark:bg-slate-800/90 dark:hover:bg-emerald-950/60 dark:text-slate-300 dark:hover:text-emerald-300 dark:border-slate-700 dark:hover:border-emerald-700 text-[11px] sm:text-xs font-medium transition-all duration-200 hover:-translate-y-0.5 cursor-pointer whitespace-nowrap shrink-0 text-left shadow-2xs"
               >
                 {item.label}
               </button>
@@ -167,7 +167,7 @@ export function SmartSearchBar({
 
       {/* Error Notice */}
       {error && (
-        <div className="flex items-center gap-2 text-xs text-rose-600 bg-rose-50 p-3 rounded-2xl border border-rose-200 shadow-xs">
+        <div className="flex items-center gap-2 text-xs text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/50 p-3 rounded-2xl border border-rose-200 dark:border-rose-900 shadow-xs">
           <AlertCircle className="w-4 h-4 shrink-0" />
           <span>{error}</span>
         </div>

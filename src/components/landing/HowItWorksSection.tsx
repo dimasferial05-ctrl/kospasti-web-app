@@ -25,15 +25,15 @@ export function HowItWorksSection() {
   ];
 
   return (
-    <section className="py-20 sm:py-28 bg-white border-t border-slate-200/70 overflow-hidden">
+    <section className="py-20 sm:py-28 bg-white dark:bg-slate-900 border-t border-slate-200/70 dark:border-slate-800 overflow-hidden">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <div className="text-center max-w-2xl mx-auto mb-16 sm:mb-20">
-          <div className="w-8 h-0.5 bg-slate-900 mx-auto mb-6" />
-          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-slate-900 tracking-tight leading-snug">
+          <div className="w-8 h-0.5 bg-slate-900 dark:bg-emerald-400 mx-auto mb-6" />
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight leading-snug">
             KosPasti mempermudah proses sewa kos hanya dalam 3 langkah mudah:
           </h2>
-          <p className="mt-3 text-sm sm:text-base text-slate-500">
+          <p className="mt-3 text-sm sm:text-base text-slate-500 dark:text-slate-400">
             Aplikasi Progressive Web App (PWA) yang responsif dan nyaman digunakan di Laptop, Tablet, maupun Smartphone Anda.
           </p>
         </div>
@@ -62,7 +62,7 @@ export function HowItWorksSection() {
               </div>
 
               {/* Desktop Image View */}
-              <div className="w-full bg-slate-100 overflow-hidden relative aspect-[16/10]">
+              <div className="w-full bg-slate-100 dark:bg-slate-800 overflow-hidden relative aspect-[16/10]">
                 <Image
                   src="/images/desktop-preview.png"
                   alt="Tampilan Desktop KosPasti Web App"
@@ -76,7 +76,7 @@ export function HowItWorksSection() {
             {/* Overlapping Floating Smartphone Mockup on Bottom-Right */}
             <div className="absolute -bottom-4 right-0 sm:-right-2 w-36 sm:w-44 h-72 sm:h-84 bg-slate-950 rounded-[32px] p-2 shadow-2xl border-2 border-slate-700 animate-float z-20">
               {/* Smartphone Top Speaker Notch */}
-              <div className="w-12 h-2.5 bg-slate-800 rounded-full mx-auto mb-1.5" />
+              <div className="w-12 h-2.5 bg-slate-800 rounded-full mx-auto mb.1.5" />
               {/* Smartphone Image Container */}
               <div className="w-full h-[calc(100%-14px)] rounded-[22px] overflow-hidden bg-white shadow-inner relative">
                 <Image
@@ -95,16 +95,16 @@ export function HowItWorksSection() {
             {steps.map((step) => (
               <div
                 key={step.number}
-                className="group flex items-start gap-6 p-4 rounded-2xl hover:bg-slate-50 transition-colors"
+                className="group flex items-start gap-6 p-4 rounded-2xl hover:bg-slate-50 dark:hover:bg-slate-800/60 transition-colors"
               >
-                <span className="text-4xl sm:text-5xl font-extrabold text-emerald-600 font-mono shrink-0 leading-none group-hover:scale-110 transition-transform">
+                <span className="text-4xl sm:text-5xl font-extrabold text-emerald-600 dark:text-emerald-400 font-mono shrink-0 leading-none group-hover:scale-110 transition-transform">
                   {step.number}
                 </span>
                 <div>
-                  <h3 className="text-lg sm:text-xl font-bold text-slate-900 mb-2">
+                  <h3 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white mb-2">
                     {step.title}
                   </h3>
-                  <p className="text-sm sm:text-base text-slate-600 leading-relaxed font-medium">
+                  <p className="text-sm sm:text-base text-slate-600 dark:text-slate-300 leading-relaxed font-medium">
                     {step.description}
                   </p>
                 </div>
