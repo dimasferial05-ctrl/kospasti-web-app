@@ -143,7 +143,7 @@ export function ProfileCompletionModal() {
       aria-modal="true"
       role="dialog"
     >
-      <div className="bg-white w-full max-w-md rounded-2xl shadow-2xl border border-slate-150 overflow-hidden">
+      <div className="bg-white dark:bg-slate-900 w-full max-w-md rounded-2xl shadow-2xl border border-slate-150 dark:border-slate-800 overflow-hidden">
         {/* Header Visual */}
         <div className="bg-gradient-to-br from-slate-900 via-slate-850 to-slate-900 text-white p-6 pb-5">
           <div className="w-12 h-12 rounded-xl bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-emerald-400 mb-4">
@@ -160,34 +160,34 @@ export function ProfileCompletionModal() {
         {/* Body Form */}
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
           {errorMessage && (
-            <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl flex items-start gap-2.5 text-xs text-rose-700 animate-in fade-in">
-              <AlertCircle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
+            <div className="p-3 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 rounded-xl flex items-start gap-2.5 text-xs text-rose-700 dark:text-rose-300 animate-in fade-in">
+              <AlertCircle className="w-4 h-4 text-rose-600 dark:text-rose-400 shrink-0 mt-0.5" />
               <span>{errorMessage}</span>
             </div>
           )}
 
           {isSuccess && (
-            <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-xl flex items-start gap-2.5 text-xs text-emerald-700 animate-in fade-in">
-              <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+            <div className="p-3 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 rounded-xl flex items-start gap-2.5 text-xs text-emerald-700 dark:text-emerald-300 animate-in fade-in">
+              <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
               <span>Data diri berhasil disimpan. Memperbarui sesi...</span>
             </div>
           )}
 
           {/* Info Akun Login */}
           {currentUser && (
-            <div className="p-3 bg-slate-50 border border-slate-200/80 rounded-xl text-xs space-y-1">
-              <div className="text-slate-500 font-medium flex items-center gap-1.5">
-                <UserIcon className="w-3.5 h-3.5 text-slate-400" />
+            <div className="p-3 bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-700/60 rounded-xl text-xs space-y-1">
+              <div className="text-slate-500 dark:text-slate-400 font-medium flex items-center gap-1.5">
+                <UserIcon className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500" />
                 <span>Akun Terhubung:</span>
               </div>
-              <p className="font-semibold text-slate-850 truncate">{currentUser.name}</p>
-              <p className="text-slate-500 text-[11px] truncate">{currentUser.email}</p>
+              <p className="font-semibold text-slate-850 dark:text-slate-100 truncate">{currentUser.name}</p>
+              <p className="text-slate-500 dark:text-slate-400 text-[11px] truncate">{currentUser.email}</p>
             </div>
           )}
 
           {/* Input Nama Lengkap (Opsional untuk disesuaikan) */}
           <div>
-            <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+            <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
               Nama Lengkap
             </label>
             <input
@@ -195,17 +195,17 @@ export function ProfileCompletionModal() {
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="Nama lengkap Anda"
-              className="w-full px-3.5 py-2.5 text-sm bg-white border border-slate-200 rounded-xl text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-600 transition-all"
+              className="w-full px-3.5 py-2.5 text-sm bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-600 transition-all"
             />
           </div>
 
           {/* Input WhatsApp */}
           <div>
-            <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+            <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
               Nomor WhatsApp Aktif <span className="text-rose-500">*</span>
             </label>
             <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+              <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400 dark:text-slate-500">
                 <Phone className="w-4 h-4" />
               </div>
               <input
@@ -219,10 +219,10 @@ export function ProfileCompletionModal() {
                   setWhatsapp(cleaned);
                 }}
                 placeholder="Contoh: 081234567890"
-                className="w-full pl-10 pr-3.5 py-2.5 text-sm bg-white border border-slate-200 rounded-xl text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-600 transition-all font-mono"
+                className="w-full pl-10 pr-3.5 py-2.5 text-sm bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-600 transition-all font-mono"
               />
             </div>
-            <p className="text-[11px] text-slate-500 mt-1">
+            <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1">
               Gunakan format standar Indonesia (diawali 08 atau +628).
             </p>
           </div>

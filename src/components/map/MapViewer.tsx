@@ -141,7 +141,7 @@ class MapErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundary
         return this.props.fallback;
       }
       return (
-        <div className="relative w-full h-full min-h-[400px] flex flex-col items-center justify-center bg-slate-100 rounded-2xl border border-dashed border-slate-300 p-8 text-center">
+        <div className="relative w-full h-full min-h-[400px] flex flex-col items-center justify-center bg-slate-100 dark:bg-slate-900 rounded-2xl border border-dashed border-slate-300 dark:border-slate-800 p-8 text-center">
           <div className="w-14 h-14 rounded-full bg-red-100 text-red-600 flex items-center justify-center mb-4 shadow-sm">
             <AlertCircle className="w-7 h-7" />
           </div>
@@ -271,7 +271,7 @@ function MapViewerInner({
 
   if (!effectiveApiKey) {
     return (
-      <div className="relative w-full h-full min-h-[400px] flex flex-col items-center justify-center bg-slate-100 rounded-2xl border border-dashed border-slate-300 p-8 text-center">
+      <div className="relative w-full h-full min-h-[400px] flex flex-col items-center justify-center bg-slate-100 dark:bg-slate-900 rounded-2xl border border-dashed border-slate-300 dark:border-slate-800 p-8 text-center">
         <div className="w-14 h-14 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center mb-4 shadow-sm">
           <AlertCircle className="w-7 h-7" />
         </div>
@@ -293,7 +293,7 @@ function MapViewerInner({
   }
 
   return (
-    <div className="relative w-full h-full min-h-[400px] rounded-2xl overflow-hidden border border-slate-200 shadow-sm bg-slate-50">
+    <div className="relative w-full h-full min-h-[400px] rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-800 shadow-sm bg-slate-50 dark:bg-slate-950">
       <APIProvider apiKey={effectiveApiKey} language="id" region="ID">
         <Map
           defaultCenter={dynamicCenter}

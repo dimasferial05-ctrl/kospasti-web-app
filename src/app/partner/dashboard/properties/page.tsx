@@ -555,10 +555,10 @@ export default function PartnerPropertiesPage() {
       {/* Page Title */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
+          <h1 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">
             Kelola Properti Kos
           </h1>
-          <p className="text-xs sm:text-sm text-slate-500 mt-1">
+          <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
             Tambah kos baru, upload foto &amp; video, tentukan tipe kamar, deskripsi, aturan, dan pantau ketersediaan kamar.
           </p>
         </div>
@@ -575,14 +575,14 @@ export default function PartnerPropertiesPage() {
 
       {/* Notifications */}
       {successMsg && (
-        <div className="p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs sm:text-sm font-semibold flex items-center gap-2 animate-in fade-in">
+        <div className="p-4 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/60 text-emerald-800 dark:text-emerald-300 text-xs sm:text-sm font-semibold flex items-center gap-2 animate-in fade-in">
           <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
           <span>{successMsg}</span>
         </div>
       )}
 
       {errorMsg && (
-        <div className="p-4 rounded-2xl bg-rose-50 border border-rose-200 text-rose-700 text-xs sm:text-sm font-semibold flex items-center gap-2 animate-in fade-in">
+        <div className="p-4 rounded-2xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800/60 text-rose-700 dark:text-rose-300 text-xs sm:text-sm font-semibold flex items-center gap-2 animate-in fade-in">
           <Info className="w-4 h-4 text-rose-600 shrink-0" />
           <span>{errorMsg}</span>
         </div>
@@ -590,17 +590,17 @@ export default function PartnerPropertiesPage() {
 
       {/* Property Cards Grid */}
       {isLoading ? (
-        <div className="p-16 text-center bg-white rounded-3xl border border-slate-200 shadow-soft">
+        <div className="p-16 text-center bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-soft">
           <Loader2 className="w-8 h-8 animate-spin text-emerald-600 mx-auto mb-3" />
-          <p className="text-sm font-bold text-slate-700">Memuat data properti Anda...</p>
+          <p className="text-sm font-bold text-slate-700 dark:text-slate-300">Memuat data properti Anda...</p>
         </div>
       ) : properties.length === 0 ? (
-        <div className="p-16 text-center bg-white rounded-3xl border border-slate-200 shadow-soft">
-          <div className="w-16 h-16 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center mx-auto mb-4">
+        <div className="p-16 text-center bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-soft">
+          <div className="w-16 h-16 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mx-auto mb-4">
             <Building2 className="w-8 h-8" />
           </div>
-          <h2 className="text-lg font-bold text-slate-900">Belum Ada Properti Terdaftar</h2>
-          <p className="text-xs text-slate-500 max-w-sm mx-auto mt-1 mb-6">
+          <h2 className="text-lg font-bold text-slate-900 dark:text-white">Belum Ada Properti Terdaftar</h2>
+          <p className="text-xs text-slate-500 dark:text-slate-400 max-w-sm mx-auto mt-1 mb-6">
             Daftarkan properti kos pertama Anda untuk mulai menerima calon penyewa dari KosPasti.
           </p>
           <button
@@ -616,10 +616,10 @@ export default function PartnerPropertiesPage() {
           {properties.map((prop) => (
             <div
               key={prop.id}
-              className="bg-white rounded-3xl border border-slate-200/80 shadow-soft overflow-hidden hover:shadow-xl transition-all duration-300 flex flex-col group"
+              className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200/80 dark:border-slate-800 shadow-soft overflow-hidden hover:shadow-xl transition-all duration-300 flex flex-col group"
             >
               {/* Image & Badges */}
-              <div className="relative h-48 w-full bg-slate-100">
+              <div className="relative h-48 w-full bg-slate-100 dark:bg-slate-800">
                 <Image
                   src={prop.image_url || "/images/placeholder.jpg"}
                   alt={prop.name}
@@ -655,7 +655,7 @@ export default function PartnerPropertiesPage() {
                     href={`/kos/${prop.id}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="px-2.5 py-1.5 rounded-xl bg-white/95 text-slate-800 hover:text-emerald-600 shadow-md backdrop-blur-md transition-colors flex items-center gap-1 text-[11px] font-bold"
+                    className="px-2.5 py-1.5 rounded-xl bg-white/95 dark:bg-slate-900/95 text-slate-800 dark:text-slate-200 hover:text-emerald-600 dark:hover:text-emerald-400 shadow-md backdrop-blur-md transition-colors flex items-center gap-1 text-[11px] font-bold"
                   >
                     <span>Pratinjau</span>
                     <ExternalLink className="w-3 h-3" />
@@ -669,45 +669,45 @@ export default function PartnerPropertiesPage() {
                   {/* Status Approval Badge */}
                   <div className="mb-2.5">
                     {prop.status === "PUBLISHED" ? (
-                      <span className="inline-flex items-center gap-1.5 text-[11px] font-bold px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
+                      <span className="inline-flex items-center gap-1.5 text-[11px] font-bold px-2.5 py-1 rounded-full bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/60">
                         <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
                         <span>Aktif (Disetujui)</span>
                       </span>
                     ) : prop.status === "REJECTED" ? (
-                      <span className="inline-flex items-center gap-1.5 text-[11px] font-bold px-2.5 py-1 rounded-full bg-rose-50 text-rose-700 border border-rose-200">
+                      <span className="inline-flex items-center gap-1.5 text-[11px] font-bold px-2.5 py-1 rounded-full bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-800/60">
                         <span className="w-1.5 h-1.5 rounded-full bg-rose-500"></span>
                         <span>Ditolak Admin</span>
                       </span>
                     ) : (
-                      <span className="inline-flex items-center gap-1.5 text-[11px] font-bold px-2.5 py-1 rounded-full bg-amber-50 text-amber-700 border border-amber-200">
+                      <span className="inline-flex items-center gap-1.5 text-[11px] font-bold px-2.5 py-1 rounded-full bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800/60">
                         <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
                         <span>Menunggu Persetujuan Admin</span>
                       </span>
                     )}
                   </div>
 
-                  <h3 className="font-extrabold text-slate-900 text-base group-hover:text-emerald-700 transition-colors">
+                  <h3 className="font-extrabold text-slate-900 dark:text-white text-base group-hover:text-emerald-700 dark:group-hover:text-emerald-400 transition-colors">
                     {prop.name}
                   </h3>
-                  <p className="text-xs text-slate-500 flex items-start gap-1 mt-1 line-clamp-2">
+                  <p className="text-xs text-slate-500 dark:text-slate-400 flex items-start gap-1 mt-1 line-clamp-2">
                     <MapPin className="w-3.5 h-3.5 text-slate-400 shrink-0 mt-0.5" />
                     <span>{prop.address || "Lokasi belum diatur"}</span>
                   </p>
 
                   {/* Rejection / Pending info */}
                   {prop.status === "REJECTED" && (
-                    <div className="mt-3 p-3 rounded-2xl bg-rose-50/90 border border-rose-200 text-rose-800 text-xs space-y-2">
+                    <div className="mt-3 p-3 rounded-2xl bg-rose-50/90 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800/60 text-rose-800 dark:text-rose-300 text-xs space-y-2">
                       <div>
-                        <div className="font-bold flex items-center gap-1.5 text-rose-900 mb-0.5">
-                          <AlertCircle className="w-3.5 h-3.5 text-rose-600 shrink-0" />
+                        <div className="font-bold flex items-center gap-1.5 text-rose-900 dark:text-rose-200 mb-0.5">
+                          <AlertCircle className="w-3.5 h-3.5 text-rose-600 dark:text-rose-400 shrink-0" />
                           <span>Alasan Penolakan:</span>
                         </div>
-                        <p className="text-rose-700 text-[11px] leading-relaxed pl-5">
+                        <p className="text-rose-700 dark:text-rose-300 text-[11px] leading-relaxed pl-5">
                           {prop.rejectionReason || "Data properti belum memenuhi standar listing KosPasti. Harap periksa dan lengkapi data kos."}
                         </p>
                       </div>
 
-                      <div className="pt-2 border-t border-rose-200/60 flex items-start gap-1.5 text-rose-900 text-[11px] bg-white/70 p-2 rounded-xl">
+                      <div className="pt-2 border-t border-rose-200/60 dark:border-rose-800/40 flex items-start gap-1.5 text-rose-900 dark:text-rose-200 text-[11px] bg-white/70 dark:bg-slate-900/70 p-2 rounded-xl">
                         <span className="text-sm leading-none shrink-0">💡</span>
                         <p className="leading-snug">
                           <span className="font-bold">Cara Mengajukan Ulang:</span> Klik tombol <strong>&ldquo;Perbaiki &amp; Ajukan Ulang&rdquo;</strong> di bawah untuk merevisi data kos. Setelah disimpan, kos akan otomatis diajukan kembali ke Admin untuk ditinjau.
@@ -717,24 +717,24 @@ export default function PartnerPropertiesPage() {
                   )}
 
                   {prop.status === "PENDING_REVIEW" && (
-                    <div className="mt-3 p-2.5 rounded-xl bg-amber-50/80 border border-amber-200 text-amber-800 text-[11px] flex items-center gap-2">
+                    <div className="mt-3 p-2.5 rounded-xl bg-amber-50/80 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/60 text-amber-800 dark:text-amber-300 text-[11px] flex items-center gap-2">
                       <Clock className="w-3.5 h-3.5 text-amber-600 shrink-0" />
                       <span>Kos sedang direview admin dan belum tayang di pencarian publik.</span>
                     </div>
                   )}
 
-                  <div className="mt-3 pt-3 border-t border-slate-100 flex items-center justify-between">
+                  <div className="mt-3 pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
                     <div>
                       <span className="text-[10px] text-slate-400 font-semibold block">Mulai Dari</span>
-                      <span className="text-sm font-black text-emerald-700">
+                      <span className="text-sm font-black text-emerald-700 dark:text-emerald-400">
                         Rp {prop.price_per_month.toLocaleString("id-ID")}{" "}
-                        <span className="text-[10px] font-medium text-slate-500">/bln</span>
+                        <span className="text-[10px] font-medium text-slate-500 dark:text-slate-400">/bln</span>
                       </span>
                     </div>
 
                     <div className="text-right">
                       <span className="text-[10px] text-slate-400 font-semibold block">Pesanan</span>
-                      <span className="text-xs font-bold text-slate-800">
+                      <span className="text-xs font-bold text-slate-800 dark:text-slate-200">
                         {prop._count?.bookings || 0} Booking
                       </span>
                     </div>
@@ -742,9 +742,9 @@ export default function PartnerPropertiesPage() {
                 </div>
 
                 {/* Fast Room Counter & Actions */}
-                <div className="pt-3 border-t border-slate-100 space-y-3">
-                  <div className="flex items-center justify-between bg-slate-50 p-2.5 rounded-2xl border border-slate-200">
-                    <span className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
+                <div className="pt-3 border-t border-slate-100 dark:border-slate-800 space-y-3">
+                  <div className="flex items-center justify-between bg-slate-50 dark:bg-slate-800/50 p-2.5 rounded-2xl border border-slate-200 dark:border-slate-700">
+                    <span className="text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
                       <BedDouble className="w-4 h-4 text-teal-600" />
                       <span>Total Sisa Kamar:</span>
                     </span>
@@ -754,11 +754,11 @@ export default function PartnerPropertiesPage() {
                         type="button"
                         onClick={() => handleUpdateRoomQuick(prop.id, -1)}
                         disabled={prop.available_rooms <= 0}
-                        className="w-7 h-7 rounded-lg bg-white text-slate-700 font-bold hover:bg-slate-200 flex items-center justify-center disabled:opacity-40 transition-colors shadow-xs cursor-pointer"
+                        className="w-7 h-7 rounded-lg bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold hover:bg-slate-200 dark:hover:bg-slate-600 flex items-center justify-center disabled:opacity-40 transition-colors shadow-xs cursor-pointer"
                       >
                         -
                       </button>
-                      <span className="w-8 text-center font-black text-sm text-slate-900">
+                      <span className="w-8 text-center font-black text-sm text-slate-900 dark:text-white">
                         {prop.available_rooms}
                       </span>
                       <button
@@ -778,7 +778,7 @@ export default function PartnerPropertiesPage() {
                       className={`flex-1 py-2 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all hover:-translate-y-px active:scale-95 cursor-pointer ${
                         prop.status === "REJECTED"
                           ? "bg-amber-500 hover:bg-amber-600 text-white shadow-xs hover:shadow-sm"
-                          : "bg-slate-100 hover:bg-slate-200 text-slate-700 hover:shadow-sm"
+                          : "bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 hover:shadow-sm"
                       }`}
                     >
                       <Edit className="w-3.5 h-3.5" />
@@ -787,7 +787,7 @@ export default function PartnerPropertiesPage() {
                     <button
                       type="button"
                       onClick={() => setDeleteConfirmId(prop.id)}
-                      className="p-2 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-600 font-bold text-xs transition-all hover:-translate-y-px active:scale-95 cursor-pointer hover:shadow-sm"
+                      className="p-2 rounded-xl bg-rose-50 dark:bg-rose-950/40 hover:bg-rose-100 dark:hover:bg-rose-900/50 text-rose-600 dark:text-rose-400 font-bold text-xs transition-all hover:-translate-y-px active:scale-95 cursor-pointer hover:shadow-sm"
                       title="Hapus Properti"
                     >
                       <Trash2 className="w-4 h-4" />
@@ -803,9 +803,9 @@ export default function PartnerPropertiesPage() {
       {/* EDIT / CREATE PROPERTY MODAL */}
       {modalMode && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
-          <div className="bg-white rounded-3xl max-w-3xl w-full max-h-[92vh] overflow-y-auto p-6 sm:p-8 shadow-2xl border border-slate-200 animate-in fade-in zoom-in-95 duration-200 my-auto">
-            <div className="flex items-center justify-between pb-4 border-b border-slate-100">
-              <h2 className="text-lg sm:text-xl font-extrabold text-slate-900 flex items-center gap-2">
+          <div className="bg-white dark:bg-slate-900 rounded-3xl max-w-3xl w-full max-h-[92vh] overflow-y-auto p-6 sm:p-8 shadow-2xl border border-slate-200 dark:border-slate-800 animate-in fade-in zoom-in-95 duration-200 my-auto">
+            <div className="flex items-center justify-between pb-4 border-b border-slate-100 dark:border-slate-800">
+              <h2 className="text-lg sm:text-xl font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
                 <Building2 className="w-5 h-5 text-emerald-600" />
                 <span>
                   {modalMode === "EDIT"
@@ -818,25 +818,25 @@ export default function PartnerPropertiesPage() {
               <button
                 type="button"
                 onClick={closeModal}
-                className="p-2 rounded-full hover:bg-slate-100 text-slate-400 hover:text-slate-600 cursor-pointer"
+                className="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
             {modalMode === "EDIT" && editingProperty?.status === "REJECTED" && (
-              <div className="mt-4 p-4 rounded-2xl bg-amber-50 border border-amber-200 text-amber-900 text-xs space-y-2">
-                <div className="flex items-center gap-1.5 font-bold text-amber-950">
+              <div className="mt-4 p-4 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/60 text-amber-900 dark:text-amber-200 text-xs space-y-2">
+                <div className="flex items-center gap-1.5 font-bold text-amber-950 dark:text-amber-100">
                   <AlertCircle className="w-4 h-4 text-amber-600 shrink-0" />
                   <span>Properti Memerlukan Revisi</span>
                 </div>
-                <div className="bg-white/80 p-2.5 rounded-xl border border-amber-200/60 text-[11px] text-amber-900">
-                  <span className="font-semibold block text-slate-500 mb-0.5">Catatan Penolakan dari Admin:</span>
-                  <p className="font-medium text-rose-700 italic">
+                <div className="bg-white/80 dark:bg-slate-800/80 p-2.5 rounded-xl border border-amber-200/60 dark:border-amber-800/40 text-[11px] text-amber-900 dark:text-amber-200">
+                  <span className="font-semibold block text-slate-500 dark:text-slate-400 mb-0.5">Catatan Penolakan dari Admin:</span>
+                  <p className="font-medium text-rose-700 dark:text-rose-400 italic">
                     &ldquo;{editingProperty.rejectionReason || "Data belum memenuhi standar listing KosPasti."}&rdquo;
                   </p>
                 </div>
-                <p className="text-[11px] text-amber-800 leading-relaxed">
+                <p className="text-[11px] text-amber-800 dark:text-amber-300 leading-relaxed">
                   💡 Silakan perbaiki data atau foto kos sesuai catatan di atas. Begitu Anda klik tombol <strong>&ldquo;Simpan &amp; Ajukan Ulang ke Admin&rdquo;</strong> di bawah, kos ini akan otomatis diajukan kembali ke Admin untuk ditinjau ulang.
                 </p>
               </div>
@@ -846,7 +846,7 @@ export default function PartnerPropertiesPage() {
               {/* Nama Kos & Kategori */}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div className="sm:col-span-2">
-                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-200 uppercase tracking-wider mb-1">
                     Nama Kos *
                   </label>
                   <input
@@ -855,18 +855,18 @@ export default function PartnerPropertiesPage() {
                     placeholder="Contoh: Kos Melati Asri Subang"
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm font-medium focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 text-sm font-medium focus:ring-2 focus:ring-emerald-500 focus:outline-none"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-200 uppercase tracking-wider mb-1">
                     Kategori Kos *
                   </label>
                   <select
                     value={formData.gender_type}
                     onChange={(e) => setFormData({ ...formData, gender_type: e.target.value })}
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm font-medium focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 text-sm font-medium focus:ring-2 focus:ring-emerald-500 focus:outline-none"
                   >
                     <option value="PUTRA">Khusus Putra</option>
                     <option value="PUTRI">Khusus Putri</option>
@@ -877,7 +877,7 @@ export default function PartnerPropertiesPage() {
 
               {/* Alamat & Titik Koordinat */}
               <div>
-                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-200 uppercase tracking-wider mb-1">
                   Alamat Lengkap Kos
                 </label>
                 <textarea
@@ -885,7 +885,7 @@ export default function PartnerPropertiesPage() {
                   placeholder="Jl. RA Kartini No. 45, RT 02/RW 05, Subang..."
                   value={formData.address}
                   onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm font-medium focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 text-sm font-medium focus:ring-2 focus:ring-emerald-500 focus:outline-none"
                 />
               </div>
 
@@ -916,7 +916,7 @@ export default function PartnerPropertiesPage() {
 
               {/* Fasilitas Umum */}
               <div>
-                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-200 uppercase tracking-wider mb-1">
                   Fasilitas Umum Properti (Dipisah tanda koma)
                 </label>
                 <input
@@ -924,7 +924,7 @@ export default function PartnerPropertiesPage() {
                   placeholder="WiFi, Dapur Bersama, Area Parkir Motor, Kulkas Bersama, CCTV"
                   value={formData.facilities}
                   onChange={(e) => setFormData({ ...formData, facilities: e.target.value })}
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm font-medium focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 text-sm font-medium focus:ring-2 focus:ring-emerald-500 focus:outline-none"
                 />
               </div>
 
@@ -933,8 +933,8 @@ export default function PartnerPropertiesPage() {
                 <label
                   className={`flex items-start gap-3 p-3 rounded-xl border transition-all cursor-pointer select-none ${
                     formData.is_24_hours
-                      ? "bg-slate-900 border-slate-900 text-white shadow-xs"
-                      : "bg-white border-slate-200 text-slate-700 hover:bg-slate-50"
+                      ? "bg-slate-900 dark:bg-emerald-600 border-slate-900 dark:border-emerald-600 text-white shadow-xs"
+                      : "bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700/50"
                   }`}
                 >
                   <input
@@ -945,7 +945,7 @@ export default function PartnerPropertiesPage() {
                   />
                   <div
                     className={`w-4 h-4 rounded mt-0.5 flex items-center justify-center shrink-0 border ${
-                      formData.is_24_hours ? "bg-white text-slate-900 border-white" : "border-slate-300 bg-white"
+                      formData.is_24_hours ? "bg-white text-slate-900 border-white" : "border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800"
                     }`}
                   >
                     {formData.is_24_hours && <CheckCircle2 className="w-3.5 h-3.5 fill-slate-900 text-white" />}
@@ -964,8 +964,8 @@ export default function PartnerPropertiesPage() {
                 <label
                   className={`flex items-start gap-3 p-3 rounded-xl border transition-all cursor-pointer select-none ${
                     formData.is_pet_friendly
-                      ? "bg-emerald-900 border-emerald-900 text-white shadow-xs"
-                      : "bg-white border-slate-200 text-slate-700 hover:bg-slate-50"
+                      ? "bg-emerald-900 dark:bg-emerald-600 border-emerald-900 dark:border-emerald-600 text-white shadow-xs"
+                      : "bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700/50"
                   }`}
                 >
                   <input
@@ -976,7 +976,7 @@ export default function PartnerPropertiesPage() {
                   />
                   <div
                     className={`w-4 h-4 rounded mt-0.5 flex items-center justify-center shrink-0 border ${
-                      formData.is_pet_friendly ? "bg-white text-emerald-900 border-white" : "border-slate-300 bg-white"
+                      formData.is_pet_friendly ? "bg-white text-emerald-900 border-white" : "border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800"
                     }`}
                   >
                     {formData.is_pet_friendly && <CheckCircle2 className="w-3.5 h-3.5 fill-emerald-900 text-white" />}
@@ -994,14 +994,14 @@ export default function PartnerPropertiesPage() {
               </div>
 
               {/* Tipe Kamar Management */}
-              <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200/90 space-y-3">
+              <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200/90 dark:border-slate-700 space-y-3">
                 <div className="flex items-center justify-between">
                   <div>
-                    <h3 className="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
+                    <h3 className="text-xs font-bold text-slate-800 dark:text-white uppercase tracking-wider flex items-center gap-1.5">
                       <BedDouble className="w-4 h-4 text-emerald-600" />
                       <span>Rincian Tipe Kamar ({roomTypes.length})</span>
                     </h3>
-                    <p className="text-[11px] text-slate-500">
+                    <p className="text-[11px] text-slate-500 dark:text-slate-400">
                       Tentukan nama, harga per bulan, sisa kamar, dan fasilitas khusus tiap tipe kamar.
                     </p>
                   </div>
@@ -1019,10 +1019,10 @@ export default function PartnerPropertiesPage() {
                   {roomTypes.map((rt, idx) => (
                     <div
                       key={idx}
-                      className="p-4 bg-white rounded-xl border border-slate-200 shadow-2xs space-y-3"
+                      className="p-4 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 shadow-2xs space-y-3"
                     >
-                      <div className="flex items-center justify-between border-b border-slate-100 pb-2">
-                        <span className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
+                      <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-2">
+                        <span className="text-xs font-bold text-slate-800 dark:text-white flex items-center gap-1.5">
                           <Home className="w-3.5 h-3.5 text-emerald-600" />
                           <span>Tipe Kamar #{idx + 1}</span>
                         </span>
@@ -1040,7 +1040,7 @@ export default function PartnerPropertiesPage() {
 
                       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                         <div>
-                          <label className="block text-[11px] font-bold text-slate-600 uppercase mb-1">
+                          <label className="block text-[11px] font-bold text-slate-600 dark:text-slate-300 uppercase mb-1">
                             Nama Tipe Kamar *
                           </label>
                           <input
@@ -1049,12 +1049,12 @@ export default function PartnerPropertiesPage() {
                             placeholder="Tipe Standar AC"
                             value={rt.name}
                             onChange={(e) => updateRoomType(idx, "name", e.target.value)}
-                            className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-xs font-medium focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                            className="w-full px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 text-xs font-medium focus:ring-2 focus:ring-emerald-500 focus:outline-none"
                           />
                         </div>
 
                         <div>
-                          <label className="block text-[11px] font-bold text-slate-600 uppercase mb-1">
+                          <label className="block text-[11px] font-bold text-slate-600 dark:text-slate-300 uppercase mb-1">
                             Harga / Bulan (Rp) *
                           </label>
                           <input
@@ -1065,12 +1065,12 @@ export default function PartnerPropertiesPage() {
                             placeholder="850000"
                             value={rt.price_per_month}
                             onChange={(e) => updateRoomType(idx, "price_per_month", e.target.value)}
-                            className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-xs font-medium focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                            className="w-full px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 text-xs font-medium focus:ring-2 focus:ring-emerald-500 focus:outline-none"
                           />
                         </div>
 
                         <div>
-                          <label className="block text-[11px] font-bold text-slate-600 uppercase mb-1">
+                          <label className="block text-[11px] font-bold text-slate-600 dark:text-slate-300 uppercase mb-1">
                             Sisa Kamar *
                           </label>
                           <input
@@ -1080,14 +1080,14 @@ export default function PartnerPropertiesPage() {
                             placeholder="3"
                             value={rt.available_rooms}
                             onChange={(e) => updateRoomType(idx, "available_rooms", e.target.value)}
-                            className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-xs font-medium focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                            className="w-full px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 text-xs font-medium focus:ring-2 focus:ring-emerald-500 focus:outline-none"
                           />
                         </div>
                       </div>
 
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <div>
-                          <label className="block text-[11px] font-bold text-slate-600 uppercase mb-1">
+                          <label className="block text-[11px] font-bold text-slate-600 dark:text-slate-300 uppercase mb-1">
                             Fasilitas Khusus Kamar Ini
                           </label>
                           <input
@@ -1095,12 +1095,12 @@ export default function PartnerPropertiesPage() {
                             placeholder="Kasur Springbed, AC, Kamar Mandi Dalam, Meja Kerja"
                             value={rt.facilities || ""}
                             onChange={(e) => updateRoomType(idx, "facilities", e.target.value)}
-                            className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-xs font-medium focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                            className="w-full px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 text-xs font-medium focus:ring-2 focus:ring-emerald-500 focus:outline-none"
                           />
                         </div>
 
                         <div>
-                          <label className="block text-[11px] font-bold text-slate-600 uppercase mb-1">
+                          <label className="block text-[11px] font-bold text-slate-600 dark:text-slate-300 uppercase mb-1">
                             Spesifikasi Kamar (Opsional)
                           </label>
                           <input
@@ -1108,19 +1108,19 @@ export default function PartnerPropertiesPage() {
                             placeholder="Contoh: Ukuran 3x4, Jendela Hadap Luar, Listrik Token Mandiri"
                             value={rt.specifications || ""}
                             onChange={(e) => updateRoomType(idx, "specifications", e.target.value)}
-                            className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-xs font-medium focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                            className="w-full px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 text-xs font-medium focus:ring-2 focus:ring-emerald-500 focus:outline-none"
                           />
                         </div>
                       </div>
 
                       {/* Room Photo Upload */}
                       <div>
-                        <label className="block text-[11px] font-bold text-slate-600 uppercase mb-1">
+                        <label className="block text-[11px] font-bold text-slate-600 dark:text-slate-300 uppercase mb-1">
                           Foto Kamar
                         </label>
                         <div className="flex items-center gap-3">
                           {rt.image_preview ? (
-                            <div className="w-14 h-14 rounded-lg overflow-hidden border border-slate-200 relative shrink-0">
+                            <div className="w-14 h-14 rounded-lg overflow-hidden border border-slate-200 dark:border-slate-700 relative shrink-0">
                               {/* eslint-disable-next-line @next/next/no-img-element */}
                               <img src={rt.image_preview} alt={rt.name} className="w-full h-full object-cover" />
                             </div>
@@ -1129,7 +1129,7 @@ export default function PartnerPropertiesPage() {
                             type="file"
                             accept="image/*"
                             onChange={(e) => handleRoomTypeFileChange(idx, e)}
-                            className="text-xs text-slate-500 file:mr-2 file:py-1 file:px-2.5 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100 cursor-pointer"
+                            className="text-xs text-slate-500 dark:text-slate-400 file:mr-2 file:py-1 file:px-2.5 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-emerald-50 dark:file:bg-emerald-950/40 file:text-emerald-700 dark:file:text-emerald-300 hover:file:bg-emerald-100 dark:hover:file:bg-emerald-900/50 cursor-pointer"
                           />
                         </div>
                       </div>
@@ -1142,7 +1142,7 @@ export default function PartnerPropertiesPage() {
               {editingProperty && (
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
-                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
+                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-200 uppercase tracking-wider">
                       Media Tersimpan ({editingProperty.media?.length || 0})
                     </label>
                     <span className="text-[10px] text-slate-400">
@@ -1151,7 +1151,7 @@ export default function PartnerPropertiesPage() {
                   </div>
 
                   {editingProperty.media && editingProperty.media.length > 0 ? (
-                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5 p-2.5 bg-slate-50 border border-slate-200 rounded-xl max-h-48 overflow-y-auto">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5 p-2.5 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl max-h-48 overflow-y-auto">
                       {editingProperty.media.map((item) => {
                         const isThumbnail = editingProperty.image_url === item.url;
                         const isDeleting = deletingMediaId === item.id;
@@ -1161,7 +1161,7 @@ export default function PartnerPropertiesPage() {
                           <div
                             key={item.id}
                             className={`relative group rounded-lg overflow-hidden border ${
-                              isThumbnail ? "border-amber-400 ring-2 ring-amber-400/40" : "border-slate-200"
+                              isThumbnail ? "border-amber-400 ring-2 ring-amber-400/40" : "border-slate-200 dark:border-slate-700"
                             } bg-black/5 aspect-video flex items-center justify-center`}
                           >
                             {item.type === "VIDEO" ? (
@@ -1211,7 +1211,7 @@ export default function PartnerPropertiesPage() {
                       })}
                     </div>
                   ) : (
-                    <div className="text-xs text-slate-400 italic bg-slate-50 border border-slate-200 rounded-xl p-3 text-center">
+                    <div className="text-xs text-slate-400 italic bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl p-3 text-center">
                       Belum ada gambar atau video tersimpan untuk properti ini.
                     </div>
                   )}
@@ -1220,7 +1220,7 @@ export default function PartnerPropertiesPage() {
 
               {/* Unggah Media Baru (Foto & Video) */}
               <div>
-                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-200 uppercase tracking-wider mb-1.5">
                   Unggah Media Baru (Gambar &amp; Video)
                 </label>
                 <input
@@ -1228,7 +1228,7 @@ export default function PartnerPropertiesPage() {
                   multiple
                   accept="image/*,video/mp4,video/webm,video/*"
                   onChange={handleFileChange}
-                  className="w-full text-xs text-slate-500 file:mr-3 file:py-2 file:px-3.5 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100 border border-slate-200 rounded-xl p-1.5 bg-white cursor-pointer"
+                  className="w-full text-xs text-slate-500 dark:text-slate-400 file:mr-3 file:py-2 file:px-3.5 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-emerald-50 dark:file:bg-emerald-950/40 file:text-emerald-700 dark:file:text-emerald-300 hover:file:bg-emerald-100 dark:hover:file:bg-emerald-900/50 border border-slate-200 dark:border-slate-700 rounded-xl p-1.5 bg-white dark:bg-slate-800 cursor-pointer"
                 />
                 <p className="text-[11px] text-slate-400 mt-1">
                   Unggah beberapa foto dan video room-tour sekaligus (format: MP4, WebM, JPG, PNG).
@@ -1239,11 +1239,11 @@ export default function PartnerPropertiesPage() {
                     {selectedFiles.map((file, idx) => (
                       <div
                         key={idx}
-                        className="flex items-center justify-between bg-slate-50 border border-slate-200 rounded-lg px-3 py-1.5 text-xs"
+                        className="flex items-center justify-between bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-1.5 text-xs"
                       >
                         <div className="flex items-center gap-2 truncate">
                           <FileText size={14} className="text-emerald-600 shrink-0" />
-                          <span className="truncate text-slate-700 font-medium">{file.name}</span>
+                          <span className="truncate text-slate-700 dark:text-slate-200 font-medium">{file.name}</span>
                         </div>
                         <div className="flex items-center gap-2 shrink-0">
                           <span className="text-[10px] text-slate-400">
@@ -1265,7 +1265,7 @@ export default function PartnerPropertiesPage() {
 
               {/* URL Video YouTube */}
               <div>
-                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-200 uppercase tracking-wider mb-1.5">
                   URL Video YouTube (Opsional)
                 </label>
                 <input
@@ -1273,7 +1273,7 @@ export default function PartnerPropertiesPage() {
                   placeholder="Contoh: https://www.youtube.com/watch?v=..."
                   value={formData.youtube_url}
                   onChange={(e) => setFormData({ ...formData, youtube_url: e.target.value })}
-                  className="w-full px-3.5 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white"
+                  className="w-full px-3.5 py-2 text-sm border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
                 />
                 <p className="text-[11px] text-slate-400 mt-1">
                   Video tour atau review kos dari YouTube yang bisa langsung diputar calon penyewa.
@@ -1283,7 +1283,7 @@ export default function PartnerPropertiesPage() {
               {/* Deskripsi Kos & AI Generator */}
               <div>
                 <div className="flex items-center justify-between mb-1.5">
-                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-200 uppercase tracking-wider">
                     Deskripsi Kos (Opsional)
                   </label>
                   <button
@@ -1307,7 +1307,7 @@ export default function PartnerPropertiesPage() {
                   placeholder="Ceritakan gambaran umum, keunggulan lingkungan, suasana kos, dan poin menarik lainnya..."
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  className="w-full px-3.5 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white resize-y"
+                  className="w-full px-3.5 py-2 text-sm border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 resize-y"
                 />
                 <p className="text-[11px] text-slate-400 mt-1">
                   Deskripsi akan ditampilkan pada card khusus &quot;Deskripsi Kos&quot; di atas pilihan tipe kamar pada halaman detail kos.
@@ -1316,7 +1316,7 @@ export default function PartnerPropertiesPage() {
 
               {/* Peraturan Kos */}
               <div>
-                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-200 uppercase tracking-wider mb-1.5">
                   Tata Tertib &amp; Peraturan Kos (Opsional)
                 </label>
                 <textarea
@@ -1324,7 +1324,7 @@ export default function PartnerPropertiesPage() {
                   placeholder={"1. Dilarang merokok di dalam kamar\n2. Tamu lawan jenis dilarang masuk kamar\n3. Waktu tenang dimulai pukul 22:00 WIB"}
                   value={formData.rules}
                   onChange={(e) => setFormData({ ...formData, rules: e.target.value })}
-                  className="w-full px-3.5 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white resize-y"
+                  className="w-full px-3.5 py-2 text-sm border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 resize-y"
                 />
                 <p className="text-[11px] text-slate-400 mt-1">
                   Gunakan baris baru untuk memisahkan setiap poin aturan.
@@ -1333,7 +1333,7 @@ export default function PartnerPropertiesPage() {
 
               {/* Ketentuan Pengajuan Sewa */}
               <div>
-                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-200 uppercase tracking-wider mb-1.5">
                   Syarat &amp; Ketentuan Pengajuan Sewa (Opsional)
                 </label>
                 <textarea
@@ -1341,7 +1341,7 @@ export default function PartnerPropertiesPage() {
                   placeholder={"1. Menyerahkan foto/scan KTP atau Kartu Tanda Mahasiswa yang berlaku\n2. Pembayaran sewa lunas di muka\n3. Uang deposit jaminan Rp 150.000 (dikembalikan saat checkout)"}
                   value={formData.rental_terms}
                   onChange={(e) => setFormData({ ...formData, rental_terms: e.target.value })}
-                  className="w-full px-3.5 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white resize-y"
+                  className="w-full px-3.5 py-2 text-sm border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 resize-y"
                 />
                 <p className="text-[11px] text-slate-400 mt-1">
                   Syarat dan ketentuan untuk calon penyewa saat mengajukan sewa kamar kos ini.
@@ -1349,12 +1349,12 @@ export default function PartnerPropertiesPage() {
               </div>
 
               {/* Modal Actions */}
-              <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-100">
+              <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-100 dark:border-slate-800">
                 <button
                   type="button"
                   onClick={closeModal}
                   disabled={isSaving}
-                  className="px-4 py-2.5 rounded-xl border border-slate-200 text-slate-700 font-bold text-xs hover:bg-slate-50 cursor-pointer"
+                  className="px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 font-bold text-xs hover:bg-slate-50 dark:hover:bg-slate-800 cursor-pointer"
                 >
                   Batal
                 </button>
@@ -1387,12 +1387,12 @@ export default function PartnerPropertiesPage() {
       {/* DELETE CONFIRMATION MODAL */}
       {deleteConfirmId && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl max-w-sm w-full p-6 text-center shadow-2xl border border-slate-200 animate-in fade-in zoom-in-95 duration-150">
-            <div className="w-12 h-12 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center mx-auto mb-3">
+          <div className="bg-white dark:bg-slate-900 rounded-3xl max-w-sm w-full p-6 text-center shadow-2xl border border-slate-200 dark:border-slate-800 animate-in fade-in zoom-in-95 duration-150">
+            <div className="w-12 h-12 rounded-2xl bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 flex items-center justify-center mx-auto mb-3">
               <Trash2 className="w-6 h-6" />
             </div>
-            <h3 className="text-base font-extrabold text-slate-900">Hapus Properti Kos?</h3>
-            <p className="text-xs text-slate-500 mt-1 mb-5">
+            <h3 className="text-base font-extrabold text-slate-900 dark:text-white">Hapus Properti Kos?</h3>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 mb-5">
               Tindakan ini permanen. Seluruh data kamar dan histori terkait properti ini akan dihapus.
             </p>
             <div className="flex items-center gap-2">
@@ -1400,7 +1400,7 @@ export default function PartnerPropertiesPage() {
                 type="button"
                 onClick={() => setDeleteConfirmId(null)}
                 disabled={isSaving}
-                className="flex-1 py-2.5 rounded-xl border border-slate-200 text-slate-700 font-bold text-xs hover:bg-slate-50 cursor-pointer"
+                className="flex-1 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 font-bold text-xs hover:bg-slate-50 dark:hover:bg-slate-800 cursor-pointer"
               >
                 Batal
               </button>

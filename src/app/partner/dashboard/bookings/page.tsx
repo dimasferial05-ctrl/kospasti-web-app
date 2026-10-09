@@ -138,7 +138,7 @@ export default function PartnerBookingsPage() {
   const getStatusBadge = (status: Booking["status"]) => {
     if (status === "PAID") {
       return (
-        <span className="text-[10px] font-black px-2.5 py-0.5 rounded-full inline-flex items-center gap-1 mb-1.5 bg-blue-100 text-blue-800 border border-blue-200">
+        <span className="text-[10px] font-black px-2.5 py-0.5 rounded-full inline-flex items-center gap-1 mb-1.5 bg-blue-100 dark:bg-blue-950/40 text-blue-800 dark:text-blue-300 border border-blue-200 dark:border-blue-800/60">
           <span>Sudah Bayar DP (Perlu Konfirmasi)</span>
           <HelpTooltip text="Calon penyewa telah membayar DP. Klik 'Setujui' jika kamar siap, atau 'Tolak' untuk mengembalikan DP." />
         </span>
@@ -146,7 +146,7 @@ export default function PartnerBookingsPage() {
     }
     if (status === "PENDING") {
       return (
-        <span className="text-[10px] font-black px-2.5 py-0.5 rounded-full inline-flex items-center gap-1 mb-1.5 bg-amber-100 text-amber-800 border border-amber-200">
+        <span className="text-[10px] font-black px-2.5 py-0.5 rounded-full inline-flex items-center gap-1 mb-1.5 bg-amber-100 dark:bg-amber-950/40 text-amber-800 dark:text-amber-300 border border-amber-200 dark:border-amber-800/60">
           <span>Menunggu Pembayaran</span>
           <HelpTooltip text="Calon penyewa sedang memproses pembayaran DP. Anda akan menerima notifikasi WA otomatis saat lunas." />
         </span>
@@ -154,14 +154,14 @@ export default function PartnerBookingsPage() {
     }
     if (status === "APPROVED" || status === "ACCEPTED") {
       return (
-        <span className="text-[10px] font-black px-2.5 py-0.5 rounded-full inline-flex items-center gap-1 mb-1.5 bg-emerald-100 text-emerald-800 border border-emerald-200">
+        <span className="text-[10px] font-black px-2.5 py-0.5 rounded-full inline-flex items-center gap-1 mb-1.5 bg-emerald-100 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/60">
           <span>Disetujui</span>
           <HelpTooltip text="Pesanan telah Anda setujui. Penyewa telah menerima notifikasi WA untuk persiapan check-in." />
         </span>
       );
     }
     return (
-      <span className="text-[10px] font-black px-2.5 py-0.5 rounded-full inline-flex items-center gap-1 mb-1.5 bg-rose-100 text-rose-800 border border-rose-200">
+      <span className="text-[10px] font-black px-2.5 py-0.5 rounded-full inline-flex items-center gap-1 mb-1.5 bg-rose-100 dark:bg-rose-950/40 text-rose-800 dark:text-rose-300 border border-rose-200 dark:border-rose-800/60">
         <span>Ditolak</span>
         <HelpTooltip text="Pesanan dibatalkan/ditolak. Kuota kamar otomatis dikembalikan dan DP direfund ke penyewa." />
       </span>
@@ -173,17 +173,17 @@ export default function PartnerBookingsPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
+          <h1 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">
             Daftar Pesanan Sewa Kos
           </h1>
-          <p className="text-xs sm:text-sm text-slate-500 mt-1">
+          <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
             Konfirmasi pesanan masuk dari calon penyewa dan hubungi mereka langsung via WhatsApp.
           </p>
         </div>
 
         <Link
           href="/bantuan?tab=partner&article=persetujuan-wa-vs-dasbor"
-          className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-white border border-slate-200 text-slate-700 hover:text-emerald-700 hover:border-emerald-300 text-xs font-bold transition-all shadow-xs"
+          className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-200 hover:text-emerald-700 dark:hover:text-emerald-400 hover:border-emerald-300 dark:hover:border-emerald-700 text-xs font-bold transition-all shadow-xs"
         >
           <HelpCircle className="w-3.5 h-3.5 text-emerald-600" />
           <span>Panduan Konfirmasi Pesanan</span>
@@ -192,21 +192,21 @@ export default function PartnerBookingsPage() {
 
       {/* Notifications */}
       {successMsg && (
-        <div className="p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs sm:text-sm font-semibold flex items-center gap-2">
+        <div className="p-4 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/60 text-emerald-800 dark:text-emerald-300 text-xs sm:text-sm font-semibold flex items-center gap-2">
           <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
           <span>{successMsg}</span>
         </div>
       )}
 
       {errorMsg && (
-        <div className="p-4 rounded-2xl bg-rose-50 border border-rose-200 text-rose-700 text-xs sm:text-sm font-semibold flex items-center gap-2">
+        <div className="p-4 rounded-2xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800/60 text-rose-700 dark:text-rose-300 text-xs sm:text-sm font-semibold flex items-center gap-2">
           <Info className="w-4 h-4 text-rose-600 shrink-0" />
           <span>{errorMsg}</span>
         </div>
       )}
 
       {/* Filter Tabs & Search Bar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-4 rounded-2xl border border-slate-200/80 shadow-soft">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-soft">
         {/* Tabs */}
         <div className="flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0">
           <button
@@ -214,8 +214,8 @@ export default function PartnerBookingsPage() {
             onClick={() => setFilterStatus("ALL")}
             className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all ${
               filterStatus === "ALL"
-                ? "bg-slate-900 text-white shadow-xs"
-                : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                ? "bg-slate-900 dark:bg-emerald-600 text-white shadow-xs"
+                : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700"
             }`}
           >
             Semua ({bookings.length})
@@ -226,7 +226,7 @@ export default function PartnerBookingsPage() {
             className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
               filterStatus === "PENDING"
                 ? "bg-amber-600 text-white shadow-xs"
-                : "bg-amber-50 text-amber-800 hover:bg-amber-100"
+                : "bg-amber-50 dark:bg-amber-950/30 text-amber-800 dark:text-amber-400 hover:bg-amber-100 dark:hover:bg-amber-900/40"
             }`}
           >
             <Clock className="w-3.5 h-3.5" />
@@ -238,7 +238,7 @@ export default function PartnerBookingsPage() {
             className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
               filterStatus === "APPROVED"
                 ? "bg-emerald-600 text-white shadow-xs"
-                : "bg-emerald-50 text-emerald-800 hover:bg-emerald-100"
+                : "bg-emerald-50 dark:bg-emerald-950/30 text-emerald-800 dark:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-emerald-900/40"
             }`}
           >
             <CheckCircle2 className="w-3.5 h-3.5" />
@@ -250,7 +250,7 @@ export default function PartnerBookingsPage() {
             className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
               filterStatus === "REJECTED"
                 ? "bg-rose-600 text-white shadow-xs"
-                : "bg-rose-50 text-rose-800 hover:bg-rose-100"
+                : "bg-rose-50 dark:bg-rose-950/30 text-rose-800 dark:text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-900/40"
             }`}
           >
             <XCircle className="w-3.5 h-3.5" />
@@ -266,24 +266,24 @@ export default function PartnerBookingsPage() {
             placeholder="Cari nama penyewa / kos..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-9 pr-3 py-1.5 rounded-xl border border-slate-200 text-xs font-medium focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+            className="w-full pl-9 pr-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 text-xs font-medium focus:ring-2 focus:ring-emerald-500 focus:outline-none"
           />
         </div>
       </div>
 
       {/* Bookings List / Table */}
       {isLoading ? (
-        <div className="p-16 text-center bg-white rounded-3xl border border-slate-200 shadow-soft">
+        <div className="p-16 text-center bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-soft">
           <Loader2 className="w-8 h-8 animate-spin text-emerald-600 mx-auto mb-3" />
-          <p className="text-sm font-bold text-slate-700">Memuat data pesanan...</p>
+          <p className="text-sm font-bold text-slate-700 dark:text-slate-300">Memuat data pesanan...</p>
         </div>
       ) : filteredBookings.length === 0 ? (
-        <div className="p-16 text-center bg-white rounded-3xl border border-slate-200 shadow-soft">
-          <div className="w-16 h-16 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center mx-auto mb-4">
+        <div className="p-16 text-center bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-soft">
+          <div className="w-16 h-16 rounded-2xl bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 flex items-center justify-center mx-auto mb-4">
             <CalendarCheck className="w-8 h-8" />
           </div>
-          <h2 className="text-lg font-bold text-slate-900">Tidak Ada Pesanan</h2>
-          <p className="text-xs text-slate-500 max-w-sm mx-auto mt-1">
+          <h2 className="text-lg font-bold text-slate-900 dark:text-white">Tidak Ada Pesanan</h2>
+          <p className="text-xs text-slate-500 dark:text-slate-400 max-w-sm mx-auto mt-1">
             Belum ada pesanan yang sesuai dengan filter atau kata kunci pencarian Anda.
           </p>
         </div>
@@ -303,13 +303,13 @@ export default function PartnerBookingsPage() {
             return (
               <div
                 key={b.id}
-                className="bg-white rounded-3xl border border-slate-200/80 shadow-soft p-5 flex flex-col justify-between space-y-4 hover:border-emerald-300 transition-all"
+                className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200/80 dark:border-slate-800 shadow-soft p-5 flex flex-col justify-between space-y-4 hover:border-emerald-300 dark:hover:border-emerald-700 transition-all"
               >
                 {/* Header Info */}
                 <div className="flex items-start justify-between gap-2">
                   <div>
                     {getStatusBadge(b.status)}
-                    <h3 className="font-extrabold text-slate-900 text-base">{b.student_name}</h3>
+                    <h3 className="font-extrabold text-slate-900 dark:text-white text-base">{b.student_name}</h3>
                     <p className="text-[11px] text-slate-400 mt-0.5">
                       Dipesan pada{" "}
                       {new Date(b.created_at).toLocaleDateString("id-ID", {
@@ -324,7 +324,7 @@ export default function PartnerBookingsPage() {
                     href={waUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="px-3 py-1.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-bold text-xs flex items-center gap-1.5 border border-emerald-200 transition-colors shrink-0"
+                    className="px-3 py-1.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 hover:bg-emerald-100 dark:hover:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300 font-bold text-xs flex items-center gap-1.5 border border-emerald-200 dark:border-emerald-800/60 transition-colors shrink-0"
                   >
                     <MessageCircle className="w-3.5 h-3.5" />
                     <span>WhatsApp</span>
@@ -332,31 +332,31 @@ export default function PartnerBookingsPage() {
                 </div>
 
                 {/* Property & Booking Details Box */}
-                <div className="bg-slate-50 p-3.5 rounded-2xl border border-slate-150 space-y-2 text-xs">
+                <div className="bg-slate-50 dark:bg-slate-800/50 p-3.5 rounded-2xl border border-slate-150 dark:border-slate-800 space-y-2 text-xs">
                   <div className="flex items-center justify-between">
-                    <span className="text-slate-500 font-medium flex items-center gap-1.5">
+                    <span className="text-slate-500 dark:text-slate-400 font-medium flex items-center gap-1.5">
                       <Building2 className="w-3.5 h-3.5 text-slate-400" />
                       <span>Properti:</span>
                     </span>
-                    <span className="font-bold text-slate-800">{b.property.name}</span>
+                    <span className="font-bold text-slate-800 dark:text-slate-200">{b.property.name}</span>
                   </div>
 
                   {b.room_type && (
                     <div className="flex items-center justify-between">
-                      <span className="text-slate-500 font-medium flex items-center gap-1.5">
+                      <span className="text-slate-500 dark:text-slate-400 font-medium flex items-center gap-1.5">
                         <BedDouble className="w-3.5 h-3.5 text-slate-400" />
                         <span>Tipe Kamar:</span>
                       </span>
-                      <span className="font-bold text-slate-800">{b.room_type.name}</span>
+                      <span className="font-bold text-slate-800 dark:text-slate-200">{b.room_type.name}</span>
                     </div>
                   )}
 
                   <div className="flex items-center justify-between">
-                    <span className="text-slate-500 font-medium flex items-center gap-1.5">
+                    <span className="text-slate-500 dark:text-slate-400 font-medium flex items-center gap-1.5">
                       <Calendar className="w-3.5 h-3.5 text-slate-400" />
                       <span>Tanggal Masuk:</span>
                     </span>
-                    <span className="font-bold text-slate-800">
+                    <span className="font-bold text-slate-800 dark:text-slate-200">
                       {new Date(b.move_in_date).toLocaleDateString("id-ID", {
                         day: "numeric",
                         month: "long",
@@ -365,12 +365,12 @@ export default function PartnerBookingsPage() {
                     </span>
                   </div>
 
-                  <div className="flex items-center justify-between pt-1 border-t border-slate-200/60">
-                    <span className="text-slate-500 font-medium flex items-center gap-1.5">
+                  <div className="flex items-center justify-between pt-1 border-t border-slate-200/60 dark:border-slate-700">
+                    <span className="text-slate-500 dark:text-slate-400 font-medium flex items-center gap-1.5">
                       <DollarSign className="w-3.5 h-3.5 text-slate-400" />
                       <span>Tarif Sewa:</span>
                     </span>
-                    <span className="font-extrabold text-emerald-700">
+                    <span className="font-extrabold text-emerald-700 dark:text-emerald-400">
                       Rp {(b.room_type?.price_per_month || b.property.price_per_month).toLocaleString("id-ID")} / bln
                     </span>
                   </div>
@@ -378,7 +378,7 @@ export default function PartnerBookingsPage() {
 
                 {/* Action Controls */}
                 {isPendingAction ? (
-                  <div className="flex items-center gap-2 pt-2 border-t border-slate-100">
+                  <div className="flex items-center gap-2 pt-2 border-t border-slate-100 dark:border-slate-800">
                     <button
                       type="button"
                       onClick={() => handleUpdateStatus(b.id, "APPROVED")}
@@ -399,16 +399,16 @@ export default function PartnerBookingsPage() {
                       type="button"
                       onClick={() => handleUpdateStatus(b.id, "REJECTED")}
                       disabled={actionLoadingId === b.id}
-                      className="px-4 py-2 rounded-xl border border-rose-200 text-rose-600 hover:bg-rose-50 font-bold text-xs transition-colors disabled:opacity-50 cursor-pointer"
+                      className="px-4 py-2 rounded-xl border border-rose-200 dark:border-rose-800 text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 font-bold text-xs transition-colors disabled:opacity-50 cursor-pointer"
                     >
                       Tolak
                     </button>
                   </div>
                 ) : (
-                  <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
+                  <div className="pt-2 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
                     <span>
                       Status saat ini:{" "}
-                      <strong className={isApproved ? "text-emerald-700" : "text-rose-700"}>
+                      <strong className={isApproved ? "text-emerald-700 dark:text-emerald-400" : "text-rose-700 dark:text-rose-400"}>
                         {isApproved ? "Disetujui" : "Ditolak"}
                       </strong>
                     </span>
@@ -420,7 +420,7 @@ export default function PartnerBookingsPage() {
                           isApproved ? "REJECTED" : "APPROVED"
                         )
                       }
-                      className="text-[11px] text-slate-400 hover:text-slate-700 hover:underline cursor-pointer"
+                      className="text-[11px] text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:underline cursor-pointer"
                     >
                       Ubah ke {isApproved ? "Ditolak" : "Disetujui"}
                     </button>

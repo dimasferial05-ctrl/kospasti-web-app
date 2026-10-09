@@ -144,22 +144,22 @@ export default function FavoritPage() {
   // 1. Loading State
   if (isLoading) {
     return (
-      <div className="min-h-[80vh] bg-slate-50/50 py-10 px-4 sm:px-6 lg:px-8">
+      <div className="min-h-[80vh] bg-slate-50/50 dark:bg-slate-950 py-10 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto space-y-8">
           <div className="flex flex-col gap-2 animate-pulse">
-            <div className="h-8 bg-slate-200 rounded-lg w-48"></div>
-            <div className="h-4 bg-slate-200 rounded-md w-72"></div>
+            <div className="h-8 bg-slate-200 dark:bg-slate-800 rounded-lg w-48"></div>
+            <div className="h-4 bg-slate-200 dark:bg-slate-800 rounded-md w-72"></div>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {[1, 2, 3, 4].map((n) => (
               <div
                 key={n}
-                className="bg-white rounded-2xl border border-slate-200 p-4 space-y-4 animate-pulse"
+                className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-4 space-y-4 animate-pulse"
               >
-                <div className="aspect-[4/3] bg-slate-200 rounded-xl"></div>
-                <div className="h-4 bg-slate-200 rounded w-3/4"></div>
-                <div className="h-4 bg-slate-200 rounded w-1/2"></div>
-                <div className="h-8 bg-slate-100 rounded-xl"></div>
+                <div className="aspect-[4/3] bg-slate-200 dark:bg-slate-800 rounded-xl"></div>
+                <div className="h-4 bg-slate-200 dark:bg-slate-800 rounded w-3/4"></div>
+                <div className="h-4 bg-slate-200 dark:bg-slate-800 rounded w-1/2"></div>
+                <div className="h-8 bg-slate-100 dark:bg-slate-800 rounded-xl"></div>
               </div>
             ))}
           </div>
@@ -171,9 +171,9 @@ export default function FavoritPage() {
   // 2. Unauthenticated State
   if (isAuthenticated === false) {
     return (
-      <div className="min-h-[80vh] bg-slate-50/50 flex items-center justify-center px-4 sm:px-6 lg:px-8 py-16">
-        <div className="max-w-md w-full text-center space-y-6 bg-white p-8 sm:p-10 rounded-3xl border border-slate-200/80 shadow-soft">
-          <div className="relative mx-auto w-20 h-20 rounded-2xl bg-rose-50 border border-rose-100 flex items-center justify-center text-rose-500 shadow-2xs">
+      <div className="min-h-[80vh] bg-slate-50/50 dark:bg-slate-950 flex items-center justify-center px-4 sm:px-6 lg:px-8 py-16">
+        <div className="max-w-md w-full text-center space-y-6 bg-white dark:bg-slate-900 p-8 sm:p-10 rounded-3xl border border-slate-200/80 dark:border-slate-800 shadow-soft">
+          <div className="relative mx-auto w-20 h-20 rounded-2xl bg-rose-50 dark:bg-rose-950/40 border border-rose-100 dark:border-rose-900/40 flex items-center justify-center text-rose-500 shadow-2xs">
             <Heart className="w-10 h-10 fill-rose-500/20 stroke-[1.8]" />
             <div className="absolute -top-1.5 -right-1.5 bg-emerald-600 text-white p-1 rounded-full shadow-sm">
               <Sparkles className="w-3.5 h-3.5" />
@@ -181,10 +181,10 @@ export default function FavoritPage() {
           </div>
 
           <div className="space-y-2">
-            <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">
+            <h1 className="text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight">
               Masuk untuk Melihat Favorit
             </h1>
-            <p className="text-sm text-slate-600 leading-relaxed">
+            <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
               Simpan daftar kos idaman Anda dan akses kembali kapan pun dengan mudah setelah masuk ke akun Anda.
             </p>
           </div>
@@ -199,7 +199,7 @@ export default function FavoritPage() {
             </button>
             <Link
               href="/search"
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-white hover:bg-slate-100 text-slate-700 font-semibold text-sm border border-slate-200 shadow-xs transition-all"
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-semibold text-sm border border-slate-200 dark:border-slate-700 shadow-xs transition-all"
             >
               <Search className="w-4 h-4" />
               <span>Jelajahi Kos</span>
@@ -213,13 +213,13 @@ export default function FavoritPage() {
   // 3. Error State
   if (error) {
     return (
-      <div className="min-h-[80vh] bg-slate-50/50 flex items-center justify-center px-4 sm:px-6 lg:px-8 py-16">
-        <div className="max-w-md w-full text-center space-y-4 bg-white p-8 rounded-3xl border border-slate-200 shadow-soft">
-          <div className="w-16 h-16 mx-auto rounded-full bg-rose-50 text-rose-500 flex items-center justify-center">
+      <div className="min-h-[80vh] bg-slate-50/50 dark:bg-slate-950 flex items-center justify-center px-4 sm:px-6 lg:px-8 py-16">
+        <div className="max-w-md w-full text-center space-y-4 bg-white dark:bg-slate-900 p-8 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-soft">
+          <div className="w-16 h-16 mx-auto rounded-full bg-rose-50 dark:bg-rose-950/40 text-rose-500 flex items-center justify-center">
             <Heart className="w-8 h-8" />
           </div>
-          <h2 className="text-xl font-bold text-slate-800">Gagal Memuat Favorit</h2>
-          <p className="text-sm text-slate-600">{error}</p>
+          <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100">Gagal Memuat Favorit</h2>
+          <p className="text-sm text-slate-600 dark:text-slate-400">{error}</p>
           <button
             onClick={() => window.location.reload()}
             className="inline-flex items-center gap-2 px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-sm font-semibold transition-all"
@@ -235,9 +235,9 @@ export default function FavoritPage() {
   // 4. Empty Wishlist State
   if (savedItems.length === 0) {
     return (
-      <div className="min-h-[80vh] bg-slate-50/50 flex items-center justify-center px-4 sm:px-6 lg:px-8 py-16">
-        <div className="max-w-lg w-full text-center space-y-6 bg-white p-8 sm:p-12 rounded-3xl border border-slate-200/90 shadow-soft">
-          <div className="relative mx-auto w-24 h-24 rounded-3xl bg-gradient-to-tr from-rose-100 to-rose-50 border border-rose-200 flex items-center justify-center shadow-soft">
+      <div className="min-h-[80vh] bg-slate-50/50 dark:bg-slate-950 flex items-center justify-center px-4 sm:px-6 lg:px-8 py-16">
+        <div className="max-w-lg w-full text-center space-y-6 bg-white dark:bg-slate-900 p-8 sm:p-12 rounded-3xl border border-slate-200/90 dark:border-slate-800 shadow-soft">
+          <div className="relative mx-auto w-24 h-24 rounded-3xl bg-gradient-to-tr from-rose-100 to-rose-50 dark:from-rose-950/60 dark:to-rose-900/30 border border-rose-200 dark:border-rose-800 flex items-center justify-center shadow-soft">
             <Heart className="w-12 h-12 text-rose-500 fill-rose-500/20 stroke-[1.8]" />
             <div className="absolute -bottom-1 -right-1 bg-emerald-600 text-white p-1.5 rounded-full shadow-md">
               <Building2 className="w-4 h-4" />
@@ -245,10 +245,10 @@ export default function FavoritPage() {
           </div>
 
           <div className="space-y-2">
-            <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+            <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
               Belum Ada Kos Favorit
             </h1>
-            <p className="text-sm sm:text-base text-slate-600 leading-relaxed max-w-sm mx-auto">
+            <p className="text-sm sm:text-base text-slate-600 dark:text-slate-400 leading-relaxed max-w-sm mx-auto">
               Anda belum menyimpan kos pilihan ke daftar favorit. Klik ikon hati pada listing kos yang Anda sukai untuk menyimpannya di sini.
             </p>
           </div>
@@ -270,7 +270,7 @@ export default function FavoritPage() {
                   router.push("/search");
                 }
               }}
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-white hover:bg-slate-100 text-slate-700 font-semibold text-sm border border-slate-200 shadow-xs transition-all cursor-pointer"
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-semibold text-sm border border-slate-200 dark:border-slate-700 shadow-xs transition-all cursor-pointer"
             >
               <ArrowLeft className="w-4 h-4" />
               <span>Kembali</span>
@@ -283,23 +283,23 @@ export default function FavoritPage() {
 
   // 5. Populated Wishlist View
   return (
-    <main className="min-h-screen bg-slate-50/50 py-8 sm:py-12 px-4 sm:px-6 lg:px-8">
+    <main className="min-h-screen bg-slate-50/50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 py-8 sm:py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto space-y-8">
         {/* Header Bar */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-slate-200/80 pb-6">
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-slate-200/80 dark:border-slate-800 pb-6">
           <div>
             <div className="flex items-center gap-2.5">
-              <div className="p-2 rounded-xl bg-rose-50 border border-rose-200 text-rose-600">
+              <div className="p-2 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 text-rose-600 dark:text-rose-400">
                 <Heart className="w-5 h-5 fill-rose-500" />
               </div>
-              <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+              <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
                 Kos Favorit Saya
               </h1>
-              <span className="bg-rose-100 text-rose-700 text-xs font-bold px-2.5 py-0.5 rounded-full border border-rose-200">
+              <span className="bg-rose-100 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300 text-xs font-bold px-2.5 py-0.5 rounded-full border border-rose-200 dark:border-rose-800">
                 {savedItems.length} Kos
               </span>
             </div>
-            <p className="text-sm text-slate-600 mt-2">
+            <p className="text-sm text-slate-600 dark:text-slate-400 mt-2">
               Daftar kos pilihan yang telah Anda simpan. Bandingkan dan hubungi pemilik dengan mudah.
             </p>
           </div>
@@ -307,9 +307,9 @@ export default function FavoritPage() {
           <div className="flex items-center gap-3 self-start md:self-auto">
             <Link
               href="/search"
-              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white hover:bg-slate-100 text-slate-700 font-semibold text-xs sm:text-sm border border-slate-200 shadow-xs transition-all"
+              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 font-semibold text-xs sm:text-sm border border-slate-200 dark:border-slate-800 shadow-xs transition-all"
             >
-              <Search className="w-4 h-4 text-slate-500" />
+              <Search className="w-4 h-4 text-slate-500 dark:text-slate-400" />
               <span>Cari Kos Lain</span>
             </Link>
             <Link
@@ -323,7 +323,7 @@ export default function FavoritPage() {
         </div>
 
         {/* Filter & Search Bar */}
-        <div className="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-xs flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div className="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-xs flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="relative w-full sm:w-auto flex items-center">
             <GooeyInput
               value={searchQuery}
@@ -337,7 +337,7 @@ export default function FavoritPage() {
           </div>
 
           <div className="flex items-center gap-2 w-full sm:w-auto overflow-x-auto pb-1 sm:pb-0">
-            <span className="text-xs font-semibold text-slate-500 flex items-center gap-1 shrink-0 mr-1">
+            <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 flex items-center gap-1 shrink-0 mr-1">
               <SlidersHorizontal className="w-3.5 h-3.5" />
               <span>Tipe:</span>
             </span>
@@ -353,8 +353,8 @@ export default function FavoritPage() {
                 onClick={() => setSelectedGender(tab.id)}
                 className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer shrink-0 ${
                   selectedGender === tab.id
-                    ? "bg-slate-900 text-white shadow-xs"
-                    : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                    ? "bg-slate-900 dark:bg-emerald-600 text-white shadow-xs"
+                    : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700"
                 }`}
               >
                 {tab.label}
@@ -365,8 +365,8 @@ export default function FavoritPage() {
 
         {/* Filter Empty Results */}
         {filteredItems.length === 0 ? (
-          <div className="flex flex-col items-center justify-center p-12 text-center bg-white rounded-3xl border border-slate-200 border-dashed">
-            <p className="text-sm font-semibold text-slate-700">
+          <div className="flex flex-col items-center justify-center p-12 text-center bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 border-dashed">
+            <p className="text-sm font-semibold text-slate-700 dark:text-slate-300">
               Tidak ada kos favorit yang cocok dengan filter atau kata kunci Anda.
             </p>
             <button
@@ -374,7 +374,7 @@ export default function FavoritPage() {
                 setSearchQuery("");
                 setSelectedGender("ALL");
               }}
-              className="mt-3 text-xs font-semibold text-emerald-600 hover:underline"
+              className="mt-3 text-xs font-semibold text-emerald-600 dark:text-emerald-400 hover:underline"
             >
               Reset Filter
             </button>

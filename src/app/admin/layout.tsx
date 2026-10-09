@@ -182,7 +182,7 @@ function Logo() {
   return (
     <div className="flex items-center gap-2 px-1">
       <Image
-        src="/logo.jpg"
+        src="/logo-dark.png"
         alt="KosPasti Admin Logo"
         width={32}
         height={32}
@@ -207,7 +207,7 @@ function LogoIcon() {
   return (
     <div className="flex items-center justify-center py-0.5">
       <Image
-        src="/logo.jpg"
+        src="/logo-dark.png"
         alt="KosPasti Admin Logo"
         width={32}
         height={32}

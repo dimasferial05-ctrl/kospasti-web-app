@@ -182,34 +182,34 @@ export default function ManageBookingsPage() {
   const renderStatusBadge = (status: string) => {
     if (status === "PAID") {
       return (
-        <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded-md text-xs font-bold border border-blue-200">
+        <span className="px-2 py-1 bg-blue-100 dark:bg-blue-950/50 text-blue-700 dark:text-blue-300 rounded-md text-xs font-bold border border-blue-200 dark:border-blue-800">
           PAID
         </span>
       );
     }
     if (status === "SUCCESS" || status === "CONFIRMED" || status === "ACCEPTED") {
       return (
-        <span className="px-2 py-1 bg-green-100 text-green-700 rounded-md text-xs font-bold border border-green-200">
+        <span className="px-2 py-1 bg-green-100 text-green-700 dark:bg-green-950/50 dark:text-green-300 rounded-md text-xs font-bold border border-green-200 dark:border-green-800">
           {status}
         </span>
       );
     }
     if (status === "PENDING") {
       return (
-        <span className="px-2 py-1 bg-yellow-100 text-yellow-700 rounded-md text-xs font-bold border border-yellow-200">
+        <span className="px-2 py-1 bg-yellow-100 text-yellow-700 dark:bg-yellow-950/50 dark:text-yellow-300 rounded-md text-xs font-bold border border-yellow-200 dark:border-yellow-800">
           PENDING
         </span>
       );
     }
     if (status === "REJECTED") {
       return (
-        <span className="px-2 py-1 bg-rose-100 text-rose-700 rounded-md text-xs font-bold border border-rose-200">
+        <span className="px-2 py-1 bg-rose-100 text-rose-700 dark:bg-rose-950/50 dark:text-rose-300 rounded-md text-xs font-bold border border-rose-200 dark:border-rose-800">
           REJECTED
         </span>
       );
     }
     return (
-      <span className="px-2 py-1 bg-slate-100 text-slate-700 rounded-md text-xs font-bold border border-slate-200">
+      <span className="px-2 py-1 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-md text-xs font-bold border border-slate-200 dark:border-slate-700">
         {status}
       </span>
     );
@@ -224,7 +224,7 @@ export default function ManageBookingsPage() {
 
   if (isLoading) {
     return (
-      <div className="p-8 text-slate-500 flex items-center gap-2">
+      <div className="p-8 text-slate-500 dark:text-slate-400 flex items-center gap-2">
         <Loader2 className="w-5 h-5 animate-spin text-blue-600" />
         <span>Memuat riwayat transaksi...</span>
       </div>
@@ -233,11 +233,11 @@ export default function ManageBookingsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-        <div className="p-6 border-b border-slate-200 bg-slate-50 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div className="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 overflow-hidden">
+        <div className="p-6 border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/60 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <h2 className="text-xl font-bold text-slate-800">Riwayat Booking Mahasiswa</h2>
-            <p className="text-sm text-slate-500">
+            <h2 className="text-xl font-bold text-slate-800 dark:text-white">Riwayat Booking Mahasiswa</h2>
+            <p className="text-sm text-slate-500 dark:text-slate-400">
               Pantau transaksi pemesanan kamar secara real-time.
             </p>
           </div>
@@ -245,37 +245,37 @@ export default function ManageBookingsPage() {
             type="button"
             onClick={handleExportCSV}
             disabled={isExporting || bookings.length === 0}
-            className="inline-flex items-center justify-center gap-2 px-3.5 py-2 bg-white border border-slate-200 text-slate-700 hover:bg-slate-100 hover:text-slate-900 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg text-sm font-semibold shadow-xs transition-all cursor-pointer"
+            className="inline-flex items-center justify-center gap-2 px-3.5 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 hover:text-slate-900 dark:hover:text-white disabled:opacity-50 disabled:cursor-not-allowed rounded-lg text-sm font-semibold shadow-xs transition-all cursor-pointer"
             title="Unduh laporan riwayat booking ke format CSV"
           >
             {isExporting ? (
-              <Loader2 className="w-4 h-4 animate-spin text-slate-600" />
+              <Loader2 className="w-4 h-4 animate-spin text-slate-600 dark:text-slate-400" />
             ) : (
-              <Download className="w-4 h-4 text-slate-600" />
+              <Download className="w-4 h-4 text-slate-600 dark:text-slate-400" />
             )}
             <span>{isExporting ? "Mengekspor..." : "Export CSV"}</span>
           </button>
         </div>
 
         {errorMessage && (
-          <div className="p-4 bg-rose-50 border-b border-rose-200 text-rose-700 text-sm">
+          <div className="p-4 bg-rose-50 dark:bg-rose-950/40 border-b border-rose-200 dark:border-rose-800 text-rose-700 dark:text-rose-300 text-sm">
             {errorMessage}
           </div>
         )}
 
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm min-w-[800px]">
-            <thead className="bg-slate-100 text-slate-600 font-semibold uppercase text-xs tracking-wider">
+            <thead className="bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-semibold uppercase text-xs tracking-wider">
               <tr>
-                <th className="p-4 border-b border-slate-200">ID Transaksi</th>
-                <th className="p-4 border-b border-slate-200">Nama Mahasiswa</th>
-                <th className="p-4 border-b border-slate-200">Nama Kos</th>
-                <th className="p-4 border-b border-slate-200 text-center">Tgl Masuk</th>
-                <th className="p-4 border-b border-slate-200 text-center">Status</th>
-                <th className="p-4 border-b border-slate-200 text-center">Aksi</th>
+                <th className="p-4 border-b border-slate-200 dark:border-slate-700">ID Transaksi</th>
+                <th className="p-4 border-b border-slate-200 dark:border-slate-700">Nama Mahasiswa</th>
+                <th className="p-4 border-b border-slate-200 dark:border-slate-700">Nama Kos</th>
+                <th className="p-4 border-b border-slate-200 dark:border-slate-700 text-center">Tgl Masuk</th>
+                <th className="p-4 border-b border-slate-200 dark:border-slate-700 text-center">Status</th>
+                <th className="p-4 border-b border-slate-200 dark:border-slate-700 text-center">Aksi</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody className="divide-y divide-slate-100 dark:divide-slate-800 text-slate-700 dark:text-slate-300">
               {bookings.map((booking) => {
                 const isPending = booking.status === "PENDING";
                 const isCurrentUpdating = updatingId === booking.id;
@@ -284,8 +284,8 @@ export default function ManageBookingsPage() {
                 const userAvatar = booking.user?.avatar;
 
                 return (
-                  <tr key={booking.id} className="hover:bg-slate-50 transition-colors">
-                    <td className="p-4 font-mono text-xs text-slate-500">
+                  <tr key={booking.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+                    <td className="p-4 font-mono text-xs text-slate-500 dark:text-slate-400">
                       {booking.id.split("-")[0]}... {/* Menampilkan potongan awal ID agar rapi */}
                     </td>
                     <td className="p-4">
@@ -318,21 +318,21 @@ export default function ManageBookingsPage() {
                                 bio: booking.user?.bio,
                               })
                             }
-                            className="text-left font-bold text-slate-800 hover:text-blue-600 transition-colors cursor-pointer block"
+                            className="text-left font-bold text-slate-800 dark:text-slate-100 hover:text-blue-600 dark:hover:text-blue-400 transition-colors cursor-pointer block"
                             title="Klik untuk melihat profil lengkap"
                           >
                             {displayName}
                           </button>
-                          <div className="text-xs text-slate-500">
+                          <div className="text-xs text-slate-500 dark:text-slate-400">
                             {displayWhatsapp}
                           </div>
                         </div>
                       </div>
                     </td>
-                    <td className="p-4 font-medium text-slate-700">
+                    <td className="p-4 font-medium text-slate-700 dark:text-slate-300">
                       {booking.property?.name || "-"}
                     </td>
-                    <td className="p-4 text-center text-slate-600">
+                    <td className="p-4 text-center text-slate-600 dark:text-slate-300">
                       {new Date(booking.move_in_date).toLocaleDateString("id-ID")}
                     </td>
                     <td className="p-4 text-center">
@@ -342,8 +342,8 @@ export default function ManageBookingsPage() {
                       {isPending ? (
                         <div className="flex items-center justify-center gap-1.5">
                           {isCurrentUpdating ? (
-                            <div className="flex items-center gap-1 text-xs text-slate-500 py-1">
-                              <Loader2 className="w-4 h-4 animate-spin text-slate-600" />
+                            <div className="flex items-center gap-1 text-xs text-slate-500 dark:text-slate-400 py-1">
+                              <Loader2 className="w-4 h-4 animate-spin text-slate-600 dark:text-slate-400" />
                               <span>Memproses...</span>
                             </div>
                           ) : (
@@ -360,7 +360,7 @@ export default function ManageBookingsPage() {
                               <button
                                 type="button"
                                 onClick={() => handleUpdateStatus(booking.id, "REJECTED")}
-                                className="px-2.5 py-1 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 rounded-md text-xs font-semibold flex items-center gap-1 transition active:scale-95 cursor-pointer"
+                                className="px-2.5 py-1 bg-rose-50 dark:bg-rose-950/40 hover:bg-rose-100 dark:hover:bg-rose-900/40 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-800 rounded-md text-xs font-semibold flex items-center gap-1 transition active:scale-95 cursor-pointer"
                                 title="Tolak Booking"
                               >
                                 <X className="w-3.5 h-3.5 stroke-[2.5]" />
@@ -370,7 +370,7 @@ export default function ManageBookingsPage() {
                           )}
                         </div>
                       ) : (
-                        <span className="text-xs text-slate-400 font-medium">-</span>
+                        <span className="text-xs text-slate-400 dark:text-slate-500 font-medium">-</span>
                       )}
                     </td>
                   </tr>
@@ -378,7 +378,7 @@ export default function ManageBookingsPage() {
               })}
               {bookings.length === 0 && (
                 <tr>
-                  <td colSpan={6} className="p-8 text-center text-slate-500">
+                  <td colSpan={6} className="p-8 text-center text-slate-500 dark:text-slate-400">
                     Belum ada riwayat transaksi.
                   </td>
                 </tr>
@@ -397,7 +397,7 @@ export default function ManageBookingsPage() {
           aria-modal="true"
         >
           <div
-            className="bg-white rounded-2xl shadow-xl border border-slate-100 w-full max-w-md overflow-hidden animate-scaleUp"
+            className="bg-white dark:bg-slate-900 rounded-2xl shadow-xl border border-slate-100 dark:border-slate-800 w-full max-w-md overflow-hidden animate-scaleUp"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header Modal */}
@@ -421,10 +421,10 @@ export default function ManageBookingsPage() {
             <div className="p-6 space-y-4">
               {/* Bio Singkat */}
               <div>
-                <label className="text-xs font-bold uppercase tracking-wider text-slate-400 block mb-1">
+                <label className="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 block mb-1">
                   Bio / Deskripsi Diri
                 </label>
-                <div className="bg-slate-50 border border-slate-200 rounded-xl p-3.5 text-sm text-slate-700 leading-relaxed italic">
+                <div className="bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-xl p-3.5 text-sm text-slate-700 dark:text-slate-300 leading-relaxed italic">
                   {selectedUser.bio ? `"${selectedUser.bio}"` : "Pengguna belum menambahkan bio profil."}
                 </div>
               </div>
@@ -432,21 +432,21 @@ export default function ManageBookingsPage() {
               {/* Data Kontak */}
               <div className="space-y-2.5 pt-2">
                 {selectedUser.email && (
-                  <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-lg border border-slate-100 text-sm">
-                    <Mail size={18} className="text-slate-400 shrink-0" />
+                  <div className="flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-800/60 rounded-lg border border-slate-100 dark:border-slate-700/60 text-sm">
+                    <Mail size={18} className="text-slate-400 dark:text-slate-500 shrink-0" />
                     <div className="overflow-hidden">
-                      <div className="text-xs text-slate-400 font-medium">Alamat Email</div>
-                      <div className="text-slate-700 font-medium truncate">{selectedUser.email}</div>
+                      <div className="text-xs text-slate-400 dark:text-slate-500 font-medium">Alamat Email</div>
+                      <div className="text-slate-700 dark:text-slate-200 font-medium truncate">{selectedUser.email}</div>
                     </div>
                   </div>
                 )}
 
-                <div className="flex items-center justify-between p-3 bg-slate-50 rounded-lg border border-slate-100 text-sm">
+                <div className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-800/60 rounded-lg border border-slate-100 dark:border-slate-700/60 text-sm">
                   <div className="flex items-center gap-3">
-                    <Phone size={18} className="text-slate-400 shrink-0" />
+                    <Phone size={18} className="text-slate-400 dark:text-slate-500 shrink-0" />
                     <div>
-                      <div className="text-xs text-slate-400 font-medium">Nomor WhatsApp</div>
-                      <div className="text-slate-700 font-medium">{selectedUser.whatsapp || "Tidak tersedia"}</div>
+                      <div className="text-xs text-slate-400 dark:text-slate-500 font-medium">Nomor WhatsApp</div>
+                      <div className="text-slate-700 dark:text-slate-200 font-medium">{selectedUser.whatsapp || "Tidak tersedia"}</div>
                     </div>
                   </div>
                   {selectedUser.whatsapp && (
@@ -468,7 +468,7 @@ export default function ManageBookingsPage() {
                 <button
                   type="button"
                   onClick={() => setSelectedUser(null)}
-                  className="w-full py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-xl text-sm transition cursor-pointer"
+                  className="w-full py-2.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-semibold rounded-xl text-sm transition cursor-pointer"
                 >
                   Tutup
                 </button>

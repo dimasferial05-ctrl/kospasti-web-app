@@ -16,7 +16,14 @@ export function LandingFooter() {
                 alt="KosPasti Logo"
                 width={32}
                 height={32}
-                className="w-8 h-8 rounded-lg object-cover shadow-xs shrink-0"
+                className="w-8 h-8 rounded-lg object-cover shadow-xs shrink-0 block dark:hidden"
+              />
+              <Image
+                src="/logo-dark.png"
+                alt="KosPasti Logo"
+                width={32}
+                height={32}
+                className="w-8 h-8 rounded-lg object-cover shadow-xs shrink-0 hidden dark:block"
               />
               <div className="flex flex-col">
                 <span className="text-lg font-extrabold text-slate-900 dark:text-white tracking-tight leading-none">

@@ -164,7 +164,7 @@ function HelpCenterContent() {
       : null;
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col selection:bg-emerald-500 selection:text-white">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex flex-col selection:bg-emerald-500 selection:text-white">
       {/* Hero Search Section with Aurora Background */}
       <section className="relative bg-zinc-950">
         <AuroraBackground className="py-16 sm:py-24 bg-zinc-950 text-white relative w-full border-b border-white/[0.08]">
@@ -186,13 +186,13 @@ function HelpCenterContent() {
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Ketik pertanyaan atau kata kunci (contoh: refund, magic link, bayar DP, stok kamar)..."
-                  className="w-full pl-12 pr-10 py-3.5 rounded-2xl bg-white text-slate-900 placeholder:text-slate-400 text-sm font-medium shadow-2xl border border-slate-200 focus:outline-none focus:ring-4 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all"
+                  className="w-full pl-12 pr-10 py-3.5 rounded-2xl bg-white dark:bg-slate-900 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 text-sm font-medium shadow-2xl border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-4 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all"
                 />
                 {searchQuery && (
                   <button
                     type="button"
                     onClick={() => setSearchQuery("")}
-                    className="absolute right-3.5 p-1 rounded-full text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors text-xs font-bold"
+                    className="absolute right-3.5 p-1 rounded-full text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors text-xs font-bold"
                     aria-label="Hapus Pencarian"
                   >
                     ✕
@@ -207,8 +207,8 @@ function HelpCenterContent() {
       {/* Main Help Center Body */}
       <main className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 sm:py-12 flex-1">
         {/* Category Tabs Switcher */}
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pb-8 border-b border-slate-200">
-          <div className="flex items-center gap-2 bg-slate-200/80 p-1.5 rounded-2xl w-full sm:w-auto">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pb-8 border-b border-slate-200 dark:border-slate-800">
+          <div className="flex items-center gap-2 bg-slate-200/80 dark:bg-slate-800/80 p-1.5 rounded-2xl w-full sm:w-auto">
             {HELP_CATEGORIES.map((cat) => {
               const isSelected = activeCategory === cat.id;
               return (
@@ -221,21 +221,21 @@ function HelpCenterContent() {
                   }}
                   className={`flex-1 sm:flex-initial flex items-center justify-center gap-2.5 px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer select-none ${
                     isSelected
-                      ? "bg-white text-emerald-800 shadow-md border border-slate-200/60 scale-[1.02]"
-                      : "text-slate-600 hover:text-slate-900 hover:bg-white/50"
+                      ? "bg-white dark:bg-slate-900 text-emerald-800 dark:text-emerald-300 shadow-md border border-slate-200/60 dark:border-slate-700 scale-[1.02]"
+                      : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-white/50 dark:hover:bg-slate-700/50"
                   }`}
                 >
                   {cat.id === "user" ? (
-                    <User className={`w-4 h-4 ${isSelected ? "text-emerald-600" : "text-slate-400"}`} />
+                    <User className={`w-4 h-4 ${isSelected ? "text-emerald-600 dark:text-emerald-400" : "text-slate-400"}`} />
                   ) : (
-                    <Building2 className={`w-4 h-4 ${isSelected ? "text-emerald-600" : "text-slate-400"}`} />
+                    <Building2 className={`w-4 h-4 ${isSelected ? "text-emerald-600 dark:text-emerald-400" : "text-slate-400"}`} />
                   )}
                   <span>{cat.title}</span>
                   <span
                     className={`text-[10px] px-2 py-0.5 rounded-full font-extrabold ${
                       isSelected
-                        ? "bg-emerald-100 text-emerald-800"
-                        : "bg-slate-300 text-slate-700"
+                        ? "bg-emerald-100 dark:bg-emerald-950/70 text-emerald-800 dark:text-emerald-300"
+                        : "bg-slate-300 dark:bg-slate-700 text-slate-700 dark:text-slate-300"
                     }`}
                   >
                     {cat.articles.length}
@@ -245,8 +245,8 @@ function HelpCenterContent() {
             })}
           </div>
 
-          <div className="text-xs text-slate-500 flex items-center gap-1.5 self-start sm:self-center">
-            <Info className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+          <div className="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-1.5 self-start sm:self-center">
+            <Info className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
             <span>Pilih topik di sebelah kiri untuk membaca panduan detail</span>
           </div>
         </div>
@@ -255,26 +255,26 @@ function HelpCenterContent() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 pt-8">
           {/* Left Column: Topic List (Sidebar) */}
           <div className="lg:col-span-4 space-y-4">
-            <div className="bg-white rounded-2xl border border-slate-200/80 p-4 shadow-soft">
-              <div className="flex items-center justify-between pb-3 mb-3 border-b border-slate-100">
-                <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
+            <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 p-4 shadow-soft">
+              <div className="flex items-center justify-between pb-3 mb-3 border-b border-slate-100 dark:border-slate-800">
+                <span className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                   Daftar Panduan ({filteredArticles.length})
                 </span>
                 {searchQuery && (
-                  <span className="text-[11px] text-emerald-600 font-semibold">
+                  <span className="text-[11px] text-emerald-600 dark:text-emerald-400 font-semibold">
                     Hasil Filter
                   </span>
                 )}
               </div>
 
               {filteredArticles.length === 0 ? (
-                <div className="p-6 text-center text-slate-500 space-y-2">
-                  <HelpCircle className="w-8 h-8 text-slate-300 mx-auto" />
+                <div className="p-6 text-center text-slate-500 dark:text-slate-400 space-y-2">
+                  <HelpCircle className="w-8 h-8 text-slate-300 dark:text-slate-600 mx-auto" />
                   <p className="text-xs font-semibold">Tidak ada panduan yang cocok dengan pencarian.</p>
                   <button
                     type="button"
                     onClick={() => setSearchQuery("")}
-                    className="text-xs text-emerald-600 hover:underline font-bold"
+                    className="text-xs text-emerald-600 dark:text-emerald-400 hover:underline font-bold"
                   >
                     Reset Filter Pencarian
                   </button>
@@ -297,14 +297,14 @@ function HelpCenterContent() {
                         className={`w-full text-left p-3 rounded-xl transition-all flex items-start gap-3 cursor-pointer group ${
                           isSelected
                             ? "bg-emerald-600 text-white shadow-md shadow-emerald-600/15"
-                            : "hover:bg-slate-100 text-slate-800"
+                            : "hover:bg-slate-100 dark:hover:bg-slate-800/80 text-slate-800 dark:text-slate-200"
                         }`}
                       >
                         <div
                           className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 transition-colors mt-0.5 ${
                             isSelected
                               ? "bg-white/20 text-white"
-                              : "bg-emerald-50 text-emerald-700 group-hover:bg-emerald-100"
+                              : "bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 group-hover:bg-emerald-100 dark:group-hover:bg-emerald-900/60"
                           }`}
                         >
                           {renderArticleIcon(article.iconName, "w-4 h-4")}
@@ -313,7 +313,7 @@ function HelpCenterContent() {
                         <div className="flex-1 min-w-0">
                           <p
                             className={`text-xs sm:text-sm font-bold leading-snug line-clamp-2 ${
-                              isSelected ? "text-white" : "text-slate-900 group-hover:text-emerald-700"
+                              isSelected ? "text-white" : "text-slate-900 dark:text-slate-100 group-hover:text-emerald-700 dark:group-hover:text-emerald-400"
                             }`}
                           >
                             {article.title}
@@ -323,14 +323,14 @@ function HelpCenterContent() {
                               className={`text-[10px] font-semibold px-2 py-0.2 rounded-full ${
                                 isSelected
                                   ? "bg-white/20 text-emerald-100"
-                                  : "bg-slate-100 text-slate-500"
+                                  : "bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400"
                               }`}
                             >
                               {article.readTime}
                             </span>
                             <span
                               className={`text-[10px] truncate ${
-                                isSelected ? "text-emerald-100" : "text-slate-400"
+                                isSelected ? "text-emerald-100" : "text-slate-400 dark:text-slate-500"
                               }`}
                             >
                               {article.tags[0]}
@@ -342,7 +342,7 @@ function HelpCenterContent() {
                           className={`w-4 h-4 shrink-0 transition-transform ${
                             isSelected
                               ? "text-white translate-x-0.5"
-                              : "text-slate-300 group-hover:text-slate-500"
+                              : "text-slate-300 dark:text-slate-600 group-hover:text-slate-500 dark:group-hover:text-slate-400"
                           }`}
                         />
                       </button>
@@ -379,36 +379,35 @@ function HelpCenterContent() {
               </a>
             </div>
           </div>
-
           {/* Right Column: Article Detail Content View */}
           <div id="article-view" className="lg:col-span-8 space-y-6">
             {activeArticle ? (
-              <article className="bg-white rounded-3xl border border-slate-200/80 p-6 sm:p-8 md:p-10 shadow-soft space-y-8 animate-in fade-in duration-200">
+              <article className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200/80 dark:border-slate-800 p-6 sm:p-8 md:p-10 shadow-soft space-y-8 animate-in fade-in duration-200">
                 {/* Article Header & Metadata */}
-                <div className="space-y-4 pb-6 border-b border-slate-100">
+                <div className="space-y-4 pb-6 border-b border-slate-100 dark:border-slate-800">
                   {/* Breadcrumbs & Badge */}
                   <div className="flex flex-wrap items-center justify-between gap-3">
-                    <div className="flex items-center gap-2 text-xs font-semibold text-slate-500">
+                    <div className="flex items-center gap-2 text-xs font-semibold text-slate-500 dark:text-slate-400">
                       <span>Pusat Bantuan</span>
-                      <ChevronRight className="w-3 h-3 text-slate-300" />
-                      <span className="text-emerald-700">{currentCategoryData.shortTitle}</span>
+                      <ChevronRight className="w-3 h-3 text-slate-300 dark:text-slate-600" />
+                      <span className="text-emerald-700 dark:text-emerald-400">{currentCategoryData.shortTitle}</span>
                     </div>
 
                     <div className="flex items-center gap-2">
                       <button
                         type="button"
                         onClick={handleShareArticle}
-                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold transition-colors"
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-semibold transition-colors cursor-pointer"
                         title="Salin Link Panduan"
                       >
                         {copiedLink ? (
                           <>
-                            <Check className="w-3.5 h-3.5 text-emerald-600" />
-                            <span className="text-emerald-700">Link Tersalin!</span>
+                            <Check className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+                            <span className="text-emerald-700 dark:text-emerald-300">Link Tersalin!</span>
                           </>
                         ) : (
                           <>
-                            <Share2 className="w-3.5 h-3.5 text-slate-500" />
+                            <Share2 className="w-3.5 h-3.5 text-slate-500 dark:text-slate-400" />
                             <span>Bagikan</span>
                           </>
                         )}
@@ -416,23 +415,23 @@ function HelpCenterContent() {
                     </div>
                   </div>
 
-                  <h2 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight leading-snug">
+                  <h2 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight leading-snug">
                     {activeArticle.title}
                   </h2>
 
-                  <p className="text-sm sm:text-base text-slate-600 leading-relaxed font-medium">
+                  <p className="text-sm sm:text-base text-slate-600 dark:text-slate-300 leading-relaxed font-medium">
                     {activeArticle.subtitle}
                   </p>
 
                   <div className="flex flex-wrap items-center gap-2 pt-1">
-                    <span className="inline-flex items-center gap-1 text-xs text-slate-500 font-medium bg-slate-100 px-2.5 py-1 rounded-full">
+                    <span className="inline-flex items-center gap-1 text-xs text-slate-500 dark:text-slate-400 font-medium bg-slate-100 dark:bg-slate-800 px-2.5 py-1 rounded-full">
                       <Clock className="w-3 h-3 text-slate-400" />
                       <span>{activeArticle.readTime}</span>
                     </span>
                     {activeArticle.tags.map((tag) => (
                       <span
                         key={tag}
-                        className="text-xs font-semibold px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-100"
+                        className="text-xs font-semibold px-2.5 py-1 rounded-full bg-emerald-50 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 border border-emerald-100 dark:border-emerald-800"
                       >
                         #{tag}
                       </span>
@@ -441,35 +440,35 @@ function HelpCenterContent() {
                 </div>
 
                 {/* Key Summary Highlight Box */}
-                <div className="p-5 rounded-2xl bg-gradient-to-r from-emerald-50/90 to-teal-50/80 border border-emerald-200/80 space-y-2">
-                  <div className="flex items-center gap-2 text-xs font-extrabold uppercase tracking-wider text-emerald-800">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                <div className="p-5 rounded-2xl bg-gradient-to-r from-emerald-50/90 to-teal-50/80 dark:from-emerald-950/40 dark:to-teal-950/30 border border-emerald-200/80 dark:border-emerald-800 space-y-2">
+                  <div className="flex items-center gap-2 text-xs font-extrabold uppercase tracking-wider text-emerald-800 dark:text-emerald-300">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
                     <span>Poin Kunci Panduan Ini</span>
                   </div>
-                  <p className="text-xs sm:text-sm text-slate-700 leading-relaxed font-medium">
+                  <p className="text-xs sm:text-sm text-slate-700 dark:text-slate-300 leading-relaxed font-medium">
                     {activeArticle.summary}
                   </p>
                 </div>
 
                 {/* Formatted Article Body Sections */}
-                <div className="space-y-8 text-slate-800 text-sm leading-relaxed">
+                <div className="space-y-8 text-slate-800 dark:text-slate-200 text-sm leading-relaxed">
                   {activeArticle.sections.map((sec, idx) => (
                     <section key={idx} className="space-y-3">
-                      <h3 className="text-base sm:text-lg font-bold text-slate-900 tracking-tight">
+                      <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white tracking-tight">
                         {sec.title}
                       </h3>
-                      <div className="text-slate-700 whitespace-pre-line text-xs sm:text-sm leading-relaxed">
+                      <div className="text-slate-700 dark:text-slate-300 whitespace-pre-line text-xs sm:text-sm leading-relaxed">
                         {sec.content}
                       </div>
 
                       {/* Tips Callout */}
                       {sec.tips && sec.tips.length > 0 && (
-                        <div className="p-4 rounded-xl bg-blue-50/70 border border-blue-200/80 space-y-2 mt-3">
-                          <div className="flex items-center gap-1.5 text-xs font-bold text-blue-900 uppercase tracking-wide">
-                            <Info className="w-3.5 h-3.5 text-blue-600 shrink-0" />
+                        <div className="p-4 rounded-xl bg-blue-50/70 dark:bg-blue-950/40 border border-blue-200/80 dark:border-blue-900 space-y-2 mt-3">
+                          <div className="flex items-center gap-1.5 text-xs font-bold text-blue-900 dark:text-blue-300 uppercase tracking-wide">
+                            <Info className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400 shrink-0" />
                             <span>Tips Praktis:</span>
                           </div>
-                          <ul className="list-disc list-inside space-y-1 text-xs text-blue-950 font-medium">
+                          <ul className="list-disc list-inside space-y-1 text-xs text-blue-950 dark:text-blue-200 font-medium">
                             {sec.tips.map((t, tIdx) => (
                               <li key={tIdx} className="leading-relaxed">
                                 {t}
@@ -481,12 +480,12 @@ function HelpCenterContent() {
 
                       {/* Warning Callout */}
                       {sec.warning && (
-                        <div className="p-4 rounded-xl bg-rose-50/80 border border-rose-200 space-y-1 mt-3">
-                          <div className="flex items-center gap-1.5 text-xs font-bold text-rose-900 uppercase tracking-wide">
-                            <ShieldAlert className="w-3.5 h-3.5 text-rose-600 shrink-0" />
+                        <div className="p-4 rounded-xl bg-rose-50/80 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900 space-y-1 mt-3">
+                          <div className="flex items-center gap-1.5 text-xs font-bold text-rose-900 dark:text-rose-300 uppercase tracking-wide">
+                            <ShieldAlert className="w-3.5 h-3.5 text-rose-600 dark:text-rose-400 shrink-0" />
                             <span>Perhatian Penting:</span>
                           </div>
-                          <p className="text-xs text-rose-950 font-medium leading-relaxed">
+                          <p className="text-xs text-rose-950 dark:text-rose-200 font-medium leading-relaxed">
                             {sec.warning}
                           </p>
                         </div>
@@ -496,20 +495,20 @@ function HelpCenterContent() {
                 </div>
 
                 {/* Helpful Rating Feedback Widget */}
-                <div className="pt-8 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div className="pt-8 border-t border-slate-100 dark:border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-4">
                   <div>
-                    <p className="text-xs font-bold text-slate-900">
+                    <p className="text-xs font-bold text-slate-900 dark:text-white">
                       Apakah panduan ini membantu Anda?
                     </p>
-                    <p className="text-[11px] text-slate-500">
+                    <p className="text-[11px] text-slate-500 dark:text-slate-400">
                       Masukan Anda membantu kami memperbarui kualitas bantuan KosPasti.
                     </p>
                   </div>
 
                   <div className="flex items-center gap-2">
                     {helpfulFeedback[activeArticle.slug] ? (
-                      <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-50 text-emerald-800 text-xs font-bold border border-emerald-200">
-                        <Check className="w-3.5 h-3.5 text-emerald-600" />
+                      <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-50 dark:bg-emerald-950/70 text-emerald-800 dark:text-emerald-300 text-xs font-bold border border-emerald-200 dark:border-emerald-800">
+                        <Check className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
                         <span>Terima kasih atas penilaian Anda!</span>
                       </div>
                     ) : (
@@ -517,17 +516,17 @@ function HelpCenterContent() {
                         <button
                           type="button"
                           onClick={() => handleRateHelpful(activeArticle.slug, "yes")}
-                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-200 hover:border-emerald-500 hover:bg-emerald-50 text-slate-700 hover:text-emerald-800 text-xs font-semibold transition-all cursor-pointer"
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 hover:border-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 text-slate-700 dark:text-slate-300 hover:text-emerald-800 dark:hover:text-emerald-300 text-xs font-semibold transition-all cursor-pointer"
                         >
-                          <ThumbsUp className="w-3.5 h-3.5 text-emerald-600" />
+                          <ThumbsUp className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
                           <span>Ya, Membantu</span>
                         </button>
                         <button
                           type="button"
                           onClick={() => handleRateHelpful(activeArticle.slug, "no")}
-                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-200 hover:border-rose-400 hover:bg-rose-50 text-slate-700 hover:text-rose-700 text-xs font-semibold transition-all cursor-pointer"
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 hover:border-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 text-slate-700 dark:text-slate-300 hover:text-rose-700 dark:hover:text-rose-300 text-xs font-semibold transition-all cursor-pointer"
                         >
-                          <ThumbsDown className="w-3.5 h-3.5 text-rose-500" />
+                          <ThumbsDown className="w-3.5 h-3.5 text-rose-500 dark:text-rose-400" />
                           <span>Kurang Jelas</span>
                         </button>
                       </>
@@ -536,7 +535,7 @@ function HelpCenterContent() {
                 </div>
 
                 {/* Navigation Between Articles (Prev / Next) */}
-                <div className="pt-6 border-t border-slate-100 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="pt-6 border-t border-slate-100 dark:border-slate-800 grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {prevArticle ? (
                     <button
                       type="button"
@@ -544,12 +543,12 @@ function HelpCenterContent() {
                         setActiveArticleSlug(prevArticle.slug);
                         window.scrollTo({ top: 350, behavior: "smooth" });
                       }}
-                      className="p-4 rounded-2xl border border-slate-200 hover:border-emerald-300 hover:bg-emerald-50/40 text-left transition-all group"
+                      className="p-4 rounded-2xl border border-slate-200 dark:border-slate-800 hover:border-emerald-300 dark:hover:border-emerald-700 hover:bg-emerald-50/40 dark:hover:bg-slate-800/50 text-left transition-all group cursor-pointer"
                     >
-                      <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
+                      <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider block">
                         ← Panduan Sebelumnya
                       </span>
-                      <span className="text-xs font-bold text-slate-900 group-hover:text-emerald-700 line-clamp-1 mt-0.5">
+                      <span className="text-xs font-bold text-slate-900 dark:text-white group-hover:text-emerald-700 dark:group-hover:text-emerald-400 line-clamp-1 mt-0.5">
                         {prevArticle.title}
                       </span>
                     </button>
@@ -564,12 +563,12 @@ function HelpCenterContent() {
                         setActiveArticleSlug(nextArticle.slug);
                         window.scrollTo({ top: 350, behavior: "smooth" });
                       }}
-                      className="p-4 rounded-2xl border border-slate-200 hover:border-emerald-300 hover:bg-emerald-50/40 text-right transition-all group"
+                      className="p-4 rounded-2xl border border-slate-200 dark:border-slate-800 hover:border-emerald-300 dark:hover:border-emerald-700 hover:bg-emerald-50/40 dark:hover:bg-slate-800/50 text-right transition-all group cursor-pointer"
                     >
-                      <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
+                      <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider block">
                         Panduan Selanjutnya →
                       </span>
-                      <span className="text-xs font-bold text-slate-900 group-hover:text-emerald-700 line-clamp-1 mt-0.5">
+                      <span className="text-xs font-bold text-slate-900 dark:text-white group-hover:text-emerald-700 dark:group-hover:text-emerald-400 line-clamp-1 mt-0.5">
                         {nextArticle.title}
                       </span>
                     </button>
@@ -577,10 +576,10 @@ function HelpCenterContent() {
                 </div>
               </article>
             ) : (
-              <div className="bg-white rounded-3xl border border-slate-200/80 p-12 text-center text-slate-500 space-y-3">
-                <BookOpen className="w-10 h-10 text-slate-300 mx-auto" />
-                <h3 className="font-bold text-slate-700 text-sm">Pilih topik bantuan di sebelah kiri</h3>
-                <p className="text-xs text-slate-500">
+              <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200/80 dark:border-slate-800 p-12 text-center text-slate-500 dark:text-slate-400 space-y-3">
+                <BookOpen className="w-10 h-10 text-slate-300 dark:text-slate-600 mx-auto" />
+                <h3 className="font-bold text-slate-700 dark:text-slate-200 text-sm">Pilih topik bantuan di sebelah kiri</h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400">
                   Seluruh dokumentasi dan FAQ disusun lengkap untuk kenyamanan Anda.
                 </p>
               </div>

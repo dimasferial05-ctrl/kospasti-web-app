@@ -250,7 +250,15 @@ export function Header({ isLoggedIn: initialIsLoggedIn = false }: HeaderProps) {
               width={36}
               height={36}
               priority
-              className="w-9 h-9 rounded-xl object-cover shadow-soft transition-transform group-hover:rotate-3 shrink-0"
+              className="w-9 h-9 rounded-xl object-cover shadow-soft transition-transform group-hover:rotate-3 shrink-0 block dark:hidden"
+            />
+            <Image
+              src="/logo-dark.png"
+              alt="KosPasti Logo"
+              width={36}
+              height={36}
+              priority
+              className="w-9 h-9 rounded-xl object-cover shadow-soft transition-transform group-hover:rotate-3 shrink-0 hidden dark:block"
             />
             <div className="flex flex-col">
               <span className="text-lg sm:text-xl font-extrabold text-slate-900 dark:text-white tracking-tight leading-none group-hover:text-emerald-600 transition-colors">
@@ -627,7 +635,14 @@ export function Header({ isLoggedIn: initialIsLoggedIn = false }: HeaderProps) {
                     alt="KosPasti Logo"
                     width={32}
                     height={32}
-                    className="w-8 h-8 rounded-xl object-cover shrink-0"
+                    className="w-8 h-8 rounded-xl object-cover shrink-0 block dark:hidden"
+                  />
+                  <Image
+                    src="/logo-dark.png"
+                    alt="KosPasti Logo"
+                    width={32}
+                    height={32}
+                    className="w-8 h-8 rounded-xl object-cover shrink-0 hidden dark:block"
                   />
                   <div className="flex flex-col">
                     <span className="text-base font-extrabold text-slate-900 dark:text-white leading-tight">
