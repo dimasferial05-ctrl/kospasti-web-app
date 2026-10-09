@@ -152,10 +152,10 @@ export function KosPropertyCard({
     <div
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      className="group bg-white rounded-2xl border border-slate-200/60 shadow-soft overflow-hidden flex flex-col hover:shadow-lg hover:shadow-float hover:-translate-y-1 transition-all duration-300 h-full relative"
+      className="group bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/60 dark:border-slate-800 shadow-soft overflow-hidden flex flex-col hover:shadow-lg hover:shadow-float hover:-translate-y-1 transition-all duration-300 h-full relative"
     >
       {/* Image Section */}
-      <div className="aspect-[4/3] w-full relative overflow-hidden bg-slate-100 flex items-center justify-center">
+      <div className="aspect-[4/3] w-full relative overflow-hidden bg-slate-100 dark:bg-slate-800 flex items-center justify-center">
         {slides.length > 0 ? (
           <>
             {slides.map((slide, idx) => (
@@ -262,12 +262,12 @@ export function KosPropertyCard({
       <div className="p-4 sm:p-5 flex flex-col flex-1 gap-2.5">
         {/* Header: Name, Rating & Gender Badge */}
         <div className="flex items-start justify-between gap-2">
-          <h3 className="text-base font-bold text-slate-900 line-clamp-1 group-hover:text-emerald-700 transition-colors tracking-tight">
+          <h3 className="text-base font-bold text-slate-900 dark:text-white line-clamp-1 group-hover:text-emerald-700 dark:group-hover:text-emerald-400 transition-colors tracking-tight">
             {name}
           </h3>
           <div className="flex items-center gap-1.5 shrink-0">
             {averageRating !== undefined && averageRating > 0 && (
-              <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-slate-800 bg-slate-50 border border-slate-200/80 px-2 py-0.5 rounded-full">
+              <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-slate-800 dark:text-slate-200 bg-slate-50 dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700 px-2 py-0.5 rounded-full">
                 <Star className="w-3 h-3 text-amber-400 fill-amber-400" />
                 {averageRating.toFixed(1)}
               </span>
@@ -282,27 +282,27 @@ export function KosPropertyCard({
 
         {/* Price & Lifestyle Badges */}
         <div className="flex flex-wrap items-baseline justify-between gap-2">
-          <span className="text-lg font-black text-emerald-600 tracking-tight">
+          <span className="text-lg font-black text-emerald-600 dark:text-emerald-400 tracking-tight">
             {formattedPrice}
           </span>
 
           <div className="flex items-center gap-1.5 flex-wrap">
             {typeof distance === "number" && (
               <span
-                className="inline-flex items-center gap-1 font-bold text-emerald-800 bg-emerald-50 px-2.5 py-0.5 rounded-full text-[10px] border border-emerald-200/80 shadow-2xs"
+                className="inline-flex items-center gap-1 font-bold text-emerald-800 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/60 px-2.5 py-0.5 rounded-full text-[10px] border border-emerald-200/80 dark:border-emerald-800 shadow-2xs"
                 title={distanceTargetName ? `Jarak ${distance} km dari ${distanceTargetName}` : `Jarak ${distance} km ke lokasi tujuan`}
               >
-                <MapPin className="w-3 h-3 text-emerald-600" />
+                <MapPin className="w-3 h-3 text-emerald-600 dark:text-emerald-400" />
                 <span>{distance} km{distanceTargetName ? ` dari ${distanceTargetName}` : ""}</span>
               </span>
             )}
             {is24Hours && (
-              <span className="text-[10px] font-medium px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-600 border border-slate-200" title="Akses 24 Jam">
+              <span className="text-[10px] font-medium px-2.5 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700" title="Akses 24 Jam">
                 24 Jam
               </span>
             )}
             {isPetFriendly && (
-              <span className="text-[10px] font-medium px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200/80" title="Pet Friendly">
+              <span className="text-[10px] font-medium px-2.5 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200/80 dark:border-emerald-800" title="Pet Friendly">
                 Pet Friendly
               </span>
             )}
@@ -310,38 +310,38 @@ export function KosPropertyCard({
         </div>
 
         {/* Facilities & Owner */}
-        <div className="space-y-1 text-xs text-slate-500 pt-1.5 border-t border-slate-100">
+        <div className="space-y-1 text-xs text-slate-500 dark:text-slate-400 pt-1.5 border-t border-slate-100 dark:border-slate-800">
           <div className="flex items-center gap-1.5">
-            <User className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-            <span className="font-medium text-slate-700 truncate">{ownerName}</span>
+            <User className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500 shrink-0" />
+            <span className="font-medium text-slate-700 dark:text-slate-300 truncate">{ownerName}</span>
           </div>
           {facilities && (
-            <p className="line-clamp-1 text-slate-500 text-[11px] font-medium">
+            <p className="line-clamp-1 text-slate-500 dark:text-slate-400 text-[11px] font-medium">
               {facilities}
             </p>
           )}
         </div>
 
         {/* Footer: Availability & Last Updated */}
-        <div className="mt-auto pt-3 border-t border-slate-100 flex items-center justify-between gap-2">
+        <div className="mt-auto pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between gap-2">
           <div className="flex items-center gap-1.5 flex-wrap">
             {isAvailable ? (
-              <span className="bg-green-100 text-green-700 text-xs font-semibold px-2.5 py-0.5 rounded-full border border-green-200">
+              <span className="bg-green-100 dark:bg-emerald-950/60 text-green-700 dark:text-emerald-300 text-xs font-semibold px-2.5 py-0.5 rounded-full border border-green-200 dark:border-emerald-800">
                 Sisa {availableRooms} Kamar
               </span>
             ) : (
-              <span className="bg-slate-200 text-slate-600 text-xs font-semibold px-2.5 py-0.5 rounded-full">
+              <span className="bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-400 text-xs font-semibold px-2.5 py-0.5 rounded-full">
                 Penuh
               </span>
             )}
             {isMultiType && (
-              <span className="bg-slate-100 text-slate-700 text-[11px] font-medium px-2.5 py-0.5 rounded-full border border-slate-200">
+              <span className="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-[11px] font-medium px-2.5 py-0.5 rounded-full border border-slate-200 dark:border-slate-700">
                 {roomTypesCount ? `${roomTypesCount} Tipe` : "Multi Tipe"}
               </span>
             )}
           </div>
 
-          <div className="flex items-center gap-1 text-[11px] text-slate-400 shrink-0">
+          <div className="flex items-center gap-1 text-[11px] text-slate-400 dark:text-slate-500 shrink-0">
             <Clock className="w-3 h-3 text-slate-400" />
             <span>{formattedDate}</span>
           </div>
