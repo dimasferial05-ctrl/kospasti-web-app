@@ -13,7 +13,9 @@ import {
   Phone,
   Calendar,
   ChevronRight,
+  Sparkles,
 } from "lucide-react";
+import IsolineBloom from "@/components/ui/isoline-bloom";
 import { HelpTooltip } from "@/components/ui/Tooltip";
 
 interface StatsData {
@@ -142,14 +144,24 @@ export default function PartnerOverviewPage() {
 
   return (
     <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto w-full space-y-8">
-      {/* Page Header */}
-      <div>
-        <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
-          Ringkasan Dasbor Mitra
-        </h1>
-        <p className="text-xs sm:text-sm text-slate-500 mt-1">
-          Pantau status ketersediaan kamar dan kelola pesanan masuk dari calon penyewa.
-        </p>
+      {/* Page Header dengan Isoline Bloom Contour Decor */}
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-emerald-900 via-teal-900 to-slate-900 p-6 sm:p-8 text-white shadow-soft">
+        <div className="absolute inset-0 pointer-events-none opacity-20 -z-10 overflow-hidden">
+          <IsolineBloom height="100%" preset="aurora" interactive={false} />
+        </div>
+        <div className="relative z-10">
+          <div className="flex items-center gap-2 mb-1.5">
+            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-400/30">
+              <Sparkles className="w-3 h-3" /> Mitra Properti KosPasti
+            </span>
+          </div>
+          <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
+            Ringkasan Dasbor Mitra
+          </h1>
+          <p className="text-xs sm:text-sm text-emerald-100/90 mt-1">
+            Pantau status ketersediaan kamar dan kelola pesanan masuk dari calon penyewa.
+          </p>
+        </div>
       </div>
 
       {/* Metric Cards Grid */}

@@ -14,6 +14,7 @@ import {
   CheckCircle2,
   ArrowLeft,
 } from "lucide-react";
+import { GradientWave } from "@/components/ui/gradient-wave";
 
 interface FormErrors {
   name?: string;
@@ -126,6 +127,13 @@ export default function RegisterPage() {
 
   return (
     <div className="min-h-[calc(100vh-64px)] flex items-center justify-center p-4 sm:p-6 bg-slate-50/60 relative overflow-hidden">
+      {/* Background Animated Gradient Wave */}
+      <GradientWave
+        colors={["#ecfdf5", "#a7f3d0", "#34d399", "#ffffff", "#6ee7b7", "#ffffff"]}
+        noiseSpeed={0.000003}
+        className="opacity-40 -z-10 pointer-events-none"
+      />
+
       {/* Decorative ambient lighting elements */}
       <div
         className="fixed top-12 left-1/4 w-96 h-96 bg-emerald-400/10 rounded-full blur-3xl pointer-events-none -z-10"
@@ -136,7 +144,7 @@ export default function RegisterPage() {
         aria-hidden="true"
       />
 
-      <div className="relative z-10 w-full max-w-md bg-white p-6 sm:p-9 rounded-2xl sm:rounded-3xl shadow-soft-lg border border-slate-200/80 transition-all my-6">
+      <div className="relative z-10 w-full max-w-md bg-white/95 backdrop-blur-md p-6 sm:p-9 rounded-2xl sm:rounded-3xl shadow-soft-lg border border-slate-200/80 transition-all my-6">
         {/* State: Sukses */}
         {isSuccess ? (
           <div className="text-center py-6 space-y-4 animate-fadeIn">

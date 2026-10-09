@@ -14,6 +14,7 @@ import {
   Info,
   CheckCircle2,
 } from "lucide-react";
+import { GradientWave } from "@/components/ui/gradient-wave";
 
 function PartnerLoginForm() {
   const router = useRouter();
@@ -69,7 +70,7 @@ function PartnerLoginForm() {
   };
 
   return (
-    <div className="bg-white rounded-2xl p-6 sm:p-10 shadow-soft border border-slate-200/60">
+    <div className="bg-white/95 backdrop-blur-md rounded-2xl p-6 sm:p-10 shadow-soft border border-slate-200/60">
       {successMsg && (
         <div className="mb-6 p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs sm:text-sm font-medium flex items-start gap-3">
           <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0 mt-0.5" />
@@ -165,8 +166,14 @@ function PartnerLoginForm() {
 
 export default function PartnerLoginPage() {
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md mx-auto w-full">
+    <div className="min-h-screen bg-slate-50 flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+      {/* Background Animated Gradient Wave */}
+      <GradientWave
+        colors={["#ecfdf5", "#a7f3d0", "#34d399", "#ffffff", "#6ee7b7", "#ffffff"]}
+        noiseSpeed={0.000003}
+        className="opacity-40 -z-10 pointer-events-none"
+      />
+      <div className="max-w-md mx-auto w-full relative z-10">
         {/* Back to Home Action */}
         <div className="mb-6 flex items-center justify-between">
           <Link

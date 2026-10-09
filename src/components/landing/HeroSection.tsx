@@ -6,6 +6,7 @@ import { Search, ArrowRight, MapPin } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import { TypeAnimation } from "react-type-animation";
+import { GradientWave } from "@/components/ui/gradient-wave";
 
 export function HeroSection() {
   const router = useRouter();
@@ -22,10 +23,17 @@ export function HeroSection() {
 
   return (
     <section className="relative w-full overflow-hidden bg-gradient-to-b from-emerald-50/60 via-slate-50 to-white pt-10 sm:pt-16 pb-0">
+      {/* Background Animated Gradient Wave */}
+      <GradientWave
+        colors={["#ecfdf5", "#a7f3d0", "#34d399", "#10b981", "#ffffff", "#059669"]}
+        noiseSpeed={0.000004}
+        className="opacity-40 -z-10 pointer-events-none"
+      />
+
       {/* Glow decorative blur */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-5xl h-80 bg-gradient-to-b from-emerald-200/30 via-teal-100/20 to-transparent blur-3xl -z-10 pointer-events-none" />
 
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center flex flex-col items-center">
+      <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center flex flex-col items-center">
 
         {/* Big centered question headline */}
         <h1 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold text-slate-900 tracking-tight leading-[1.18] max-w-3xl">
@@ -91,7 +99,7 @@ export function HeroSection() {
       </div>
 
       {/* Hero Architectural / Building Image Banner (Ready for user's custom image) */}
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 mt-10 sm:mt-12">
+      <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 mt-10 sm:mt-12">
         <div className="relative w-full h-56 sm:h-80 lg:h-96 rounded-t-3xl overflow-hidden border-t border-x border-slate-200/80 shadow-2xl bg-slate-900 group">
           {/* Architectural Image */}
           <Image

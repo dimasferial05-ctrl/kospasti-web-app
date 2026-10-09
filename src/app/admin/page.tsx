@@ -16,6 +16,7 @@ import {
   ChevronRight,
   Sparkles,
 } from "lucide-react";
+import IsolineBloom from "@/components/ui/isoline-bloom";
 
 interface AdminStats {
   properties: number;
@@ -109,16 +110,27 @@ export default function AdminDashboardOverview() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-        <div>
-          <h2 className="text-2xl font-extrabold text-slate-800">Overview Dasbor</h2>
-          <p className="text-slate-500 text-sm">
-            Ringkasan performa kos dan aktivitas pesanan harian terkini.
-          </p>
+      {/* Header Dasbor dengan Isoline Bloom Contour Decor */}
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-slate-900 via-slate-800 to-indigo-950 p-6 sm:p-7 text-white shadow-soft">
+        <div className="absolute inset-0 pointer-events-none opacity-20 -z-10 overflow-hidden">
+          <IsolineBloom height="100%" preset="ghost" interactive={false} />
         </div>
-        <div className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 border border-slate-200 rounded-lg text-xs font-semibold text-slate-600 self-start sm:self-auto">
-          <Calendar size={14} className="text-slate-500" />
-          <span>{todayFormatted}</span>
+        <div className="relative z-10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div>
+            <div className="flex items-center gap-2 mb-1">
+              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-blue-500/20 text-blue-300 border border-blue-400/30">
+                <Sparkles size={11} /> Admin Control Center
+              </span>
+            </div>
+            <h2 className="text-2xl font-extrabold text-white">Overview Dasbor Admin</h2>
+            <p className="text-slate-300 text-sm mt-0.5">
+              Ringkasan performa kos dan aktivitas pesanan harian terkini.
+            </p>
+          </div>
+          <div className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white/10 backdrop-blur-md border border-white/20 rounded-lg text-xs font-semibold text-slate-200 self-start sm:self-auto">
+            <Calendar size={14} className="text-slate-300" />
+            <span>{todayFormatted}</span>
+          </div>
         </div>
       </div>
 
