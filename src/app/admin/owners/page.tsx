@@ -358,10 +358,10 @@ export default function AdminOwnersPage() {
       {/* Header & Controls */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
+          <h1 className="text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
             <span>Manajemen Pemilik Kos</span>
           </h1>
-          <p className="text-sm text-slate-500 mt-1">
+          <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
             Daftar seluruh pemilik kos (Ibu/Bapak Kos) yang terdaftar di platform KosPasti.
           </p>
         </div>
@@ -388,7 +388,7 @@ export default function AdminOwnersPage() {
               setAddError(null);
               setIsAddModalOpen(true);
             }}
-            className="inline-flex items-center justify-center gap-2 bg-slate-900 hover:bg-slate-800 text-white px-4 py-2 text-sm font-semibold rounded-lg shadow-sm transition-colors cursor-pointer shrink-0"
+            className="inline-flex items-center justify-center gap-2 bg-slate-900 hover:bg-slate-800 dark:bg-emerald-600 dark:hover:bg-emerald-700 text-white px-4 py-2 text-sm font-semibold rounded-lg shadow-sm transition-colors cursor-pointer shrink-0"
           >
             <Plus className="w-4 h-4" />
             <span>Tambah Pemilik</span>
@@ -397,54 +397,54 @@ export default function AdminOwnersPage() {
       </div>
 
       {/* Owners Table */}
-      <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-        <div className="p-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
-          <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">
+      <div className="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 overflow-hidden">
+        <div className="p-4 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-slate-50/50 dark:bg-slate-800/60">
+          <span className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
             Total {filteredOwners.length} Pemilik Terdaftar
           </span>
         </div>
 
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm min-w-[800px]">
-            <thead className="bg-slate-100 text-slate-600 font-semibold uppercase text-xs tracking-wider">
+            <thead className="bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-semibold uppercase text-xs tracking-wider">
               <tr>
-                <th className="p-4 border-b border-slate-200">Nama Pemilik</th>
-                <th className="p-4 border-b border-slate-200">Nomor WhatsApp</th>
-                <th className="p-4 border-b border-slate-200 text-center">Jumlah Properti</th>
-                <th className="p-4 border-b border-slate-200">Tanggal Terdaftar</th>
-                <th className="p-4 border-b border-slate-200 text-right">Aksi</th>
+                <th className="p-4 border-b border-slate-200 dark:border-slate-700">Nama Pemilik</th>
+                <th className="p-4 border-b border-slate-200 dark:border-slate-700">Nomor WhatsApp</th>
+                <th className="p-4 border-b border-slate-200 dark:border-slate-700 text-center">Jumlah Properti</th>
+                <th className="p-4 border-b border-slate-200 dark:border-slate-700">Tanggal Terdaftar</th>
+                <th className="p-4 border-b border-slate-200 dark:border-slate-700 text-right">Aksi</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody className="divide-y divide-slate-100 dark:divide-slate-800 text-slate-700 dark:text-slate-300">
               {filteredOwners.map((owner) => {
                 const propertyCount =
                   owner._count?.properties ?? owner.properties?.length ?? 0;
                 const isGenerating = generatingId === owner.id;
 
                 return (
-                  <tr key={owner.id} className="hover:bg-slate-50/80 transition-colors">
+                  <tr key={owner.id} className="hover:bg-slate-50/80 dark:hover:bg-slate-800/50 transition-colors">
                     <td className="p-4">
-                      <div className="font-bold text-slate-900">{owner.name}</div>
+                      <div className="font-bold text-slate-900 dark:text-slate-100">{owner.name}</div>
                       {owner.properties && owner.properties.length > 0 && (
-                        <div className="text-xs text-slate-400 mt-0.5 line-clamp-1">
+                        <div className="text-xs text-slate-400 dark:text-slate-500 mt-0.5 line-clamp-1">
                           {owner.properties.map((p) => p.name).join(", ")}
                         </div>
                       )}
                     </td>
                     <td className="p-4">
-                      <div className="font-medium text-slate-700 font-mono text-xs">
+                      <div className="font-medium text-slate-700 dark:text-slate-300 font-mono text-xs">
                         {owner.whatsapp_number}
                       </div>
                     </td>
                     <td className="p-4 text-center">
-                      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200/60">
-                        <Building2 className="w-3.5 h-3.5 text-emerald-600" />
+                      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200/60 dark:border-emerald-800">
+                        <Building2 className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
                         {propertyCount} Kos
                       </span>
                     </td>
                     <td className="p-4">
-                      <div className="text-xs text-slate-600 flex items-center gap-1.5">
-                        <Calendar className="w-3.5 h-3.5 text-slate-400" />
+                      <div className="text-xs text-slate-600 dark:text-slate-400 flex items-center gap-1.5">
+                        <Calendar className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500" />
                         {formatDate(owner.created_at)}
                       </div>
                     </td>
@@ -455,10 +455,10 @@ export default function AdminOwnersPage() {
                           type="button"
                           onClick={() => handleOpenEditModal(owner)}
                           disabled={generatingId !== null || isDeletingOwner}
-                          className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 disabled:opacity-50 disabled:cursor-not-allowed border border-slate-200 rounded-lg transition-colors cursor-pointer"
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-slate-700 dark:text-slate-200 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed border border-slate-200 dark:border-slate-700 rounded-lg transition-colors cursor-pointer"
                           title="Edit Data Pemilik"
                         >
-                          <Pencil className="w-3.5 h-3.5 text-slate-600" />
+                          <Pencil className="w-3.5 h-3.5 text-slate-600 dark:text-slate-400" />
                           <span>Edit</span>
                         </button>
 
@@ -467,13 +467,13 @@ export default function AdminOwnersPage() {
                           type="button"
                           onClick={() => handleGenerateLink(owner)}
                           disabled={generatingId !== null || isDeletingOwner}
-                          className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 disabled:opacity-50 disabled:cursor-not-allowed border border-indigo-200 rounded-lg transition-colors cursor-pointer"
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-indigo-700 dark:text-indigo-300 bg-indigo-50 dark:bg-indigo-950/50 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 disabled:opacity-50 disabled:cursor-not-allowed border border-indigo-200 dark:border-indigo-800 rounded-lg transition-colors cursor-pointer"
                           title="Buat Magic Link Baru"
                         >
                           {isGenerating ? (
-                            <Loader2 className="w-3.5 h-3.5 animate-spin text-indigo-600" />
+                            <Loader2 className="w-3.5 h-3.5 animate-spin text-indigo-600 dark:text-indigo-400" />
                           ) : (
-                            <Link2 className="w-3.5 h-3.5 text-indigo-600" />
+                            <Link2 className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />
                           )}
                           <span>{isGenerating ? "Memproses..." : "Generate Link"}</span>
                         </button>
@@ -483,10 +483,10 @@ export default function AdminOwnersPage() {
                           href={`https://wa.me/${formatWhatsAppNumber(owner.whatsapp_number)}`}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 rounded-lg transition-colors cursor-pointer"
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/40 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 border border-emerald-200 dark:border-emerald-800 rounded-lg transition-colors cursor-pointer"
                           title="Hubungi via WhatsApp"
                         >
-                          <MessageSquare className="w-3.5 h-3.5 text-emerald-600" />
+                          <MessageSquare className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
                           <span>Chat WA</span>
                         </a>
 
@@ -502,10 +502,10 @@ export default function AdminOwnersPage() {
                             setDeleteOwnerError(null);
                           }}
                           disabled={generatingId !== null || isDeletingOwner}
-                          className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-rose-600 bg-white hover:bg-rose-50 disabled:opacity-50 disabled:cursor-not-allowed border border-rose-200 rounded-lg transition-colors cursor-pointer"
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-rose-600 dark:text-rose-400 bg-white dark:bg-slate-900 hover:bg-rose-50 dark:hover:bg-rose-950/50 disabled:opacity-50 disabled:cursor-not-allowed border border-rose-200 dark:border-rose-800 rounded-lg transition-colors cursor-pointer"
                           title="Hapus Pemilik"
                         >
-                          <Trash2 className="w-3.5 h-3.5 text-rose-600" />
+                          <Trash2 className="w-3.5 h-3.5 text-rose-600 dark:text-rose-400" />
                           <span>Hapus</span>
                         </button>
                       </div>
@@ -516,7 +516,7 @@ export default function AdminOwnersPage() {
 
               {filteredOwners.length === 0 && (
                 <tr>
-                  <td colSpan={5} className="p-8 text-center text-slate-500">
+                  <td colSpan={5} className="p-8 text-center text-slate-500 dark:text-slate-400">
                     {searchQuery
                       ? `Tidak ditemukan pemilik kos dengan kata kunci "${searchQuery}".`
                       : "Belum ada data pemilik kos terdaftar."}
@@ -543,20 +543,20 @@ export default function AdminOwnersPage() {
           }}
         >
           <div
-            className="bg-white rounded-2xl max-w-md w-full shadow-2xl border border-slate-100 overflow-hidden"
+            className="bg-white dark:bg-slate-900 rounded-2xl max-w-md w-full shadow-2xl border border-slate-100 dark:border-slate-800 overflow-hidden"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Modal Header */}
-            <div className="p-6 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+            <div className="p-6 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-slate-50/50 dark:bg-slate-800/60">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-slate-100 text-slate-700 flex items-center justify-center shrink-0 font-bold">
+                <div className="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 flex items-center justify-center shrink-0 font-bold">
                   <UserPlus className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 id="add-owner-modal-title" className="text-lg font-bold text-slate-900">
+                  <h3 id="add-owner-modal-title" className="text-lg font-bold text-slate-900 dark:text-white">
                     Tambah Pemilik Kos Baru
                   </h3>
-                  <p className="text-xs text-slate-500">
+                  <p className="text-xs text-slate-500 dark:text-slate-400">
                     Daftarkan pemilik kos baru ke dalam sistem
                   </p>
                 </div>
@@ -568,7 +568,7 @@ export default function AdminOwnersPage() {
                   setIsAddModalOpen(false);
                   setAddError(null);
                 }}
-                className="text-slate-400 hover:text-slate-600 p-1.5 rounded-lg hover:bg-slate-100 transition-colors disabled:opacity-50 cursor-pointer"
+                className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors disabled:opacity-50 cursor-pointer"
                 aria-label="Tutup Modal"
               >
                 <X className="w-5 h-5" />
@@ -578,14 +578,14 @@ export default function AdminOwnersPage() {
             {/* Modal Form */}
             <form onSubmit={handleAddOwner} className="p-6 space-y-4">
               {addError && (
-                <div className="flex items-center gap-2 p-3.5 bg-rose-50 border border-rose-200 rounded-xl text-xs text-rose-700 font-medium">
-                  <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
+                <div className="flex items-center gap-2 p-3.5 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 rounded-xl text-xs text-rose-700 dark:text-rose-300 font-medium">
+                  <AlertCircle className="w-4 h-4 text-rose-600 dark:text-rose-400 shrink-0" />
                   <span>{addError}</span>
                 </div>
               )}
 
               <div className="space-y-1.5">
-                <label htmlFor="add-owner-name" className="text-xs font-semibold text-slate-700">
+                <label htmlFor="add-owner-name" className="text-xs font-semibold text-slate-700 dark:text-slate-300">
                   Nama Pemilik <span className="text-rose-500">*</span>
                 </label>
                 <input
@@ -597,12 +597,12 @@ export default function AdminOwnersPage() {
                   onChange={(e) =>
                     setAddFormData((prev) => ({ ...prev, name: e.target.value }))
                   }
-                  className="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-sm bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-600/15 focus:border-emerald-600 transition-all"
+                  className="w-full px-3.5 py-2.5 border border-slate-200 dark:border-slate-700 rounded-xl text-sm bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-600/15 focus:border-emerald-600 transition-all"
                 />
               </div>
 
               <div className="space-y-1.5">
-                <label htmlFor="add-owner-whatsapp" className="text-xs font-semibold text-slate-700">
+                <label htmlFor="add-owner-whatsapp" className="text-xs font-semibold text-slate-700 dark:text-slate-300">
                   Nomor WhatsApp <span className="text-rose-500">*</span>
                 </label>
                 <input
@@ -617,14 +617,14 @@ export default function AdminOwnersPage() {
                       whatsapp_number: e.target.value,
                     }))
                   }
-                  className="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-sm bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-600/15 focus:border-emerald-600 transition-all font-mono"
+                  className="w-full px-3.5 py-2.5 border border-slate-200 dark:border-slate-700 rounded-xl text-sm bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-600/15 focus:border-emerald-600 transition-all font-mono"
                 />
-                <p className="text-[11px] text-slate-400">
+                <p className="text-[11px] text-slate-400 dark:text-slate-500">
                   Nomor ini digunakan untuk kontak dan login via Magic Link WhatsApp.
                 </p>
               </div>
 
-              <div className="flex items-center justify-end gap-2.5 pt-4 border-t border-slate-100">
+              <div className="flex items-center justify-end gap-2.5 pt-4 border-t border-slate-100 dark:border-slate-800">
                 <button
                   type="button"
                   disabled={isSubmittingAdd}
@@ -632,14 +632,14 @@ export default function AdminOwnersPage() {
                     setIsAddModalOpen(false);
                     setAddError(null);
                   }}
-                  className="px-4 py-2.5 text-xs font-semibold text-slate-600 hover:bg-slate-100 disabled:opacity-50 rounded-xl transition-colors cursor-pointer border border-slate-200"
+                  className="px-4 py-2.5 text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 disabled:opacity-50 rounded-xl transition-colors cursor-pointer border border-slate-200 dark:border-slate-700"
                 >
                   Batal
                 </button>
                 <button
                   type="submit"
                   disabled={isSubmittingAdd}
-                  className="inline-flex items-center gap-2 bg-slate-900 hover:bg-slate-800 disabled:opacity-60 text-white px-5 py-2.5 text-xs font-semibold rounded-xl transition-all cursor-pointer shadow-sm"
+                  className="inline-flex items-center gap-2 bg-slate-900 hover:bg-slate-800 dark:bg-emerald-600 dark:hover:bg-emerald-700 disabled:opacity-60 text-white px-5 py-2.5 text-xs font-semibold rounded-xl transition-all cursor-pointer shadow-sm"
                 >
                   {isSubmittingAdd ? (
                     <>
@@ -674,20 +674,20 @@ export default function AdminOwnersPage() {
           }}
         >
           <div
-            className="bg-white rounded-2xl max-w-md w-full shadow-2xl border border-slate-100 overflow-hidden"
+            className="bg-white dark:bg-slate-900 rounded-2xl max-w-md w-full shadow-2xl border border-slate-100 dark:border-slate-800 overflow-hidden"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Modal Header */}
-            <div className="p-6 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+            <div className="p-6 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-slate-50/50 dark:bg-slate-800/60">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center shrink-0 font-bold">
+                <div className="w-10 h-10 rounded-xl bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-400 flex items-center justify-center shrink-0 font-bold">
                   <Pencil className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 id="edit-owner-modal-title" className="text-lg font-bold text-slate-900">
+                  <h3 id="edit-owner-modal-title" className="text-lg font-bold text-slate-900 dark:text-white">
                     Edit Data Pemilik Kos
                   </h3>
-                  <p className="text-xs text-slate-500">
+                  <p className="text-xs text-slate-500 dark:text-slate-400">
                     Perbarui nama atau nomor WhatsApp pemilik
                   </p>
                 </div>
@@ -699,7 +699,7 @@ export default function AdminOwnersPage() {
                   setEditingOwner(null);
                   setEditError(null);
                 }}
-                className="text-slate-400 hover:text-slate-600 p-1.5 rounded-lg hover:bg-slate-100 transition-colors disabled:opacity-50 cursor-pointer"
+                className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors disabled:opacity-50 cursor-pointer"
                 aria-label="Tutup Modal"
               >
                 <X className="w-5 h-5" />
@@ -709,14 +709,14 @@ export default function AdminOwnersPage() {
             {/* Modal Form */}
             <form onSubmit={handleUpdateOwner} className="p-6 space-y-4">
               {editError && (
-                <div className="flex items-center gap-2 p-3.5 bg-rose-50 border border-rose-200 rounded-xl text-xs text-rose-700 font-medium">
-                  <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
+                <div className="flex items-center gap-2 p-3.5 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 rounded-xl text-xs text-rose-700 dark:text-rose-300 font-medium">
+                  <AlertCircle className="w-4 h-4 text-rose-600 dark:text-rose-400 shrink-0" />
                   <span>{editError}</span>
                 </div>
               )}
 
               <div className="space-y-1.5">
-                <label htmlFor="edit-owner-name" className="text-xs font-semibold text-slate-700">
+                <label htmlFor="edit-owner-name" className="text-xs font-semibold text-slate-700 dark:text-slate-300">
                   Nama Pemilik <span className="text-rose-500">*</span>
                 </label>
                 <input
@@ -728,12 +728,12 @@ export default function AdminOwnersPage() {
                   onChange={(e) =>
                     setEditFormData((prev) => ({ ...prev, name: e.target.value }))
                   }
-                  className="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-sm bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-600/15 focus:border-emerald-600 transition-all"
+                  className="w-full px-3.5 py-2.5 border border-slate-200 dark:border-slate-700 rounded-xl text-sm bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-600/15 focus:border-emerald-600 transition-all"
                 />
               </div>
 
               <div className="space-y-1.5">
-                <label htmlFor="edit-owner-whatsapp" className="text-xs font-semibold text-slate-700">
+                <label htmlFor="edit-owner-whatsapp" className="text-xs font-semibold text-slate-700 dark:text-slate-300">
                   Nomor WhatsApp <span className="text-rose-500">*</span>
                 </label>
                 <input
@@ -748,11 +748,11 @@ export default function AdminOwnersPage() {
                       whatsapp_number: e.target.value,
                     }))
                   }
-                  className="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-sm bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-600/15 focus:border-emerald-600 transition-all font-mono"
+                  className="w-full px-3.5 py-2.5 border border-slate-200 dark:border-slate-700 rounded-xl text-sm bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-600/15 focus:border-emerald-600 transition-all font-mono"
                 />
               </div>
 
-              <div className="flex items-center justify-end gap-2.5 pt-4 border-t border-slate-100">
+              <div className="flex items-center justify-end gap-2.5 pt-4 border-t border-slate-100 dark:border-slate-800">
                 <button
                   type="button"
                   disabled={isSubmittingEdit}
@@ -760,14 +760,14 @@ export default function AdminOwnersPage() {
                     setEditingOwner(null);
                     setEditError(null);
                   }}
-                  className="px-4 py-2.5 text-xs font-semibold text-slate-600 hover:bg-slate-100 disabled:opacity-50 rounded-xl transition-colors cursor-pointer border border-slate-200"
+                  className="px-4 py-2.5 text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 disabled:opacity-50 rounded-xl transition-colors cursor-pointer border border-slate-200 dark:border-slate-700"
                 >
                   Batal
                 </button>
                 <button
                   type="submit"
                   disabled={isSubmittingEdit}
-                  className="inline-flex items-center gap-2 bg-slate-900 hover:bg-slate-800 disabled:opacity-60 text-white px-5 py-2.5 text-xs font-semibold rounded-xl transition-all cursor-pointer shadow-sm"
+                  className="inline-flex items-center gap-2 bg-slate-900 hover:bg-slate-800 dark:bg-emerald-600 dark:hover:bg-emerald-700 disabled:opacity-60 text-white px-5 py-2.5 text-xs font-semibold rounded-xl transition-all cursor-pointer shadow-sm"
                 >
                   {isSubmittingEdit ? (
                     <>
@@ -802,25 +802,25 @@ export default function AdminOwnersPage() {
           }}
         >
           <div
-            className="bg-white rounded-2xl max-w-sm w-full shadow-2xl border border-slate-100 overflow-hidden"
+            className="bg-white dark:bg-slate-900 rounded-2xl max-w-sm w-full shadow-2xl border border-slate-100 dark:border-slate-800 overflow-hidden"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header */}
-            <div className="p-5 border-b border-slate-100 flex items-center gap-3 bg-rose-50/70">
-              <div className="w-10 h-10 rounded-xl bg-rose-100 text-rose-600 flex items-center justify-center shrink-0">
+            <div className="p-5 border-b border-slate-100 dark:border-slate-800 flex items-center gap-3 bg-rose-50/70 dark:bg-rose-950/40">
+              <div className="w-10 h-10 rounded-xl bg-rose-100 dark:bg-rose-900/50 text-rose-600 dark:text-rose-400 flex items-center justify-center shrink-0">
                 <Trash2 className="w-5 h-5" />
               </div>
               <div>
-                <h3 id="delete-owner-modal-title" className="font-bold text-slate-800 text-base">Hapus Pemilik Kos</h3>
-                <p className="text-xs text-slate-500">Tindakan ini tidak dapat dibatalkan.</p>
+                <h3 id="delete-owner-modal-title" className="font-bold text-slate-800 dark:text-slate-100 text-base">Hapus Pemilik Kos</h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400">Tindakan ini tidak dapat dibatalkan.</p>
               </div>
             </div>
 
             {/* Body */}
             <div className="p-5 space-y-3">
-              <p className="text-sm text-slate-600 leading-relaxed">
+              <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
                 Apakah Anda yakin ingin menghapus pemilik{" "}
-                <span className="font-bold text-slate-800">
+                <span className="font-bold text-slate-800 dark:text-slate-100">
                   &ldquo;{confirmDeleteOwner.name}&rdquo;
                 </span>
                 ?
@@ -828,9 +828,9 @@ export default function AdminOwnersPage() {
 
               {/* Warning jika punya properti */}
               {confirmDeleteOwner.propertyCount > 0 && (
-                <div className="p-3 bg-amber-50 rounded-xl border border-amber-200 text-xs text-amber-800 space-y-1">
-                  <div className="flex items-center gap-1.5 font-bold text-amber-900">
-                    <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0" />
+                <div className="p-3 bg-amber-50 dark:bg-amber-950/40 rounded-xl border border-amber-200 dark:border-amber-800 text-xs text-amber-800 dark:text-amber-300 space-y-1">
+                  <div className="flex items-center gap-1.5 font-bold text-amber-900 dark:text-amber-200">
+                    <AlertTriangle className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0" />
                     <span>Peringatan Data Terkait:</span>
                   </div>
                   <p className="leading-relaxed">
@@ -838,15 +838,15 @@ export default function AdminOwnersPage() {
                     <span className="font-bold underline">
                       {confirmDeleteOwner.propertyCount} properti kos
                     </span>{" "}
-                    yang juga akan <span className="font-semibold text-rose-700">ikut terhapus</span> beserta seluruh data booking, media foto/video, dan magic link terkait.
+                    yang juga akan <span className="font-semibold text-rose-700 dark:text-rose-400">ikut terhapus</span> beserta seluruh data booking, media foto/video, dan magic link terkait.
                   </p>
                 </div>
               )}
 
               {/* Error inline */}
               {deleteOwnerError && (
-                <div className="flex items-center gap-2 p-3 bg-rose-50 border border-rose-200 rounded-xl text-xs text-rose-700 font-medium">
-                  <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
+                <div className="flex items-center gap-2 p-3 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 rounded-xl text-xs text-rose-700 dark:text-rose-300 font-medium">
+                  <AlertCircle className="w-4 h-4 text-rose-600 dark:text-rose-400 shrink-0" />
                   <span>{deleteOwnerError}</span>
                 </div>
               )}
@@ -861,7 +861,7 @@ export default function AdminOwnersPage() {
                   setConfirmDeleteOwner(null);
                   setDeleteOwnerError(null);
                 }}
-                className="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 disabled:opacity-50 rounded-xl transition-colors cursor-pointer border border-slate-200"
+                className="px-4 py-2 text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 disabled:opacity-50 rounded-xl transition-colors cursor-pointer border border-slate-200 dark:border-slate-700"
               >
                 Batal
               </button>
@@ -901,20 +901,20 @@ export default function AdminOwnersPage() {
           }}
         >
           <div
-            className="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-100 space-y-5"
+            className="bg-white dark:bg-slate-900 rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-100 dark:border-slate-800 space-y-5"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-start justify-between">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center font-bold shrink-0">
+                <div className="w-10 h-10 rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center font-bold shrink-0">
                   <CheckCircle2 className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 id="magic-link-modal-title" className="text-lg font-bold text-slate-900">
+                  <h3 id="magic-link-modal-title" className="text-lg font-bold text-slate-900 dark:text-white">
                     Tautan Magic Link Berhasil Dibuat!
                   </h3>
-                  <p className="text-xs text-slate-500">
-                    Untuk pemilik: <span className="font-semibold text-slate-700">{generatedModal.ownerName}</span>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">
+                    Untuk pemilik: <span className="font-semibold text-slate-700 dark:text-slate-200">{generatedModal.ownerName}</span>
                   </p>
                 </div>
               </div>
@@ -924,7 +924,7 @@ export default function AdminOwnersPage() {
                   setGeneratedModal(null);
                   setCopied(false);
                 }}
-                className="text-slate-400 hover:text-slate-600 p-1 rounded-lg hover:bg-slate-100 transition-colors cursor-pointer"
+                className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
                 aria-label="Tutup Modal"
               >
                 <X className="w-5 h-5" />
@@ -932,7 +932,7 @@ export default function AdminOwnersPage() {
             </div>
 
             <div className="space-y-2">
-              <label className="text-xs font-semibold text-slate-700">
+              <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">
                 URL Magic Link (Berlaku 24 Jam):
               </label>
               <div className="flex items-center gap-2">
@@ -940,14 +940,14 @@ export default function AdminOwnersPage() {
                   type="text"
                   readOnly
                   value={generatedModal.link}
-                  className="w-full text-xs font-mono bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-slate-800 focus:outline-none select-all break-all"
+                  className="w-full text-xs font-mono bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg p-2.5 text-slate-800 dark:text-slate-200 focus:outline-none select-all break-all"
                 />
                 <button
                   type="button"
                   onClick={handleCopyLink}
                   className={`inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-lg text-xs font-semibold transition-all shrink-0 cursor-pointer ${copied
                       ? "bg-emerald-600 text-white shadow-sm"
-                      : "bg-slate-900 text-white hover:bg-slate-800"
+                      : "bg-slate-900 hover:bg-slate-800 dark:bg-emerald-600 dark:hover:bg-emerald-700 text-white"
                     }`}
                   title="Salin ke Clipboard"
                 >
@@ -966,23 +966,23 @@ export default function AdminOwnersPage() {
               </div>
             </div>
 
-            <div className="p-3.5 bg-amber-50 rounded-xl border border-amber-200/80 text-xs text-amber-800 space-y-1">
+            <div className="p-3.5 bg-amber-50 dark:bg-amber-950/40 rounded-xl border border-amber-200/80 dark:border-amber-800 text-xs text-amber-800 dark:text-amber-300 space-y-1">
               <p className="font-semibold">Perhatian Keamanan:</p>
-              <p className="text-amber-700 leading-relaxed">
+              <p className="text-amber-700 dark:text-amber-400 leading-relaxed">
                 Tautan ini memberikan akses langsung bagi pemilik untuk memperbarui data kos tanpa login. Tautan lama otomatis kedaluwarsa.
               </p>
             </div>
 
-            <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
+            <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100 dark:border-slate-800">
               <a
                 href={`https://wa.me/${formatWhatsAppNumber(generatedModal.ownerPhone)}?text=${encodeURIComponent(
                   `Halo ${generatedModal.ownerName},\n\nBerikut adalah tautan rahasia (Magic Link) untuk mengakses dan memperbarui data properti kos Anda di platform KosPasti.\n\n🔗 Tautan: ${generatedModal.link}\n\n⚠️ Catatan: Tautan ini memberikan akses langsung tanpa login dan hanya berlaku selama 24 jam ke depan. Mohon jangan bagikan tautan ini kepada orang lain.\n\nTerima kasih!`
                 )}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-semibold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 rounded-lg transition-colors cursor-pointer"
+                className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-semibold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/40 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 border border-emerald-200 dark:border-emerald-800 rounded-lg transition-colors cursor-pointer"
               >
-                <MessageSquare className="w-3.5 h-3.5 text-emerald-600" />
+                <MessageSquare className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
                 <span>Kirim via WA</span>
               </a>
               <button
@@ -991,7 +991,7 @@ export default function AdminOwnersPage() {
                   setGeneratedModal(null);
                   setCopied(false);
                 }}
-                className="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-lg transition-colors cursor-pointer"
+                className="px-4 py-2 text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors cursor-pointer"
               >
                 Tutup
               </button>

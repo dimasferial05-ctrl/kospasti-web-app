@@ -204,13 +204,13 @@ export function GooeyInput({
   // Harmonized surface color tokens based on system typography and palette
   const surfaceClass = useMemo(() => {
     if (theme === "emerald") {
-      return "bg-white text-slate-800 border border-slate-200/90 shadow-xs hover:border-emerald-400 focus-within:border-emerald-500 focus-within:ring-2 focus-within:ring-emerald-500/15";
+      return "bg-white text-slate-800 border border-slate-200/90 shadow-xs hover:border-emerald-400 focus-within:border-emerald-500 focus-within:ring-2 focus-within:ring-emerald-500/15 dark:bg-slate-900 dark:text-slate-100 dark:border-slate-800 dark:hover:border-emerald-500";
     }
     // Default / slate theme (Admin & default components)
-    return "bg-white text-slate-800 border border-slate-200 shadow-xs hover:border-slate-300 focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-500/15";
+    return "bg-white text-slate-800 border border-slate-200 shadow-xs hover:border-slate-300 focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-500/15 dark:bg-slate-900 dark:text-slate-100 dark:border-slate-800 dark:hover:border-slate-700";
   }, [theme]);
 
-  const iconColor = theme === "emerald" ? "text-emerald-600" : "text-slate-500";
+  const iconColor = theme === "emerald" ? "text-emerald-600 dark:text-emerald-400" : "text-slate-500 dark:text-slate-400";
 
   // Total reserved width so it never shifts neighboring flex elements
   const containerWidth = preserveLayoutSpace ? expandedWidth + expandedOffset : undefined;
@@ -267,7 +267,7 @@ export function GooeyInput({
               disabled={disabled || !isExpanded}
               placeholder={placeholder}
               className={cn(
-                "h-full min-w-0 flex-1 bg-transparent text-sm text-slate-800 placeholder:text-slate-400 outline-none font-medium",
+                "h-full min-w-0 flex-1 bg-transparent text-sm text-slate-800 placeholder:text-slate-400 outline-none font-medium dark:text-slate-100 dark:placeholder:text-slate-500",
                 isExpanded
                   ? "pointer-events-auto"
                   : "pointer-events-none opacity-80",

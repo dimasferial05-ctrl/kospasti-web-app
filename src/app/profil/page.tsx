@@ -602,15 +602,15 @@ function ProfileContent() {
                 </div>
 
                 {saveSuccessMessage && (
-                  <div className="mb-6 p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-sm flex items-center gap-3">
-                    <CheckCircle2 className="w-5 h-5 shrink-0 text-emerald-600" />
+                  <div className="mb-6 p-4 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300 text-sm flex items-center gap-3">
+                    <CheckCircle2 className="w-5 h-5 shrink-0 text-emerald-600 dark:text-emerald-400" />
                     <span>{saveSuccessMessage}</span>
                   </div>
                 )}
 
                 {saveErrorMessage && (
-                  <div className="mb-6 p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-sm flex items-center gap-3">
-                    <AlertCircle className="w-5 h-5 shrink-0 text-rose-600" />
+                  <div className="mb-6 p-4 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 text-rose-800 dark:text-rose-300 text-sm flex items-center gap-3">
+                    <AlertCircle className="w-5 h-5 shrink-0 text-rose-600 dark:text-rose-400" />
                     <span>{saveErrorMessage}</span>
                   </div>
                 )}
@@ -618,8 +618,8 @@ function ProfileContent() {
                 {!isEditing ? (
                   /* VIEW MODE */
                   <div className="space-y-6">
-                    <div className="flex items-center gap-5 p-4 rounded-xl bg-slate-50 border border-slate-150">
-                      <div className="relative w-20 h-20 rounded-full overflow-hidden bg-white border-2 border-slate-200 flex items-center justify-center shrink-0">
+                    <div className="flex items-center gap-5 p-4 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-150 dark:border-slate-800">
+                      <div className="relative w-20 h-20 rounded-full overflow-hidden bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 flex items-center justify-center shrink-0">
                         {avatarPreview ? (
                           <Image
                             src={avatarPreview}
@@ -629,17 +629,17 @@ function ProfileContent() {
                             unoptimized={avatarPreview.startsWith("blob:")}
                           />
                         ) : (
-                          <UserIcon className="w-9 h-9 text-slate-400" />
+                          <UserIcon className="w-9 h-9 text-slate-400 dark:text-slate-500" />
                         )}
                       </div>
                       <div>
-                        <span className="text-xs font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-0.5 rounded-full inline-block mb-1">
+                        <span className="text-xs font-semibold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800 px-2.5 py-0.5 rounded-full inline-block mb-1">
                           Foto Profil
                         </span>
-                        <p className="text-sm font-medium text-slate-800">
+                        <p className="text-sm font-medium text-slate-800 dark:text-slate-200">
                           {user?.avatar ? "Foto profil kustom terpasang" : "Menggunakan avatar bawaan"}
                         </p>
-                        <p className="text-xs text-slate-500">
+                        <p className="text-xs text-slate-500 dark:text-slate-400">
                           Klik tombol &quot;Edit Profil&quot; di atas untuk mengganti foto.
                         </p>
                       </div>
@@ -772,10 +772,14 @@ function ProfileContent() {
                           return (
                             <label
                               key={item.id}
-                              onClick={() => setTheme(item.id)}
+                              onClick={() => {
+                                if (item.id === "light") setTheme("light");
+                                else if (item.id === "dark") setTheme("dark");
+                                else setTheme("system");
+                              }}
                               className={`relative flex items-start gap-3 p-3.5 rounded-xl border transition-all cursor-pointer select-none ${
                                 isSelected
-                                  ? "bg-white dark:bg-slate-800 border-emerald-500 shadow-sm ring-2 ring-emerald-500/20"
+                                    ? "bg-white dark:bg-slate-800 border-emerald-500 shadow-sm ring-2 ring-emerald-500/20"
                                   : "bg-white/80 dark:bg-slate-900/60 border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 hover:bg-white dark:hover:bg-slate-800/80"
                               }`}
                             >
@@ -786,7 +790,11 @@ function ProfileContent() {
                                   name="theme-selection"
                                   value={item.id}
                                   checked={isSelected}
-                                  onChange={() => setTheme(item.id)}
+                                  onChange={() => {
+                                    if (item.id === "light") setTheme("light");
+                                    else if (item.id === "dark") setTheme("dark");
+                                    else setTheme("system");
+                                  }}
                                   className="sr-only"
                                 />
                                 <div
@@ -830,13 +838,13 @@ function ProfileContent() {
                   <form onSubmit={handleSaveProfile} className="space-y-6">
                     {/* Foto Profil Uploader */}
                     <div>
-                      <label className="block text-sm font-semibold text-slate-800 mb-2">
+                      <label className="block text-sm font-semibold text-slate-800 dark:text-slate-200 mb-2">
                         Foto Profil
                       </label>
                       <div className="flex items-center gap-5">
                         <div
                           onClick={() => fileInputRef.current?.click()}
-                          className="group relative w-24 h-24 rounded-full overflow-hidden bg-slate-100 border-2 border-dashed border-slate-300 hover:border-emerald-500 cursor-pointer flex items-center justify-center transition-colors"
+                          className="group relative w-24 h-24 rounded-full overflow-hidden bg-slate-100 dark:bg-slate-800 border-2 border-dashed border-slate-300 dark:border-slate-700 hover:border-emerald-500 cursor-pointer flex items-center justify-center transition-colors"
                         >
                           {avatarPreview ? (
                             <Image
@@ -860,11 +868,11 @@ function ProfileContent() {
                           <button
                             type="button"
                             onClick={() => fileInputRef.current?.click()}
-                            className="px-3.5 py-1.5 text-xs font-semibold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 rounded-lg border border-emerald-200 transition-colors cursor-pointer"
+                            className="px-3.5 py-1.5 text-xs font-semibold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60 hover:bg-emerald-100 dark:hover:bg-emerald-900/60 rounded-lg border border-emerald-200 dark:border-emerald-800 transition-colors cursor-pointer"
                           >
                             Pilih Foto Baru
                           </button>
-                          <p className="text-xs text-slate-500">
+                          <p className="text-xs text-slate-500 dark:text-slate-400">
                             Format JPG, PNG, atau WebP. Maksimal 2MB.
                           </p>
                         </div>
@@ -1012,134 +1020,6 @@ function ProfileContent() {
                     </div>
                   </form>
                 )}
-
-                {/* PENGATURAN TAMPILAN APLIKASI (Issue #237) */}
-                <div className="mt-8 pt-6 border-t border-slate-100 dark:border-slate-800">
-                  <div className="mb-4">
-                    <h3 className="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-wider">
-                      Tampilan Aplikasi
-                    </h3>
-                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                      Pilih tema tampilan yang paling nyaman untuk mata Anda saat mencari kos.
-                    </p>
-                  </div>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                    {/* Mode Terang */}
-                    <button
-                      type="button"
-                      onClick={() => setTheme("light")}
-                      className={`flex items-center gap-3 p-3.5 rounded-xl border text-left transition-all cursor-pointer ${
-                        themeMounted && theme === "light"
-                          ? "border-emerald-500 bg-emerald-50/50 dark:bg-emerald-950/20 text-emerald-900 dark:text-emerald-300 ring-2 ring-emerald-500/20"
-                          : "border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-800/60 text-slate-700 dark:text-slate-300 hover:border-slate-300 dark:hover:border-slate-700"
-                      }`}
-                    >
-                      <div
-                        className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 ${
-                          themeMounted && theme === "light"
-                            ? "bg-amber-100 dark:bg-amber-900/40 text-amber-600 dark:text-amber-400"
-                            : "bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400"
-                        }`}
-                      >
-                        <Sun className="w-4 h-4" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center justify-between">
-                          <span className="text-sm font-semibold">Mode Terang</span>
-                          <span
-                            className={`w-4 h-4 rounded-full border flex items-center justify-center shrink-0 ${
-                              themeMounted && theme === "light"
-                                ? "border-emerald-600 bg-emerald-600 text-white"
-                                : "border-slate-300 dark:border-slate-600"
-                            }`}
-                          >
-                            {themeMounted && theme === "light" && <Check className="w-2.5 h-2.5" />}
-                          </span>
-                        </div>
-                        <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
-                          Tampilan terang standar
-                        </p>
-                      </div>
-                    </button>
-
-                    {/* Mode Gelap */}
-                    <button
-                      type="button"
-                      onClick={() => setTheme("dark")}
-                      className={`flex items-center gap-3 p-3.5 rounded-xl border text-left transition-all cursor-pointer ${
-                        themeMounted && theme === "dark"
-                          ? "border-emerald-500 bg-emerald-50/50 dark:bg-emerald-950/20 text-emerald-900 dark:text-emerald-300 ring-2 ring-emerald-500/20"
-                          : "border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-800/60 text-slate-700 dark:text-slate-300 hover:border-slate-300 dark:hover:border-slate-700"
-                      }`}
-                    >
-                      <div
-                        className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 ${
-                          themeMounted && theme === "dark"
-                            ? "bg-indigo-100 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-400"
-                            : "bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400"
-                        }`}
-                      >
-                        <Moon className="w-4 h-4" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center justify-between">
-                          <span className="text-sm font-semibold">Mode Gelap</span>
-                          <span
-                            className={`w-4 h-4 rounded-full border flex items-center justify-center shrink-0 ${
-                              themeMounted && theme === "dark"
-                                ? "border-emerald-600 bg-emerald-600 text-white"
-                                : "border-slate-300 dark:border-slate-600"
-                            }`}
-                          >
-                            {themeMounted && theme === "dark" && <Check className="w-2.5 h-2.5" />}
-                          </span>
-                        </div>
-                        <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
-                          Lebih nyaman di malam hari
-                        </p>
-                      </div>
-                    </button>
-
-                    {/* Ikuti Sistem */}
-                    <button
-                      type="button"
-                      onClick={() => setTheme("system")}
-                      className={`flex items-center gap-3 p-3.5 rounded-xl border text-left transition-all cursor-pointer ${
-                        themeMounted && theme === "system"
-                          ? "border-emerald-500 bg-emerald-50/50 dark:bg-emerald-950/20 text-emerald-900 dark:text-emerald-300 ring-2 ring-emerald-500/20"
-                          : "border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-800/60 text-slate-700 dark:text-slate-300 hover:border-slate-300 dark:hover:border-slate-700"
-                      }`}
-                    >
-                      <div
-                        className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 ${
-                          themeMounted && theme === "system"
-                            ? "bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300"
-                            : "bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400"
-                        }`}
-                      >
-                        <Monitor className="w-4 h-4" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center justify-between">
-                          <span className="text-sm font-semibold">Ikuti Sistem</span>
-                          <span
-                            className={`w-4 h-4 rounded-full border flex items-center justify-center shrink-0 ${
-                              themeMounted && theme === "system"
-                                ? "border-emerald-600 bg-emerald-600 text-white"
-                                : "border-slate-300 dark:border-slate-600"
-                            }`}
-                          >
-                            {themeMounted && theme === "system" && <Check className="w-2.5 h-2.5" />}
-                          </span>
-                        </div>
-                        <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
-                          Otomatis sesuai HP / Laptop
-                        </p>
-                      </div>
-                    </button>
-                  </div>
-                </div>
               </div>
             )}
 

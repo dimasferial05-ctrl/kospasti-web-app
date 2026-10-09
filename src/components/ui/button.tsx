@@ -9,16 +9,16 @@ const buttonVariants = cva(
     variants: {
       variant: {
         default:
-          "bg-emerald-600 text-white shadow-soft hover:bg-emerald-700 hover:shadow-float",
+          "bg-emerald-600 text-white shadow-soft hover:bg-emerald-700 hover:shadow-float dark:bg-emerald-600 dark:hover:bg-emerald-500",
         outline:
-          "border-slate-200/80 bg-white text-slate-700 shadow-soft hover:bg-slate-50 hover:text-slate-900 hover:border-slate-300 hover:shadow-float dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200",
+          "border-slate-200/80 bg-white text-slate-700 shadow-soft hover:bg-slate-50 hover:text-slate-900 hover:border-slate-300 hover:shadow-float dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700 dark:hover:text-white dark:hover:border-slate-600",
         secondary:
-          "bg-slate-100 text-slate-800 hover:bg-slate-200/80 shadow-2xs dark:bg-slate-800 dark:text-slate-100",
+          "bg-slate-100 text-slate-800 hover:bg-slate-200/80 shadow-2xs dark:bg-slate-800 dark:text-slate-100 dark:hover:bg-slate-700",
         ghost:
-          "hover:bg-slate-100 hover:text-slate-900 hover:-translate-y-0 shadow-none active:scale-95 dark:hover:bg-slate-800 dark:text-slate-200",
+          "hover:bg-slate-100 hover:text-slate-900 hover:-translate-y-0 shadow-none active:scale-95 dark:hover:bg-slate-800 dark:text-slate-200 dark:hover:text-white",
         destructive:
-          "bg-rose-600 text-white shadow-soft hover:bg-rose-700 hover:shadow-float focus-visible:ring-rose-500/50",
-        link: "text-emerald-600 underline-offset-4 hover:underline hover:text-emerald-700 hover:-translate-y-0 shadow-none",
+          "bg-rose-600 text-white shadow-soft hover:bg-rose-700 hover:shadow-float focus-visible:ring-rose-500/50 dark:bg-rose-600 dark:hover:bg-rose-700",
+        link: "text-emerald-600 underline-offset-4 hover:underline hover:text-emerald-700 hover:-translate-y-0 shadow-none dark:text-emerald-400 dark:hover:text-emerald-300",
       },
       size: {
         default:

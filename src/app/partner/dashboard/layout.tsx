@@ -14,6 +14,7 @@ import {
   ExternalLink,
 } from "lucide-react";
 import { Sidebar, SidebarBody, SidebarLink, type Links } from "@/components/ui/sidebar";
+import { SidebarThemeToggle } from "@/components/ui/SidebarThemeToggle";
 import { motion } from "motion/react";
 
 interface PartnerInfo {
@@ -149,7 +150,7 @@ export default function PartnerDashboardLayout({
   }
 
   return (
-    <div className="h-screen w-full flex flex-col md:flex-row overflow-hidden bg-slate-100">
+    <div className="h-screen w-full flex flex-col md:flex-row overflow-hidden bg-slate-100 dark:bg-slate-950">
       <Sidebar open={open} setOpen={setOpen}>
         <SidebarBody className="justify-between gap-6 bg-slate-950 text-slate-300 border-r border-slate-800">
           <div className="flex flex-1 flex-col overflow-x-hidden overflow-y-auto">
@@ -190,8 +191,9 @@ export default function PartnerDashboardLayout({
             </div>
           </div>
 
-          {/* Bottom section: Help Center, Main Page Link & Logout */}
+          {/* Bottom section: Theme Toggle, Help Center, Main Page Link & Logout */}
           <div className="pt-3 border-t border-slate-800/80 space-y-1.5">
+            <SidebarThemeToggle />
             <SidebarLink
               link={{
                 label: "Pusat Bantuan",
@@ -239,7 +241,7 @@ export default function PartnerDashboardLayout({
       </Sidebar>
 
       {/* Main Content */}
-      <main className="flex-1 overflow-y-auto p-4 md:p-8 bg-slate-50/70">
+      <main className="flex-1 overflow-y-auto p-4 md:p-8 bg-slate-50/70 dark:bg-slate-950">
         {children}
       </main>
     </div>
@@ -250,7 +252,7 @@ function Logo() {
   return (
     <div className="flex items-center gap-2 px-1">
       <Image
-        src="/logo.jpg"
+        src="/logo-dark.png"
         alt="KosPasti Mitra Logo"
         width={32}
         height={32}
@@ -275,7 +277,7 @@ function LogoIcon() {
   return (
     <div className="flex items-center justify-center py-0.5">
       <Image
-        src="/logo.jpg"
+        src="/logo-dark.png"
         alt="KosPasti Mitra Logo"
         width={32}
         height={32}

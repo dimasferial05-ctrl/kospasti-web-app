@@ -141,7 +141,7 @@ class MapErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundary
         return this.props.fallback;
       }
       return (
-        <div className="relative w-full h-full min-h-[400px] flex flex-col items-center justify-center bg-slate-100 rounded-2xl border border-dashed border-slate-300 p-8 text-center">
+        <div className="relative w-full h-full min-h-[400px] flex flex-col items-center justify-center bg-slate-100 dark:bg-slate-900 rounded-2xl border border-dashed border-slate-300 dark:border-slate-800 p-8 text-center">
           <div className="w-14 h-14 rounded-full bg-red-100 text-red-600 flex items-center justify-center mb-4 shadow-sm">
             <AlertCircle className="w-7 h-7" />
           </div>
@@ -271,7 +271,7 @@ function MapViewerInner({
 
   if (!effectiveApiKey) {
     return (
-      <div className="relative w-full h-full min-h-[400px] flex flex-col items-center justify-center bg-slate-100 rounded-2xl border border-dashed border-slate-300 p-8 text-center">
+      <div className="relative w-full h-full min-h-[400px] flex flex-col items-center justify-center bg-slate-100 dark:bg-slate-900 rounded-2xl border border-dashed border-slate-300 dark:border-slate-800 p-8 text-center">
         <div className="w-14 h-14 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center mb-4 shadow-sm">
           <AlertCircle className="w-7 h-7" />
         </div>
@@ -293,7 +293,7 @@ function MapViewerInner({
   }
 
   return (
-    <div className="relative w-full h-full min-h-[400px] rounded-2xl overflow-hidden border border-slate-200 shadow-sm bg-slate-50">
+    <div className="relative w-full h-full min-h-[400px] rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-800 shadow-sm bg-slate-50 dark:bg-slate-950">
       <APIProvider apiKey={effectiveApiKey} language="id" region="ID">
         <Map
           defaultCenter={dynamicCenter}
@@ -389,9 +389,9 @@ function MapViewerInner({
                 onCloseClick={handleInfoWindowClose}
                 pixelOffset={[0, -28]}
               >
-                <div className="w-64 p-1 text-slate-800">
+                <div className="w-64 p-1 text-slate-800 dark:text-slate-100">
                   {activeProperty.image_url ? (
-                    <div className="relative w-full h-32 mb-2.5 rounded-lg overflow-hidden bg-slate-100">
+                    <div className="relative w-full h-32 mb-2.5 rounded-lg overflow-hidden bg-slate-100 dark:bg-slate-800">
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
                         src={activeProperty.image_url}
@@ -401,7 +401,7 @@ function MapViewerInner({
                       />
                     </div>
                   ) : (
-                    <div className="w-full h-24 mb-2.5 rounded-lg bg-slate-100 flex items-center justify-center text-slate-400 text-xs">
+                    <div className="w-full h-24 mb-2.5 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-400 dark:text-slate-500 text-xs">
                       Tidak ada foto
                     </div>
                   )}
@@ -410,10 +410,10 @@ function MapViewerInner({
                     <span
                       className={`text-[10px] font-bold px-1.5 py-0.5 rounded-md uppercase ${
                         activeProperty.gender_type === "PUTRI"
-                          ? "bg-pink-100 text-pink-700"
+                          ? "bg-pink-100 dark:bg-pink-950/60 text-pink-700 dark:text-pink-300"
                           : activeProperty.gender_type === "PUTRA"
-                          ? "bg-blue-100 text-blue-700"
-                          : "bg-purple-100 text-purple-700"
+                          ? "bg-blue-100 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300"
+                          : "bg-purple-100 dark:bg-purple-950/60 text-purple-700 dark:text-purple-300"
                       }`}
                     >
                       {activeProperty.gender_type}
@@ -421,8 +421,8 @@ function MapViewerInner({
                     <span
                       className={`text-[10px] font-medium px-1.5 py-0.5 rounded-md ${
                         activeProperty.available_rooms > 0
-                          ? "bg-emerald-100 text-emerald-800"
-                          : "bg-red-100 text-red-700"
+                          ? "bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300"
+                          : "bg-red-100 dark:bg-red-950/60 text-red-700 dark:text-red-300"
                       }`}
                     >
                       {activeProperty.available_rooms > 0
@@ -431,24 +431,24 @@ function MapViewerInner({
                     </span>
                   </div>
 
-                  <h4 className="font-bold text-sm text-slate-900 line-clamp-1 mb-1">
+                  <h4 className="font-bold text-sm text-slate-900 dark:text-white line-clamp-1 mb-1">
                     {activeProperty.name}
                   </h4>
 
                   {activeProperty.address && (
-                    <p className="text-xs text-slate-500 line-clamp-1 mb-1.5 flex items-center gap-1">
-                      <MapPin className="w-3 h-3 shrink-0 text-slate-400" />
+                    <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-1 mb-1.5 flex items-center gap-1">
+                      <MapPin className="w-3 h-3 shrink-0 text-slate-400 dark:text-slate-500" />
                       <span>{activeProperty.address}</span>
                     </p>
                   )}
 
-                  <div className="flex items-baseline justify-between pt-1 border-t border-slate-100 mb-2.5">
+                  <div className="flex items-baseline justify-between pt-1 border-t border-slate-100 dark:border-slate-800 mb-2.5">
                     <div>
-                      <span className="text-[10px] text-slate-400 block">Harga Sewa</span>
-                      <span className="text-sm font-extrabold text-emerald-600">
+                      <span className="text-[10px] text-slate-400 dark:text-slate-500 block">Harga Sewa</span>
+                      <span className="text-sm font-extrabold text-emerald-600 dark:text-emerald-400">
                         {formatRupiah(activeProperty.price_per_month)}
                       </span>
-                      <span className="text-[10px] text-slate-500">/bln</span>
+                      <span className="text-[10px] text-slate-500 dark:text-slate-400">/bln</span>
                     </div>
                   </div>
 
@@ -470,10 +470,10 @@ function MapViewerInner({
         onClick={handleLocateMe}
         disabled={isLocating}
         aria-label="Gunakan lokasi saya saat ini"
-        className="absolute top-4 right-4 z-10 bg-white/95 hover:bg-white text-slate-700 p-2.5 rounded-xl shadow-md border border-slate-200 transition-all hover:scale-105 active:scale-95 disabled:opacity-50 flex items-center gap-1.5 text-xs font-medium"
+        className="absolute top-4 right-4 z-10 bg-white/95 hover:bg-white dark:bg-slate-900/95 dark:hover:bg-slate-900 text-slate-700 dark:text-slate-200 p-2.5 rounded-xl shadow-md border border-slate-200 dark:border-slate-800 transition-all hover:scale-105 active:scale-95 disabled:opacity-50 flex items-center gap-1.5 text-xs font-medium cursor-pointer"
       >
         <Navigation
-          className={`w-4 h-4 text-emerald-600 ${isLocating ? "animate-spin" : ""}`}
+          className={`w-4 h-4 text-emerald-600 dark:text-emerald-400 ${isLocating ? "animate-spin" : ""}`}
         />
         <span className="hidden sm:inline">
           {isLocating ? "Mencari..." : "Lokasi Saya"}

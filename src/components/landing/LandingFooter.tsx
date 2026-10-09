@@ -16,7 +16,14 @@ export function LandingFooter() {
                 alt="KosPasti Logo"
                 width={32}
                 height={32}
-                className="w-8 h-8 rounded-lg object-cover shadow-xs shrink-0"
+                className="w-8 h-8 rounded-lg object-cover shadow-xs shrink-0 block dark:hidden"
+              />
+              <Image
+                src="/logo-dark.png"
+                alt="KosPasti Logo"
+                width={32}
+                height={32}
+                className="w-8 h-8 rounded-lg object-cover shadow-xs shrink-0 hidden dark:block"
               />
               <div className="flex flex-col">
                 <span className="text-lg font-extrabold text-slate-900 dark:text-white tracking-tight leading-none">
@@ -134,7 +141,14 @@ export function LandingFooter() {
                 src="/images/footer-skyline.jpg"
                 alt="City Skyline Left"
                 fill
-                className="object-cover object-bottom scale-x-[-1]"
+                className="object-cover object-bottom scale-x-[-1] block dark:hidden"
+                sizes="(max-width: 768px) 33vw, 300px"
+              />
+              <Image
+                src="/images/footer-skyline-dark.png"
+                alt="City Skyline Left"
+                fill
+                className="object-cover object-bottom scale-x-[-1] hidden dark:block"
                 sizes="(max-width: 768px) 33vw, 300px"
               />
             </div>
@@ -144,7 +158,14 @@ export function LandingFooter() {
                 src="/images/footer-skyline.jpg"
                 alt="City Skyline Center"
                 fill
-                className="object-cover object-bottom"
+                className="object-cover object-bottom block dark:hidden"
+                sizes="(max-width: 768px) 33vw, 300px"
+              />
+              <Image
+                src="/images/footer-skyline-dark.png"
+                alt="City Skyline Center"
+                fill
+                className="object-cover object-bottom hidden dark:block"
                 sizes="(max-width: 768px) 33vw, 300px"
               />
             </div>
@@ -154,7 +175,14 @@ export function LandingFooter() {
                 src="/images/footer-skyline.jpg"
                 alt="City Skyline Right"
                 fill
-                className="object-cover object-bottom scale-x-[-1]"
+                className="object-cover object-bottom scale-x-[-1] block dark:hidden"
+                sizes="(max-width: 768px) 33vw, 300px"
+              />
+              <Image
+                src="/images/footer-skyline-dark.png"
+                alt="City Skyline Right"
+                fill
+                className="object-cover object-bottom scale-x-[-1] hidden dark:block"
                 sizes="(max-width: 768px) 33vw, 300px"
               />
             </div>

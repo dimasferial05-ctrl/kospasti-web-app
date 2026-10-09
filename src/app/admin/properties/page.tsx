@@ -719,19 +719,19 @@ export default function ManagePropertiesPage() {
 
   return (
     <div className="space-y-6">
-      <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-        <div className="p-6 border-b border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-slate-50">
+      <div className="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 overflow-hidden">
+        <div className="p-6 border-b border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-slate-50 dark:bg-slate-800/50">
           <div>
-            <h2 className="text-xl font-bold text-slate-800">
+            <h2 className="text-xl font-bold text-slate-800 dark:text-white">
               Daftar Kos &amp; Manajemen Properti
             </h2>
-            <p className="text-sm text-slate-500">
+            <p className="text-sm text-slate-500 dark:text-slate-400">
               Kelola properti terdaftar, harga sewa, tipe kamar, dan fasilitas kos.
             </p>
           </div>
           <button
             onClick={handleOpenAddModal}
-            className="inline-flex items-center justify-center gap-2 bg-slate-900 hover:bg-slate-800 text-white px-4 py-2.5 rounded-lg text-sm font-semibold transition-all shadow-sm cursor-pointer self-start sm:self-auto"
+            className="inline-flex items-center justify-center gap-2 bg-slate-900 hover:bg-slate-800 dark:bg-emerald-600 dark:hover:bg-emerald-700 text-white px-4 py-2.5 rounded-lg text-sm font-semibold transition-all shadow-sm cursor-pointer self-start sm:self-auto"
           >
             <Plus size={16} />
             <span>Tambah Properti</span>
@@ -743,8 +743,8 @@ export default function ManagePropertiesPage() {
           <div
             className={`p-4 border-b flex items-center justify-between text-xs font-semibold ${
               statusAlert.type === "success"
-                ? "bg-emerald-50 text-emerald-800 border-emerald-200"
-                : "bg-rose-50 text-rose-800 border-rose-200"
+                ? "bg-emerald-50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800/60"
+                : "bg-rose-50 dark:bg-rose-950/40 text-rose-800 dark:text-rose-300 border-rose-200 dark:border-rose-800/60"
             }`}
           >
             <div className="flex items-center gap-2">
@@ -757,7 +757,7 @@ export default function ManagePropertiesPage() {
             </div>
             <button
               onClick={() => setStatusAlert(null)}
-              className="text-slate-400 hover:text-slate-600 cursor-pointer"
+              className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer"
             >
               <X size={14} />
             </button>
@@ -765,18 +765,18 @@ export default function ManagePropertiesPage() {
         )}
 
         {/* Status Filter Tabs */}
-        <div className="px-6 py-3 border-b border-slate-200 bg-slate-50/50 flex items-center gap-2 overflow-x-auto">
+        <div className="px-6 py-3 border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30 flex items-center gap-2 overflow-x-auto">
           <button
             type="button"
             onClick={() => setSelectedStatusTab("ALL")}
             className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 shrink-0 ${
               selectedStatusTab === "ALL"
-                ? "bg-slate-900 text-white shadow-xs"
-                : "bg-white text-slate-600 hover:bg-slate-100 border border-slate-200"
+                ? "bg-slate-900 dark:bg-emerald-600 text-white shadow-xs"
+                : "bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700"
             }`}
           >
             <span>Semua Kos</span>
-            <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-slate-200 text-slate-800 font-black">
+            <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-slate-200 dark:bg-slate-700 text-slate-800 dark:text-slate-200 font-black">
               {properties.length}
             </span>
           </button>
@@ -787,7 +787,7 @@ export default function ManagePropertiesPage() {
             className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 shrink-0 ${
               selectedStatusTab === "PENDING_REVIEW"
                 ? "bg-amber-600 text-white shadow-xs"
-                : "bg-white text-amber-700 hover:bg-amber-50 border border-amber-200"
+                : "bg-white dark:bg-slate-800 text-amber-700 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950/30 border border-amber-200 dark:border-amber-800/50"
             }`}
           >
             <span>Butuh Persetujuan</span>
@@ -804,7 +804,7 @@ export default function ManagePropertiesPage() {
             className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 shrink-0 ${
               selectedStatusTab === "PUBLISHED"
                 ? "bg-emerald-600 text-white shadow-xs"
-                : "bg-white text-emerald-700 hover:bg-emerald-50 border border-emerald-200"
+                : "bg-white dark:bg-slate-800 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800/50"
             }`}
           >
             <span>Disetujui / Aktif</span>
@@ -819,7 +819,7 @@ export default function ManagePropertiesPage() {
             className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 shrink-0 ${
               selectedStatusTab === "REJECTED"
                 ? "bg-rose-600 text-white shadow-xs"
-                : "bg-white text-rose-700 hover:bg-rose-50 border border-rose-200"
+                : "bg-white dark:bg-slate-800 text-rose-700 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 border border-rose-200 dark:border-rose-800/50"
             }`}
           >
             <span>Ditolak</span>
@@ -831,18 +831,18 @@ export default function ManagePropertiesPage() {
 
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm min-w-[900px]">
-            <thead className="bg-slate-100 text-slate-600 font-semibold uppercase text-xs tracking-wider">
+            <thead className="bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-semibold uppercase text-xs tracking-wider">
               <tr>
-                <th className="p-4 border-b border-slate-200">Nama Kos</th>
-                <th className="p-4 border-b border-slate-200">Nama Pemilik</th>
-                <th className="p-4 border-b border-slate-200 text-center">Tipe Kos</th>
-                <th className="p-4 border-b border-slate-200">Harga</th>
-                <th className="p-4 border-b border-slate-200 text-center">Kapasitas</th>
-                <th className="p-4 border-b border-slate-200 text-center">Status Review</th>
-                <th className="p-4 border-b border-slate-200 text-right">Aksi</th>
+                <th className="p-4 border-b border-slate-200 dark:border-slate-700">Nama Kos</th>
+                <th className="p-4 border-b border-slate-200 dark:border-slate-700">Nama Pemilik</th>
+                <th className="p-4 border-b border-slate-200 dark:border-slate-700 text-center">Tipe Kos</th>
+                <th className="p-4 border-b border-slate-200 dark:border-slate-700">Harga</th>
+                <th className="p-4 border-b border-slate-200 dark:border-slate-700 text-center">Kapasitas</th>
+                <th className="p-4 border-b border-slate-200 dark:border-slate-700 text-center">Status Review</th>
+                <th className="p-4 border-b border-slate-200 dark:border-slate-700 text-right">Aksi</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
               {properties
                 .filter((prop) => {
                   const effectiveStatus = prop.status || "PENDING_REVIEW";
@@ -850,19 +850,19 @@ export default function ManagePropertiesPage() {
                   return effectiveStatus === selectedStatusTab;
                 })
                 .map((prop) => (
-                  <tr key={prop.id} className="hover:bg-slate-50 transition-colors">
+                  <tr key={prop.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
                     <td className="p-4">
-                      <div className="font-bold text-slate-800">{prop.name}</div>
+                      <div className="font-bold text-slate-800 dark:text-white">{prop.name}</div>
                       {(prop.is_24_hours || prop.is_pet_friendly) && (
                         <div className="flex items-center gap-1.5 flex-wrap mt-1">
                           {prop.is_24_hours && (
-                            <span className="inline-flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 border border-slate-200/80">
+                            <span className="inline-flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200/80 dark:border-slate-700">
                               <Clock size={10} className="text-slate-500" />
                               <span>24 Jam</span>
                             </span>
                           )}
                           {prop.is_pet_friendly && (
-                            <span className="inline-flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-800 border border-emerald-200/80">
+                            <span className="inline-flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-md bg-emerald-50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 border border-emerald-200/80 dark:border-emerald-800/60">
                               <Sparkles size={10} className="text-emerald-600" />
                               <span>Pet Friendly</span>
                             </span>
@@ -876,10 +876,10 @@ export default function ManagePropertiesPage() {
                       )}
                     </td>
                     <td className="p-4">
-                      <div className="font-medium text-slate-700">
+                      <div className="font-medium text-slate-700 dark:text-slate-200">
                         {prop.owner?.name || "-"}
                       </div>
-                      <div className="text-xs text-slate-500">
+                      <div className="text-xs text-slate-500 dark:text-slate-400">
                         {prop.owner?.whatsapp_number || "-"}
                       </div>
                     </td>
@@ -896,24 +896,24 @@ export default function ManagePropertiesPage() {
                         {prop.gender_type || "CAMPUR"}
                       </span>
                     </td>
-                    <td className="p-4 font-semibold text-slate-700">
+                    <td className="p-4 font-semibold text-slate-700 dark:text-slate-200">
                       <div>
                         {prop.price_per_month
                           ? `Rp ${prop.price_per_month.toLocaleString("id-ID")}/bln`
                           : "-"}
                       </div>
                       {prop.room_types && prop.room_types.length > 1 && (
-                        <span className="inline-block mt-0.5 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-teal-50 text-teal-700 border border-teal-200">
+                        <span className="inline-block mt-0.5 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-teal-50 dark:bg-teal-950/40 text-teal-700 dark:text-teal-300 border border-teal-200 dark:border-teal-800/60">
                           {prop.room_types.length} Tipe Kamar
                         </span>
                       )}
                     </td>
-                    <td className="p-4 text-center">
+                    <td className="p-4 text-center whitespace-nowrap">
                       <span
-                        className={`px-3 py-1 rounded-full text-xs font-bold ${
+                        className={`inline-flex items-center justify-center whitespace-nowrap px-3 py-1 rounded-full text-xs font-bold ${
                           prop.available_rooms > 0
-                            ? "bg-green-100 text-green-700"
-                            : "bg-red-100 text-red-700"
+                            ? "bg-green-100 text-green-700 dark:bg-emerald-950/50 dark:text-emerald-300 dark:border dark:border-emerald-800/60"
+                            : "bg-red-100 text-red-700 dark:bg-rose-950/50 dark:text-rose-300 dark:border dark:border-rose-800/60"
                         }`}
                       >
                         {prop.available_rooms} Kamar
@@ -972,7 +972,7 @@ export default function ManagePropertiesPage() {
                               type="button"
                               disabled={isUpdatingStatusId === prop.id}
                               onClick={() => handleOpenRejectModal(prop)}
-                              className="inline-flex items-center gap-1 bg-white hover:bg-rose-50 hover:-translate-y-px active:scale-95 disabled:hover:translate-y-0 disabled:active:scale-100 text-rose-700 disabled:opacity-50 border border-rose-200 px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer shadow-xs"
+                              className="inline-flex items-center gap-1 bg-white dark:bg-slate-800 hover:bg-rose-50 dark:hover:bg-rose-950/30 hover:-translate-y-px active:scale-95 disabled:hover:translate-y-0 disabled:active:scale-100 text-rose-700 dark:text-rose-400 disabled:opacity-50 border border-rose-200 dark:border-rose-800 px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer shadow-xs"
                               title="Tolak Properti Kos"
                             >
                               <X size={12} />
@@ -984,7 +984,7 @@ export default function ManagePropertiesPage() {
                         <button
                           type="button"
                           onClick={() => handleOpenEditModal(prop)}
-                          className="inline-flex items-center gap-1 bg-white hover:bg-slate-50 hover:-translate-y-px active:scale-95 text-slate-700 px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer border border-slate-200 shadow-xs"
+                          className="inline-flex items-center gap-1 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 hover:-translate-y-px active:scale-95 text-slate-700 dark:text-slate-200 px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer border border-slate-200 dark:border-slate-700 shadow-xs"
                           title="Edit Properti"
                         >
                           <Pencil size={12} />
@@ -995,7 +995,7 @@ export default function ManagePropertiesPage() {
                           type="button"
                           disabled={deletingPropertyId === prop.id}
                           onClick={() => handleDeleteProperty(prop.id, prop.name)}
-                          className="inline-flex items-center gap-1 bg-white hover:bg-rose-50 hover:-translate-y-px active:scale-95 disabled:hover:translate-y-0 disabled:active:scale-100 disabled:opacity-50 text-rose-600 px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer border border-rose-200 shadow-xs"
+                          className="inline-flex items-center gap-1 bg-white dark:bg-slate-800 hover:bg-rose-50 dark:hover:bg-rose-950/30 hover:-translate-y-px active:scale-95 disabled:hover:translate-y-0 disabled:active:scale-100 disabled:opacity-50 text-rose-600 dark:text-rose-400 px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer border border-rose-200 dark:border-rose-800 shadow-xs"
                           title="Hapus Properti"
                         >
                           {deletingPropertyId === prop.id ? (
@@ -1010,7 +1010,7 @@ export default function ManagePropertiesPage() {
                 ))}
               {properties.length === 0 && (
                 <tr>
-                  <td colSpan={7} className="p-8 text-center text-slate-500">
+                  <td colSpan={7} className="p-8 text-center text-slate-500 dark:text-slate-400">
                     Belum ada data kos.
                   </td>
                 </tr>
@@ -1023,16 +1023,16 @@ export default function ManagePropertiesPage() {
       {/* MODAL TAMBAH / EDIT PROPERTI */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 sm:p-6 overflow-hidden">
-          <div className="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200">
             {/* Modal Header */}
-            <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/80 shrink-0">
-              <h3 className="font-bold text-slate-800 text-base">
+            <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-slate-50/80 dark:bg-slate-800/80 shrink-0">
+              <h3 className="font-bold text-slate-800 dark:text-white text-base">
                 {editingProperty ? "Edit Properti Kos" : "Tambah Properti Kos Baru"}
               </h3>
               <button
                 type="button"
                 onClick={handleCloseModal}
-                className="text-slate-400 hover:text-slate-600 p-1.5 rounded-lg hover:bg-slate-100 transition-colors cursor-pointer"
+                className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
               >
                 <X size={18} />
               </button>
@@ -1043,7 +1043,7 @@ export default function ManagePropertiesPage() {
               {/* Scrollable Content */}
               <div className="p-6 overflow-y-auto space-y-4 flex-1 overscroll-contain">
                 {formError && (
-                  <div className="p-3.5 bg-red-50 border border-red-200 text-red-700 text-xs rounded-xl flex items-center gap-2">
+                  <div className="p-3.5 bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-800/60 text-red-700 dark:text-red-300 text-xs rounded-xl flex items-center gap-2">
                     <AlertCircle size={16} className="shrink-0 text-red-500" />
                     <span>{formError}</span>
                   </div>
@@ -1051,7 +1051,7 @@ export default function ManagePropertiesPage() {
 
               {/* Nama Properti */}
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1.5">
                   Nama Properti Kos <span className="text-red-500">*</span>
                 </label>
                 <input
@@ -1060,13 +1060,13 @@ export default function ManagePropertiesPage() {
                   placeholder="Contoh: Kos Mawar Indah"
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className="w-full px-3.5 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-600/20 focus:border-emerald-600 bg-white"
+                  className="w-full px-3.5 py-2 text-sm border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-600/20 focus:border-emerald-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
                 />
               </div>
 
               {/* Pemilik Kos */}
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1.5">
                   Pemilik Kos (Owner) <span className="text-red-500">*</span>
                 </label>
                 {isLoadingOwners ? (
@@ -1076,7 +1076,7 @@ export default function ManagePropertiesPage() {
                     required
                     value={formData.owner_id}
                     onChange={(e) => setFormData({ ...formData, owner_id: e.target.value })}
-                    className="w-full px-3.5 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-600/20 focus:border-emerald-600 bg-white"
+                    className="w-full px-3.5 py-2 text-sm border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-600/20 focus:border-emerald-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
                   >
                     <option value="" disabled>
                       -- Pilih Pemilik Kos --
@@ -1092,13 +1092,13 @@ export default function ManagePropertiesPage() {
 
               {/* Tipe Kos */}
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1.5">
                   Tipe Kos (Gender) <span className="text-red-500">*</span>
                 </label>
                 <select
                   value={formData.gender_type}
                   onChange={(e) => setFormData({ ...formData, gender_type: e.target.value })}
-                  className="w-full px-3.5 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-600/20 focus:border-emerald-600 bg-white"
+                  className="w-full px-3.5 py-2 text-sm border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-600/20 focus:border-emerald-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
                 >
                   <option value="PUTRA">Putra</option>
                   <option value="PUTRI">Putri</option>
@@ -1107,13 +1107,13 @@ export default function ManagePropertiesPage() {
               </div>
 
               {/* Seksi Manajemen Tipe Kamar */}
-              <div className="p-4 bg-slate-50 border border-slate-200/80 rounded-2xl space-y-3">
+              <div className="p-4 bg-slate-50 dark:bg-slate-800/50 border border-slate-200/80 dark:border-slate-700 rounded-2xl space-y-3">
                 <div className="flex items-center justify-between">
                   <div>
-                    <h4 className="text-xs font-bold text-slate-900">
+                    <h4 className="text-xs font-bold text-slate-900 dark:text-white">
                       Tipe Kamar Kos
                     </h4>
-                    <p className="text-[11px] text-slate-500">
+                    <p className="text-[11px] text-slate-500 dark:text-slate-400">
                       Kelola daftar tipe kamar, harga, dan sisa kamar.
                     </p>
                   </div>
@@ -1134,7 +1134,7 @@ export default function ManagePropertiesPage() {
                         },
                       ])
                     }
-                    className="inline-flex items-center gap-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-xs font-bold px-3 py-1.5 rounded-lg border border-emerald-200 transition-colors cursor-pointer"
+                    className="inline-flex items-center gap-1 bg-emerald-50 dark:bg-emerald-950/40 hover:bg-emerald-100 dark:hover:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300 text-xs font-bold px-3 py-1.5 rounded-lg border border-emerald-200 dark:border-emerald-800/60 transition-colors cursor-pointer"
                   >
                     <Plus size={13} />
                     <span>Tambah Tipe</span>
@@ -1145,10 +1145,10 @@ export default function ManagePropertiesPage() {
                   {roomTypes.map((rt, idx) => (
                     <div
                       key={idx}
-                      className="p-3.5 bg-white border border-slate-200 rounded-xl space-y-2.5 shadow-2xs relative"
+                      className="p-3.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl space-y-2.5 shadow-2xs relative"
                     >
                       <div className="flex items-center justify-between">
-                        <span className="text-xs font-bold text-slate-800">
+                        <span className="text-xs font-bold text-slate-800 dark:text-white">
                           Tipe #{idx + 1}
                         </span>
                         {roomTypes.length > 1 && (
@@ -1167,7 +1167,7 @@ export default function ManagePropertiesPage() {
 
                       <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
                         <div className="sm:col-span-1">
-                          <label className="block text-[11px] font-semibold text-slate-600 mb-1">
+                          <label className="block text-[11px] font-semibold text-slate-600 dark:text-slate-300 mb-1">
                             Nama Tipe <span className="text-red-500">*</span>
                           </label>
                           <input
@@ -1180,12 +1180,12 @@ export default function ManagePropertiesPage() {
                               updated[idx].name = e.target.value;
                               setRoomTypes(updated);
                             }}
-                            className="w-full px-3 py-1.5 text-xs border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-600/20 focus:border-emerald-600 bg-white"
+                            className="w-full px-3 py-1.5 text-xs border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-600/20 focus:border-emerald-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
                           />
                         </div>
 
                         <div>
-                          <label className="block text-[11px] font-semibold text-slate-600 mb-1">
+                          <label className="block text-[11px] font-semibold text-slate-600 dark:text-slate-300 mb-1">
                             Harga/Bln (Rp) <span className="text-red-500">*</span>
                           </label>
                           <input
@@ -1194,17 +1194,22 @@ export default function ManagePropertiesPage() {
                             min="1"
                             placeholder="Contoh: 850000"
                             value={rt.price_per_month}
+                            onKeyDown={(e) => {
+                              if (["e", "E", "+", "-"].includes(e.key)) {
+                                e.preventDefault();
+                              }
+                            }}
                             onChange={(e) => {
                               const updated = [...roomTypes];
                               updated[idx].price_per_month = e.target.value;
                               setRoomTypes(updated);
                             }}
-                            className="w-full px-3 py-1.5 text-xs border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-600/20 focus:border-emerald-600 bg-white"
+                            className="w-full px-3 py-1.5 text-xs border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-600/20 focus:border-emerald-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
                           />
                         </div>
 
                         <div>
-                          <label className="block text-[11px] font-semibold text-slate-600 mb-1">
+                          <label className="block text-[11px] font-semibold text-slate-600 dark:text-slate-300 mb-1">
                             Sisa Kamar <span className="text-red-500">*</span>
                           </label>
                           <input
@@ -1213,18 +1218,23 @@ export default function ManagePropertiesPage() {
                             min="0"
                             placeholder="Contoh: 3"
                             value={rt.available_rooms}
+                            onKeyDown={(e) => {
+                              if (["e", "E", "+", "-"].includes(e.key)) {
+                                e.preventDefault();
+                              }
+                            }}
                             onChange={(e) => {
                               const updated = [...roomTypes];
                               updated[idx].available_rooms = e.target.value;
                               setRoomTypes(updated);
                             }}
-                            className="w-full px-3 py-1.5 text-xs border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-600/20 focus:border-emerald-600 bg-white"
+                            className="w-full px-3 py-1.5 text-xs border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-600/20 focus:border-emerald-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
                           />
                         </div>
                       </div>
 
                       <div>
-                        <label className="block text-[11px] font-semibold text-slate-600 mb-1">
+                        <label className="block text-[11px] font-semibold text-slate-600 dark:text-slate-300 mb-1">
                           Fasilitas Khusus Kamar Ini (Opsional)
                         </label>
                         <input
@@ -1236,12 +1246,12 @@ export default function ManagePropertiesPage() {
                             updated[idx].facilities = e.target.value;
                             setRoomTypes(updated);
                           }}
-                          className="w-full px-3 py-1.5 text-xs border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-600/20 focus:border-emerald-600 bg-white"
+                          className="w-full px-3 py-1.5 text-xs border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-600/20 focus:border-emerald-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
                         />
                       </div>
 
                       <div>
-                        <label className="block text-[11px] font-semibold text-slate-600 mb-1">
+                        <label className="block text-[11px] font-semibold text-slate-600 dark:text-slate-300 mb-1">
                           Spesifikasi Tipe Kamar (Opsional)
                         </label>
                         <input
@@ -1253,20 +1263,20 @@ export default function ManagePropertiesPage() {
                             updated[idx].specifications = e.target.value;
                             setRoomTypes(updated);
                           }}
-                          className="w-full px-3 py-1.5 text-xs border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-600/20 focus:border-emerald-600 bg-white"
+                          className="w-full px-3 py-1.5 text-xs border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-600/20 focus:border-emerald-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
                         />
                       </div>
 
                       {/* Foto Tipe Kamar (Unggah File atau URL) */}
-                      <div className="space-y-1.5 pt-1.5 border-t border-slate-100">
-                        <label className="block text-[11px] font-semibold text-slate-600">
+                      <div className="space-y-1.5 pt-1.5 border-t border-slate-100 dark:border-slate-800">
+                        <label className="block text-[11px] font-semibold text-slate-600 dark:text-slate-300">
                           Foto Kamar Tipe Ini (Unggah File / URL)
                         </label>
 
                         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
                           {/* Preview Thumbnail */}
                           {rt.image_preview || rt.image_url ? (
-                            <div className="relative w-14 h-14 rounded-lg overflow-hidden bg-slate-100 border border-slate-200 shrink-0 group">
+                            <div className="relative w-14 h-14 rounded-lg overflow-hidden bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shrink-0 group">
                               {/* eslint-disable-next-line @next/next/no-img-element */}
                               <img
                                 src={rt.image_preview || rt.image_url}
@@ -1289,7 +1299,7 @@ export default function ManagePropertiesPage() {
                               </button>
                             </div>
                           ) : (
-                            <div className="w-14 h-14 rounded-lg bg-slate-50 border border-dashed border-slate-300 flex items-center justify-center text-slate-400 shrink-0">
+                            <div className="w-14 h-14 rounded-lg bg-slate-50 dark:bg-slate-800 border border-dashed border-slate-300 dark:border-slate-700 flex items-center justify-center text-slate-400 shrink-0">
                               <ImageIcon size={16} />
                             </div>
                           )}
@@ -1297,7 +1307,7 @@ export default function ManagePropertiesPage() {
                           {/* Upload / URL Inputs */}
                           <div className="flex-1 space-y-1.5 w-full min-w-0">
                             <div className="flex items-center gap-2 flex-wrap">
-                              <label className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 rounded-lg text-xs font-semibold cursor-pointer border border-emerald-200/80 transition-colors">
+                              <label className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 dark:bg-emerald-950/40 hover:bg-emerald-100 dark:hover:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300 rounded-lg text-xs font-semibold cursor-pointer border border-emerald-200/80 dark:border-emerald-800/60 transition-colors">
                                 <Upload size={13} />
                                 <span>{rt.image_file ? "Ganti File Foto" : "Pilih File Foto"}</span>
                                 <input
@@ -1318,7 +1328,7 @@ export default function ManagePropertiesPage() {
                                 />
                               </label>
                               {rt.image_file && (
-                                <span className="text-[11px] text-slate-600 truncate max-w-[160px]">
+                                <span className="text-[11px] text-slate-600 dark:text-slate-300 truncate max-w-[160px]">
                                   {rt.image_file.name}
                                 </span>
                               )}
@@ -1335,7 +1345,7 @@ export default function ManagePropertiesPage() {
                                 updated[idx].image_preview = e.target.value || null;
                                 setRoomTypes(updated);
                               }}
-                              className="w-full px-3 py-1.5 text-xs border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-600/20 focus:border-emerald-600 bg-white"
+                              className="w-full px-3 py-1.5 text-xs border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-600/20 focus:border-emerald-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
                             />
                           </div>
                         </div>
@@ -1347,7 +1357,7 @@ export default function ManagePropertiesPage() {
 
               {/* Fasilitas Umum / Bersama */}
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1.5">
                   Fasilitas Umum / Bangunan <span className="text-red-500">*</span>
                 </label>
                 <input
@@ -1356,7 +1366,7 @@ export default function ManagePropertiesPage() {
                   placeholder="Contoh: WiFi, Dapur Bersama, Parkir Motor, CCTV"
                   value={formData.facilities}
                   onChange={(e) => setFormData({ ...formData, facilities: e.target.value })}
-                  className="w-full px-3.5 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-600/20 focus:border-emerald-600 bg-white"
+                  className="w-full px-3.5 py-2 text-sm border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-600/20 focus:border-emerald-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
                 />
                 <p className="text-[11px] text-slate-400 mt-1">
                   Fasilitas yang bisa digunakan bersama oleh semua penghuni. Gunakan tanda koma (,) untuk memisahkan.
@@ -1364,16 +1374,16 @@ export default function ManagePropertiesPage() {
               </div>
 
               {/* Alamat & Koordinat Peta */}
-              <div className="p-3.5 bg-slate-50 border border-slate-200/80 rounded-xl space-y-3">
+              <div className="p-3.5 bg-slate-50 dark:bg-slate-800/50 border border-slate-200/80 dark:border-slate-700 rounded-xl space-y-3">
                 <div className="flex items-center gap-1.5">
                   <MapPin size={14} className="text-slate-500" />
-                  <label className="block text-xs font-bold text-slate-800">
+                  <label className="block text-xs font-bold text-slate-800 dark:text-white">
                     Lokasi &amp; Titik Koordinat (Opsional)
                   </label>
                 </div>
 
                 <div>
-                  <label className="block text-[11px] font-semibold text-slate-600 mb-1">
+                  <label className="block text-[11px] font-semibold text-slate-600 dark:text-slate-300 mb-1">
                     Alamat Lengkap / Patokan
                   </label>
                   <input
@@ -1381,7 +1391,7 @@ export default function ManagePropertiesPage() {
                     placeholder="Contoh: Jl. Tebet Barat Dalam VII No. 12, Jakarta Selatan"
                     value={formData.address}
                     onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                    className="w-full px-3 py-1.5 text-xs border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-600/20 focus:border-emerald-600 bg-white"
+                    className="w-full px-3 py-1.5 text-xs border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-600/20 focus:border-emerald-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
                   />
                 </div>
 
@@ -1412,7 +1422,7 @@ export default function ManagePropertiesPage() {
 
               {/* Kebijakan & Akses */}
               <div className="space-y-2">
-                <label className="block text-xs font-semibold text-slate-700">
+                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-200">
                   Kebijakan &amp; Akses Properti
                 </label>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
@@ -1420,8 +1430,8 @@ export default function ManagePropertiesPage() {
                   <label
                     className={`flex items-start gap-3 p-3 rounded-xl border transition-all cursor-pointer select-none ${
                       formData.is_24_hours
-                        ? "bg-slate-900 border-slate-900 text-white shadow-xs"
-                        : "bg-white border-slate-200 text-slate-700 hover:border-slate-300 hover:bg-slate-50/60"
+                        ? "bg-slate-900 dark:bg-emerald-600 border-slate-900 dark:border-emerald-600 text-white shadow-xs"
+                        : "bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:border-slate-300 dark:hover:border-slate-600 hover:bg-slate-50/60 dark:hover:bg-slate-700/50"
                     }`}
                   >
                     <input
@@ -1436,7 +1446,7 @@ export default function ManagePropertiesPage() {
                       className={`w-4 h-4 rounded mt-0.5 flex items-center justify-center shrink-0 border transition-colors ${
                         formData.is_24_hours
                           ? "bg-white text-slate-900 border-white"
-                          : "border-slate-300 bg-white"
+                          : "border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800"
                       }`}
                     >
                       {formData.is_24_hours && (
@@ -1465,8 +1475,8 @@ export default function ManagePropertiesPage() {
                   <label
                     className={`flex items-start gap-3 p-3 rounded-xl border transition-all cursor-pointer select-none ${
                       formData.is_pet_friendly
-                        ? "bg-emerald-900 border-emerald-900 text-white shadow-xs"
-                        : "bg-white border-slate-200 text-slate-700 hover:border-slate-300 hover:bg-slate-50/60"
+                        ? "bg-emerald-900 dark:bg-emerald-600 border-emerald-900 dark:border-emerald-600 text-white shadow-xs"
+                        : "bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:border-slate-300 dark:hover:border-slate-600 hover:bg-slate-50/60 dark:hover:bg-slate-700/50"
                     }`}
                   >
                     <input
@@ -1481,7 +1491,7 @@ export default function ManagePropertiesPage() {
                       className={`w-4 h-4 rounded mt-0.5 flex items-center justify-center shrink-0 border transition-colors ${
                         formData.is_pet_friendly
                           ? "bg-white text-emerald-900 border-white"
-                          : "border-slate-300 bg-white"
+                          : "border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800"
                       }`}
                     >
                       {formData.is_pet_friendly && (
@@ -1512,7 +1522,7 @@ export default function ManagePropertiesPage() {
               {editingProperty && (
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
-                    <label className="block text-xs font-semibold text-slate-700">
+                    <label className="block text-xs font-semibold text-slate-700 dark:text-slate-200">
                       Media Tersimpan ({editingProperty.media?.length || 0})
                     </label>
                     <span className="text-[10px] text-slate-400">
@@ -1521,7 +1531,7 @@ export default function ManagePropertiesPage() {
                   </div>
 
                   {editingProperty.media && editingProperty.media.length > 0 ? (
-                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5 p-2.5 bg-slate-50 border border-slate-200 rounded-xl max-h-48 overflow-y-auto">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5 p-2.5 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl max-h-48 overflow-y-auto">
                       {editingProperty.media.map((item) => {
                         const isThumbnail = editingProperty.image_url === item.url;
                         const isDeleting = deletingMediaId === item.id;
@@ -1533,7 +1543,7 @@ export default function ManagePropertiesPage() {
                             className={`relative group rounded-lg overflow-hidden border ${
                               isThumbnail
                                 ? "border-amber-400 ring-2 ring-amber-400/40"
-                                : "border-slate-200"
+                                : "border-slate-200 dark:border-slate-700"
                             } bg-black/5 aspect-video flex items-center justify-center`}
                           >
                             {item.type === "VIDEO" ? (
@@ -1600,7 +1610,7 @@ export default function ManagePropertiesPage() {
                       })}
                     </div>
                   ) : (
-                    <div className="text-xs text-slate-400 italic bg-slate-50 border border-slate-200 rounded-xl p-3 text-center">
+                    <div className="text-xs text-slate-400 italic bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl p-3 text-center">
                       Belum ada gambar atau video tersimpan untuk properti ini.
                     </div>
                   )}
@@ -1609,7 +1619,7 @@ export default function ManagePropertiesPage() {
 
               {/* Multi-Upload Media (Gambar & Video) */}
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1.5">
                   Unggah Media Baru (Gambar &amp; Video)
                 </label>
                 <input
@@ -1617,7 +1627,7 @@ export default function ManagePropertiesPage() {
                   multiple
                   accept="image/*,video/mp4,video/webm,video/*"
                   onChange={handleFileChange}
-                  className="w-full text-xs text-slate-500 file:mr-3 file:py-2 file:px-3.5 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100 border border-slate-200 rounded-xl p-1.5 bg-white cursor-pointer"
+                  className="w-full text-xs text-slate-500 dark:text-slate-400 file:mr-3 file:py-2 file:px-3.5 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-emerald-50 dark:file:bg-emerald-950/40 file:text-emerald-700 dark:file:text-emerald-300 hover:file:bg-emerald-100 dark:hover:file:bg-emerald-900/50 border border-slate-200 dark:border-slate-700 rounded-xl p-1.5 bg-white dark:bg-slate-800 cursor-pointer"
                 />
                 <p className="text-[11px] text-slate-400 mt-1">
                   Unggah beberapa gambar dan video sekaligus (MP4, WebM, JPG, PNG).
@@ -1629,11 +1639,11 @@ export default function ManagePropertiesPage() {
                     {selectedFiles.map((file, idx) => (
                       <div
                         key={idx}
-                        className="flex items-center justify-between bg-slate-50 border border-slate-200 rounded-lg px-3 py-1.5 text-xs"
+                        className="flex items-center justify-between bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-1.5 text-xs"
                       >
                         <div className="flex items-center gap-2 truncate">
                           <FileText size={14} className="text-emerald-600 shrink-0" />
-                          <span className="truncate text-slate-700 font-medium">
+                          <span className="truncate text-slate-700 dark:text-slate-200 font-medium">
                             {file.name}
                           </span>
                         </div>
@@ -1657,7 +1667,7 @@ export default function ManagePropertiesPage() {
 
               {/* URL Gambar */}
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1.5">
                   URL Gambar (Opsional)
                 </label>
                 <input
@@ -1665,13 +1675,13 @@ export default function ManagePropertiesPage() {
                   placeholder="Contoh: https://images.unsplash.com/photo-..."
                   value={formData.image_url}
                   onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
-                  className="w-full px-3.5 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-600/20 focus:border-emerald-600 bg-white"
+                  className="w-full px-3.5 py-2 text-sm border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-600/20 focus:border-emerald-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
                 />
               </div>
 
               {/* URL Video YouTube */}
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1.5">
                   URL Video YouTube (Opsional)
                 </label>
                 <input
@@ -1679,7 +1689,7 @@ export default function ManagePropertiesPage() {
                   placeholder="Contoh: https://www.youtube.com/watch?v=aqz-KE-bpKQ"
                   value={formData.youtube_url}
                   onChange={(e) => setFormData({ ...formData, youtube_url: e.target.value })}
-                  className="w-full px-3.5 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-600/20 focus:border-emerald-600 bg-white"
+                  className="w-full px-3.5 py-2 text-sm border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-600/20 focus:border-emerald-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
                 />
                 <p className="text-[11px] text-slate-400 mt-1">
                   Video tour atau review kos dari YouTube yang bisa langsung diputar calon penyewa.
@@ -1689,7 +1699,7 @@ export default function ManagePropertiesPage() {
               {/* Deskripsi Kos & AI Generator */}
               <div>
                 <div className="flex items-center justify-between mb-1.5">
-                  <label className="block text-xs font-semibold text-slate-700">
+                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-200">
                     Deskripsi Kos (Opsional)
                   </label>
                   <button
@@ -1713,7 +1723,7 @@ export default function ManagePropertiesPage() {
                   placeholder="Ceritakan gambaran umum, keunggulan lingkungan, suasana kos, dan poin menarik lainnya..."
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  className="w-full px-3.5 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-600/20 focus:border-emerald-600 bg-white resize-y"
+                  className="w-full px-3.5 py-2 text-sm border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-600/20 focus:border-emerald-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 resize-y"
                 />
                 <p className="text-[11px] text-slate-400 mt-1">
                   Deskripsi akan ditampilkan pada card khusus &quot;Deskripsi Kos&quot; di atas pilihan tipe kamar pada halaman detail kos.
@@ -1722,7 +1732,7 @@ export default function ManagePropertiesPage() {
 
               {/* Peraturan Kos */}
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1.5">
                   Peraturan Kos (Opsional)
                 </label>
                 <textarea
@@ -1730,7 +1740,7 @@ export default function ManagePropertiesPage() {
                   placeholder={"1. Dilarang merokok di dalam kamar\n2. Tamu lawan jenis dilarang masuk kamar\n3. Waktu tenang dimulai pukul 22:00 WIB"}
                   value={formData.rules}
                   onChange={(e) => setFormData({ ...formData, rules: e.target.value })}
-                  className="w-full px-3.5 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-600/20 focus:border-emerald-600 bg-white resize-y"
+                  className="w-full px-3.5 py-2 text-sm border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-600/20 focus:border-emerald-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 resize-y"
                 />
                 <p className="text-[11px] text-slate-400 mt-1">
                   Aturan tata tertib kos. Gunakan baris baru untuk memisahkan setiap poin aturan.
@@ -1739,7 +1749,7 @@ export default function ManagePropertiesPage() {
 
               {/* Ketentuan Pengajuan Sewa */}
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1.5">
                   Ketentuan Pengajuan Sewa (Opsional)
                 </label>
                 <textarea
@@ -1747,7 +1757,7 @@ export default function ManagePropertiesPage() {
                   placeholder={"1. Menyerahkan foto/scan KTP atau Kartu Tanda Mahasiswa yang berlaku\n2. Pembayaran sewa lunas di muka\n3. Uang deposit jaminan Rp 150.000 (dikembalikan saat checkout)"}
                   value={formData.rental_terms}
                   onChange={(e) => setFormData({ ...formData, rental_terms: e.target.value })}
-                  className="w-full px-3.5 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-600/20 focus:border-emerald-600 bg-white resize-y"
+                  className="w-full px-3.5 py-2 text-sm border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-600/20 focus:border-emerald-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 resize-y"
                 />
                 <p className="text-[11px] text-slate-400 mt-1">
                   Syarat dan ketentuan untuk calon penyewa saat mengajukan sewa kamar kos ini.
@@ -1757,18 +1767,18 @@ export default function ManagePropertiesPage() {
               </div>
 
               {/* Pinned Action Buttons Footer */}
-              <div className="px-6 py-3.5 border-t border-slate-100 bg-slate-50/80 flex items-center justify-end gap-2.5 shrink-0">
+              <div className="px-6 py-3.5 border-t border-slate-100 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-800/80 flex items-center justify-end gap-2.5 shrink-0">
                 <button
                   type="button"
                   onClick={handleCloseModal}
-                  className="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-200/60 rounded-xl transition-colors cursor-pointer"
+                  className="px-4 py-2 text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-200/60 dark:hover:bg-slate-700 rounded-xl transition-colors cursor-pointer"
                 >
                   Batal
                 </button>
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="inline-flex items-center gap-2 bg-slate-900 hover:bg-slate-800 disabled:opacity-50 text-white px-5 py-2 text-xs font-semibold rounded-xl transition-all cursor-pointer shadow-sm"
+                  className="inline-flex items-center gap-2 bg-slate-900 hover:bg-slate-800 dark:bg-emerald-600 dark:hover:bg-emerald-700 disabled:opacity-50 text-white px-5 py-2 text-xs font-semibold rounded-xl transition-all cursor-pointer shadow-sm"
                 >
                   {isSubmitting ? (
                     <>
@@ -1792,33 +1802,33 @@ export default function ManagePropertiesPage() {
           onClick={closeConfirmDeleteModal}
         >
           <div
-            className="bg-white rounded-2xl shadow-xl border border-slate-200 w-full max-w-sm overflow-hidden"
+            className="bg-white dark:bg-slate-900 rounded-2xl shadow-xl border border-slate-200 dark:border-slate-800 w-full max-w-sm overflow-hidden"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header */}
-            <div className="p-5 border-b border-slate-100 flex items-center gap-3 bg-rose-50/70">
-              <div className="w-10 h-10 rounded-xl bg-rose-100 text-rose-600 flex items-center justify-center shrink-0">
+            <div className="p-5 border-b border-slate-100 dark:border-slate-800 flex items-center gap-3 bg-rose-50/70 dark:bg-rose-950/30">
+              <div className="w-10 h-10 rounded-xl bg-rose-100 dark:bg-rose-900/50 text-rose-600 dark:text-rose-400 flex items-center justify-center shrink-0">
                 <Trash2 size={18} />
               </div>
               <div>
-                <h3 className="font-bold text-slate-800 text-base">Hapus Properti</h3>
-                <p className="text-xs text-slate-500">Tindakan ini tidak dapat dibatalkan.</p>
+                <h3 className="font-bold text-slate-800 dark:text-white text-base">Hapus Properti</h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400">Tindakan ini tidak dapat dibatalkan.</p>
               </div>
             </div>
 
             {/* Body */}
             <div className="p-5 space-y-3">
-              <p className="text-sm text-slate-600 leading-relaxed">
+              <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
                 Apakah Anda yakin ingin menghapus properti{" "}
-                <span className="font-bold text-slate-800">
+                <span className="font-bold text-slate-800 dark:text-white">
                   &ldquo;{confirmDeleteModal.name}&rdquo;
                 </span>
                 ? Semua data, media, dan booking terkait akan{" "}
-                <span className="text-rose-600 font-semibold">dihapus secara permanen</span>.
+                <span className="text-rose-600 dark:text-rose-400 font-semibold">dihapus secara permanen</span>.
               </p>
               {/* Error inline */}
               {deleteError && (
-                <div className="flex items-center gap-2 p-3 bg-red-50 border border-red-200 rounded-xl text-xs text-red-600 font-medium">
+                <div className="flex items-center gap-2 p-3 bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-800/60 rounded-xl text-xs text-red-600 dark:text-red-400 font-medium">
                   <AlertCircle size={14} className="shrink-0" />
                   <span>{deleteError}</span>
                 </div>
@@ -1831,7 +1841,7 @@ export default function ManagePropertiesPage() {
                 type="button"
                 disabled={!!deletingPropertyId}
                 onClick={closeConfirmDeleteModal}
-                className="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 disabled:opacity-50 rounded-xl transition-colors cursor-pointer border border-slate-200"
+                className="px-4 py-2 text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 disabled:opacity-50 rounded-xl transition-colors cursor-pointer border border-slate-200 dark:border-slate-700"
               >
                 Batal
               </button>
@@ -1861,41 +1871,41 @@ export default function ManagePropertiesPage() {
       {/* Modal Konfirmasi Penolakan Properti Kos */}
       {rejectModalOpen && propertyToReject && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-200">
-          <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-100 animate-in zoom-in-95 duration-200">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
-              <div className="flex items-center gap-2 text-rose-600">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-100 dark:border-slate-800 animate-in zoom-in-95 duration-200">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
+              <div className="flex items-center gap-2 text-rose-600 dark:text-rose-400">
                 <AlertCircle size={20} />
-                <h3 className="font-extrabold text-slate-900 text-base">
+                <h3 className="font-extrabold text-slate-900 dark:text-white text-base">
                   Tolak Properti Kos
                 </h3>
               </div>
               <button
                 type="button"
                 onClick={() => setRejectModalOpen(false)}
-                className="text-slate-400 hover:text-slate-600 p-1 rounded-lg cursor-pointer"
+                className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1 rounded-lg cursor-pointer"
               >
                 <X size={18} />
               </button>
             </div>
 
             <div className="py-4 space-y-3">
-              <p className="text-xs text-slate-600">
+              <p className="text-xs text-slate-600 dark:text-slate-300">
                 Anda akan menolak pengajuan properti{" "}
-                <span className="font-bold text-slate-900">
+                <span className="font-bold text-slate-900 dark:text-white">
                   &quot;{propertyToReject.name}&quot;
                 </span>
                 . Mohon tuliskan alasan penolakan secara jelas agar pemilik kos dapat memperbaiki datanya.
               </p>
 
               {rejectModalError && (
-                <div className="p-2.5 rounded-lg bg-rose-50 border border-rose-200 text-rose-700 text-xs font-medium flex items-center gap-1.5">
-                  <AlertCircle size={14} className="shrink-0 text-rose-600" />
+                <div className="p-2.5 rounded-lg bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800/60 text-rose-700 dark:text-rose-300 text-xs font-medium flex items-center gap-1.5">
+                  <AlertCircle size={14} className="shrink-0 text-rose-600 dark:text-rose-400" />
                   <span>{rejectModalError}</span>
                 </div>
               )}
 
               <div>
-                <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-200 uppercase mb-1">
                   Alasan Penolakan <span className="text-rose-500">*</span>
                 </label>
                 <textarea
@@ -1904,17 +1914,17 @@ export default function ManagePropertiesPage() {
                   placeholder="Contoh: Foto tampak depan kos buram, alamat belum lengkap, atau harga tidak sesuai standar..."
                   value={rejectionReasonText}
                   onChange={(e) => setRejectionReasonText(e.target.value)}
-                  className="w-full text-xs p-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-rose-500 bg-slate-50 focus:bg-white resize-y font-medium"
+                  className="w-full text-xs p-3 rounded-xl border border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-rose-500 bg-slate-50 dark:bg-slate-800 focus:bg-white dark:focus:bg-slate-800 text-slate-900 dark:text-slate-100 resize-y font-medium"
                 />
               </div>
             </div>
 
-            <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
+            <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-100 dark:border-slate-800">
               <button
                 type="button"
                 onClick={() => setRejectModalOpen(false)}
                 disabled={isUpdatingStatusId === propertyToReject.id}
-                className="px-4 py-2 text-xs font-bold text-slate-600 hover:bg-slate-100 rounded-xl transition-colors cursor-pointer"
+                className="px-4 py-2 text-xs font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors cursor-pointer"
               >
                 Batal
               </button>

@@ -219,7 +219,7 @@ export default function PartnerRegisterPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col justify-center py-10 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col justify-center py-10 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
       {/* Background Animated Gradient Wave */}
       <GradientWave
         colors={["#ecfdf5", "#a7f3d0", "#34d399", "#ffffff", "#6ee7b7", "#ffffff"]}
@@ -232,7 +232,7 @@ export default function PartnerRegisterPage() {
         <div className="mb-6 flex items-center justify-between">
           <Link
             href="/"
-            className="inline-flex items-center gap-2 text-xs font-bold text-slate-600 hover:text-emerald-600 transition-colors px-3.5 py-2 rounded-full bg-white border border-slate-200 shadow-2xs hover:border-emerald-300"
+            className="inline-flex items-center gap-2 text-xs font-bold text-slate-600 dark:text-slate-300 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors px-3.5 py-2 rounded-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xs hover:border-emerald-300 dark:hover:border-emerald-700"
           >
             <ArrowLeft className="w-3.5 h-3.5" />
             <span>Kembali ke Beranda</span>
@@ -247,24 +247,31 @@ export default function PartnerRegisterPage() {
               alt="KosPasti Logo"
               width={40}
               height={40}
-              className="w-10 h-10 rounded-xl object-cover shadow-soft group-hover:rotate-3 transition-transform"
+              className="w-10 h-10 rounded-xl object-cover shadow-soft group-hover:rotate-3 transition-transform block dark:hidden"
             />
-            <span className="text-2xl font-black text-slate-900 tracking-tight">
-              KosPasti <span className="text-emerald-600 font-bold">Mitra</span>
+            <Image
+              src="/logo-dark.png"
+              alt="KosPasti Logo"
+              width={40}
+              height={40}
+              className="w-10 h-10 rounded-xl object-cover shadow-soft group-hover:rotate-3 transition-transform hidden dark:block"
+            />
+            <span className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">
+              KosPasti <span className="text-emerald-600 dark:text-emerald-400 font-bold">Mitra</span>
             </span>
           </Link>
-          <h1 className="mt-4 text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+          <h1 className="mt-4 text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
             Daftar Sebagai Mitra Pemilik Kos
           </h1>
-          <p className="mt-2 text-sm text-slate-600">
+          <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
             Kelola properti kos Anda secara mandiri dengan teknologi modern &amp; praktis.
           </p>
         </div>
 
         {/* Stepper Progress Bar */}
-        <div className="bg-white rounded-2xl p-4 sm:p-6 shadow-soft border border-slate-200/60 mb-6">
+        <div className="bg-white dark:bg-slate-900 rounded-2xl p-4 sm:p-6 shadow-soft border border-slate-200/60 dark:border-slate-800 mb-6">
           <div className="flex items-center justify-between relative">
-            <div className="absolute top-1/2 left-0 right-0 h-1 bg-slate-100 -translate-y-1/2 z-0" />
+            <div className="absolute top-1/2 left-0 right-0 h-1 bg-slate-100 dark:bg-slate-800 -translate-y-1/2 z-0" />
             <div
               className="absolute top-1/2 left-0 h-1 bg-emerald-500 -translate-y-1/2 z-0 transition-all duration-300"
               style={{ width: `${((currentStep - 1) / 3) * 100}%` }}
@@ -285,17 +292,17 @@ export default function PartnerRegisterPage() {
                   <div
                     className={`w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center font-bold text-xs sm:text-sm transition-all duration-200 ${
                       isActive
-                        ? "bg-emerald-600 text-white ring-4 ring-emerald-100 shadow-md scale-105"
+                        ? "bg-emerald-600 text-white ring-4 ring-emerald-100 dark:ring-emerald-950/60 shadow-md scale-105"
                         : isPassed
                         ? "bg-emerald-500 text-white shadow-xs"
-                        : "bg-slate-100 text-slate-400 border border-slate-200"
+                        : "bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-500 border border-slate-200 dark:border-slate-700"
                     }`}
                   >
                     {isPassed ? <CheckCircle2 className="w-5 h-5" /> : <Icon className="w-4 h-4 sm:w-5 sm:h-5" />}
                   </div>
                   <span
                     className={`text-[11px] sm:text-xs font-semibold mt-2 ${
-                      isActive ? "text-emerald-700" : isPassed ? "text-slate-700" : "text-slate-400"
+                      isActive ? "text-emerald-700 dark:text-emerald-400" : isPassed ? "text-slate-700 dark:text-slate-300" : "text-slate-400 dark:text-slate-500"
                     }`}
                   >
                     {step.label}
@@ -307,21 +314,21 @@ export default function PartnerRegisterPage() {
         </div>
 
         {/* Card Form */}
-        <div className="bg-white rounded-2xl p-6 sm:p-10 shadow-soft border border-slate-200/60">
+        <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 sm:p-10 shadow-soft border border-slate-200/60 dark:border-slate-800">
           {errorMsg && (
-            <div className="mb-6 p-4 rounded-2xl bg-rose-50 border border-rose-200 text-rose-700 text-sm font-medium flex items-start gap-3">
+            <div className="mb-6 p-4 rounded-2xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 text-rose-700 dark:text-rose-300 text-sm font-medium flex items-start gap-3">
               <Info className="w-5 h-5 text-rose-500 shrink-0 mt-0.5" />
               <span>{errorMsg}</span>
             </div>
           )}
 
           {isSuccess && (
-            <div className="mb-6 p-6 rounded-2xl bg-emerald-50 border border-emerald-200 text-center">
-              <div className="w-12 h-12 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center mx-auto mb-3">
+            <div className="mb-6 p-6 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-center">
+              <div className="w-12 h-12 rounded-full bg-emerald-100 dark:bg-emerald-900/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mx-auto mb-3">
                 <CheckCircle2 className="w-6 h-6" />
               </div>
-              <h3 className="text-lg font-bold text-emerald-900">Pendaftaran Berhasil!</h3>
-              <p className="text-sm text-emerald-700 mt-1">
+              <h3 className="text-lg font-bold text-emerald-900 dark:text-emerald-100">Pendaftaran Berhasil!</h3>
+              <p className="text-sm text-emerald-700 dark:text-emerald-300 mt-1">
                 Akun Mitra dan properti Anda telah aktif. Mengalihkan Anda ke halaman login...
               </p>
             </div>
@@ -332,52 +339,52 @@ export default function PartnerRegisterPage() {
             {currentStep === 1 && (
               <div className="space-y-5 animate-in fade-in duration-200">
                 <div>
-                  <h2 className="text-lg font-bold text-slate-900">Informasi Akun Mitra</h2>
-                  <p className="text-xs text-slate-500">
+                  <h2 className="text-lg font-bold text-slate-900 dark:text-white">Informasi Akun Mitra</h2>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">
                     Kredensial ini digunakan untuk masuk ke Dashboard Mitra Anda.
                   </p>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
                     Nama Lengkap Pemilik Kos *
                   </label>
                   <div className="relative">
-                    <User className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                    <User className="w-4 h-4 text-slate-400 dark:text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
                     <input
                       type="text"
                       required
                       placeholder="Contoh: Budi Santoso"
                       value={formData.name}
                       onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                      className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 text-sm font-medium focus:ring-2 focus:ring-emerald-500 focus:outline-none transition-all"
+                      className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-800/80 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 text-sm font-medium focus:ring-2 focus:ring-emerald-500 focus:outline-none transition-all"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
                     Alamat Email (Login) *
                   </label>
                   <div className="relative">
-                    <Mail className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                    <Mail className="w-4 h-4 text-slate-400 dark:text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
                     <input
                       type="email"
                       required
                       placeholder="nama@email.com"
                       value={formData.email}
                       onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                      className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 text-sm font-medium focus:ring-2 focus:ring-emerald-500 focus:outline-none transition-all"
+                      className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-800/80 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 text-sm font-medium focus:ring-2 focus:ring-emerald-500 focus:outline-none transition-all"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
                     Nomor WhatsApp Aktif *
                   </label>
                   <div className="relative">
-                    <Phone className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                    <Phone className="w-4 h-4 text-slate-400 dark:text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
                     <input
                       type="tel"
                       required
@@ -390,32 +397,32 @@ export default function PartnerRegisterPage() {
                           whatsapp_number: e.target.value.replace(/\D/g, "").slice(0, 13),
                         })
                       }
-                      className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 text-sm font-medium focus:ring-2 focus:ring-emerald-500 focus:outline-none transition-all"
+                      className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-800/80 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 text-sm font-medium focus:ring-2 focus:ring-emerald-500 focus:outline-none transition-all"
                     />
                   </div>
-                  <p className="text-[11px] text-slate-500 mt-1">
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1">
                     Nomor WA digunakan untuk menerima notifikasi pesanan dan konfirmasi sewa.
                   </p>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
                     Password Akun *
                   </label>
                   <div className="relative">
-                    <Lock className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                    <Lock className="w-4 h-4 text-slate-400 dark:text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
                     <input
                       type={showPassword ? "text" : "password"}
                       required
                       placeholder="Minimal 8 karakter (huruf besar, kecil, & angka)"
                       value={formData.password}
                       onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                      className="w-full pl-10 pr-10 py-2.5 rounded-xl border border-slate-200 text-sm font-medium focus:ring-2 focus:ring-emerald-500 focus:outline-none transition-all"
+                      className="w-full pl-10 pr-10 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-800/80 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 text-sm font-medium focus:ring-2 focus:ring-emerald-500 focus:outline-none transition-all"
                     />
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                      className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300"
                     >
                       {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                     </button>
@@ -428,31 +435,31 @@ export default function PartnerRegisterPage() {
             {currentStep === 2 && (
               <div className="space-y-5 animate-in fade-in duration-200">
                 <div>
-                  <h2 className="text-lg font-bold text-slate-900">Data Properti Kos Perdana</h2>
-                  <p className="text-xs text-slate-500">
+                  <h2 className="text-lg font-bold text-slate-900 dark:text-white">Data Properti Kos Perdana</h2>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">
                     Masukkan detail kos pertama yang ingin Anda daftarkan di KosPasti.
                   </p>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
                     Nama Properti Kos *
                   </label>
                   <div className="relative">
-                    <Building2 className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                    <Building2 className="w-4 h-4 text-slate-400 dark:text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
                     <input
                       type="text"
                       required
                       placeholder="Contoh: Kos Melati Asri Subang"
                       value={formData.propertyName}
                       onChange={(e) => setFormData({ ...formData, propertyName: e.target.value })}
-                      className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 text-sm font-medium focus:ring-2 focus:ring-emerald-500 focus:outline-none transition-all"
+                      className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-800/80 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 text-sm font-medium focus:ring-2 focus:ring-emerald-500 focus:outline-none transition-all"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
                     Kategori / Tipe Penghuni *
                   </label>
                   <div className="grid grid-cols-3 gap-3">
@@ -464,7 +471,7 @@ export default function PartnerRegisterPage() {
                         className={`py-2.5 px-3 rounded-xl border text-xs sm:text-sm font-bold transition-all ${
                           formData.gender_type === type
                             ? "bg-emerald-600 text-white border-emerald-600 shadow-xs"
-                            : "bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100"
+                            : "bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700"
                         }`}
                       >
                         {type === "PUTRA" ? "Khusus Putra" : type === "PUTRI" ? "Khusus Putri" : "Campur"}
@@ -474,18 +481,18 @@ export default function PartnerRegisterPage() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
                     Alamat Lengkap Kos *
                   </label>
                   <div className="relative">
-                    <MapPin className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
+                    <MapPin className="w-4 h-4 text-slate-400 dark:text-slate-500 absolute left-3.5 top-3" />
                     <textarea
                       required
                       rows={2}
                       placeholder="Jl. RA Kartini No. 45, RT 02/RW 03, Kel. Soklat, Kec. Subang, Jawa Barat"
                       value={formData.address}
                       onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                      className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 text-sm font-medium focus:ring-2 focus:ring-emerald-500 focus:outline-none transition-all"
+                      className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-800/80 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 text-sm font-medium focus:ring-2 focus:ring-emerald-500 focus:outline-none transition-all"
                     />
                   </div>
                 </div>
@@ -518,7 +525,7 @@ export default function PartnerRegisterPage() {
 
                 {/* Aturan & Kebijakan Tambahan */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
-                  <label className="flex items-center gap-3 p-3 rounded-xl border border-slate-200 hover:bg-slate-50 cursor-pointer transition-colors">
+                  <label className="flex items-center gap-3 p-3 rounded-xl border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/60 cursor-pointer transition-colors">
                     <input
                       type="checkbox"
                       checked={formData.is_24_hours}
@@ -526,12 +533,12 @@ export default function PartnerRegisterPage() {
                       className="w-4 h-4 text-emerald-600 rounded focus:ring-emerald-500"
                     />
                     <div className="text-xs">
-                      <span className="font-bold text-slate-800 block">Akses 24 Jam</span>
-                      <span className="text-slate-500">Bebas jam malam untuk penghuni</span>
+                      <span className="font-bold text-slate-800 dark:text-slate-200 block">Akses 24 Jam</span>
+                      <span className="text-slate-500 dark:text-slate-400">Bebas jam malam untuk penghuni</span>
                     </div>
                   </label>
 
-                  <label className="flex items-center gap-3 p-3 rounded-xl border border-slate-200 hover:bg-slate-50 cursor-pointer transition-colors">
+                  <label className="flex items-center gap-3 p-3 rounded-xl border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/60 cursor-pointer transition-colors">
                     <input
                       type="checkbox"
                       checked={formData.is_pet_friendly}
@@ -539,8 +546,8 @@ export default function PartnerRegisterPage() {
                       className="w-4 h-4 text-emerald-600 rounded focus:ring-emerald-500"
                     />
                     <div className="text-xs">
-                      <span className="font-bold text-slate-800 block">Boleh Hewan (Pet Friendly)</span>
-                      <span className="text-slate-500">Izinkan kucing / peliharaan kecil</span>
+                      <span className="font-bold text-slate-800 dark:text-slate-200 block">Boleh Hewan (Pet Friendly)</span>
+                      <span className="text-slate-500 dark:text-slate-400">Izinkan kucing / peliharaan kecil</span>
                     </div>
                   </label>
                 </div>
@@ -551,46 +558,63 @@ export default function PartnerRegisterPage() {
             {currentStep === 3 && (
               <div className="space-y-5 animate-in fade-in duration-200">
                 <div>
-                  <h2 className="text-lg font-bold text-slate-900">Kamar, Harga &amp; Fasilitas</h2>
-                  <p className="text-xs text-slate-500">
+                  <h2 className="text-lg font-bold text-slate-900 dark:text-white">Kamar, Harga &amp; Fasilitas</h2>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">
                     Tentukan tarif bulanan dan fasilitas yang tersedia untuk calon penyewa.
                   </p>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
                       Harga Sewa per Bulan (Rp) *
                     </label>
                     <div className="relative">
-                      <DollarSign className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                      <DollarSign className="w-4 h-4 text-slate-400 dark:text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
                       <input
-                        type="number"
+                        type="text"
+                        inputMode="numeric"
+                        pattern="[0-9]*"
                         required
-                        min="0"
-                        step="10000"
                         placeholder="Contoh: 850000"
                         value={formData.price_per_month}
-                        onChange={(e) => setFormData({ ...formData, price_per_month: e.target.value })}
-                        className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 text-sm font-medium focus:ring-2 focus:ring-emerald-500 focus:outline-none transition-all"
+                        onKeyDown={(e) => {
+                          if (["e", "E", "+", "-", "."].includes(e.key)) {
+                            e.preventDefault();
+                          }
+                        }}
+                        onChange={(e) => {
+                          const val = e.target.value.replace(/\D/g, "");
+                          setFormData({ ...formData, price_per_month: val });
+                        }}
+                        className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-800/80 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 text-sm font-medium focus:ring-2 focus:ring-emerald-500 focus:outline-none transition-all"
                       />
                     </div>
                   </div>
 
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
                       Jumlah Kamar Tersedia *
                     </label>
                     <div className="relative">
-                      <BedDouble className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                      <BedDouble className="w-4 h-4 text-slate-400 dark:text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
                       <input
-                        type="number"
+                        type="text"
+                        inputMode="numeric"
+                        pattern="[0-9]*"
                         required
-                        min="0"
                         placeholder="Contoh: 5"
                         value={formData.available_rooms}
-                        onChange={(e) => setFormData({ ...formData, available_rooms: e.target.value })}
-                        className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 text-sm font-medium focus:ring-2 focus:ring-emerald-500 focus:outline-none transition-all"
+                        onKeyDown={(e) => {
+                          if (["e", "E", "+", "-", "."].includes(e.key)) {
+                            e.preventDefault();
+                          }
+                        }}
+                        onChange={(e) => {
+                          const val = e.target.value.replace(/\D/g, "");
+                          setFormData({ ...formData, available_rooms: val });
+                        }}
+                        className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-800/80 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 text-sm font-medium focus:ring-2 focus:ring-emerald-500 focus:outline-none transition-all"
                       />
                     </div>
                   </div>
@@ -598,7 +622,7 @@ export default function PartnerRegisterPage() {
 
                 {/* Fasilitas Checkbox Grid */}
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-2">
                     Fasilitas Tersedia
                   </label>
                   <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
@@ -611,12 +635,12 @@ export default function PartnerRegisterPage() {
                           onClick={() => handleFacilityToggle(item)}
                           className={`p-2.5 rounded-xl border text-left text-xs font-semibold flex items-center justify-between transition-all ${
                             isChecked
-                              ? "bg-emerald-50 border-emerald-400 text-emerald-800 shadow-xs"
-                              : "bg-slate-50/70 border-slate-200 text-slate-600 hover:bg-slate-100"
+                              ? "bg-emerald-50 dark:bg-emerald-950/40 border-emerald-400 dark:border-emerald-700 text-emerald-800 dark:text-emerald-300 shadow-xs"
+                              : "bg-slate-50/70 dark:bg-slate-800/60 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
                           }`}
                         >
                           <span className="truncate">{item}</span>
-                          {isChecked && <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0 ml-1" />}
+                          {isChecked && <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0 ml-1" />}
                         </button>
                       );
                     })}
@@ -634,12 +658,12 @@ export default function PartnerRegisterPage() {
                           handleAddCustomFacility();
                         }
                       }}
-                      className="flex-1 px-3.5 py-2 rounded-xl border border-slate-200 text-xs font-medium focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                      className="flex-1 px-3.5 py-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-800/80 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 text-xs font-medium focus:ring-2 focus:ring-emerald-500 focus:outline-none"
                     />
                     <button
                       type="button"
                       onClick={handleAddCustomFacility}
-                      className="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs"
+                      className="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 dark:bg-slate-700 dark:hover:bg-slate-600 text-white font-bold text-xs"
                     >
                       + Tambah
                     </button>
@@ -648,7 +672,7 @@ export default function PartnerRegisterPage() {
 
                 {/* URL Foto Properti */}
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
                     URL Foto Utama Properti
                   </label>
                   <input
@@ -656,9 +680,9 @@ export default function PartnerRegisterPage() {
                     placeholder="https://images.unsplash.com/..."
                     value={formData.image_url}
                     onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm font-medium focus:ring-2 focus:ring-emerald-500 focus:outline-none transition-all"
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-800/80 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 text-sm font-medium focus:ring-2 focus:ring-emerald-500 focus:outline-none transition-all"
                   />
-                  <p className="text-[11px] text-slate-500 mt-1">
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1">
                     Bisa diedit dan ditambahkan galeri foto lebih lengkap di Dashboard setelah akun dibuat.
                   </p>
                 </div>
@@ -669,69 +693,69 @@ export default function PartnerRegisterPage() {
             {currentStep === 4 && (
               <div className="space-y-5 animate-in fade-in duration-200">
                 <div>
-                  <h2 className="text-lg font-bold text-slate-900">Ringkasan Pendaftaran Mitra</h2>
-                  <p className="text-xs text-slate-500">
+                  <h2 className="text-lg font-bold text-slate-900 dark:text-white">Ringkasan Pendaftaran Mitra</h2>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">
                     Mohon periksa kembali data akun dan properti Anda sebelum mengirimkan form.
                   </p>
                 </div>
 
                 <div className="space-y-4">
                   {/* Akun Summary */}
-                  <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-2">
+                  <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/60 space-y-2">
                     <div className="flex items-center justify-between">
-                      <span className="text-xs font-bold text-emerald-800 uppercase tracking-wider">
+                      <span className="text-xs font-bold text-emerald-800 dark:text-emerald-400 uppercase tracking-wider">
                         1. Akun Mitra
                       </span>
                       <button
                         type="button"
                         onClick={() => setCurrentStep(1)}
-                        className="text-xs text-emerald-600 font-semibold hover:underline"
+                        className="text-xs text-emerald-600 dark:text-emerald-400 font-semibold hover:underline"
                       >
                         Ubah
                       </button>
                     </div>
                     <div className="grid grid-cols-2 gap-2 text-xs">
                       <div>
-                        <span className="text-slate-500 block">Nama Pemilik:</span>
-                        <span className="font-bold text-slate-800">{formData.name}</span>
+                        <span className="text-slate-500 dark:text-slate-400 block">Nama Pemilik:</span>
+                        <span className="font-bold text-slate-800 dark:text-slate-200">{formData.name}</span>
                       </div>
                       <div>
-                        <span className="text-slate-500 block">Email Login:</span>
-                        <span className="font-bold text-slate-800">{formData.email}</span>
+                        <span className="text-slate-500 dark:text-slate-400 block">Email Login:</span>
+                        <span className="font-bold text-slate-800 dark:text-slate-200">{formData.email}</span>
                       </div>
                       <div>
-                        <span className="text-slate-500 block">WhatsApp:</span>
-                        <span className="font-bold text-slate-800">{formData.whatsapp_number}</span>
+                        <span className="text-slate-500 dark:text-slate-400 block">WhatsApp:</span>
+                        <span className="font-bold text-slate-800 dark:text-slate-200">{formData.whatsapp_number}</span>
                       </div>
                       <div>
-                        <span className="text-slate-500 block">Password:</span>
-                        <span className="font-bold text-slate-800">••••••••</span>
+                        <span className="text-slate-500 dark:text-slate-400 block">Password:</span>
+                        <span className="font-bold text-slate-800 dark:text-slate-200">••••••••</span>
                       </div>
                     </div>
                   </div>
 
                   {/* Properti Summary */}
-                  <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-2">
+                  <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/60 space-y-2">
                     <div className="flex items-center justify-between">
-                      <span className="text-xs font-bold text-emerald-800 uppercase tracking-wider">
+                      <span className="text-xs font-bold text-emerald-800 dark:text-emerald-400 uppercase tracking-wider">
                         2. Properti &amp; Kamar
                       </span>
                       <button
                         type="button"
                         onClick={() => setCurrentStep(2)}
-                        className="text-xs text-emerald-600 font-semibold hover:underline"
+                        className="text-xs text-emerald-600 dark:text-emerald-400 font-semibold hover:underline"
                       >
                         Ubah
                       </button>
                     </div>
                     <div className="grid grid-cols-2 gap-2 text-xs">
                       <div>
-                        <span className="text-slate-500 block">Nama Kos:</span>
-                        <span className="font-bold text-slate-800">{formData.propertyName}</span>
+                        <span className="text-slate-500 dark:text-slate-400 block">Nama Kos:</span>
+                        <span className="font-bold text-slate-800 dark:text-slate-200">{formData.propertyName}</span>
                       </div>
                       <div>
-                        <span className="text-slate-500 block">Kategori:</span>
-                        <span className="font-bold text-slate-800">
+                        <span className="text-slate-500 dark:text-slate-400 block">Kategori:</span>
+                        <span className="font-bold text-slate-800 dark:text-slate-200">
                           {formData.gender_type === "PUTRA"
                             ? "Khusus Putra"
                             : formData.gender_type === "PUTRI"
@@ -740,44 +764,44 @@ export default function PartnerRegisterPage() {
                         </span>
                       </div>
                       <div className="col-span-2">
-                        <span className="text-slate-500 block">Alamat:</span>
-                        <span className="font-bold text-slate-800">{formData.address}</span>
+                        <span className="text-slate-500 dark:text-slate-400 block">Alamat:</span>
+                        <span className="font-bold text-slate-800 dark:text-slate-200">{formData.address}</span>
                       </div>
                       <div>
-                        <span className="text-slate-500 block">Harga Sewa:</span>
-                        <span className="font-bold text-emerald-700">
+                        <span className="text-slate-500 dark:text-slate-400 block">Harga Sewa:</span>
+                        <span className="font-bold text-emerald-700 dark:text-emerald-400">
                           Rp {Number(formData.price_per_month).toLocaleString("id-ID")} / bulan
                         </span>
                       </div>
                       <div>
-                        <span className="text-slate-500 block">Kamar Tersedia:</span>
-                        <span className="font-bold text-slate-800">{formData.available_rooms} Kamar</span>
+                        <span className="text-slate-500 dark:text-slate-400 block">Kamar Tersedia:</span>
+                        <span className="font-bold text-slate-800 dark:text-slate-200">{formData.available_rooms} Kamar</span>
                       </div>
                     </div>
                   </div>
 
                   {/* Fasilitas Summary */}
-                  <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-2">
+                  <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/60 space-y-2">
                     <div className="flex items-center justify-between">
-                      <span className="text-xs font-bold text-emerald-800 uppercase tracking-wider">
+                      <span className="text-xs font-bold text-emerald-800 dark:text-emerald-400 uppercase tracking-wider">
                         3. Fasilitas
                       </span>
                       <button
                         type="button"
                         onClick={() => setCurrentStep(3)}
-                        className="text-xs text-emerald-600 font-semibold hover:underline"
+                        className="text-xs text-emerald-600 dark:text-emerald-400 font-semibold hover:underline"
                       >
                         Ubah
                       </button>
                     </div>
-                    <p className="text-xs text-slate-700 font-medium leading-relaxed">
+                    <p className="text-xs text-slate-700 dark:text-slate-300 font-medium leading-relaxed">
                       {formData.facilities || "Fasilitas standar"}
                     </p>
                   </div>
                 </div>
 
-                <div className="p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 text-xs text-emerald-800 flex items-center gap-2">
-                  <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />
+                <div className="p-3.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-xs text-emerald-800 dark:text-emerald-300 flex items-center gap-2">
+                  <ShieldCheck className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
                   <span>
                     Dengan menekan tombol submit, Anda menyetujui syarat &amp; ketentuan kemitraan resmi KosPasti.
                   </span>
@@ -786,13 +810,13 @@ export default function PartnerRegisterPage() {
             )}
 
             {/* Action Buttons */}
-            <div className="flex items-center justify-between gap-3 pt-6 mt-6 border-t border-slate-100">
+            <div className="flex items-center justify-between gap-3 pt-6 mt-6 border-t border-slate-100 dark:border-slate-800">
               {currentStep > 1 ? (
                 <button
                   type="button"
                   onClick={prevStep}
                   disabled={isLoading || isSuccess}
-                  className="px-5 py-2.5 rounded-xl border border-slate-200/80 bg-white hover:bg-slate-50 text-slate-700 text-xs sm:text-sm font-bold flex items-center gap-2 shadow-soft hover:shadow-float active:scale-95 transition-all duration-200 disabled:opacity-50 cursor-pointer"
+                  className="px-5 py-2.5 rounded-xl border border-slate-200/80 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs sm:text-sm font-bold flex items-center gap-2 shadow-soft hover:shadow-float active:scale-95 transition-all duration-200 disabled:opacity-50 cursor-pointer"
                 >
                   <ArrowLeft className="w-4 h-4" />
                   <span>Kembali</span>
@@ -800,7 +824,7 @@ export default function PartnerRegisterPage() {
               ) : (
                 <Link
                   href="/partner/login"
-                  className="text-xs sm:text-sm font-semibold text-slate-500 hover:text-emerald-600 transition-colors"
+                  className="text-xs sm:text-sm font-semibold text-slate-500 dark:text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors"
                 >
                   Sudah punya akun Mitra? Masuk
                 </Link>
@@ -839,13 +863,13 @@ export default function PartnerRegisterPage() {
         </div>
 
         {/* Footer info */}
-        <div className="text-center mt-6 text-xs text-slate-500">
+        <div className="text-center mt-6 text-xs text-slate-500 dark:text-slate-400">
           Butuh bantuan pendaftaran?{" "}
           <a
             href="https://wa.me/6281234567890?text=Halo%20Admin%20KosPasti,%20saya%20butuh%20bantuan%20pendaftaran%20mitra."
             target="_blank"
             rel="noopener noreferrer"
-            className="text-emerald-600 font-bold hover:underline"
+            className="text-emerald-600 dark:text-emerald-400 font-bold hover:underline"
           >
             Hubungi Admin WhatsApp
           </a>

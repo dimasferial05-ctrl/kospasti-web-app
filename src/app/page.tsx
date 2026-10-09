@@ -17,7 +17,7 @@ export const metadata = {
 
 export default function LandingPage() {
   return (
-    <div className="min-h-screen flex flex-col bg-slate-50 selection:bg-emerald-500 selection:text-white">
+    <div className="min-h-screen flex flex-col bg-slate-50 dark:bg-slate-950 selection:bg-emerald-500 selection:text-white">
       <main className="flex-1 w-full">
         {/* 1. Hero Section with Top Search & Architectural Image Banner */}
         <div id="beranda" className="scroll-mt-20">

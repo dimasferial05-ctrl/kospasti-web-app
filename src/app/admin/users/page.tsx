@@ -143,17 +143,17 @@ export default function AdminUsersPage() {
       {/* Header Halaman */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-extrabold text-slate-800">Manajemen Pengguna</h2>
-          <p className="text-slate-500 text-sm">
+          <h2 className="text-2xl font-extrabold text-slate-800 dark:text-white">Manajemen Pengguna</h2>
+          <p className="text-slate-500 dark:text-slate-400 text-sm">
             Daftar seluruh pencari kos yang terdaftar di platform KosPasti.
           </p>
         </div>
       </div>
 
       {/* Kontainer Utama Tabel */}
-      <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+      <div className="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 overflow-hidden">
         {/* Search Bar */}
-        <div className="p-4 border-b border-slate-200 bg-slate-50 flex items-center justify-between gap-4">
+        <div className="p-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/60 flex items-center justify-between gap-4">
           <div className="relative w-auto flex items-center">
             <GooeyInput
               placeholder="Cari nama, email, WhatsApp..."
@@ -165,36 +165,36 @@ export default function AdminUsersPage() {
               preserveLayoutSpace={true}
             />
           </div>
-          <div className="text-xs font-semibold text-slate-500 shrink-0">
-            Total: <span className="text-slate-800 font-bold">{filteredUsers.length}</span> Pengguna
+          <div className="text-xs font-semibold text-slate-500 dark:text-slate-400 shrink-0">
+            Total: <span className="text-slate-800 dark:text-slate-200 font-bold">{filteredUsers.length}</span> Pengguna
           </div>
         </div>
 
         {/* Tabel Data Pengguna */}
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm min-w-[850px]">
-            <thead className="bg-slate-100 text-slate-600 font-semibold uppercase text-xs tracking-wider">
+            <thead className="bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-semibold uppercase text-xs tracking-wider">
               <tr>
-                <th className="p-4 border-b border-slate-200">Pengguna</th>
-                <th className="p-4 border-b border-slate-200">Email</th>
-                <th className="p-4 border-b border-slate-200">Nomor WhatsApp</th>
-                <th className="p-4 border-b border-slate-200">Bio</th>
-                <th className="p-4 border-b border-slate-200 text-center">Total Booking</th>
-                <th className="p-4 border-b border-slate-200 text-center">Terdaftar</th>
-                <th className="p-4 border-b border-slate-200 text-center">Aksi</th>
+                <th className="p-4 border-b border-slate-200 dark:border-slate-700">Pengguna</th>
+                <th className="p-4 border-b border-slate-200 dark:border-slate-700">Email</th>
+                <th className="p-4 border-b border-slate-200 dark:border-slate-700">Nomor WhatsApp</th>
+                <th className="p-4 border-b border-slate-200 dark:border-slate-700">Bio</th>
+                <th className="p-4 border-b border-slate-200 dark:border-slate-700 text-center">Total Booking</th>
+                <th className="p-4 border-b border-slate-200 dark:border-slate-700 text-center">Terdaftar</th>
+                <th className="p-4 border-b border-slate-200 dark:border-slate-700 text-center">Aksi</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody className="divide-y divide-slate-100 dark:divide-slate-800 text-slate-700 dark:text-slate-300">
               {filteredUsers.map((user) => {
                 return (
-                  <tr key={user.id} className="hover:bg-slate-50 transition-colors">
+                  <tr key={user.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
                     {/* Kolom Avatar & Nama */}
                     <td className="p-4">
                       <div className="flex items-center gap-3">
                         <UserAvatar src={user.avatar} name={user.name} size="md" />
                         <div>
-                          <div className="font-bold text-slate-800">{user.name}</div>
-                          <div className="text-xs text-slate-400 font-mono">
+                          <div className="font-bold text-slate-800 dark:text-slate-100">{user.name}</div>
+                          <div className="text-xs text-slate-400 dark:text-slate-500 font-mono">
                             {user.id.slice(0, 8)}...
                           </div>
                         </div>
@@ -202,23 +202,23 @@ export default function AdminUsersPage() {
                     </td>
 
                     {/* Kolom Email */}
-                    <td className="p-4 text-slate-600">
+                    <td className="p-4 text-slate-600 dark:text-slate-300">
                       <div className="flex items-center gap-1.5">
-                        <Mail size={14} className="text-slate-400 shrink-0" />
+                        <Mail size={14} className="text-slate-400 dark:text-slate-500 shrink-0" />
                         <span className="truncate max-w-[180px]">{user.email}</span>
                       </div>
                     </td>
 
                     {/* Kolom Nomor WhatsApp */}
-                    <td className="p-4 text-slate-600">
+                    <td className="p-4 text-slate-600 dark:text-slate-300">
                       {user.whatsapp ? (
                         <div className="flex items-center gap-2">
-                          <span className="font-medium text-slate-700">{user.whatsapp}</span>
+                          <span className="font-medium text-slate-700 dark:text-slate-200">{user.whatsapp}</span>
                           <a
                             href={getCleanWhatsappUrl(user.whatsapp)}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="inline-flex items-center gap-1 px-2 py-0.5 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200 rounded text-xs font-semibold transition"
+                            className="inline-flex items-center gap-1 px-2 py-0.5 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 border border-emerald-200 dark:border-emerald-800 rounded text-xs font-semibold transition"
                             title="Kirim pesan WhatsApp langsung"
                           >
                             <MessageCircle size={12} />
@@ -226,31 +226,31 @@ export default function AdminUsersPage() {
                           </a>
                         </div>
                       ) : (
-                        <span className="text-slate-400 text-xs italic">Belum diisi</span>
+                        <span className="text-slate-400 dark:text-slate-500 text-xs italic">Belum diisi</span>
                       )}
                     </td>
 
                     {/* Kolom Bio Singkat */}
-                    <td className="p-4 text-slate-600 max-w-[200px]">
+                    <td className="p-4 text-slate-600 dark:text-slate-300 max-w-[200px]">
                       {user.bio ? (
-                        <span className="text-xs italic line-clamp-2 text-slate-700" title={user.bio}>
+                        <span className="text-xs italic line-clamp-2 text-slate-700 dark:text-slate-300" title={user.bio}>
                           &ldquo;{user.bio}&rdquo;
                         </span>
                       ) : (
-                        <span className="text-slate-400 text-xs italic">-</span>
+                        <span className="text-slate-400 dark:text-slate-500 text-xs italic">-</span>
                       )}
                     </td>
 
                     {/* Kolom Total Booking */}
                     <td className="p-4 text-center">
-                      <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-slate-100 text-slate-700 rounded-full text-xs font-bold">
-                        <BookmarkCheck size={13} className="text-emerald-600" />
+                      <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-full text-xs font-bold">
+                        <BookmarkCheck size={13} className="text-emerald-600 dark:text-emerald-400" />
                         <span>{user._count?.bookings ?? 0}</span>
                       </span>
                     </td>
 
                     {/* Kolom Tanggal Terdaftar */}
-                    <td className="p-4 text-center text-xs text-slate-500 font-medium">
+                    <td className="p-4 text-center text-xs text-slate-500 dark:text-slate-400 font-medium">
                       {new Date(user.created_at).toLocaleDateString("id-ID", {
                         day: "numeric",
                         month: "short",
@@ -263,7 +263,7 @@ export default function AdminUsersPage() {
                       <button
                         type="button"
                         onClick={() => setSelectedUser(user)}
-                        className="inline-flex items-center gap-1 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 rounded-lg text-xs font-semibold shadow-2xs transition active:scale-95 cursor-pointer"
+                        className="inline-flex items-center gap-1 px-3 py-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 rounded-lg text-xs font-semibold shadow-2xs transition active:scale-95 cursor-pointer"
                         title="Lihat Detail Profil Pengguna"
                       >
                         <Eye size={14} />
@@ -276,7 +276,7 @@ export default function AdminUsersPage() {
 
               {filteredUsers.length === 0 && (
                 <tr>
-                  <td colSpan={7} className="p-8 text-center text-slate-500">
+                  <td colSpan={7} className="p-8 text-center text-slate-500 dark:text-slate-400">
                     {searchQuery
                       ? "Tidak ditemukan pengguna yang sesuai dengan kata kunci pencarian."
                       : "Belum ada data pengguna terdaftar."}
@@ -297,7 +297,7 @@ export default function AdminUsersPage() {
           aria-modal="true"
         >
           <div
-            className="bg-white rounded-2xl shadow-xl border border-slate-100 w-full max-w-md overflow-hidden animate-scaleUp"
+            className="bg-white dark:bg-slate-900 rounded-2xl shadow-xl border border-slate-100 dark:border-slate-800 w-full max-w-md overflow-hidden animate-scaleUp"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header Modal */}
@@ -321,30 +321,30 @@ export default function AdminUsersPage() {
             <div className="p-6 space-y-4">
               {/* Bio Singkat */}
               <div>
-                <label className="text-xs font-bold uppercase tracking-wider text-slate-400 block mb-1">
+                <label className="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 block mb-1">
                   Bio / Deskripsi Profil
                 </label>
-                <div className="bg-slate-50 border border-slate-200 rounded-xl p-3.5 text-sm text-slate-700 leading-relaxed italic">
+                <div className="bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-xl p-3.5 text-sm text-slate-700 dark:text-slate-300 leading-relaxed italic">
                   {selectedUser.bio ? `"${selectedUser.bio}"` : "Pengguna belum menambahkan bio profil."}
                 </div>
               </div>
 
               {/* Data Kontak */}
               <div className="space-y-2.5 pt-2">
-                <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-lg border border-slate-100 text-sm">
-                  <Mail size={18} className="text-slate-400 shrink-0" />
+                <div className="flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-800/60 rounded-lg border border-slate-100 dark:border-slate-700/60 text-sm">
+                  <Mail size={18} className="text-slate-400 dark:text-slate-500 shrink-0" />
                   <div className="overflow-hidden">
-                    <div className="text-xs text-slate-400 font-medium">Alamat Email</div>
-                    <div className="text-slate-700 font-medium truncate">{selectedUser.email}</div>
+                    <div className="text-xs text-slate-400 dark:text-slate-500 font-medium">Alamat Email</div>
+                    <div className="text-slate-700 dark:text-slate-200 font-medium truncate">{selectedUser.email}</div>
                   </div>
                 </div>
 
-                <div className="flex items-center justify-between p-3 bg-slate-50 rounded-lg border border-slate-100 text-sm">
+                <div className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-800/60 rounded-lg border border-slate-100 dark:border-slate-700/60 text-sm">
                   <div className="flex items-center gap-3">
-                    <Phone size={18} className="text-slate-400 shrink-0" />
+                    <Phone size={18} className="text-slate-400 dark:text-slate-500 shrink-0" />
                     <div>
-                      <div className="text-xs text-slate-400 font-medium">Nomor WhatsApp</div>
-                      <div className="text-slate-700 font-medium">{selectedUser.whatsapp || "Tidak tersedia"}</div>
+                      <div className="text-xs text-slate-400 dark:text-slate-500 font-medium">Nomor WhatsApp</div>
+                      <div className="text-slate-700 dark:text-slate-200 font-medium">{selectedUser.whatsapp || "Tidak tersedia"}</div>
                     </div>
                   </div>
                   {selectedUser.whatsapp && (
@@ -361,21 +361,21 @@ export default function AdminUsersPage() {
                 </div>
 
                 <div className="grid grid-cols-2 gap-2.5 pt-1">
-                  <div className="p-3 bg-slate-50 rounded-lg border border-slate-100 text-sm">
-                    <div className="flex items-center gap-1.5 text-xs text-slate-400 font-medium mb-1">
-                      <BookmarkCheck size={14} className="text-emerald-600" />
+                  <div className="p-3 bg-slate-50 dark:bg-slate-800/60 rounded-lg border border-slate-100 dark:border-slate-700/60 text-sm">
+                    <div className="flex items-center gap-1.5 text-xs text-slate-400 dark:text-slate-500 font-medium mb-1">
+                      <BookmarkCheck size={14} className="text-emerald-600 dark:text-emerald-400" />
                       <span>Total Booking</span>
                     </div>
-                    <div className="text-base font-bold text-slate-800">
+                    <div className="text-base font-bold text-slate-800 dark:text-slate-100">
                       {selectedUser._count?.bookings ?? 0} Pesanan
                     </div>
                   </div>
-                  <div className="p-3 bg-slate-50 rounded-lg border border-slate-100 text-sm">
-                    <div className="flex items-center gap-1.5 text-xs text-slate-400 font-medium mb-1">
-                      <Calendar size={14} className="text-slate-400" />
+                  <div className="p-3 bg-slate-50 dark:bg-slate-800/60 rounded-lg border border-slate-100 dark:border-slate-700/60 text-sm">
+                    <div className="flex items-center gap-1.5 text-xs text-slate-400 dark:text-slate-500 font-medium mb-1">
+                      <Calendar size={14} className="text-slate-400 dark:text-slate-500" />
                       <span>Terdaftar</span>
                     </div>
-                    <div className="text-xs font-semibold text-slate-700">
+                    <div className="text-xs font-semibold text-slate-700 dark:text-slate-300">
                       {new Date(selectedUser.created_at).toLocaleDateString("id-ID", {
                         day: "numeric",
                         month: "short",
@@ -391,7 +391,7 @@ export default function AdminUsersPage() {
                 <button
                   type="button"
                   onClick={() => setSelectedUser(null)}
-                  className="w-full py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-xl text-sm transition cursor-pointer"
+                  className="w-full py-2.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-semibold rounded-xl text-sm transition cursor-pointer"
                 >
                   Tutup
                 </button>

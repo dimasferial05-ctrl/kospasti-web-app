@@ -101,7 +101,7 @@ export default function SearchPage() {
       <section className="relative w-full flex flex-col items-center justify-center text-center pt-6 pb-8 sm:pt-10 sm:pb-12 px-4">
 
         {/* Main Headline */}
-        <h1 className="text-3xl sm:text-5xl font-extrabold text-slate-900 tracking-tight max-w-3xl leading-[1.15]">
+        <h1 className="text-3xl sm:text-5xl font-extrabold text-slate-900 dark:text-white tracking-tight max-w-3xl leading-[1.15]">
           Cari Kos Sesuai{" "}
           <TypeAnimation
             sequence={[
@@ -116,13 +116,13 @@ export default function SearchPage() {
             ]}
             wrapper="span"
             speed={50}
-            className="text-emerald-600 inline-block"
+            className="text-emerald-600 dark:text-emerald-400 inline-block"
             repeat={Infinity}
           />
         </h1>
 
         {/* Subtitle */}
-        <p className="mt-3 text-sm sm:text-base text-slate-600 max-w-2xl leading-relaxed font-medium">
+        <p className="mt-3 text-sm sm:text-base text-slate-600 dark:text-slate-300 max-w-2xl leading-relaxed font-medium">
           Temukan info kos dengan fasilitas lengkap, harga transparan, dan ketersediaan kamar terupdate secara real-time.
         </p>
 
@@ -136,13 +136,13 @@ export default function SearchPage() {
         </div>
 
         {/* Quick Link to Map */}
-        <div className="mt-5 flex items-center justify-center gap-2 text-xs sm:text-sm text-slate-500">
+        <div className="mt-5 flex items-center justify-center gap-2 text-xs sm:text-sm text-slate-500 dark:text-slate-400">
           <span>Ingin melihat sebaran kos di peta?</span>
           <Link
             href="/map"
-            className="font-semibold text-emerald-600 hover:text-emerald-700 hover:underline inline-flex items-center gap-1 transition-colors"
+            className="font-semibold text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 hover:underline inline-flex items-center gap-1 transition-colors"
           >
-            <MapPin className="w-3.5 h-3.5 text-emerald-600" />
+            <MapPin className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
             <span>Buka Peta Interaktif →</span>
           </Link>
         </div>
@@ -150,21 +150,21 @@ export default function SearchPage() {
 
       {/* Property List Section */}
       <section className="flex flex-col gap-6">
-        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3 border-b border-slate-200/80 pb-5">
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3 border-b border-slate-200/80 dark:border-slate-800 pb-5">
           <div>
             <div className="flex items-center gap-2">
 
-              <h2 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
+              <h2 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white tracking-tight">
                 Rekomendasi Kos Terbaru
               </h2>
             </div>
-            <p className="text-xs sm:text-sm text-slate-500 mt-1">
+            <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
               Pilihan kamar kos terverifikasi dan siap huni di berbagai lokasi strategis.
             </p>
           </div>
           <Link
             href="/map"
-            className="text-xs sm:text-sm font-bold text-emerald-600 hover:text-emerald-700 hover:underline inline-flex items-center gap-1 self-start sm:self-auto"
+            className="text-xs sm:text-sm font-bold text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 hover:underline inline-flex items-center gap-1 self-start sm:self-auto"
           >
             <span>Lihat semua di peta</span>
             <span>→</span>
@@ -172,28 +172,28 @@ export default function SearchPage() {
         </div>
 
         {isLoading && (
-          <div className="py-20 flex flex-col items-center justify-center gap-3 text-slate-500">
-            <Loader2 className="w-8 h-8 animate-spin text-emerald-600" />
-            <p className="text-sm font-semibold text-slate-600">Memuat daftar kos...</p>
+          <div className="py-20 flex flex-col items-center justify-center gap-3 text-slate-500 dark:text-slate-400">
+            <Loader2 className="w-8 h-8 animate-spin text-emerald-600 dark:text-emerald-400" />
+            <p className="text-sm font-semibold text-slate-600 dark:text-slate-300">Memuat daftar kos...</p>
           </div>
         )}
 
         {!isLoading && error && (
-          <div className="p-4 bg-rose-50 border border-rose-200 rounded-2xl text-rose-600 flex items-center gap-2.5 text-sm shadow-2xs">
+          <div className="p-4 bg-rose-50 dark:bg-rose-950/50 border border-rose-200 dark:border-rose-900 rounded-2xl text-rose-600 dark:text-rose-400 flex items-center gap-2.5 text-sm shadow-2xs">
             <AlertCircle className="w-5 h-5 shrink-0" />
             <span>{error}</span>
           </div>
         )}
 
         {!isLoading && !error && properties.length === 0 && (
-          <div className="flex flex-col items-center justify-center p-14 text-center bg-white rounded-3xl border border-slate-200 border-dashed shadow-soft">
-            <div className="w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center mb-4">
-              <SearchX className="w-8 h-8 text-slate-300" />
+          <div className="flex flex-col items-center justify-center p-14 text-center bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 border-dashed shadow-soft">
+            <div className="w-16 h-16 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center mb-4">
+              <SearchX className="w-8 h-8 text-slate-300 dark:text-slate-600" />
             </div>
-            <h3 className="text-base font-bold text-slate-800 mb-1">
+            <h3 className="text-base font-bold text-slate-800 dark:text-slate-200 mb-1">
               Kos Tidak Ditemukan
             </h3>
-            <p className="text-xs text-slate-500 max-w-sm leading-relaxed">
+            <p className="text-xs text-slate-500 dark:text-slate-400 max-w-sm leading-relaxed">
               Maaf, tidak ada kos yang sesuai dengan kriteria pencarian atau filter Anda. Saat ini belum ada listing kos yang terdaftar di sistem.
             </p>
           </div>

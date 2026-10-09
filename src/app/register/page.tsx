@@ -126,7 +126,7 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="min-h-[calc(100vh-64px)] flex items-center justify-center p-4 sm:p-6 bg-slate-50/60 relative overflow-hidden">
+    <div className="min-h-[calc(100vh-64px)] flex items-center justify-center p-4 sm:p-6 bg-slate-50/60 dark:bg-slate-950 relative overflow-hidden">
       {/* Background Animated Gradient Wave */}
       <GradientWave
         colors={["#ecfdf5", "#a7f3d0", "#34d399", "#ffffff", "#6ee7b7", "#ffffff"]}
@@ -144,18 +144,18 @@ export default function RegisterPage() {
         aria-hidden="true"
       />
 
-      <div className="relative z-10 w-full max-w-md bg-white/95 backdrop-blur-md p-6 sm:p-9 rounded-2xl sm:rounded-3xl shadow-soft-lg border border-slate-200/80 transition-all my-6">
+      <div className="relative z-10 w-full max-w-md bg-white/95 dark:bg-slate-900/95 backdrop-blur-md p-6 sm:p-9 rounded-2xl sm:rounded-3xl shadow-soft-lg border border-slate-200/80 dark:border-slate-800 transition-all my-6">
         {/* State: Sukses */}
         {isSuccess ? (
           <div className="text-center py-6 space-y-4 animate-fadeIn">
-            <div className="w-16 h-16 bg-emerald-50 text-emerald-600 rounded-full flex items-center justify-center mx-auto ring-8 ring-emerald-50/50 shadow-soft">
+            <div className="w-16 h-16 bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400 rounded-full flex items-center justify-center mx-auto ring-8 ring-emerald-50/50 dark:ring-emerald-900/30 shadow-soft">
               <CheckCircle2 className="w-10 h-10" />
             </div>
 
-            <h2 className="text-2xl font-bold text-slate-900 tracking-tight">
+            <h2 className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight">
               Pendaftaran Berhasil!
             </h2>
-            <p className="text-sm text-slate-600 max-w-xs mx-auto">
+            <p className="text-sm text-slate-600 dark:text-slate-400 max-w-xs mx-auto">
               Akun Anda telah berhasil dibuat. Silakan masuk untuk mulai mencari dan memesan kamar kos idaman Anda.
             </p>
 
@@ -173,10 +173,10 @@ export default function RegisterPage() {
             {/* Header Form */}
             <div className="text-center mb-6">
 
-              <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
+              <h1 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">
                 Daftar Akun Baru
               </h1>
-              <p className="text-xs sm:text-sm text-slate-500 mt-1.5">
+              <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1.5">
                 Lengkapi data di bawah untuk membuat akun pencari kos Anda.
               </p>
             </div>
@@ -199,13 +199,13 @@ export default function RegisterPage() {
               <div className="space-y-1.5 text-left">
                 <label
                   htmlFor="register-name"
-                  className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider"
+                  className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider"
                 >
                   Nama Lengkap <span className="text-rose-500">*</span>
                 </label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-                    <User className="w-5 h-5 text-slate-400" />
+                    <User className="w-5 h-5 text-slate-400 dark:text-slate-500" />
                   </div>
                   <input
                     id="register-name"
@@ -221,9 +221,9 @@ export default function RegisterPage() {
                     required
                     aria-invalid={!!errors.name}
                     aria-describedby={errors.name ? "name-error" : undefined}
-                    className={`w-full pl-11 pr-4 py-3 bg-slate-50/80 border rounded-xl text-sm font-medium text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 transition-all disabled:opacity-50 ${errors.name
+                    className={`w-full pl-11 pr-4 py-3 bg-slate-50/80 dark:bg-slate-800/80 border rounded-xl text-sm font-medium text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 transition-all disabled:opacity-50 ${errors.name
                         ? "border-rose-400 focus:ring-rose-200 focus:border-rose-500 bg-rose-50/20"
-                        : "border-slate-200 focus:ring-emerald-600/20 focus:border-emerald-600 focus:bg-white"
+                        : "border-slate-200 dark:border-slate-700 focus:ring-emerald-600/20 focus:border-emerald-600 focus:bg-white dark:focus:bg-slate-800"
                       }`}
                   />
                 </div>
@@ -238,13 +238,13 @@ export default function RegisterPage() {
               <div className="space-y-1.5 text-left">
                 <label
                   htmlFor="register-whatsapp"
-                  className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider"
+                  className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider"
                 >
                   Nomor WhatsApp <span className="text-rose-500">*</span>
                 </label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-                    <Phone className="w-5 h-5 text-slate-400" />
+                    <Phone className="w-5 h-5 text-slate-400 dark:text-slate-500" />
                   </div>
                   <input
                     id="register-whatsapp"
@@ -261,9 +261,9 @@ export default function RegisterPage() {
                     required
                     aria-invalid={!!errors.whatsapp}
                     aria-describedby={errors.whatsapp ? "whatsapp-error" : undefined}
-                    className={`w-full pl-11 pr-4 py-3 bg-slate-50/80 border rounded-xl text-sm font-medium text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 transition-all disabled:opacity-50 ${errors.whatsapp
+                    className={`w-full pl-11 pr-4 py-3 bg-slate-50/80 dark:bg-slate-800/80 border rounded-xl text-sm font-medium text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 transition-all disabled:opacity-50 ${errors.whatsapp
                         ? "border-rose-400 focus:ring-rose-200 focus:border-rose-500 bg-rose-50/20"
-                        : "border-slate-200 focus:ring-emerald-600/20 focus:border-emerald-600 focus:bg-white"
+                        : "border-slate-200 dark:border-slate-700 focus:ring-emerald-600/20 focus:border-emerald-600 focus:bg-white dark:focus:bg-slate-800"
                       }`}
                   />
                 </div>
@@ -278,13 +278,13 @@ export default function RegisterPage() {
               <div className="space-y-1.5 text-left">
                 <label
                   htmlFor="register-email"
-                  className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider"
+                  className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider"
                 >
                   Email <span className="text-rose-500">*</span>
                 </label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-                    <Mail className="w-5 h-5 text-slate-400" />
+                    <Mail className="w-5 h-5 text-slate-400 dark:text-slate-500" />
                   </div>
                   <input
                     id="register-email"
@@ -300,9 +300,9 @@ export default function RegisterPage() {
                     autoComplete="email"
                     aria-invalid={!!errors.email}
                     aria-describedby={errors.email ? "email-error" : undefined}
-                    className={`w-full pl-11 pr-4 py-3 bg-slate-50/80 border rounded-xl text-sm font-medium text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 transition-all disabled:opacity-50 ${errors.email
+                    className={`w-full pl-11 pr-4 py-3 bg-slate-50/80 dark:bg-slate-800/80 border rounded-xl text-sm font-medium text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 transition-all disabled:opacity-50 ${errors.email
                         ? "border-rose-400 focus:ring-rose-200 focus:border-rose-500 bg-rose-50/20"
-                        : "border-slate-200 focus:ring-emerald-600/20 focus:border-emerald-600 focus:bg-white"
+                        : "border-slate-200 dark:border-slate-700 focus:ring-emerald-600/20 focus:border-emerald-600 focus:bg-white dark:focus:bg-slate-800"
                       }`}
                   />
                 </div>
@@ -317,13 +317,13 @@ export default function RegisterPage() {
               <div className="space-y-1.5 text-left">
                 <label
                   htmlFor="register-password"
-                  className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider"
+                  className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider"
                 >
                   Password <span className="text-rose-500">*</span>
                 </label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-                    <Lock className="w-5 h-5 text-slate-400" />
+                    <Lock className="w-5 h-5 text-slate-400 dark:text-slate-500" />
                   </div>
                   <input
                     id="register-password"
@@ -339,15 +339,15 @@ export default function RegisterPage() {
                     autoComplete="new-password"
                     aria-invalid={!!errors.password}
                     aria-describedby={errors.password ? "password-error" : undefined}
-                    className={`w-full pl-11 pr-11 py-3 bg-slate-50/80 border rounded-xl text-sm font-medium text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 transition-all disabled:opacity-50 ${errors.password
+                    className={`w-full pl-11 pr-11 py-3 bg-slate-50/80 dark:bg-slate-800/80 border rounded-xl text-sm font-medium text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 transition-all disabled:opacity-50 ${errors.password
                         ? "border-rose-400 focus:ring-rose-200 focus:border-rose-500 bg-rose-50/20"
-                        : "border-slate-200 focus:ring-emerald-600/20 focus:border-emerald-600 focus:bg-white"
+                        : "border-slate-200 dark:border-slate-700 focus:ring-emerald-600/20 focus:border-emerald-600 focus:bg-white dark:focus:bg-slate-800"
                       }`}
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword((prev) => !prev)}
-                    className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600 transition-colors cursor-pointer focus:outline-none"
+                    className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300 transition-colors cursor-pointer focus:outline-none"
                     aria-label={showPassword ? "Sembunyikan password" : "Tampilkan password"}
                     tabIndex={-1}
                   >
@@ -369,13 +369,13 @@ export default function RegisterPage() {
               <div className="space-y-1.5 text-left">
                 <label
                   htmlFor="register-confirm-password"
-                  className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider"
+                  className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider"
                 >
                   Konfirmasi Password <span className="text-rose-500">*</span>
                 </label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-                    <Lock className="w-5 h-5 text-slate-400" />
+                    <Lock className="w-5 h-5 text-slate-400 dark:text-slate-500" />
                   </div>
                   <input
                     id="register-confirm-password"
@@ -392,15 +392,15 @@ export default function RegisterPage() {
                     autoComplete="new-password"
                     aria-invalid={!!errors.confirmPassword}
                     aria-describedby={errors.confirmPassword ? "confirm-password-error" : undefined}
-                    className={`w-full pl-11 pr-11 py-3 bg-slate-50/80 border rounded-xl text-sm font-medium text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 transition-all disabled:opacity-50 ${errors.confirmPassword
+                    className={`w-full pl-11 pr-11 py-3 bg-slate-50/80 dark:bg-slate-800/80 border rounded-xl text-sm font-medium text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 transition-all disabled:opacity-50 ${errors.confirmPassword
                         ? "border-rose-400 focus:ring-rose-200 focus:border-rose-500 bg-rose-50/20"
-                        : "border-slate-200 focus:ring-emerald-600/20 focus:border-emerald-600 focus:bg-white"
+                        : "border-slate-200 dark:border-slate-700 focus:ring-emerald-600/20 focus:border-emerald-600 focus:bg-white dark:focus:bg-slate-800"
                       }`}
                   />
                   <button
                     type="button"
                     onClick={() => setShowConfirmPassword((prev) => !prev)}
-                    className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600 transition-colors cursor-pointer focus:outline-none"
+                    className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300 transition-colors cursor-pointer focus:outline-none"
                     aria-label={showConfirmPassword ? "Sembunyikan konfirmasi password" : "Tampilkan konfirmasi password"}
                     tabIndex={-1}
                   >
@@ -438,10 +438,10 @@ export default function RegisterPage() {
             {/* Divider Atau */}
             <div className="relative my-5">
               <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-slate-200/80" />
+                <div className="w-full border-t border-slate-200/80 dark:border-slate-800" />
               </div>
               <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-white px-3 text-slate-400 font-semibold text-[10px] tracking-wider">
+                <span className="bg-white dark:bg-slate-900 px-3 text-slate-400 dark:text-slate-500 font-semibold text-[10px] tracking-wider">
                   Atau daftar dengan
                 </span>
               </div>
@@ -450,7 +450,7 @@ export default function RegisterPage() {
             {/* Google OAuth Button */}
             <a
               href="/api/auth/google"
-              className="w-full py-3 px-4 bg-white hover:bg-slate-50/80 active:scale-[0.99] text-slate-700 font-semibold rounded-xl border border-slate-200 shadow-2xs transition-all flex items-center justify-center gap-3 cursor-pointer hover:border-slate-300"
+              className="w-full py-3 px-4 bg-white dark:bg-slate-800 hover:bg-slate-50/80 dark:hover:bg-slate-700/80 active:scale-[0.99] text-slate-700 dark:text-slate-200 font-semibold rounded-xl border border-slate-200 dark:border-slate-700 shadow-2xs transition-all flex items-center justify-center gap-3 cursor-pointer hover:border-slate-300 dark:hover:border-slate-600"
             >
               <svg className="w-5 h-5" viewBox="0 0 24 24">
                 <path
@@ -474,12 +474,12 @@ export default function RegisterPage() {
             </a>
 
             {/* Footer Login Link */}
-            <div className="mt-6 pt-5 border-t border-slate-100 text-center space-y-3">
-              <p className="text-xs sm:text-sm text-slate-600">
+            <div className="mt-6 pt-5 border-t border-slate-100 dark:border-slate-800 text-center space-y-3">
+              <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400">
                 Sudah punya akun?{" "}
                 <Link
                   href="/login"
-                  className="font-bold text-emerald-600 hover:text-emerald-700 hover:underline transition-colors"
+                  className="font-bold text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 hover:underline transition-colors"
                 >
                   Masuk di sini
                 </Link>
@@ -488,7 +488,7 @@ export default function RegisterPage() {
               <div>
                 <Link
                   href="/"
-                  className="inline-flex items-center gap-1.5 text-xs text-slate-400 hover:text-slate-600 font-medium transition-colors"
+                  className="inline-flex items-center gap-1.5 text-xs text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 font-medium transition-colors"
                 >
                   <ArrowLeft className="w-3.5 h-3.5" />
                   <span>Kembali ke Beranda</span>
