@@ -166,6 +166,12 @@ export const ISOLINE_PRESETS: Record<string, Partial<IsolineParams>> = {
     hotColor: "#ffffff", backgroundColor: "#000000",
     glowGain: 0.35, heat: 0.1, rings: 18, lineWidth: 1, lobeDepth: 0.14, hueDrift: 0,
   },
+  emerald: {
+    coreColor: "#064e3b", leftColor: "#059669", midColor: "#10b981", rightColor: "#14b8a6",
+    hotColor: "#6ee7b7", backgroundColor: "#000000",
+    lobes: 3, lobeDepth: 0.2, wobble: 0.45, twist: 0.9, rings: 16, lineWidth: 1.2, flow: 0.2,
+    pull: 0.32,
+  },
 }
 
 export type IsolinePreset = keyof typeof ISOLINE_PRESETS
@@ -500,6 +506,13 @@ export default function IsolineBloom({
     }
     const onMove = (e: PointerEvent) => {
       if (!interactive) return
+      const r = canvas.getBoundingClientRect()
+      const isInside =
+        e.clientX >= r.left &&
+        e.clientX <= r.right &&
+        e.clientY >= r.top &&
+        e.clientY <= r.bottom
+
       const [x, y] = toUv(e)
       const now = performance.now() / 1000
       const dt = now - lastMove.t
@@ -508,10 +521,14 @@ export default function IsolineBloom({
         energy = Math.max(energy, boost)
       }
       lastMove = { x, y, t: now }
-      targetX = x
-      targetY = y
-      inside = true
-      lastTouched = now
+      if (isInside) {
+        targetX = x
+        targetY = y
+        inside = true
+        lastTouched = now
+      } else if (inside) {
+        inside = false
+      }
     }
     const onLeave = () => {
       inside = false
@@ -530,6 +547,7 @@ export default function IsolineBloom({
       if (!reduced) energy = Math.max(energy, 1.5 * paramsRef.current.energy)
     }
 
+    window.addEventListener("pointermove", onMove, { passive: true })
     root.addEventListener("pointermove", onMove)
     root.addEventListener("pointerdown", onDown)
     root.addEventListener("pointerleave", onLeave)
@@ -641,6 +659,7 @@ export default function IsolineBloom({
       observer.disconnect()
       io.disconnect()
       document.removeEventListener("visibilitychange", wake)
+      window.removeEventListener("pointermove", onMove)
       root.removeEventListener("pointermove", onMove)
       root.removeEventListener("pointerdown", onDown)
       root.removeEventListener("pointerleave", onLeave)
