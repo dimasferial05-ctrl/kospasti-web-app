@@ -141,7 +141,14 @@ export function LandingFooter() {
                 src="/images/footer-skyline.jpg"
                 alt="City Skyline Left"
                 fill
-                className="object-cover object-bottom scale-x-[-1]"
+                className="object-cover object-bottom scale-x-[-1] block dark:hidden"
+                sizes="(max-width: 768px) 33vw, 300px"
+              />
+              <Image
+                src="/images/footer-skyline-dark.png"
+                alt="City Skyline Left"
+                fill
+                className="object-cover object-bottom scale-x-[-1] hidden dark:block"
                 sizes="(max-width: 768px) 33vw, 300px"
               />
             </div>
@@ -151,7 +158,14 @@ export function LandingFooter() {
                 src="/images/footer-skyline.jpg"
                 alt="City Skyline Center"
                 fill
-                className="object-cover object-bottom"
+                className="object-cover object-bottom block dark:hidden"
+                sizes="(max-width: 768px) 33vw, 300px"
+              />
+              <Image
+                src="/images/footer-skyline-dark.png"
+                alt="City Skyline Center"
+                fill
+                className="object-cover object-bottom hidden dark:block"
                 sizes="(max-width: 768px) 33vw, 300px"
               />
             </div>
@@ -161,7 +175,14 @@ export function LandingFooter() {
                 src="/images/footer-skyline.jpg"
                 alt="City Skyline Right"
                 fill
-                className="object-cover object-bottom scale-x-[-1]"
+                className="object-cover object-bottom scale-x-[-1] block dark:hidden"
+                sizes="(max-width: 768px) 33vw, 300px"
+              />
+              <Image
+                src="/images/footer-skyline-dark.png"
+                alt="City Skyline Right"
+                fill
+                className="object-cover object-bottom scale-x-[-1] hidden dark:block"
                 sizes="(max-width: 768px) 33vw, 300px"
               />
             </div>
