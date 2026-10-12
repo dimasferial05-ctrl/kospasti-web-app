@@ -6,6 +6,7 @@ import { BottomNav } from "@/components/layout/BottomNav";
 import { ProfileCompletionModal } from "@/components/features/ProfileCompletionModal";
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
 import { PwaUpdater } from "@/components/pwa/PwaUpdater";
+import { NetworkStatusNotifier } from "@/components/pwa/NetworkStatusNotifier";
 import "./globals.css";
 
 const plusJakartaSans = Plus_Jakarta_Sans({
@@ -51,6 +52,7 @@ export default async function RootLayout({
     >
       <body className="bg-slate-50 text-slate-900 antialiased dark:bg-slate-950 dark:text-slate-100 font-sans min-h-screen flex flex-col transition-colors duration-200">
         <ThemeProvider>
+          <NetworkStatusNotifier />
           <Header isLoggedIn={isLoggedIn} />
           <ProfileCompletionModal />
           <div className="flex-1 pb-20 md:pb-0 flex flex-col">
