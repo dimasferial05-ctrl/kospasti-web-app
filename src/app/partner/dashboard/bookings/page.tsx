@@ -562,11 +562,29 @@ export default function PartnerBookingsPage() {
                   <div className="pt-2 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
                     <span>
                       Status:{" "}
-                      <strong className={isApproved ? "text-emerald-700 dark:text-emerald-400" : isRefunded ? "text-sky-700 dark:text-sky-400" : "text-rose-700 dark:text-rose-400"}>
-                        {isApproved ? "Disetujui" : isRefunded ? "Dana Dikembalikan" : isCancelled ? "Dibatalkan" : "Ditolak"}
+                      <strong
+                        className={
+                          isApproved
+                            ? "text-emerald-700 dark:text-emerald-400"
+                            : isRefunded
+                            ? "text-sky-700 dark:text-sky-400"
+                            : isRefundRequested
+                            ? "text-amber-700 dark:text-amber-400"
+                            : "text-rose-700 dark:text-rose-400"
+                        }
+                      >
+                        {isApproved
+                          ? "Disetujui"
+                          : isRefunded
+                          ? "Dana Dikembalikan"
+                          : isRefundRequested
+                          ? "Menunggu Refund (Admin)"
+                          : isCancelled
+                          ? "Dibatalkan"
+                          : "Ditolak"}
                       </strong>
                     </span>
-                    {!isRefunded && !isCancelled && (
+                    {!isRefunded && !isCancelled && !isRefundRequested && (
                       <button
                         type="button"
                         onClick={() =>
