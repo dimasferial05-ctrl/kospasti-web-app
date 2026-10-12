@@ -22,6 +22,12 @@ interface BookingAdminItem {
   move_in_date: string;
   status: string;
   created_at?: string;
+  cancellation_reason?: string | null;
+  refund_bank_name?: string | null;
+  refund_account_number?: string | null;
+  refund_account_holder?: string | null;
+  refund_note?: string | null;
+  refunded_at?: string | null;
   property?: {
     name: string;
     price_per_month?: number;
@@ -143,6 +149,8 @@ export default function ManageBookingsPage() {
         status: b.status,
         created_at: b.created_at,
         amount: b.room_type?.price_per_month ?? b.property?.price_per_month ?? 0,
+        cancellation_reason: b.cancellation_reason,
+        refund_note: b.refund_note,
         property: b.property
           ? {
               name: b.property.name,
@@ -207,28 +215,50 @@ export default function ManageBookingsPage() {
 
   // Helper untuk merender warna Status (Badge)
   const renderStatusBadge = (status: string) => {
-    if (status === "PAID") {
+    const upper = (status || "").toUpperCase();
+    if (upper === "PAID") {
       return (
         <span className="px-2 py-1 bg-blue-100 dark:bg-blue-950/50 text-blue-700 dark:text-blue-300 rounded-md text-xs font-bold border border-blue-200 dark:border-blue-800">
           PAID
         </span>
       );
     }
-    if (status === "SUCCESS" || status === "CONFIRMED" || status === "ACCEPTED") {
+    if (upper === "SUCCESS" || upper === "CONFIRMED" || upper === "ACCEPTED" || upper === "APPROVED") {
       return (
         <span className="px-2 py-1 bg-green-100 text-green-700 dark:bg-green-950/50 dark:text-green-300 rounded-md text-xs font-bold border border-green-200 dark:border-green-800">
           {status}
         </span>
       );
     }
-    if (status === "PENDING") {
+    if (upper === "PENDING") {
       return (
         <span className="px-2 py-1 bg-yellow-100 text-yellow-700 dark:bg-yellow-950/50 dark:text-yellow-300 rounded-md text-xs font-bold border border-yellow-200 dark:border-yellow-800">
           PENDING
         </span>
       );
     }
-    if (status === "REJECTED") {
+    if (upper === "REFUND_REQUESTED") {
+      return (
+        <span className="px-2 py-1 bg-amber-100 text-amber-800 dark:bg-amber-950/50 dark:text-amber-300 rounded-md text-xs font-bold border border-amber-300 dark:border-amber-800">
+          REFUND_REQUESTED
+        </span>
+      );
+    }
+    if (upper === "REFUNDED") {
+      return (
+        <span className="px-2 py-1 bg-sky-100 text-sky-800 dark:bg-sky-950/50 dark:text-sky-300 rounded-md text-xs font-bold border border-sky-300 dark:border-sky-800">
+          REFUNDED
+        </span>
+      );
+    }
+    if (upper === "CANCELLED") {
+      return (
+        <span className="px-2 py-1 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-md text-xs font-bold border border-slate-200 dark:border-slate-700">
+          CANCELLED
+        </span>
+      );
+    }
+    if (upper === "REJECTED") {
       return (
         <span className="px-2 py-1 bg-rose-100 text-rose-700 dark:bg-rose-950/50 dark:text-rose-300 rounded-md text-xs font-bold border border-rose-200 dark:border-rose-800">
           REJECTED
@@ -356,8 +386,25 @@ export default function ManageBookingsPage() {
                         </div>
                       </div>
                     </td>
-                    <td className="p-4 font-medium text-slate-700 dark:text-slate-300">
-                      {booking.property?.name || "-"}
+                    <td className="p-4">
+                      <div className="font-medium text-slate-700 dark:text-slate-300">
+                        {booking.property?.name || "-"}
+                      </div>
+                      {booking.cancellation_reason && (
+                        <div className="text-[11px] text-amber-700 dark:text-amber-400 mt-0.5 line-clamp-1" title={booking.cancellation_reason}>
+                          Alasan: {booking.cancellation_reason}
+                        </div>
+                      )}
+                      {booking.refund_bank_name && (
+                        <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 font-mono">
+                          Refund: {booking.refund_bank_name} {booking.refund_account_number} ({booking.refund_account_holder})
+                        </div>
+                      )}
+                      {booking.refund_note && (
+                        <div className="text-[11px] text-sky-700 dark:text-sky-400 mt-0.5">
+                          Ref: {booking.refund_note}
+                        </div>
+                      )}
                     </td>
                     <td className="p-4 text-center text-slate-600 dark:text-slate-300">
                       {new Date(booking.move_in_date).toLocaleDateString("id-ID")}
@@ -394,6 +441,25 @@ export default function ManageBookingsPage() {
                                 <span>Tolak</span>
                               </button>
                             </>
+                          )}
+                        </div>
+                      ) : booking.status === "REFUND_REQUESTED" ? (
+                        <div className="flex items-center justify-center gap-1.5">
+                          {isCurrentUpdating ? (
+                            <div className="flex items-center gap-1 text-xs text-slate-500 dark:text-slate-400 py-1">
+                              <Loader2 className="w-4 h-4 animate-spin text-slate-600 dark:text-slate-400" />
+                              <span>Memproses...</span>
+                            </div>
+                          ) : (
+                            <button
+                              type="button"
+                              onClick={() => handleUpdateStatus(booking.id, "REFUNDED")}
+                              className="px-2.5 py-1 bg-sky-600 hover:bg-sky-700 text-white rounded-md text-xs font-semibold flex items-center gap-1 shadow-xs transition active:scale-95 cursor-pointer"
+                              title="Tandai Refund Selesai"
+                            >
+                              <Check className="w-3.5 h-3.5 stroke-[2.5]" />
+                              <span>Selesai Refund</span>
+                            </button>
                           )}
                         </div>
                       ) : (

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
-const ALLOWED_STATUSES = ["PENDING", "SUCCESS", "CONFIRMED", "REJECTED", "CANCELLED"];
+const ALLOWED_STATUSES = ["PENDING", "SUCCESS", "CONFIRMED", "APPROVED", "REJECTED", "CANCELLED", "REFUND_REQUESTED", "REFUNDED"];
 
 export async function PATCH(
   request: NextRequest,
@@ -79,11 +79,24 @@ export async function PATCH(
     }
 
     const updatedBooking = await prisma.$transaction(async (tx) => {
+      const updateData: {
+        status: string;
+        refunded_at?: Date;
+        refund_note?: string;
+      } = {
+        status: status,
+      };
+
+      if (status === "REFUNDED") {
+        updateData.refunded_at = new Date();
+        if (body.refund_note && typeof body.refund_note === "string") {
+          updateData.refund_note = body.refund_note.trim();
+        }
+      }
+
       const updated = await tx.booking.update({
         where: { id: id.trim() },
-        data: {
-          status: status,
-        },
+        data: updateData,
         include: {
           property: {
             select: {
@@ -93,8 +106,8 @@ export async function PATCH(
         },
       });
 
-      const isOldActive = ["PENDING", "SUCCESS", "CONFIRMED"].includes(existingBooking.status);
-      const isNewActive = ["PENDING", "SUCCESS", "CONFIRMED"].includes(status);
+      const isOldActive = ["PENDING", "SUCCESS", "CONFIRMED", "APPROVED"].includes(existingBooking.status);
+      const isNewActive = ["PENDING", "SUCCESS", "CONFIRMED", "APPROVED"].includes(status);
 
       if (isOldActive && !isNewActive && existingBooking.property_id) {
         await tx.property.update({
@@ -103,6 +116,12 @@ export async function PATCH(
             available_rooms: { increment: 1 },
           },
         });
+        if (existingBooking.room_type_id) {
+          await tx.roomType.update({
+            where: { id: existingBooking.room_type_id },
+            data: { available_rooms: { increment: 1 } },
+          });
+        }
       } else if (!isOldActive && isNewActive && existingBooking.property_id) {
         await tx.property.update({
           where: { id: existingBooking.property_id },
@@ -110,6 +129,12 @@ export async function PATCH(
             available_rooms: { decrement: 1 },
           },
         });
+        if (existingBooking.room_type_id) {
+          await tx.roomType.update({
+            where: { id: existingBooking.room_type_id },
+            data: { available_rooms: { decrement: 1 } },
+          });
+        }
       }
 
       return updated;
