@@ -1580,7 +1580,7 @@ function ProfileContent() {
                               )}
                               {booking.refund_note && (
                                 <p className="text-emerald-700 dark:text-emerald-400 font-medium">
-                                  <strong>Catatan Pemilik/Refund:</strong> {booking.refund_note}
+                                  <strong>Catatan Refund:</strong> {booking.refund_note}
                                 </p>
                               )}
                             </div>
