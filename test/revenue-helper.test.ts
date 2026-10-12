@@ -136,5 +136,18 @@ describe("CSV Export Security & Financial Formatting Tests", () => {
     expect(csvOutput).toContain("Deluxe AC");
     expect(csvOutput).toContain("TOTAL PENDAPATAN SUKSES");
     expect(csvOutput).toContain("1.500.000"); // Dari TRX-101 yang PAID
+
+    // Verifikasi penyesuaian jumlah kolom (alignment) dengan baris header
+    const lines = csvOutput.split("\n");
+    const headerCols = lines[0].split(";").length;
+    const summaryCols = lines[lines.length - 1].split(";").length;
+    expect(summaryCols).toBe(headerCols);
+
+    // Verifikasi tanpa includeOwner juga presisi
+    const csvPartnerOutput = formatFinancialBookingsToCSV(sampleData);
+    const partnerLines = csvPartnerOutput.split("\n");
+    expect(partnerLines[partnerLines.length - 1].split(";").length).toBe(
+      partnerLines[0].split(";").length
+    );
   });
 });

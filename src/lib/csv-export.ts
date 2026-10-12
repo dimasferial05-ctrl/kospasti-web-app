@@ -151,7 +151,7 @@ export function formatFinancialBookingsToCSV(
   const emptyColsCount = headers.length - 2;
   const summaryRow = [
     escapeCSV("TOTAL PENDAPATAN SUKSES"),
-    ...Array(emptyColsCount - 1).fill('""'),
+    ...Array(emptyColsCount).fill('""'),
     escapeCSV(formatRupiah(totalRevenue)),
   ].join(";");
 

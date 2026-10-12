@@ -117,9 +117,15 @@ export default function PartnerBookingsPage() {
   };
 
   const handleExportFinancialCSV = () => {
-    if (bookings.length === 0) return;
-    const targetBookings = filteredBookings.length > 0 ? filteredBookings : bookings;
-    const exportData = targetBookings.map((b) => ({
+    if (bookings.length === 0) {
+      setErrorMsg("Belum ada data riwayat transaksi untuk diekspor.");
+      return;
+    }
+    if (filteredBookings.length === 0) {
+      setErrorMsg("Tidak ada data pesanan yang sesuai dengan filter saat ini untuk diekspor.");
+      return;
+    }
+    const exportData = filteredBookings.map((b) => ({
       id: b.id,
       student_name: b.student_name,
       student_whatsapp: b.student_whatsapp,
