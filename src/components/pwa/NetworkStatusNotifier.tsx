@@ -13,7 +13,10 @@ export function NetworkStatusNotifier() {
     // Set status awal
     setIsOffline(!navigator.onLine);
 
+    let reconnectTimer: NodeJS.Timeout | null = null;
+
     const handleOffline = () => {
+      if (reconnectTimer) clearTimeout(reconnectTimer);
       setIsOffline(true);
       setShowReconnected(false);
     };
@@ -21,16 +24,17 @@ export function NetworkStatusNotifier() {
     const handleOnline = () => {
       setIsOffline(false);
       setShowReconnected(true);
-      const timer = setTimeout(() => {
+      if (reconnectTimer) clearTimeout(reconnectTimer);
+      reconnectTimer = setTimeout(() => {
         setShowReconnected(false);
       }, 3500);
-      return () => clearTimeout(timer);
     };
 
     window.addEventListener("offline", handleOffline);
     window.addEventListener("online", handleOnline);
 
     return () => {
+      if (reconnectTimer) clearTimeout(reconnectTimer);
       window.removeEventListener("offline", handleOffline);
       window.removeEventListener("online", handleOnline);
     };
@@ -42,7 +46,7 @@ export function NetworkStatusNotifier() {
     <div
       role="status"
       aria-live="polite"
-      className="fixed top-4 left-1/2 -translate-x-1/2 z-50 px-3 py-1.5 rounded-full shadow-float border border-slate-200/80 dark:border-slate-800 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md animate-in slide-in-from-top-3 duration-200 flex items-center gap-2 text-xs font-bold"
+      className="fixed top-4 left-1/2 -translate-x-1/2 z-[60] px-3 py-1.5 rounded-full shadow-float border border-slate-200/80 dark:border-slate-800 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md animate-in slide-in-from-top-3 duration-200 flex items-center gap-2 text-xs font-bold"
     >
       {isOffline ? (
         <div className="flex items-center gap-2 text-rose-700 dark:text-rose-300">

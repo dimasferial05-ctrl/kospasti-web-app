@@ -1,11 +1,15 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { WifiOff, RefreshCw, Home } from "lucide-react";
 
 export default function OfflineFallbackPage() {
   const [isRetrying, setIsRetrying] = useState(false);
+
+  useEffect(() => {
+    document.title = "Koneksi Terputus - KosPasti";
+  }, []);
 
   const handleRetry = () => {
     setIsRetrying(true);
