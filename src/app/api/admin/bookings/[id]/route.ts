@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { sendWhatsAppMessage } from "@/lib/whatsapp";
 
 const ALLOWED_STATUSES = ["PENDING", "SUCCESS", "CONFIRMED", "APPROVED", "REJECTED", "CANCELLED", "REFUND_REQUESTED", "REFUNDED"];
 
@@ -64,6 +65,13 @@ export async function PATCH(
 
     const existingBooking = await prisma.booking.findUnique({
       where: { id: id.trim() },
+      include: {
+        property: {
+          select: {
+            name: true,
+          },
+        },
+      },
     });
 
     if (!existingBooking) {
@@ -139,6 +147,31 @@ export async function PATCH(
 
       return updated;
     });
+
+    // Kirim notifikasi WhatsApp dari Admin KosPasti jika status adalah REFUNDED
+    if (status === "REFUNDED" && existingBooking.student_whatsapp) {
+      const propertyName = existingBooking.property?.name || "Kos";
+      const refundNoteText = body.refund_note ? `\n\nCatatan / No. Referensi Transfer: *${body.refund_note.trim()}*` : "";
+      const refundMessage = [
+        `Halo *${existingBooking.student_name}*,`,
+        ``,
+        `Pengembalian dana (*refund*) untuk pesanan kamar Anda di *${propertyName}* telah selesai ditransfer oleh Tim Admin Finansial KosPasti.${refundNoteText}`,
+        ``,
+        `📋 *Tujuan Pengembalian Dana:*`,
+        `🏦 *Bank / E-Wallet:* ${existingBooking.refund_bank_name || "-"}`,
+        `💳 *No. Rekening / Akun:* ${existingBooking.refund_account_number || "-"}`,
+        `👤 *Atas Nama:* ${existingBooking.refund_account_holder || "-"}`,
+        ``,
+        `Silakan periksa mutasi saldo pada rekening Anda. Terima kasih telah mempercayai layanan *KosPasti*.`,
+        ``,
+        `_Salam hangat, Tim KosPasti._`,
+      ].join("\n");
+
+      await sendWhatsAppMessage({
+        to: existingBooking.student_whatsapp,
+        message: refundMessage,
+      }).catch((err) => console.error("Gagal kirim WA refund admin:", err));
+    }
 
     return NextResponse.json(
       {

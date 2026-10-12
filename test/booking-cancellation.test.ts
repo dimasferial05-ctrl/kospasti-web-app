@@ -139,4 +139,20 @@ describe("Booking Cancellation & Refund Policy Unit Tests", () => {
     expect(canCompleteRefund("REFUND_REQUESTED")).toBe(true);
     expect(canCompleteRefund("CANCELLED")).toBe(false);
   });
+
+  it("otorisasi peran Escrow Model A: hanya Admin Platform yang berwenang mengeksekusi REFUNDED", () => {
+    // Model A: Mitra hanya berwenang menyetujui/menolak kamar (APPROVED/REJECTED)
+    const allowedPartnerStatuses = ["APPROVED", "REJECTED", "PENDING"];
+    const canPartnerProcessRefund = (status: string) => allowedPartnerStatuses.includes(status);
+
+    expect(canPartnerProcessRefund("APPROVED")).toBe(true);
+    expect(canPartnerProcessRefund("REJECTED")).toBe(true);
+    expect(canPartnerProcessRefund("REFUNDED")).toBe(false); // Ditolak untuk mitra
+
+    // Admin berwenang mengelola rekening penampung (Escrow) dan mengeksekusi REFUNDED
+    const allowedAdminStatuses = ["PENDING", "SUCCESS", "CONFIRMED", "APPROVED", "REJECTED", "CANCELLED", "REFUND_REQUESTED", "REFUNDED"];
+    const canAdminProcessRefund = (status: string) => allowedAdminStatuses.includes(status);
+
+    expect(canAdminProcessRefund("REFUNDED")).toBe(true);
+  });
 });

@@ -31,13 +31,19 @@ export async function PATCH(
     const body = await request.json().catch(() => null);
     let status = body?.status?.toUpperCase?.();
 
-    if (status === "ACCEPTED") {
-      status = "APPROVED";
+    if (status === "REFUNDED") {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Otoritas ditolak: Pengembalian dana (refund) diproses terpusat oleh Admin KosPasti melalui rekening penampung (Escrow).",
+        },
+        { status: 403 }
+      );
     }
 
-    if (!status || !["APPROVED", "REJECTED", "PENDING", "REFUNDED"].includes(status)) {
+    if (!status || !["APPROVED", "REJECTED", "PENDING"].includes(status)) {
       return NextResponse.json(
-        { success: false, error: "Status harus bernilai APPROVED, REJECTED, PENDING, atau REFUNDED." },
+        { success: false, error: "Status harus bernilai APPROVED, REJECTED, atau PENDING." },
         { status: 400 }
       );
     }
@@ -81,43 +87,13 @@ export async function PATCH(
         },
       });
 
-      const updateData: {
-        status: string;
-        refunded_at?: Date;
-        refund_note?: string;
-      } = { status };
-
-      if (status === "REFUNDED") {
-        updateData.refunded_at = new Date();
-        if (body?.refund_note && typeof body.refund_note === "string") {
-          updateData.refund_note = body.refund_note.trim();
-        }
-      }
-
       const updatedBooking = await tx.booking.update({
         where: { id },
-        data: updateData,
+        data: { status },
       });
 
       // Kembalikan kamar jika REJECTED (dan belum pernah dikembalikan)
       if (status === "REJECTED" && previousStatus !== "REJECTED" && previousStatus !== "CANCELLED" && previousStatus !== "REFUND_REQUESTED") {
-        await tx.property.update({
-          where: { id: existing.property_id },
-          data: { available_rooms: { increment: 1 } },
-        });
-
-        if (existing.room_type_id) {
-          await tx.roomType.update({
-            where: { id: existing.room_type_id },
-            data: { available_rooms: { increment: 1 } },
-          });
-        }
-      }
-
-      // Catatan: Jika status === "REFUNDED" dan previousStatus === "REFUND_REQUESTED", kuota kamar SUDAH dikembalikan
-      // saat user mengajukan cancel, jadi tidak di-increment lagi untuk mencegah double-count.
-      // Namun jika status berubah ke REFUNDED langsung dari PAID/APPROVED tanpa melalui REFUND_REQUESTED:
-      if (status === "REFUNDED" && previousStatus !== "REFUND_REQUESTED" && previousStatus !== "REJECTED" && previousStatus !== "CANCELLED") {
         await tx.property.update({
           where: { id: existing.property_id },
           data: { available_rooms: { increment: 1 } },
@@ -181,22 +157,6 @@ export async function PATCH(
           to: existing.student_whatsapp,
           message: rejectMessage,
         }).catch((err) => console.error("Gagal kirim WA penolakan:", err));
-      } else if (status === "REFUNDED") {
-        const refundNoteText = body?.refund_note ? `\n\nCatatan / Referensi: *${body.refund_note}*` : "";
-        const refundMessage = [
-          `Halo *${existing.student_name}*,`,
-          ``,
-          `Pengembalian dana (*refund*) untuk pesanan kamar Anda di *${propertyName}* telah selesai diproses oleh pemilik kos (*${ownerName}*).${refundNoteText}`,
-          ``,
-          `Silakan periksa saldo rekening atau e-wallet yang telah Anda daftarkan.`,
-          ``,
-          `Terima kasih telah menggunakan *KosPasti*.`,
-        ].join("\n");
-
-        await sendWhatsAppMessage({
-          to: existing.student_whatsapp,
-          message: refundMessage,
-        }).catch((err) => console.error("Gagal kirim WA refund:", err));
       }
     }
 
