@@ -33,5 +33,59 @@
       "type": "image/png",
       "purpose": "maskable"
     }
+  ],
+  "shortcuts": [
+    {
+      "name": "Cari Kos",
+      "short_name": "Cari",
+      "description": "Cari kos dengan kepastian kamar real-time",
+      "url": "/search",
+      "icons": [
+        {
+          "src": "/icons/icon-192x192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "Peta Kos",
+      "short_name": "Peta",
+      "description": "Jelajahi kos di sekitar kampus lewat peta interaktif",
+      "url": "/map",
+      "icons": [
+        {
+          "src": "/icons/icon-192x192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "Kos Favorit",
+      "short_name": "Favorit",
+      "description": "Lihat daftar kos impian yang telah disimpan",
+      "url": "/favorit",
+      "icons": [
+        {
+          "src": "/icons/icon-192x192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "Riwayat Pesanan",
+      "short_name": "Pesanan",
+      "description": "Cek status booking dan sewa kos",
+      "url": "/profil?tab=bookings",
+      "icons": [
+        {
+          "src": "/icons/icon-192x192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    }
   ]
 }
