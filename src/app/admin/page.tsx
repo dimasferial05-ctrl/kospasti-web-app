@@ -14,7 +14,13 @@ import {
   XCircle,
   ChevronLeft,
   ChevronRight,
+  Wallet,
+  TrendingUp,
+  ArrowUpRight,
+  CreditCard,
 } from "lucide-react";
+import { RevenueChart } from "@/components/dashboard/RevenueChart";
+import { formatRupiah, MonthlyRevenueData } from "@/lib/revenue-helper";
 
 interface AdminStats {
   properties: number;
@@ -39,6 +45,23 @@ interface AdminStats {
   }>;
 }
 
+interface AdminAnalytics {
+  totalGtv: number;
+  thisMonthGtv: number;
+  lastMonthGtv: number;
+  gtvGrowth: number | null;
+  averageOrderValue: number;
+  successfulBookingsCount: number;
+  monthlyTrend: MonthlyRevenueData[];
+  topProperties: Array<{
+    id: string;
+    name: string;
+    ownerName: string;
+    revenue: number;
+    bookingsCount: number;
+  }>;
+}
+
 const ITEMS_PER_PAGE = 5;
 
 export default function AdminDashboardOverview() {
@@ -51,6 +74,16 @@ export default function AdminDashboardOverview() {
     recent_bookings: [],
     recent_magic_links: [],
   });
+  const [analytics, setAnalytics] = useState<AdminAnalytics>({
+    totalGtv: 0,
+    thisMonthGtv: 0,
+    lastMonthGtv: 0,
+    gtvGrowth: null,
+    averageOrderValue: 0,
+    successfulBookingsCount: 0,
+    monthlyTrend: [],
+    topProperties: [],
+  });
   const [isLoading, setIsLoading] = useState(true);
 
   // Pagination states
@@ -58,21 +91,29 @@ export default function AdminDashboardOverview() {
   const [magicPage, setMagicPage] = useState(1);
 
   useEffect(() => {
-    fetch("/api/admin/stats")
-      .then(async (res) => {
+    Promise.all([
+      fetch("/api/admin/stats").then(async (res) => {
         if (res.status === 401) {
           router.push("/admin/login");
           return null;
         }
         return res.json();
-      })
-      .then((data) => {
-        if (data && data.success && data.data) {
-          setStats(data.data);
+      }),
+      fetch("/api/admin/analytics").then(async (res) => {
+        if (res.status === 401) return null;
+        return res.json();
+      }),
+    ])
+      .then(([statsData, analyticsData]) => {
+        if (statsData && statsData.success && statsData.data) {
+          setStats(statsData.data);
+        }
+        if (analyticsData && analyticsData.success && analyticsData.data) {
+          setAnalytics(analyticsData.data);
         }
       })
       .catch((err) => {
-        console.error("Fetch stats error:", err);
+        console.error("Fetch stats/analytics error:", err);
       })
       .finally(() => setIsLoading(false));
   }, [router]);
@@ -120,6 +161,83 @@ export default function AdminDashboardOverview() {
           <span>{todayFormatted}</span>
         </div>
       </div>
+
+      {/* Grid Kartu Finansial Platform (GTV) */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+        {/* Total GTV Platform */}
+        <div className="p-6 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm flex items-center gap-4 hover:border-emerald-300 dark:hover:border-emerald-700 transition-colors">
+          <div className="p-4 bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400 rounded-xl shrink-0">
+            <Wallet size={28} />
+          </div>
+          <div>
+            <div className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+              Total Platform GTV
+            </div>
+            <div className="text-2xl sm:text-3xl font-black text-slate-800 dark:text-white tracking-tight">
+              {formatRupiah(analytics.totalGtv)}
+            </div>
+            <div className="text-[11px] text-slate-400 mt-0.5">
+              {analytics.successfulBookingsCount} total transaksi terverifikasi
+            </div>
+          </div>
+        </div>
+
+        {/* GTV Bulan Ini */}
+        <div className="p-6 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm flex items-center gap-4 hover:border-emerald-300 dark:hover:border-emerald-700 transition-colors">
+          <div className="p-4 bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400 rounded-xl shrink-0">
+            <TrendingUp size={28} />
+          </div>
+          <div>
+            <div className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+              GTV Bulan Ini
+            </div>
+            <div className="text-2xl sm:text-3xl font-black text-slate-800 dark:text-white tracking-tight">
+              {formatRupiah(analytics.thisMonthGtv)}
+            </div>
+            <div className="text-[11px] text-slate-400 mt-0.5 flex items-center gap-1.5">
+              {analytics.gtvGrowth !== null ? (
+                <span
+                  className={`inline-flex items-center gap-0.5 px-1.5 py-0.2 rounded font-bold text-[10px] ${
+                    analytics.gtvGrowth >= 0
+                      ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300"
+                      : "bg-rose-100 text-rose-800 dark:bg-rose-950/60 dark:text-rose-300"
+                  }`}
+                >
+                  <ArrowUpRight className="w-3 h-3" />
+                  {analytics.gtvGrowth >= 0 ? `+${analytics.gtvGrowth}%` : `${analytics.gtvGrowth}%`}
+                </span>
+              ) : null}
+              <span>vs bulan lalu</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Rata-rata Nilai Sewa */}
+        <div className="p-6 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm flex items-center gap-4 hover:border-teal-300 dark:hover:border-teal-700 transition-colors">
+          <div className="p-4 bg-teal-50 dark:bg-teal-950/50 text-teal-600 dark:text-teal-400 rounded-xl shrink-0">
+            <CreditCard size={28} />
+          </div>
+          <div>
+            <div className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+              Rata-rata Transaksi (AOV)
+            </div>
+            <div className="text-2xl sm:text-3xl font-black text-slate-800 dark:text-white tracking-tight">
+              {formatRupiah(analytics.averageOrderValue)}
+            </div>
+            <div className="text-[11px] text-slate-400 mt-0.5">
+              Rata-rata per kamar disewa
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Visualisasi Grafik Tren Platform */}
+      <RevenueChart
+        data={analytics.monthlyTrend}
+        title="Tren Perputaran Uang Platform (GTV)"
+        subtitle="Riwayat transaksi sewa sukses di seluruh kos KosPasti dalam 6 bulan terakhir"
+        badgeText="Platform GTV"
+      />
 
       {/* Grid Kartu Statistik */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
