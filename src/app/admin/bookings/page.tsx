@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Loader2, Check, X, Download, User as UserIcon, MessageCircle, Mail, Phone, Calendar } from "lucide-react";
+import { Loader2, Check, X, Download, User as UserIcon, MessageCircle, Mail, Phone, Calendar, CheckCircle2, CreditCard, Copy } from "lucide-react";
 import { formatBookingsToCSV, formatFinancialBookingsToCSV } from "@/lib/csv-export";
 
 interface BookingAdminUser {
@@ -22,6 +22,12 @@ interface BookingAdminItem {
   move_in_date: string;
   status: string;
   created_at?: string;
+  cancellation_reason?: string | null;
+  refund_bank_name?: string | null;
+  refund_account_number?: string | null;
+  refund_account_holder?: string | null;
+  refund_note?: string | null;
+  refunded_at?: string | null;
   property?: {
     name: string;
     price_per_month?: number;
@@ -97,7 +103,14 @@ export default function ManageBookingsPage() {
   const [isExporting, setIsExporting] = useState(false);
   const [updatingId, setUpdatingId] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [selectedUser, setSelectedUser] = useState<BookingAdminUser | null>(null);
+
+  // Escrow Admin Refund Modal State
+  const [refundingBooking, setRefundingBooking] = useState<BookingAdminItem | null>(null);
+  const [refundNoteInput, setRefundNoteInput] = useState("");
+  const [isSubmittingRefund, setIsSubmittingRefund] = useState(false);
+  const [copiedAccount, setCopiedAccount] = useState(false);
 
   const fetchBookings = () => {
     fetch("/api/admin/bookings")
@@ -143,6 +156,8 @@ export default function ManageBookingsPage() {
         status: b.status,
         created_at: b.created_at,
         amount: b.room_type?.price_per_month ?? b.property?.price_per_month ?? 0,
+        cancellation_reason: b.cancellation_reason,
+        refund_note: b.refund_note,
         property: b.property
           ? {
               name: b.property.name,
@@ -158,7 +173,7 @@ export default function ManageBookingsPage() {
       const link = document.createElement("a");
       const dateStr = new Date().toISOString().slice(0, 10).replace(/-/g, "");
       link.setAttribute("href", url);
-      link.setAttribute("download", `Laporan_Keuangan_KosPasti_${dateStr}.csv`);
+      link.setAttribute("download", `Laporan_KosPasti_${dateStr}.csv`);
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -205,30 +220,103 @@ export default function ManageBookingsPage() {
     }
   };
 
+  const handleConfirmAdminRefund = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!refundingBooking) return;
+
+    try {
+      setIsSubmittingRefund(true);
+      setErrorMessage(null);
+
+      const res = await fetch(`/api/admin/bookings/${refundingBooking.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          status: "REFUNDED",
+          refund_note: refundNoteInput.trim() || undefined,
+        }),
+      });
+
+      if (res.status === 401) {
+        router.push("/admin/login");
+        return;
+      }
+
+      const result = await res.json();
+      if (res.ok && result.success) {
+        setBookings((prev) =>
+          prev.map((b) =>
+            b.id === refundingBooking.id
+              ? {
+                  ...b,
+                  status: "REFUNDED",
+                  refund_note: refundNoteInput.trim() || b.refund_note,
+                  refunded_at: new Date().toISOString(),
+                }
+              : b
+          )
+        );
+        setSuccessMessage("Pengembalian dana (refund) berhasil dicairkan! Mahasiswa telah menerima notifikasi WhatsApp resmi.");
+        setTimeout(() => setSuccessMessage(null), 4000);
+        setRefundingBooking(null);
+        setRefundNoteInput("");
+      } else {
+        alert(result.error || "Gagal memproses pengembalian dana.");
+      }
+    } catch (err) {
+      console.error("Gagal memproses refund admin:", err);
+      alert("Terjadi kesalahan jaringan saat memproses refund.");
+    } finally {
+      setIsSubmittingRefund(false);
+    }
+  };
+
   // Helper untuk merender warna Status (Badge)
   const renderStatusBadge = (status: string) => {
-    if (status === "PAID") {
+    const upper = (status || "").toUpperCase();
+    if (upper === "PAID") {
       return (
         <span className="px-2 py-1 bg-blue-100 dark:bg-blue-950/50 text-blue-700 dark:text-blue-300 rounded-md text-xs font-bold border border-blue-200 dark:border-blue-800">
           PAID
         </span>
       );
     }
-    if (status === "SUCCESS" || status === "CONFIRMED" || status === "ACCEPTED") {
+    if (status === "SUCCESS" || upper === "SUCCESS" || upper === "CONFIRMED" || upper === "ACCEPTED" || upper === "APPROVED") {
       return (
         <span className="px-2 py-1 bg-green-100 text-green-700 dark:bg-green-950/50 dark:text-green-300 rounded-md text-xs font-bold border border-green-200 dark:border-green-800">
           {status}
         </span>
       );
     }
-    if (status === "PENDING") {
+    if (status === "PENDING" || upper === "PENDING") {
       return (
         <span className="px-2 py-1 bg-yellow-100 text-yellow-700 dark:bg-yellow-950/50 dark:text-yellow-300 rounded-md text-xs font-bold border border-yellow-200 dark:border-yellow-800">
           PENDING
         </span>
       );
     }
-    if (status === "REJECTED") {
+    if (upper === "REFUND_REQUESTED") {
+      return (
+        <span className="px-2 py-1 bg-amber-100 text-amber-800 dark:bg-amber-950/50 dark:text-amber-300 rounded-md text-xs font-bold border border-amber-300 dark:border-amber-800">
+          REFUND_REQUESTED
+        </span>
+      );
+    }
+    if (upper === "REFUNDED") {
+      return (
+        <span className="px-2 py-1 bg-sky-100 text-sky-800 dark:bg-sky-950/50 dark:text-sky-300 rounded-md text-xs font-bold border border-sky-300 dark:border-sky-800">
+          REFUNDED
+        </span>
+      );
+    }
+    if (upper === "CANCELLED") {
+      return (
+        <span className="px-2 py-1 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-md text-xs font-bold border border-slate-200 dark:border-slate-700">
+          CANCELLED
+        </span>
+      );
+    }
+    if (status === "REJECTED" || upper === "REJECTED") {
       return (
         <span className="px-2 py-1 bg-rose-100 text-rose-700 dark:bg-rose-950/50 dark:text-rose-300 rounded-md text-xs font-bold border border-rose-200 dark:border-rose-800">
           REJECTED
@@ -287,6 +375,13 @@ export default function ManageBookingsPage() {
         {errorMessage && (
           <div className="p-4 bg-rose-50 dark:bg-rose-950/40 border-b border-rose-200 dark:border-rose-800 text-rose-700 dark:text-rose-300 text-sm">
             {errorMessage}
+          </div>
+        )}
+
+        {successMessage && (
+          <div className="p-4 bg-emerald-50 dark:bg-emerald-950/40 border-b border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300 text-sm flex items-center gap-2">
+            <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
+            <span>{successMessage}</span>
           </div>
         )}
 
@@ -356,8 +451,25 @@ export default function ManageBookingsPage() {
                         </div>
                       </div>
                     </td>
-                    <td className="p-4 font-medium text-slate-700 dark:text-slate-300">
-                      {booking.property?.name || "-"}
+                    <td className="p-4">
+                      <div className="font-medium text-slate-700 dark:text-slate-300">
+                        {booking.property?.name || "-"}
+                      </div>
+                      {booking.cancellation_reason && (
+                        <div className="text-[11px] text-amber-700 dark:text-amber-400 mt-0.5 line-clamp-1" title={booking.cancellation_reason}>
+                          Alasan: {booking.cancellation_reason}
+                        </div>
+                      )}
+                      {booking.refund_bank_name && (
+                        <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 font-mono">
+                          Refund: {booking.refund_bank_name} {booking.refund_account_number} ({booking.refund_account_holder})
+                        </div>
+                      )}
+                      {booking.refund_note && (
+                        <div className="text-[11px] text-sky-700 dark:text-sky-400 mt-0.5">
+                          Ref: {booking.refund_note}
+                        </div>
+                      )}
                     </td>
                     <td className="p-4 text-center text-slate-600 dark:text-slate-300">
                       {new Date(booking.move_in_date).toLocaleDateString("id-ID")}
@@ -394,6 +506,29 @@ export default function ManageBookingsPage() {
                                 <span>Tolak</span>
                               </button>
                             </>
+                          )}
+                        </div>
+                      ) : booking.status === "REFUND_REQUESTED" ? (
+                        <div className="flex items-center justify-center gap-1.5">
+                          {isCurrentUpdating ? (
+                            <div className="flex items-center gap-1 text-xs text-slate-500 dark:text-slate-400 py-1">
+                              <Loader2 className="w-4 h-4 animate-spin text-slate-600 dark:text-slate-400" />
+                              <span>Memproses...</span>
+                            </div>
+                          ) : (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setRefundingBooking(booking);
+                                setRefundNoteInput("");
+                                setCopiedAccount(false);
+                              }}
+                              className="px-2.5 py-1 bg-amber-600 hover:bg-amber-700 text-white rounded-md text-xs font-semibold flex items-center gap-1 shadow-xs transition active:scale-95 cursor-pointer"
+                              title="Proses Pengembalian Dana (Escrow KosPasti)"
+                            >
+                              <CheckCircle2 className="w-3.5 h-3.5" />
+                              <span>Proses Refund</span>
+                            </button>
                           )}
                         </div>
                       ) : (
@@ -501,6 +636,160 @@ export default function ManageBookingsPage() {
                 </button>
               </div>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Proses Refund Escrow Admin */}
+      {refundingBooking && (
+        <div
+          className="fixed inset-0 bg-slate-950/60 backdrop-blur-xs z-50 flex items-center justify-center p-4 animate-fadeIn"
+          onClick={() => setRefundingBooking(null)}
+          role="dialog"
+          aria-modal="true"
+        >
+          <div
+            className="bg-white dark:bg-slate-900 rounded-3xl shadow-float border border-slate-200 dark:border-slate-800 w-full max-w-lg overflow-hidden animate-scaleUp"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header Modal */}
+            <div className="bg-gradient-to-r from-amber-600 to-orange-600 p-6 text-white relative">
+              <button
+                type="button"
+                onClick={() => setRefundingBooking(null)}
+                className="absolute top-4 right-4 p-1.5 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors cursor-pointer"
+                aria-label="Tutup modal refund"
+              >
+                <X size={18} />
+              </button>
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-2xl bg-white/20 backdrop-blur-xs flex items-center justify-center text-white font-black text-xl shadow-inner">
+                  <CreditCard className="w-6 h-6" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-black tracking-tight">Proses Pengembalian Dana (Escrow)</h3>
+                  <p className="text-amber-100 text-xs">Pencairan dana tertahan platform KosPasti ke penyewa</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Isi Konten Modal */}
+            <form onSubmit={handleConfirmAdminRefund} className="p-6 space-y-4 text-xs">
+              {/* Info Ringkasan */}
+              <div className="grid grid-cols-2 gap-3 p-3.5 bg-slate-50 dark:bg-slate-800/60 rounded-2xl border border-slate-200/80 dark:border-slate-700/80">
+                <div>
+                  <span className="text-[11px] text-slate-400 block font-medium">Mahasiswa Pemesan</span>
+                  <span className="font-bold text-slate-900 dark:text-white text-sm">
+                    {refundingBooking.user?.name || refundingBooking.student_name}
+                  </span>
+                </div>
+                <div>
+                  <span className="text-[11px] text-slate-400 block font-medium">Kos & Tipe Kamar</span>
+                  <span className="font-bold text-slate-900 dark:text-white text-sm line-clamp-1">
+                    {refundingBooking.property?.name || "Kos"}
+                  </span>
+                </div>
+              </div>
+
+              {/* Rekening Tujuan Transfer */}
+              <div className="p-4 rounded-2xl bg-amber-50/70 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/70 space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="font-bold text-amber-900 dark:text-amber-200">Rekening Tujuan Refund:</span>
+                  <span className="text-[11px] font-extrabold text-amber-800 dark:text-amber-300 px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-900/60">
+                    {refundingBooking.refund_bank_name || "Bank Transfer"}
+                  </span>
+                </div>
+
+                <div className="flex items-center justify-between p-2.5 rounded-xl bg-white dark:bg-slate-900 border border-amber-200/80 dark:border-amber-800">
+                  <div>
+                    <div className="text-[10px] text-slate-400 font-semibold uppercase">Nomor Rekening / Akun</div>
+                    <div className="font-mono text-base font-black text-slate-900 dark:text-white tracking-wider">
+                      {refundingBooking.refund_account_number || "-"}
+                    </div>
+                    <div className="text-xs text-slate-600 dark:text-slate-300 font-medium mt-0.5">
+                      a.n. <strong className="text-slate-900 dark:text-white">{refundingBooking.refund_account_holder || "-"}</strong>
+                    </div>
+                  </div>
+
+                  {refundingBooking.refund_account_number && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        navigator.clipboard.writeText(refundingBooking.refund_account_number || "");
+                        setCopiedAccount(true);
+                        setTimeout(() => setCopiedAccount(false), 2000);
+                      }}
+                      className="px-3 py-1.5 rounded-lg bg-amber-100 hover:bg-amber-200 dark:bg-amber-900/60 dark:hover:bg-amber-900 text-amber-900 dark:text-amber-200 font-bold text-xs flex items-center gap-1.5 transition cursor-pointer"
+                      title="Salin nomor rekening"
+                    >
+                      {copiedAccount ? (
+                        <>
+                          <Check className="w-3.5 h-3.5 text-emerald-600" />
+                          <span>Tersalin!</span>
+                        </>
+                      ) : (
+                        <>
+                          <Copy className="w-3.5 h-3.5" />
+                          <span>Salin</span>
+                        </>
+                      )}
+                    </button>
+                  )}
+                </div>
+
+                {refundingBooking.cancellation_reason && (
+                  <p className="text-slate-600 dark:text-slate-400 text-[11px] pt-1">
+                    <strong>Alasan Pembatalan:</strong> {refundingBooking.cancellation_reason}
+                  </p>
+                )}
+              </div>
+
+              {/* Form Input Catatan Transfer */}
+              <div>
+                <label className="block text-xs font-bold text-slate-800 dark:text-slate-200 mb-1">
+                  Catatan / No. Referensi Transfer Admin (Opsional)
+                </label>
+                <input
+                  type="text"
+                  placeholder="Contoh: Transfer Escrow BCA ref #891238 / QRIS refund"
+                  value={refundNoteInput}
+                  onChange={(e) => setRefundNoteInput(e.target.value)}
+                  className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white placeholder:text-slate-400 focus:ring-2 focus:ring-amber-500 focus:outline-none"
+                />
+                <p className="text-[11px] text-slate-400 mt-1">
+                  Catatan dan nomor referensi ini akan dikirimkan otomatis via notifikasi WhatsApp resmi ke mahasiswa.
+                </p>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-slate-100 dark:border-slate-800">
+                <button
+                  type="button"
+                  onClick={() => setRefundingBooking(null)}
+                  disabled={isSubmittingRefund}
+                  className="px-4 py-2.5 text-xs font-bold text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-xl transition cursor-pointer"
+                >
+                  Batal
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSubmittingRefund}
+                  className="inline-flex items-center gap-1.5 px-5 py-2.5 text-xs font-bold text-white bg-amber-600 hover:bg-amber-700 active:scale-95 rounded-xl shadow-soft transition disabled:opacity-50 cursor-pointer"
+                >
+                  {isSubmittingRefund ? (
+                    <>
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                      <span>Memproses Refund...</span>
+                    </>
+                  ) : (
+                    <>
+                      <CheckCircle2 className="w-4 h-4" />
+                      <span>Konfirmasi Telah Ditransfer</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

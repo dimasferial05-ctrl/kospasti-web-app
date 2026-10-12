@@ -22,6 +22,8 @@ export interface FinancialBookingExportItem {
   status: string;
   created_at?: string;
   amount: number;
+  cancellation_reason?: string | null;
+  refund_note?: string | null;
   property?: {
     name: string;
     owner?: {
@@ -109,6 +111,7 @@ export function formatFinancialBookingsToCSV(
     "Status",
     "Tanggal Booking",
     "Nominal Sewa (IDR)",
+    "Alasan Batal / Catatan Refund",
   ];
 
   let totalRevenue = 0;
@@ -131,6 +134,10 @@ export function formatFinancialBookingsToCSV(
       totalRevenue += b.amount || 0;
     }
 
+    const cancellationInfo = b.cancellation_reason
+      ? `${b.cancellation_reason}${b.refund_note ? ` (Catatan: ${b.refund_note})` : ""}`
+      : b.refund_note || "-";
+
     const row = [
       escapeCSV(b.id),
       escapeCSV(b.student_name),
@@ -142,6 +149,7 @@ export function formatFinancialBookingsToCSV(
       escapeCSV(b.status),
       escapeCSV(createdAt),
       escapeCSV(formatRupiah(b.amount || 0)),
+      escapeCSV(cancellationInfo),
     ];
 
     return row.join(";");

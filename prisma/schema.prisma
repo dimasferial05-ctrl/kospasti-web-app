@@ -102,10 +102,16 @@ model Booking {
   property         Property    @relation(fields: [property_id], references: [id], onDelete: Cascade)
   room_type_id     String?
   room_type        RoomType?   @relation(fields: [room_type_id], references: [id], onDelete: SetNull)
-  user_id          String?
-  user             User?       @relation(fields: [user_id], references: [id], onDelete: SetNull)
-  magic_links      MagicLink[]
-  review           Review?
+  user_id                String?
+  user                   User?       @relation(fields: [user_id], references: [id], onDelete: SetNull)
+  cancellation_reason    String?
+  refund_bank_name       String?
+  refund_account_number  String?
+  refund_account_holder  String?
+  refund_note            String?
+  refunded_at            DateTime?
+  magic_links            MagicLink[]
+  review                 Review?
 }
 
 model User {

@@ -29,8 +29,14 @@ interface Booking {
   student_name: string;
   student_whatsapp: string;
   move_in_date: string;
-  status: "PENDING" | "PAID" | "APPROVED" | "ACCEPTED" | "REJECTED";
+  status: string;
   created_at: string;
+  cancellation_reason?: string | null;
+  refund_bank_name?: string | null;
+  refund_account_number?: string | null;
+  refund_account_holder?: string | null;
+  refund_note?: string | null;
+  refunded_at?: string | null;
   property: {
     id: string;
     name: string;
@@ -54,11 +60,13 @@ interface Booking {
 export default function PartnerBookingsPage() {
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [filterStatus, setFilterStatus] = useState<"ALL" | "PENDING" | "APPROVED" | "REJECTED">("ALL");
+  const [filterStatus, setFilterStatus] = useState<"ALL" | "PENDING" | "APPROVED" | "REJECTED" | "REFUND">("ALL");
   const [searchQuery, setSearchQuery] = useState("");
   const [actionLoadingId, setActionLoadingId] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+
+
 
   const fetchBookings = async () => {
     try {
@@ -116,6 +124,8 @@ export default function PartnerBookingsPage() {
     }
   };
 
+
+
   const handleExportFinancialCSV = () => {
     if (bookings.length === 0) {
       setErrorMsg("Belum ada data riwayat transaksi untuk diekspor.");
@@ -134,6 +144,8 @@ export default function PartnerBookingsPage() {
       status: b.status,
       created_at: b.created_at,
       amount: b.room_type?.price_per_month ?? b.property.price_per_month ?? 0,
+      cancellation_reason: b.cancellation_reason,
+      refund_note: b.refund_note,
       property: {
         name: b.property.name,
       },
@@ -164,6 +176,8 @@ export default function PartnerBookingsPage() {
       matchesFilter = b.status === "APPROVED" || b.status === "ACCEPTED";
     } else if (filterStatus === "REJECTED") {
       matchesFilter = b.status === "REJECTED";
+    } else if (filterStatus === "REFUND") {
+      matchesFilter = b.status === "REFUND_REQUESTED" || b.status === "REFUNDED" || b.status === "CANCELLED";
     }
 
     const matchesSearch =
@@ -176,8 +190,9 @@ export default function PartnerBookingsPage() {
   const pendingCount = bookings.filter((b) => b.status === "PENDING" || b.status === "PAID").length;
   const approvedCount = bookings.filter((b) => b.status === "APPROVED" || b.status === "ACCEPTED").length;
   const rejectedCount = bookings.filter((b) => b.status === "REJECTED").length;
+  const refundCount = bookings.filter((b) => ["REFUND_REQUESTED", "REFUNDED", "CANCELLED"].includes(b.status)).length;
 
-  const getStatusBadge = (status: Booking["status"]) => {
+  const getStatusBadge = (status: string) => {
     if (status === "PAID") {
       return (
         <span className="text-[10px] font-black px-2.5 py-0.5 rounded-full inline-flex items-center gap-1 mb-1.5 bg-blue-100 dark:bg-blue-950/40 text-blue-800 dark:text-blue-300 border border-blue-200 dark:border-blue-800/60">
@@ -199,6 +214,32 @@ export default function PartnerBookingsPage() {
         <span className="text-[10px] font-black px-2.5 py-0.5 rounded-full inline-flex items-center gap-1 mb-1.5 bg-emerald-100 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/60">
           <span>Disetujui</span>
           <HelpTooltip text="Pesanan telah Anda setujui. Penyewa telah menerima notifikasi WA untuk persiapan check-in." />
+        </span>
+      );
+    }
+    if (status === "REFUND_REQUESTED") {
+      return (
+        <span className="text-[10px] font-black px-2.5 py-0.5 rounded-full inline-flex items-center gap-1 mb-1.5 bg-amber-100 dark:bg-amber-950/50 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-800">
+          <Clock className="w-3 h-3 text-amber-600" />
+          <span>Batal (Refund Diproses Admin)</span>
+          <HelpTooltip text="Penyewa membatalkan pesanan. Kuota kamar Anda telah dilepas kembali (+1). Pengembalian dana (Escrow) ditangani langsung oleh Admin KosPasti." />
+        </span>
+      );
+    }
+    if (status === "REFUNDED") {
+      return (
+        <span className="text-[10px] font-black px-2.5 py-0.5 rounded-full inline-flex items-center gap-1 mb-1.5 bg-sky-100 dark:bg-sky-950/40 text-sky-800 dark:text-sky-300 border border-sky-200 dark:border-sky-800/60">
+          <CheckCircle2 className="w-3 h-3 text-sky-600" />
+          <span>Dana Dikembalikan oleh Admin</span>
+          <HelpTooltip text="Pengembalian dana (refund) telah berhasil ditransfer oleh Admin KosPasti ke penyewa." />
+        </span>
+      );
+    }
+    if (status === "CANCELLED") {
+      return (
+        <span className="text-[10px] font-black px-2.5 py-0.5 rounded-full inline-flex items-center gap-1 mb-1.5 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
+          <span>Dibatalkan</span>
+          <HelpTooltip text="Pesanan dibatalkan sebelum pembayaran dilakukan. Kamar otomatis kembali ke sistem." />
         </span>
       );
     }
@@ -298,6 +339,18 @@ export default function PartnerBookingsPage() {
             <XCircle className="w-3.5 h-3.5" />
             <span>Ditolak ({rejectedCount})</span>
           </button>
+          <button
+            type="button"
+            onClick={() => setFilterStatus("REFUND")}
+            className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
+              filterStatus === "REFUND"
+                ? "bg-amber-600 text-white shadow-xs"
+                : "bg-amber-50 dark:bg-amber-950/30 text-amber-800 dark:text-amber-400 hover:bg-amber-100 dark:hover:bg-amber-900/40"
+            }`}
+          >
+            <Clock className="w-3.5 h-3.5" />
+            <span>Batal & Refund ({refundCount})</span>
+          </button>
         </div>
 
         {/* Search Input & Export Button */}
@@ -354,6 +407,9 @@ export default function PartnerBookingsPage() {
 
             const isPendingAction = b.status === "PENDING" || b.status === "PAID";
             const isApproved = b.status === "APPROVED" || b.status === "ACCEPTED";
+            const isRefundRequested = b.status === "REFUND_REQUESTED";
+            const isRefunded = b.status === "REFUNDED";
+            const isCancelled = b.status === "CANCELLED";
 
             return (
               <div
@@ -431,6 +487,49 @@ export default function PartnerBookingsPage() {
                   </div>
                 </div>
 
+                {/* Refund & Cancellation Information Box */}
+                {(isRefundRequested || isRefunded || isCancelled || b.cancellation_reason) && (
+                  <div className="bg-amber-50/70 dark:bg-amber-950/30 p-3.5 rounded-2xl border border-amber-200/80 dark:border-amber-800/60 space-y-2 text-xs">
+                    <div className="flex items-center justify-between">
+                      <span className="font-bold text-amber-900 dark:text-amber-200">Informasi Pembatalan</span>
+                      {b.refunded_at && (
+                        <span className="text-[10px] text-slate-400">
+                          {new Date(b.refunded_at).toLocaleDateString("id-ID")}
+                        </span>
+                      )}
+                    </div>
+
+                    {b.cancellation_reason && (
+                      <p className="text-slate-700 dark:text-slate-300">
+                        <strong className="text-slate-900 dark:text-slate-200">Alasan:</strong> {b.cancellation_reason}
+                      </p>
+                    )}
+
+                    <div className="p-2.5 rounded-xl bg-white dark:bg-slate-900 border border-amber-200 dark:border-amber-800/80 space-y-1">
+                      <p className="text-emerald-700 dark:text-emerald-400 font-semibold flex items-center gap-1">
+                        <CheckCircle2 className="w-3.5 h-3.5" />
+                        <span>Kuota kamar otomatis dilepas kembali (+1)</span>
+                      </p>
+                      {isRefundRequested && (
+                        <p className="text-slate-600 dark:text-slate-400 text-[11px] leading-relaxed">
+                          Dana pembayaran berada di rekening penampung (Escrow) KosPasti dan <strong>sedang diproses pengembaliannya oleh Admin KosPasti</strong> ke penyewa. Mitra tidak perlu mentransfer dana.
+                        </p>
+                      )}
+                      {isRefunded && (
+                        <p className="text-sky-700 dark:text-sky-400 text-[11px] leading-relaxed">
+                          Pengembalian dana telah selesai ditransfer oleh Admin KosPasti ke penyewa.
+                          {b.refund_note && <span> Ref: <em>{b.refund_note}</em></span>}
+                        </p>
+                      )}
+                      {isCancelled && (
+                        <p className="text-slate-500 dark:text-slate-400 text-[11px]">
+                          Pesanan dibatalkan sebelum pembayaran dilakukan. Tidak ada transaksi dana yang terjadi.
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                )}
+
                 {/* Action Controls */}
                 {isPendingAction ? (
                   <div className="flex items-center gap-2 pt-2 border-t border-slate-100 dark:border-slate-800">
@@ -462,23 +561,43 @@ export default function PartnerBookingsPage() {
                 ) : (
                   <div className="pt-2 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
                     <span>
-                      Status saat ini:{" "}
-                      <strong className={isApproved ? "text-emerald-700 dark:text-emerald-400" : "text-rose-700 dark:text-rose-400"}>
-                        {isApproved ? "Disetujui" : "Ditolak"}
+                      Status:{" "}
+                      <strong
+                        className={
+                          isApproved
+                            ? "text-emerald-700 dark:text-emerald-400"
+                            : isRefunded
+                            ? "text-sky-700 dark:text-sky-400"
+                            : isRefundRequested
+                            ? "text-amber-700 dark:text-amber-400"
+                            : "text-rose-700 dark:text-rose-400"
+                        }
+                      >
+                        {isApproved
+                          ? "Disetujui"
+                          : isRefunded
+                          ? "Dana Dikembalikan"
+                          : isRefundRequested
+                          ? "Menunggu Refund (Admin)"
+                          : isCancelled
+                          ? "Dibatalkan"
+                          : "Ditolak"}
                       </strong>
                     </span>
-                    <button
-                      type="button"
-                      onClick={() =>
-                        handleUpdateStatus(
-                          b.id,
-                          isApproved ? "REJECTED" : "APPROVED"
-                        )
-                      }
-                      className="text-[11px] text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:underline cursor-pointer"
-                    >
-                      Ubah ke {isApproved ? "Ditolak" : "Disetujui"}
-                    </button>
+                    {!isRefunded && !isCancelled && !isRefundRequested && (
+                      <button
+                        type="button"
+                        onClick={() =>
+                          handleUpdateStatus(
+                            b.id,
+                            isApproved ? "REJECTED" : "APPROVED"
+                          )
+                        }
+                        className="text-[11px] text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:underline cursor-pointer"
+                      >
+                        Ubah ke {isApproved ? "Ditolak" : "Disetujui"}
+                      </button>
+                    )}
                   </div>
                 )}
               </div>
@@ -486,6 +605,7 @@ export default function PartnerBookingsPage() {
           })}
         </div>
       )}
+
     </div>
   );
 }

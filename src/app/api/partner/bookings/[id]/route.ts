@@ -31,8 +31,14 @@ export async function PATCH(
     const body = await request.json().catch(() => null);
     let status = body?.status?.toUpperCase?.();
 
-    if (status === "ACCEPTED") {
-      status = "APPROVED";
+    if (status === "REFUNDED") {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Otoritas ditolak: Pengembalian dana (refund) diproses terpusat oleh Admin KosPasti melalui rekening penampung (Escrow).",
+        },
+        { status: 403 }
+      );
     }
 
     if (!status || !["APPROVED", "REJECTED", "PENDING"].includes(status)) {
@@ -86,7 +92,8 @@ export async function PATCH(
         data: { status },
       });
 
-      if (status === "REJECTED" && previousStatus !== "REJECTED") {
+      // Kembalikan kamar jika REJECTED (dan belum pernah dikembalikan)
+      if (status === "REJECTED" && previousStatus !== "REJECTED" && previousStatus !== "CANCELLED" && previousStatus !== "REFUND_REQUESTED") {
         await tx.property.update({
           where: { id: existing.property_id },
           data: { available_rooms: { increment: 1 } },
@@ -103,7 +110,7 @@ export async function PATCH(
       return updatedBooking;
     });
 
-    // Send WhatsApp notification if status changed to APPROVED or REJECTED
+    // Send WhatsApp notification if status changed to APPROVED, REJECTED, or REFUNDED
     if (existing.student_whatsapp && previousStatus !== status) {
       const ownerName = existing.property.owner?.name || "Pemilik Kos";
       const propertyName = existing.property.name;
