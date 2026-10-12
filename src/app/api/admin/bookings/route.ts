@@ -20,7 +20,15 @@ export async function GET(request: NextRequest) {
       include: {
         property: {
           select: {
+            id: true,
             name: true,
+            price_per_month: true,
+            owner: {
+              select: {
+                name: true,
+                whatsapp_number: true,
+              },
+            },
           },
         },
         room_type: true,

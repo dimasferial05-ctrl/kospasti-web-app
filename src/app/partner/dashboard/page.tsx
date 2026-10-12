@@ -13,8 +13,13 @@ import {
   Phone,
   Calendar,
   ChevronRight,
+  Wallet,
+  TrendingUp,
+  ArrowUpRight,
 } from "lucide-react";
 import { HelpTooltip } from "@/components/ui/Tooltip";
+import { RevenueChart } from "@/components/dashboard/RevenueChart";
+import { formatRupiah, MonthlyRevenueData } from "@/lib/revenue-helper";
 
 interface StatsData {
   totalProperties: number;
@@ -48,6 +53,16 @@ interface BookingItem {
   };
 }
 
+interface AnalyticsState {
+  totalRevenue: number;
+  thisMonthRevenue: number;
+  lastMonthRevenue: number;
+  revenueGrowth: number | null;
+  averageOrderValue: number;
+  successfulBookingsCount: number;
+  monthlyTrend: MonthlyRevenueData[];
+}
+
 export default function PartnerOverviewPage() {
   const [stats, setStats] = useState<StatsData>({
     totalProperties: 0,
@@ -58,6 +73,16 @@ export default function PartnerOverviewPage() {
     rejectedBookings: 0,
   });
 
+  const [analytics, setAnalytics] = useState<AnalyticsState>({
+    totalRevenue: 0,
+    thisMonthRevenue: 0,
+    lastMonthRevenue: 0,
+    revenueGrowth: null,
+    averageOrderValue: 0,
+    successfulBookingsCount: 0,
+    monthlyTrend: [],
+  });
+
   const [properties, setProperties] = useState<PropertyItem[]>([]);
   const [recentBookings, setRecentBookings] = useState<BookingItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -66,15 +91,17 @@ export default function PartnerOverviewPage() {
   const fetchData = async () => {
     try {
       setIsLoading(true);
-      const [statsRes, propsRes, booksRes] = await Promise.all([
+      const [statsRes, propsRes, booksRes, analyticsRes] = await Promise.all([
         fetch("/api/partner/stats").then((r) => r.json()),
         fetch("/api/partner/properties").then((r) => r.json()),
         fetch("/api/partner/bookings").then((r) => r.json()),
+        fetch("/api/partner/analytics").then((r) => r.json()),
       ]);
 
       if (statsRes.success) setStats(statsRes.stats);
       if (propsRes.success) setProperties(propsRes.properties || []);
       if (booksRes.success) setRecentBookings(booksRes.bookings?.slice(0, 5) || []);
+      if (analyticsRes.success && analyticsRes.data) setAnalytics(analyticsRes.data);
     } catch (error) {
       console.error("Gagal memuat ringkasan dashboard:", error);
     } finally {
@@ -152,6 +179,65 @@ export default function PartnerOverviewPage() {
         </p>
       </div>
 
+      {/* Financial Highlight Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        {/* Total Omzet Diterima */}
+        <div className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-soft">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-1.5">
+              <span className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                Total Omzet Sewa
+              </span>
+              <HelpTooltip text="Akumulasi seluruh transaksi sewa kos yang telah lunas dan disetujui." />
+            </div>
+            <div className="w-8 h-8 rounded-lg bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
+              <Wallet className="w-4 h-4" />
+            </div>
+          </div>
+          <p className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white mt-2 tracking-tight">
+            {isLoading ? "..." : formatRupiah(analytics.totalRevenue)}
+          </p>
+          <span className="text-[11px] text-slate-500 dark:text-slate-400 font-medium mt-1 block">
+            {analytics.successfulBookingsCount} pesanan sukses • rata-rata {formatRupiah(analytics.averageOrderValue)} / transaksi
+          </span>
+        </div>
+
+        {/* Omzet Bulan Ini */}
+        <div className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-soft">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-1.5">
+              <span className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                Omzet Bulan Ini
+              </span>
+              <HelpTooltip text="Total nominal sewa yang masuk dan disetujui pada bulan berjalan saat ini." />
+            </div>
+            <div className="w-8 h-8 rounded-lg bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
+              <TrendingUp className="w-4 h-4" />
+            </div>
+          </div>
+          <p className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white mt-2 tracking-tight">
+            {isLoading ? "..." : formatRupiah(analytics.thisMonthRevenue)}
+          </p>
+          <div className="flex items-center gap-2 mt-1 text-[11px]">
+            {analytics.revenueGrowth !== null ? (
+              <span
+                className={`inline-flex items-center gap-0.5 px-1.5 py-0.2 rounded font-bold text-[10px] ${
+                  analytics.revenueGrowth >= 0
+                    ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300"
+                    : "bg-rose-50 text-rose-700 dark:bg-rose-950/60 dark:text-rose-300"
+                }`}
+              >
+                <ArrowUpRight className="w-3 h-3" />
+                {analytics.revenueGrowth >= 0 ? `+${analytics.revenueGrowth}%` : `${analytics.revenueGrowth}%`}
+              </span>
+            ) : null}
+            <span className="text-slate-500 dark:text-slate-400 font-medium">
+              vs bulan lalu ({formatRupiah(analytics.lastMonthRevenue)})
+            </span>
+          </div>
+        </div>
+      </div>
+
       {/* Metric Cards Grid */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Total Properti */}
@@ -224,6 +310,14 @@ export default function PartnerOverviewPage() {
           <span className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">Menunggu persetujuan Anda</span>
         </div>
       </div>
+
+      {/* Visualisasi Grafik Tren Omzet */}
+      <RevenueChart
+        data={analytics.monthlyTrend}
+        title="Tren Pendapatan Bulanan Mitra"
+        subtitle="Riwayat pergerakan omzet transaksi kos Anda dalam 6 bulan terakhir"
+        badgeText="Omzet Mitra"
+      />
 
       {/* Main Content 2 Columns */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">

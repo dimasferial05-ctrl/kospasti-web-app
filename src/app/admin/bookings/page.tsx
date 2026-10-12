@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Loader2, Check, X, Download, User as UserIcon, MessageCircle, Mail, Phone, Calendar } from "lucide-react";
-import { formatBookingsToCSV } from "@/lib/csv-export";
+import { formatBookingsToCSV, formatFinancialBookingsToCSV } from "@/lib/csv-export";
 
 interface BookingAdminUser {
   id?: string;
@@ -24,6 +24,15 @@ interface BookingAdminItem {
   created_at?: string;
   property?: {
     name: string;
+    price_per_month?: number;
+    owner?: {
+      name: string;
+      whatsapp_number?: string;
+    } | null;
+  } | null;
+  room_type?: {
+    name: string;
+    price_per_month: number;
   } | null;
   user?: BookingAdminUser | null;
 }
@@ -125,13 +134,31 @@ export default function ManageBookingsPage() {
       // Small timeout to allow spinner to render smoothly
       await new Promise((resolve) => setTimeout(resolve, 200));
 
-      const csvContent = formatBookingsToCSV(bookings);
+      const exportData = bookings.map((b) => ({
+        id: b.id,
+        student_name: b.student_name,
+        student_whatsapp: b.student_whatsapp,
+        whatsapp_number: b.whatsapp_number,
+        move_in_date: b.move_in_date,
+        status: b.status,
+        created_at: b.created_at,
+        amount: b.room_type?.price_per_month ?? b.property?.price_per_month ?? 0,
+        property: b.property
+          ? {
+              name: b.property.name,
+              owner: b.property.owner,
+            }
+          : null,
+        room_type: b.room_type,
+      }));
+
+      const csvContent = formatFinancialBookingsToCSV(exportData, { includeOwner: true });
       const blob = new Blob(["\uFEFF" + csvContent], { type: "text/csv;charset=utf-8;" });
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement("a");
       const dateStr = new Date().toISOString().slice(0, 10).replace(/-/g, "");
       link.setAttribute("href", url);
-      link.setAttribute("download", `Laporan_KosPasti_${dateStr}.csv`);
+      link.setAttribute("download", `Laporan_Keuangan_KosPasti_${dateStr}.csv`);
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);

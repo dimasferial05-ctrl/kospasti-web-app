@@ -19,8 +19,10 @@ import {
   BedDouble,
   DollarSign,
   HelpCircle,
+  Download,
 } from "lucide-react";
 import { HelpTooltip } from "@/components/ui/Tooltip";
+import { formatFinancialBookingsToCSV } from "@/lib/csv-export";
 
 interface Booking {
   id: string;
@@ -112,6 +114,40 @@ export default function PartnerBookingsPage() {
     } finally {
       setActionLoadingId(null);
     }
+  };
+
+  const handleExportFinancialCSV = () => {
+    if (bookings.length === 0) return;
+    const targetBookings = filteredBookings.length > 0 ? filteredBookings : bookings;
+    const exportData = targetBookings.map((b) => ({
+      id: b.id,
+      student_name: b.student_name,
+      student_whatsapp: b.student_whatsapp,
+      whatsapp_number: b.student_whatsapp,
+      move_in_date: b.move_in_date,
+      status: b.status,
+      created_at: b.created_at,
+      amount: b.room_type?.price_per_month ?? b.property.price_per_month ?? 0,
+      property: {
+        name: b.property.name,
+      },
+      room_type: b.room_type
+        ? { name: b.room_type.name, price_per_month: b.room_type.price_per_month }
+        : null,
+    }));
+    const csvContent = formatFinancialBookingsToCSV(exportData);
+    const blob = new Blob(["\uFEFF" + csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute(
+      "download",
+      `Laporan_Keuangan_Mitra_${new Date().toISOString().split("T")[0]}.csv`
+    );
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
   };
 
   const filteredBookings = bookings.filter((b) => {
@@ -258,16 +294,29 @@ export default function PartnerBookingsPage() {
           </button>
         </div>
 
-        {/* Search Input */}
-        <div className="relative min-w-[220px]">
-          <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
-          <input
-            type="text"
-            placeholder="Cari nama penyewa / kos..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-9 pr-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 text-xs font-medium focus:ring-2 focus:ring-emerald-500 focus:outline-none"
-          />
+        {/* Search Input & Export Button */}
+        <div className="flex items-center gap-2.5 w-full sm:w-auto">
+          <div className="relative flex-1 sm:w-56">
+            <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+            <input
+              type="text"
+              placeholder="Cari nama penyewa / kos..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-9 pr-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 text-xs font-medium focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+            />
+          </div>
+
+          <button
+            type="button"
+            onClick={handleExportFinancialCSV}
+            disabled={bookings.length === 0}
+            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed text-white text-xs font-bold shadow-soft hover:shadow-float transition-all duration-200 cursor-pointer shrink-0"
+            title="Unduh rekapitulasi data pesanan dan rincian keuangan ke format CSV/Excel"
+          >
+            <Download className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">Ekspor CSV</span>
+          </button>
         </div>
       </div>
 
