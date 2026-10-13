@@ -187,7 +187,28 @@ export async function POST(request: Request) {
         throw new Error("Kamar sudah penuh atau tidak ditemukan");
       }
 
-      // 3. Buat Data Booking jika update kamar di atas berhasil
+      // 3. Ambil tarif sewa untuk field amount
+      let bookingAmount = 0;
+      if (resolvedRoomTypeId) {
+        const roomTypeData = await tx.roomType.findUnique({
+          where: { id: resolvedRoomTypeId },
+          select: { price_per_month: true },
+        });
+        if (roomTypeData) {
+          bookingAmount = roomTypeData.price_per_month;
+        }
+      }
+      if (bookingAmount === 0) {
+        const propData = await tx.property.findUnique({
+          where: { id: propertyId.trim() },
+          select: { price_per_month: true },
+        });
+        if (propData) {
+          bookingAmount = propData.price_per_month;
+        }
+      }
+
+      // 4. Buat Data Booking jika update kamar di atas berhasil
       const newBooking = await tx.booking.create({
         data: {
           property_id: propertyId.trim(),
@@ -196,6 +217,7 @@ export async function POST(request: Request) {
           student_whatsapp: resolvedWaNumber,
           move_in_date: parsedDate,
           status: "PENDING",
+          amount: bookingAmount,
           user_id: userPayload.userId,
         },
       });

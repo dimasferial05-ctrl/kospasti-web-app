@@ -2,7 +2,20 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { sendWhatsAppMessage } from "@/lib/whatsapp";
 
-const ALLOWED_STATUSES = ["PENDING", "SUCCESS", "CONFIRMED", "APPROVED", "REJECTED", "CANCELLED", "REFUND_REQUESTED", "REFUNDED"];
+const ALLOWED_STATUSES = [
+  "PENDING",
+  "SUCCESS",
+  "CONFIRMED",
+  "APPROVED",
+  "REJECTED",
+  "CANCELLED",
+  "REFUND_REQUESTED",
+  "REFUNDED",
+  "COMPLETED",
+  "DISPUTED",
+  "PAYOUT_PENDING",
+  "PAYOUT_PAID",
+];
 
 export async function PATCH(
   request: NextRequest,

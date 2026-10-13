@@ -12,6 +12,8 @@ import {
   LogOut,
   Loader2,
   ExternalLink,
+  Wallet,
+  CreditCard,
 } from "lucide-react";
 import { Sidebar, SidebarBody, SidebarLink, type Links } from "@/components/ui/sidebar";
 import { SidebarThemeToggle } from "@/components/ui/SidebarThemeToggle";
@@ -137,6 +139,36 @@ export default function PartnerDashboardLayout({
         />
       ),
       active: Boolean(pathname?.startsWith("/partner/dashboard/reviews")),
+    },
+    {
+      label: "Pencairan Dana",
+      href: "/partner/dashboard/payouts",
+      icon: (
+        <Wallet
+          size={20}
+          className={`shrink-0 transition-colors ${
+            pathname?.startsWith("/partner/dashboard/payouts")
+              ? "text-emerald-400"
+              : "text-slate-400"
+          }`}
+        />
+      ),
+      active: Boolean(pathname?.startsWith("/partner/dashboard/payouts")),
+    },
+    {
+      label: "Profil & Rekening",
+      href: "/partner/dashboard/profile",
+      icon: (
+        <CreditCard
+          size={20}
+          className={`shrink-0 transition-colors ${
+            pathname?.startsWith("/partner/dashboard/profile")
+              ? "text-emerald-400"
+              : "text-slate-400"
+          }`}
+        />
+      ),
+      active: Boolean(pathname?.startsWith("/partner/dashboard/profile")),
     },
   ];
 

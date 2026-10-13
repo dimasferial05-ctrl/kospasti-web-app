@@ -316,6 +316,34 @@ export default function ManageBookingsPage() {
         </span>
       );
     }
+    if (upper === "COMPLETED") {
+      return (
+        <span className="px-2 py-1 bg-indigo-100 dark:bg-indigo-950/50 text-indigo-700 dark:text-indigo-300 rounded-md text-xs font-bold border border-indigo-200 dark:border-indigo-800">
+          COMPLETED (CHECK-IN)
+        </span>
+      );
+    }
+    if (upper === "DISPUTED") {
+      return (
+        <span className="px-2 py-1 bg-rose-100 text-rose-700 dark:bg-rose-950/50 dark:text-rose-300 rounded-md text-xs font-bold border border-rose-200 dark:border-rose-800">
+          DISPUTED
+        </span>
+      );
+    }
+    if (upper === "PAYOUT_PENDING") {
+      return (
+        <span className="px-2 py-1 bg-amber-100 text-amber-800 dark:bg-amber-950/50 dark:text-amber-300 rounded-md text-xs font-bold border border-amber-300 dark:border-amber-800">
+          PAYOUT_PENDING
+        </span>
+      );
+    }
+    if (upper === "PAYOUT_PAID") {
+      return (
+        <span className="px-2 py-1 bg-emerald-100 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300 rounded-md text-xs font-bold border border-emerald-200 dark:border-emerald-800">
+          PAYOUT_PAID
+        </span>
+      );
+    }
     if (status === "REJECTED" || upper === "REJECTED") {
       return (
         <span className="px-2 py-1 bg-rose-100 text-rose-700 dark:bg-rose-950/50 dark:text-rose-300 rounded-md text-xs font-bold border border-rose-200 dark:border-rose-800">
