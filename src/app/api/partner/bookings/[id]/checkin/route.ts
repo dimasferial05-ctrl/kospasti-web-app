@@ -55,12 +55,12 @@ export async function POST(
       );
     }
 
-    // Hanya booking berstatus ACCEPTED yang bisa dikonfirmasi check-in
-    if (booking.status !== "ACCEPTED") {
+    // Hanya booking berstatus APPROVED atau ACCEPTED yang bisa dikonfirmasi check-in
+    if (booking.status !== "ACCEPTED" && booking.status !== "APPROVED") {
       return NextResponse.json(
         {
           success: false,
-          error: `Status booking tidak valid (${booking.status}). Hanya pesanan yang diterima (ACCEPTED) yang dapat dikonfirmasi check-in.`,
+          error: `Status booking tidak valid (${booking.status}). Hanya pesanan yang disetujui (APPROVED/ACCEPTED) yang dapat dikonfirmasi check-in.`,
         },
         { status: 400 }
       );
