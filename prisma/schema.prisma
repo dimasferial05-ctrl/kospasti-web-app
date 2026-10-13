@@ -20,6 +20,8 @@ model Owner {
   updated_at      DateTime    @updatedAt
   properties      Property[]
   magic_links     MagicLink[]
+  payout_method   PayoutMethod?
+  payouts         Payout[]
 }
 
 model Property {
@@ -110,8 +112,11 @@ model Booking {
   refund_account_holder  String?
   refund_note            String?
   refunded_at            DateTime?
+  amount                 Int         @default(0)
+  checkin_confirmed_at   DateTime?
   magic_links            MagicLink[]
   review                 Review?
+  payout                 Payout?
 }
 
 model User {
@@ -164,5 +169,35 @@ model Review {
 
   @@index([property_id])
   @@index([user_id])
+}
+
+model PayoutMethod {
+  id             String    @id @default(uuid())
+  owner_id       String    @unique
+  owner          Owner     @relation(fields: [owner_id], references: [id], onDelete: Cascade)
+  bank_name      String    // Contoh: "BCA", "BNI", "Mandiri", "GoPay", dll.
+  account_number String    // Nomor rekening / nomor HP e-wallet
+  account_holder String    // Nama pemilik rekening (HARUS sama persis dengan nama di bank)
+  is_verified    Boolean   @default(false) // Admin yang set jadi true
+  verified_at    DateTime?
+  created_at     DateTime  @default(now())
+  updated_at     DateTime  @updatedAt
+}
+
+model Payout {
+  id                     String    @id @default(uuid())
+  booking_id             String    @unique
+  booking                Booking   @relation(fields: [booking_id], references: [id], onDelete: Cascade)
+  owner_id               String
+  owner                  Owner     @relation(fields: [owner_id], references: [id], onDelete: Cascade)
+  amount                 Int       // Nominal yang dicairkan (dalam rupiah)
+  status                 String    @default("PAYOUT_PENDING")
+  // Status valid: "PAYOUT_PENDING" | "PAYOUT_PAID" | "PAYOUT_FAILED"
+  payout_method_snapshot String?   // JSON string: snapshot rekening saat payout diproses
+  processed_at           DateTime? // Kapan admin memproses
+  processed_by           String?   // Email/ID admin yang memproses
+  notes                  String?   // Catatan internal admin
+  created_at             DateTime  @default(now())
+  updated_at             DateTime  @updatedAt
 }
 

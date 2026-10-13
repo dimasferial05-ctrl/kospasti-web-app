@@ -2,6 +2,7 @@ export interface BookingFinancialRecord {
   id: string;
   created_at: Date | string;
   status: string;
+  amount?: number;
   property?: {
     name: string;
     price_per_month: number;
@@ -13,14 +14,17 @@ export interface BookingFinancialRecord {
   } | null;
 }
 
-export const VALID_REVENUE_STATUSES = ["PAID", "ACCEPTED", "APPROVED"];
+export const VALID_REVENUE_STATUSES = ["PAID", "ACCEPTED", "APPROVED", "COMPLETED", "PAYOUT_PENDING", "PAYOUT_PAID"];
 
 /**
  * Menghitung nominal tarif sewa booking:
- * Mengutamakan harga dari tipe kamar (room_type.price_per_month),
+ * Mengutamakan amount pada booking, lalu tipe kamar (room_type.price_per_month),
  * jika tidak tersedia, fallback ke harga properti (property.price_per_month).
  */
 export function getBookingAmount(booking: BookingFinancialRecord): number {
+  if (typeof booking.amount === "number" && booking.amount > 0) {
+    return booking.amount;
+  }
   if (booking.room_type && typeof booking.room_type.price_per_month === "number") {
     return booking.room_type.price_per_month;
   }

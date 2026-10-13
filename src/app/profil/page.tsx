@@ -67,6 +67,7 @@ interface BookingItem {
   move_in_date: string;
   status: string;
   created_at: string;
+  checkin_confirmed_at?: string | null;
   cancellation_reason?: string | null;
   refund_bank_name?: string | null;
   refund_account_number?: string | null;
@@ -142,6 +143,13 @@ function ProfileContent() {
   const [isSubmittingCancel, setIsSubmittingCancel] = useState(false);
   const [cancelError, setCancelError] = useState<string | null>(null);
   const [cancelSuccessMsg, setCancelSuccessMsg] = useState<string | null>(null);
+
+  // Dispute Modal State
+  const [disputeBooking, setDisputeBooking] = useState<BookingItem | null>(null);
+  const [disputeReason, setDisputeReason] = useState("");
+  const [isSubmittingDispute, setIsSubmittingDispute] = useState(false);
+  const [disputeError, setDisputeError] = useState<string | null>(null);
+  const [disputeSuccessMsg, setDisputeSuccessMsg] = useState<string | null>(null);
 
   // Logout State
   const [isLoggingOut, setIsLoggingOut] = useState(false);
@@ -429,6 +437,33 @@ function ProfileContent() {
           <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
           <span>Disetujui</span>
           <HelpTooltip text="Pesanan telah disetujui pemilik kos. Anda dapat langsung berkomunikasi untuk persiapan check-in." />
+        </span>
+      );
+    }
+    if (upper === "COMPLETED") {
+      return (
+        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold rounded-full bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800">
+          <Clock className="w-3.5 h-3.5 shrink-0 text-indigo-600" />
+          <span>Check-In Dikonfirmasi Mitra</span>
+          <HelpTooltip text="Mitra mengonfirmasi Anda telah check-in. Terdapat masa tenggang 12 jam untuk melaporkan masalah jika ada kendala." />
+        </span>
+      );
+    }
+    if (upper === "DISPUTED") {
+      return (
+        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold rounded-full bg-rose-50 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-800">
+          <AlertCircle className="w-3.5 h-3.5 shrink-0 text-rose-600" />
+          <span>Dalam Sanggahan (Dispute)</span>
+          <HelpTooltip text="Anda telah mengajukan sanggahan/masalah. Tim Admin KosPasti sedang menginvestigasi laporan Anda." />
+        </span>
+      );
+    }
+    if (upper === "PAYOUT_PENDING" || upper === "PAYOUT_PAID") {
+      return (
+        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold rounded-full bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
+          <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
+          <span>Selesai</span>
+          <HelpTooltip text="Check-in selesai dan masa sewa telah aktif." />
         </span>
       );
     }
@@ -1458,6 +1493,12 @@ function ProfileContent() {
                   </div>
                 ) : (
                   <div className="space-y-4">
+                    {disputeSuccessMsg && (
+                      <div className="p-4 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300 text-xs font-semibold flex items-center gap-2">
+                        <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                        <span>{disputeSuccessMsg}</span>
+                      </div>
+                    )}
                     {bookings.map((booking) => {
                       const canCancel = ["PENDING", "PAID", "APPROVED", "ACCEPTED"].includes(
                         booking.status?.toUpperCase()
@@ -1563,10 +1604,81 @@ function ProfileContent() {
                             </div>
                           </div>
 
-                          {/* Info Pembatalan / Refund Details jika ada */}
-                          {(booking.cancellation_reason || booking.refund_bank_name || booking.refund_note) && (
-                            <div className="mt-1 pt-3 border-t border-slate-150 dark:border-slate-800/80 bg-slate-50/80 dark:bg-slate-800/40 p-3 rounded-xl text-xs space-y-1">
+                          {/* Grace period & Dispute Banner for COMPLETED booking */}
+                          {booking.status?.toUpperCase() === "COMPLETED" && (() => {
+                            const confirmedAt = booking.checkin_confirmed_at
+                              ? new Date(booking.checkin_confirmed_at)
+                              : null;
+                            const deadline = confirmedAt
+                              ? new Date(confirmedAt.getTime() + 12 * 60 * 60 * 1000)
+                              : null;
+                            const isWithinGracePeriod = deadline ? Date.now() < deadline.getTime() : false;
+
+                            if (isWithinGracePeriod && deadline) {
+                              const diffMs = deadline.getTime() - Date.now();
+                              const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+                              const diffMins = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+
+                              return (
+                                <div className="mt-1 pt-3 border-t border-slate-150 dark:border-slate-800/80 bg-indigo-50/70 dark:bg-indigo-950/40 p-3.5 rounded-xl border border-indigo-200 dark:border-indigo-800/60 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+                                  <div className="space-y-1">
+                                    <div className="flex items-center gap-1.5 font-bold text-indigo-900 dark:text-indigo-200">
+                                      <Clock className="w-3.5 h-3.5 text-indigo-600" />
+                                      <span>Check-In Dikonfirmasi Mitra (Masa Tenggang 12 Jam)</span>
+                                    </div>
+                                    <p className="text-slate-600 dark:text-slate-400 text-[11px]">
+                                      Sisa waktu pengajuan masalah kamar:{" "}
+                                      <strong className="text-indigo-700 dark:text-indigo-300">
+                                        {diffHours} jam {diffMins} menit lagi
+                                      </strong>
+                                      . Jika tidak ada sanggahan, dana akan otomatis diteruskan ke mitra.
+                                    </p>
+                                  </div>
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      setDisputeBooking(booking);
+                                      setDisputeReason("");
+                                      setDisputeError(null);
+                                    }}
+                                    className="px-3.5 py-1.5 rounded-xl font-bold text-xs bg-rose-600 hover:bg-rose-700 text-white shadow-xs transition-colors shrink-0 cursor-pointer self-start sm:self-auto"
+                                  >
+                                    Laporkan Masalah
+                                  </button>
+                                </div>
+                              );
+                            }
+
+                            return (
+                              <div className="mt-1 pt-3 border-t border-slate-150 dark:border-slate-800/80 bg-emerald-50/60 dark:bg-emerald-950/30 p-3 rounded-xl border border-emerald-200 dark:border-emerald-800/50 flex items-center gap-2 text-xs text-emerald-800 dark:text-emerald-300">
+                                <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                                <span>Check-in selesai dan masa tenggang telah berakhir. Selamat menikmati kamar kos Anda!</span>
+                              </div>
+                            );
+                          })()}
+
+                          {/* Dispute Info Banner */}
+                          {booking.status?.toUpperCase() === "DISPUTED" && (
+                            <div className="mt-1 pt-3 border-t border-slate-150 dark:border-slate-800/80 bg-rose-50/70 dark:bg-rose-950/30 p-3.5 rounded-xl border border-rose-200 dark:border-rose-800/60 text-xs text-rose-900 dark:text-rose-200 space-y-1">
+                              <div className="flex items-center gap-1.5 font-bold">
+                                <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
+                                <span>Laporan Kendala (Dispute) Sedang Ditangani</span>
+                              </div>
+                              <p className="text-[11px] text-slate-600 dark:text-slate-400">
+                                Tim Admin KosPasti sedang menginvestigasi laporan Anda dan menahan pencairan dana ke mitra. Kami akan segera menghubungi Anda.
+                              </p>
                               {booking.cancellation_reason && (
+                                <p className="text-[11px] text-slate-700 dark:text-slate-300 mt-1">
+                                  <strong>Keterangan masalah:</strong> {booking.cancellation_reason}
+                                </p>
+                              )}
+                            </div>
+                          )}
+
+                          {/* Info Pembatalan / Refund Details jika ada */}
+                          {(booking.cancellation_reason && booking.status?.toUpperCase() !== "DISPUTED" || booking.refund_bank_name || booking.refund_note) && (
+                            <div className="mt-1 pt-3 border-t border-slate-150 dark:border-slate-800/80 bg-slate-50/80 dark:bg-slate-800/40 p-3 rounded-xl text-xs space-y-1">
+                              {booking.cancellation_reason && booking.status?.toUpperCase() !== "DISPUTED" && (
                                 <p className="text-slate-700 dark:text-slate-300">
                                   <strong className="text-slate-800 dark:text-slate-200">Alasan Pembatalan:</strong>{" "}
                                   {booking.cancellation_reason}
@@ -1800,6 +1912,130 @@ function ProfileContent() {
                       </div>
                     </form>
                   )}
+                </div>
+              </div>
+            )}
+
+            {/* MODAL LAPORKAN MASALAH / DISPUTE */}
+            {disputeBooking && (
+              <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-200">
+                <div
+                  className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 sm:p-7 max-w-lg w-full shadow-float space-y-5 animate-in zoom-in-95 duration-200"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <div className="flex items-start justify-between gap-3 border-b border-slate-100 dark:border-slate-800 pb-4">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2.5 rounded-2xl bg-rose-100 dark:bg-rose-950/50 text-rose-600 dark:text-rose-400">
+                        <AlertCircle className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <h3 className="text-lg font-black text-slate-900 dark:text-white">
+                          Laporkan Masalah Check-In
+                        </h3>
+                        <p className="text-xs text-slate-500 dark:text-slate-400">
+                          {disputeBooking.property.name}
+                        </p>
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setDisputeBooking(null)}
+                      className="p-1.5 rounded-full text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+                    >
+                      <X className="w-5 h-5" />
+                    </button>
+                  </div>
+
+                  {disputeError && (
+                    <div className="p-3.5 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 text-rose-700 dark:text-rose-300 text-xs font-semibold flex items-center gap-2">
+                      <AlertCircle className="w-4 h-4 shrink-0 text-rose-600" />
+                      <span>{disputeError}</span>
+                    </div>
+                  )}
+
+                  <div className="p-3 rounded-2xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 text-xs text-amber-900 dark:text-amber-200 leading-relaxed">
+                    Pengajuan masalah akan menahan dana sewa Anda di sistem Escrow KosPasti agar tidak dicairkan ke pemilik kos. Tim Admin akan memverifikasi laporan Anda secepatnya.
+                  </div>
+
+                  <form
+                    onSubmit={async (e) => {
+                      e.preventDefault();
+                      if (!disputeReason.trim()) {
+                        setDisputeError("Mohon deskripsikan masalah yang Anda alami.");
+                        return;
+                      }
+
+                      setIsSubmittingDispute(true);
+                      setDisputeError(null);
+
+                      try {
+                        const res = await fetch(`/api/user/bookings/${disputeBooking.id}/dispute`, {
+                          method: "POST",
+                          headers: { "Content-Type": "application/json" },
+                          body: JSON.stringify({ reason: disputeReason.trim() }),
+                        });
+
+                        const data = await res.json();
+                        if (!res.ok || !data.success) {
+                          throw new Error(data.error || "Gagal mengajukan dispute.");
+                        }
+
+                        setDisputeSuccessMsg("Laporan masalah Anda berhasil diajukan. Tim Admin akan segera menghubungi Anda.");
+                        setDisputeBooking(null);
+
+                        // Reload bookings
+                        const refreshRes = await fetch("/api/user/bookings");
+                        const refreshData = await refreshRes.json();
+                        if (refreshData.success && Array.isArray(refreshData.bookings)) {
+                          setBookings(refreshData.bookings);
+                        }
+                      } catch (err: any) {
+                        setDisputeError(err.message || "Terjadi kesalahan saat mengirim laporan.");
+                      } finally {
+                        setIsSubmittingDispute(false);
+                      }
+                    }}
+                    className="space-y-4"
+                  >
+                    <div>
+                      <label className="block text-xs font-bold text-slate-800 dark:text-slate-200 mb-1.5">
+                        Jelaskan Masalah / Kendala <span className="text-rose-500">*</span>
+                      </label>
+                      <textarea
+                        rows={3}
+                        required
+                        value={disputeReason}
+                        onChange={(e) => setDisputeReason(e.target.value)}
+                        placeholder="Contoh: Kamar tidak sesuai foto, pemilik tidak dapat dihubungi saat check-in, atau fasilitas utama rusak."
+                        className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white placeholder:text-slate-400 focus:ring-2 focus:ring-rose-500 focus:outline-none"
+                      />
+                    </div>
+
+                    <div className="flex items-center justify-end gap-2.5 pt-2 border-t border-slate-100 dark:border-slate-800">
+                      <button
+                        type="button"
+                        disabled={isSubmittingDispute}
+                        onClick={() => setDisputeBooking(null)}
+                        className="px-4 py-2 text-xs font-bold text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-xl transition-colors cursor-pointer"
+                      >
+                        Batal
+                      </button>
+                      <button
+                        type="submit"
+                        disabled={isSubmittingDispute}
+                        className="inline-flex items-center gap-2 px-5 py-2 text-xs font-bold text-white bg-rose-600 hover:bg-rose-700 active:scale-95 rounded-xl shadow-soft hover:shadow-float transition-all disabled:opacity-50 cursor-pointer"
+                      >
+                        {isSubmittingDispute ? (
+                          <>
+                            <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                            <span>Mengirim Laporan...</span>
+                          </>
+                        ) : (
+                          <span>Kirim Laporan Masalah</span>
+                        )}
+                      </button>
+                    </div>
+                  </form>
                 </div>
               </div>
             )}

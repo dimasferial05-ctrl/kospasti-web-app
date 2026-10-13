@@ -31,6 +31,7 @@ interface Booking {
   move_in_date: string;
   status: string;
   created_at: string;
+  checkin_confirmed_at?: string | null;
   cancellation_reason?: string | null;
   refund_bank_name?: string | null;
   refund_account_number?: string | null;
@@ -65,6 +66,8 @@ export default function PartnerBookingsPage() {
   const [actionLoadingId, setActionLoadingId] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [confirmCheckinBooking, setConfirmCheckinBooking] = useState<Booking | null>(null);
+  const [checkinLoading, setCheckinLoading] = useState(false);
 
 
 
@@ -173,7 +176,14 @@ export default function PartnerBookingsPage() {
     if (filterStatus === "PENDING") {
       matchesFilter = b.status === "PENDING" || b.status === "PAID";
     } else if (filterStatus === "APPROVED") {
-      matchesFilter = b.status === "APPROVED" || b.status === "ACCEPTED";
+      matchesFilter = [
+        "APPROVED",
+        "ACCEPTED",
+        "COMPLETED",
+        "PAYOUT_PENDING",
+        "PAYOUT_PAID",
+        "DISPUTED",
+      ].includes(b.status);
     } else if (filterStatus === "REJECTED") {
       matchesFilter = b.status === "REJECTED";
     } else if (filterStatus === "REFUND") {
@@ -188,7 +198,9 @@ export default function PartnerBookingsPage() {
   });
 
   const pendingCount = bookings.filter((b) => b.status === "PENDING" || b.status === "PAID").length;
-  const approvedCount = bookings.filter((b) => b.status === "APPROVED" || b.status === "ACCEPTED").length;
+  const approvedCount = bookings.filter((b) =>
+    ["APPROVED", "ACCEPTED", "COMPLETED", "PAYOUT_PENDING", "PAYOUT_PAID", "DISPUTED"].includes(b.status)
+  ).length;
   const rejectedCount = bookings.filter((b) => b.status === "REJECTED").length;
   const refundCount = bookings.filter((b) => ["REFUND_REQUESTED", "REFUNDED", "CANCELLED"].includes(b.status)).length;
 
@@ -214,6 +226,42 @@ export default function PartnerBookingsPage() {
         <span className="text-[10px] font-black px-2.5 py-0.5 rounded-full inline-flex items-center gap-1 mb-1.5 bg-emerald-100 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/60">
           <span>Disetujui</span>
           <HelpTooltip text="Pesanan telah Anda setujui. Penyewa telah menerima notifikasi WA untuk persiapan check-in." />
+        </span>
+      );
+    }
+    if (status === "COMPLETED") {
+      return (
+        <span className="text-[10px] font-black px-2.5 py-0.5 rounded-full inline-flex items-center gap-1 mb-1.5 bg-indigo-100 dark:bg-indigo-950/40 text-indigo-800 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800/60">
+          <Clock className="w-3 h-3 text-indigo-600" />
+          <span>Check-In Dikonfirmasi (Grace Period 12 Jam)</span>
+          <HelpTooltip text="Check-in telah dikonfirmasi oleh Anda. Masa tenggang 12 jam sedang berjalan untuk verifikasi sebelum dana dicairkan." />
+        </span>
+      );
+    }
+    if (status === "DISPUTED") {
+      return (
+        <span className="text-[10px] font-black px-2.5 py-0.5 rounded-full inline-flex items-center gap-1 mb-1.5 bg-rose-100 dark:bg-rose-950/40 text-rose-800 dark:text-rose-300 border border-rose-200 dark:border-rose-800/60">
+          <Info className="w-3 h-3 text-rose-600" />
+          <span>Dalam Sanggahan (Dispute)</span>
+          <HelpTooltip text="Penyewa mengajukan sanggahan kendala check-in. Tim Admin KosPasti sedang menginvestigasi masalah ini." />
+        </span>
+      );
+    }
+    if (status === "PAYOUT_PENDING") {
+      return (
+        <span className="text-[10px] font-black px-2.5 py-0.5 rounded-full inline-flex items-center gap-1 mb-1.5 bg-amber-100 dark:bg-amber-950/40 text-amber-800 dark:text-amber-300 border border-amber-200 dark:border-amber-800/60">
+          <Clock className="w-3 h-3 text-amber-600" />
+          <span>Menunggu Pencairan Dana</span>
+          <HelpTooltip text="Grace period telah selesai tanpa sanggahan. Permintaan payout telah dibuat dan sedang menunggu pemrosesan admin." />
+        </span>
+      );
+    }
+    if (status === "PAYOUT_PAID") {
+      return (
+        <span className="text-[10px] font-black px-2.5 py-0.5 rounded-full inline-flex items-center gap-1 mb-1.5 bg-emerald-100 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/60">
+          <CheckCircle2 className="w-3 h-3 text-emerald-600" />
+          <span>Dana Sudah Dicairkan</span>
+          <HelpTooltip text="Dana sewa telah berhasil dicairkan oleh Admin KosPasti ke rekening Anda." />
         </span>
       );
     }
@@ -558,24 +606,96 @@ export default function PartnerBookingsPage() {
                       Tolak
                     </button>
                   </div>
+                ) : isApproved ? (
+                  <div className="pt-2 border-t border-slate-100 dark:border-slate-800 space-y-2">
+                    {(() => {
+                      const today = new Date();
+                      today.setHours(0, 0, 0, 0);
+                      const moveIn = new Date(b.move_in_date);
+                      moveIn.setHours(0, 0, 0, 0);
+                      const isDateReady = today >= moveIn;
+
+                      return isDateReady ? (
+                        <button
+                          type="button"
+                          onClick={() => setConfirmCheckinBooking(b)}
+                          className="w-full py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex items-center justify-center gap-1.5 transition-all shadow-sm shadow-emerald-600/20 cursor-pointer"
+                        >
+                          <CheckCircle2 className="w-4 h-4" />
+                          <span>Konfirmasi Check-In</span>
+                        </button>
+                      ) : (
+                        <div className="py-2 px-3 text-center rounded-xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-800 text-xs text-slate-400 font-medium">
+                          Belum waktunya (Tersedia mulai {new Date(b.move_in_date).toLocaleDateString("id-ID")})
+                        </div>
+                      );
+                    })()}
+
+                    <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400 pt-1">
+                      <span>Status: <strong className="text-emerald-700 dark:text-emerald-400">Disetujui</strong></span>
+                      <button
+                        type="button"
+                        onClick={() => handleUpdateStatus(b.id, "REJECTED")}
+                        className="text-[11px] text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:underline cursor-pointer"
+                      >
+                        Ubah ke Ditolak
+                      </button>
+                    </div>
+                  </div>
+                ) : b.status === "COMPLETED" ? (
+                  <div className="pt-2 border-t border-slate-100 dark:border-slate-800 p-3 rounded-2xl bg-indigo-50/70 dark:bg-indigo-950/30 border border-indigo-200 dark:border-indigo-800/50 text-xs text-indigo-900 dark:text-indigo-200 space-y-1">
+                    <div className="font-bold flex items-center gap-1.5">
+                      <Clock className="w-3.5 h-3.5 text-indigo-600" />
+                      <span>Check-In Dikonfirmasi</span>
+                    </div>
+                    <p className="text-[11px] text-slate-600 dark:text-slate-400">
+                      Masa tenggang (Grace Period 12 jam) sedang berjalan. Payout otomatis dibuat ke antrean admin setelah masa tenggang berakhir.
+                    </p>
+                  </div>
+                ) : b.status === "PAYOUT_PENDING" ? (
+                  <div className="pt-2 border-t border-slate-100 dark:border-slate-800 p-3 rounded-2xl bg-amber-50/70 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/50 text-xs text-amber-900 dark:text-amber-200 space-y-1">
+                    <div className="font-bold flex items-center gap-1.5">
+                      <Clock className="w-3.5 h-3.5 text-amber-600" />
+                      <span>Menunggu Pencairan Admin</span>
+                    </div>
+                    <p className="text-[11px] text-slate-600 dark:text-slate-400">
+                      Permintaan pencairan dana telah dibuat. Admin KosPasti akan memproses transfer ke rekening mitra Anda.
+                    </p>
+                  </div>
+                ) : b.status === "PAYOUT_PAID" ? (
+                  <div className="pt-2 border-t border-slate-100 dark:border-slate-800 p-3 rounded-2xl bg-emerald-50/70 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800/50 text-xs text-emerald-900 dark:text-emerald-200 space-y-1">
+                    <div className="font-bold flex items-center gap-1.5">
+                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                      <span>Dana Berhasil Dicairkan</span>
+                    </div>
+                    <p className="text-[11px] text-slate-600 dark:text-slate-400">
+                      Dana sewa telah dicairkan ke rekening Anda. Cek rincian di <Link href="/partner/dashboard/payouts" className="text-emerald-600 underline font-semibold">Riwayat Payout</Link>.
+                    </p>
+                  </div>
+                ) : b.status === "DISPUTED" ? (
+                  <div className="pt-2 border-t border-slate-100 dark:border-slate-800 p-3 rounded-2xl bg-rose-50/70 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-800/50 text-xs text-rose-900 dark:text-rose-200 space-y-1">
+                    <div className="font-bold flex items-center gap-1.5">
+                      <Info className="w-3.5 h-3.5 text-rose-600" />
+                      <span>Dispute Diajukan Penyewa</span>
+                    </div>
+                    <p className="text-[11px] text-slate-600 dark:text-slate-400">
+                      Penyewa mengajukan komplain saat grace period. Admin sedang menginvestigasi kendala ini.
+                    </p>
+                  </div>
                 ) : (
                   <div className="pt-2 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
                     <span>
                       Status:{" "}
                       <strong
                         className={
-                          isApproved
-                            ? "text-emerald-700 dark:text-emerald-400"
-                            : isRefunded
+                          isRefunded
                             ? "text-sky-700 dark:text-sky-400"
                             : isRefundRequested
                             ? "text-amber-700 dark:text-amber-400"
                             : "text-rose-700 dark:text-rose-400"
                         }
                       >
-                        {isApproved
-                          ? "Disetujui"
-                          : isRefunded
+                        {isRefunded
                           ? "Dana Dikembalikan"
                           : isRefundRequested
                           ? "Menunggu Refund (Admin)"
@@ -587,15 +707,10 @@ export default function PartnerBookingsPage() {
                     {!isRefunded && !isCancelled && !isRefundRequested && (
                       <button
                         type="button"
-                        onClick={() =>
-                          handleUpdateStatus(
-                            b.id,
-                            isApproved ? "REJECTED" : "APPROVED"
-                          )
-                        }
+                        onClick={() => handleUpdateStatus(b.id, "APPROVED")}
                         className="text-[11px] text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:underline cursor-pointer"
                       >
-                        Ubah ke {isApproved ? "Ditolak" : "Disetujui"}
+                        Ubah ke Disetujui
                       </button>
                     )}
                   </div>
@@ -603,6 +718,92 @@ export default function PartnerBookingsPage() {
               </div>
             );
           })}
+        </div>
+      )}
+
+      {/* Modal Dialog Konfirmasi Check-In */}
+      {confirmCheckinBooking && (
+        <div className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in duration-200">
+          <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-2xl max-w-md w-full p-6 space-y-5">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-2xl bg-emerald-100 dark:bg-emerald-950/50 flex items-center justify-center text-emerald-600 dark:text-emerald-400 shrink-0">
+                <CheckCircle2 className="w-6 h-6" />
+              </div>
+              <div>
+                <h3 className="font-extrabold text-slate-900 dark:text-white text-base">
+                  Konfirmasi Check-In Penyewa
+                </h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400">
+                  {confirmCheckinBooking.property.name}
+                </p>
+              </div>
+            </div>
+
+            <div className="bg-slate-50 dark:bg-slate-800/60 p-4 rounded-2xl border border-slate-150 dark:border-slate-800 text-xs space-y-2">
+              <div className="flex justify-between">
+                <span className="text-slate-500">Penyewa:</span>
+                <span className="font-bold text-slate-900 dark:text-white">{confirmCheckinBooking.student_name}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-slate-500">Tanggal Masuk:</span>
+                <span className="font-bold text-slate-900 dark:text-white">
+                  {new Date(confirmCheckinBooking.move_in_date).toLocaleDateString("id-ID", {
+                    day: "numeric",
+                    month: "long",
+                    year: "numeric",
+                  })}
+                </span>
+              </div>
+            </div>
+
+            <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+              Apakah Anda yakin <strong>{confirmCheckinBooking.student_name}</strong> sudah check-in dan menempati kamar? Dana sewa akan dicairkan ke rekening Anda setelah melewati masa tenggang (grace period) 12 jam.
+            </p>
+
+            <div className="flex items-center justify-end gap-3 pt-2">
+              <button
+                type="button"
+                disabled={checkinLoading}
+                onClick={() => setConfirmCheckinBooking(null)}
+                className="px-4 py-2.5 rounded-xl text-xs font-bold border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 transition-colors"
+              >
+                Batal
+              </button>
+              <button
+                type="button"
+                disabled={checkinLoading}
+                onClick={async () => {
+                  setCheckinLoading(true);
+                  try {
+                    const res = await fetch(`/api/partner/bookings/${confirmCheckinBooking.id}/checkin`, {
+                      method: "POST",
+                    });
+                    const data = await res.json();
+                    if (!res.ok || !data.success) {
+                      throw new Error(data.error || "Gagal mengonfirmasi check-in");
+                    }
+                    setSuccessMsg(data.message || "Check-in berhasil dikonfirmasi! Grace period 12 jam dimulai.");
+                    setConfirmCheckinBooking(null);
+                    fetchBookings();
+                  } catch (err: any) {
+                    setErrorMsg(err.message || "Terjadi kesalahan saat mengonfirmasi check-in.");
+                  } finally {
+                    setCheckinLoading(false);
+                  }
+                }}
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white shadow-md shadow-emerald-600/20 disabled:opacity-50 transition-colors"
+              >
+                {checkinLoading ? (
+                  <>
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    Memproses...
+                  </>
+                ) : (
+                  "Ya, Konfirmasi Check-In"
+                )}
+              </button>
+            </div>
+          </div>
         </div>
       )}
 

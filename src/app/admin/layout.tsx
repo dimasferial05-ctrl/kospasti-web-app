@@ -12,6 +12,7 @@ import {
   LogOut,
   Loader2,
   Star,
+  Wallet,
 } from "lucide-react";
 import { Sidebar, SidebarBody, SidebarLink, type Links } from "@/components/ui/sidebar";
 import { SidebarThemeToggle } from "@/components/ui/SidebarThemeToggle";
@@ -110,6 +111,19 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         />
       ),
       active: Boolean(pathname?.startsWith("/admin/bookings")),
+    },
+    {
+      label: "Pencairan Dana",
+      href: "/admin/payouts",
+      icon: (
+        <Wallet
+          size={20}
+          className={`shrink-0 transition-colors ${
+            pathname?.startsWith("/admin/payouts") ? "text-emerald-400" : "text-slate-400"
+          }`}
+        />
+      ),
+      active: Boolean(pathname?.startsWith("/admin/payouts")),
     },
     {
       label: "Kelola Ulasan",
