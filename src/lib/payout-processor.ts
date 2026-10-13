@@ -23,30 +23,36 @@ export async function processReadyPayouts(): Promise<number> {
   });
 
   // Buat Payout record untuk setiap booking yang siap
+  let processedCount = 0;
   for (const booking of readyBookings) {
-    const payoutAmount =
-      booking.amount > 0
-        ? booking.amount
-        : booking.room_type?.price_per_month || booking.property?.price_per_month || 0;
+    try {
+      const payoutAmount =
+        booking.amount > 0
+          ? booking.amount
+          : booking.room_type?.price_per_month || booking.property?.price_per_month || 0;
 
-    await prisma.$transaction([
-      prisma.payout.create({
-        data: {
-          booking_id: booking.id,
-          owner_id: booking.property.owner_id,
-          amount: payoutAmount,
-          status: "PAYOUT_PENDING",
-        },
-      }),
-      prisma.booking.update({
-        where: { id: booking.id },
-        data: {
-          status: "PAYOUT_PENDING",
-          ...(booking.amount === 0 && payoutAmount > 0 ? { amount: payoutAmount } : {}),
-        },
-      }),
-    ]);
+      await prisma.$transaction([
+        prisma.payout.create({
+          data: {
+            booking_id: booking.id,
+            owner_id: booking.property.owner_id,
+            amount: payoutAmount,
+            status: "PAYOUT_PENDING",
+          },
+        }),
+        prisma.booking.update({
+          where: { id: booking.id },
+          data: {
+            status: "PAYOUT_PENDING",
+            ...(booking.amount === 0 && payoutAmount > 0 ? { amount: payoutAmount } : {}),
+          },
+        }),
+      ]);
+      processedCount++;
+    } catch (itemErr) {
+      console.error(`[PAYOUT PROCESSOR] Gagal memproses booking ${booking.id}:`, itemErr);
+    }
   }
 
-  return readyBookings.length;
+  return processedCount;
 }

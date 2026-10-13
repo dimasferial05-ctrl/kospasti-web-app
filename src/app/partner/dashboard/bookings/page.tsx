@@ -198,7 +198,9 @@ export default function PartnerBookingsPage() {
   });
 
   const pendingCount = bookings.filter((b) => b.status === "PENDING" || b.status === "PAID").length;
-  const approvedCount = bookings.filter((b) => b.status === "APPROVED" || b.status === "ACCEPTED").length;
+  const approvedCount = bookings.filter((b) =>
+    ["APPROVED", "ACCEPTED", "COMPLETED", "PAYOUT_PENDING", "PAYOUT_PAID", "DISPUTED"].includes(b.status)
+  ).length;
   const rejectedCount = bookings.filter((b) => b.status === "REJECTED").length;
   const refundCount = bookings.filter((b) => ["REFUND_REQUESTED", "REFUNDED", "CANCELLED"].includes(b.status)).length;
 
