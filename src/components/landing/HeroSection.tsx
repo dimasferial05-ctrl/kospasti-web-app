@@ -32,7 +32,7 @@ export function HeroSection() {
       {/* Glow decorative blur */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-5xl h-80 bg-gradient-to-b from-emerald-200/30 via-teal-100/20 to-transparent dark:from-emerald-950/30 dark:via-emerald-900/10 blur-3xl -z-10 pointer-events-none" />
 
-      <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center flex flex-col items-center">
+      <div className="relative z-30 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center flex flex-col items-center">
 
         {/* Big centered question headline */}
         <h1 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold text-slate-900 dark:text-white tracking-tight leading-[1.18] max-w-3xl">
