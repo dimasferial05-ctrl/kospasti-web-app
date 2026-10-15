@@ -1,23 +1,22 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import { useRouter } from "next/navigation";
-import { Search, ArrowRight, MapPin } from "lucide-react";
+import { MapPin } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import { TypeAnimation } from "react-type-animation";
 import { GradientWave } from "@/components/ui/gradient-wave";
+import { SmartSearchBar } from "@/components/features/SmartSearchBar";
 
 export function HeroSection() {
   const router = useRouter();
-  const [searchQuery, setSearchQuery] = useState("");
 
-  const handleSearchSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (searchQuery.trim()) {
-      router.push(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
+  const handleSearch = (prompt: string) => {
+    if (prompt.trim()) {
+      router.push(`/map?q=${encodeURIComponent(prompt.trim())}`);
     } else {
-      router.push("/search");
+      router.push("/map");
     }
   };
 
@@ -62,28 +61,14 @@ export function HeroSection() {
         </p>
 
         {/* Floating Search Bar */}
-        <form
-          onSubmit={handleSearchSubmit}
-          className="w-full max-w-2xl mt-8 sm:mt-10 p-2 sm:p-2.5 bg-white/95 dark:bg-slate-900/90 backdrop-blur-md rounded-2xl sm:rounded-full border border-slate-200/80 dark:border-slate-800 shadow-soft-lg hover:shadow-float transition-all duration-300 flex flex-col sm:flex-row items-center justify-between gap-3 relative z-20"
-        >
-          <div className="flex items-center gap-3 w-full px-4 py-1.5">
-            <Search className="w-5 h-5 text-emerald-600 dark:text-emerald-400 shrink-0" />
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Ketik lokasi, nama kampus, atau fasilitas kos..."
-              className="w-full bg-transparent text-sm sm:text-base text-slate-800 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-hidden py-1 font-medium"
-            />
-          </div>
-          <button
-            type="submit"
-            className="w-full sm:w-auto px-7 py-3 bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-600 dark:hover:bg-emerald-500 text-white font-bold text-sm sm:text-base rounded-xl sm:rounded-full transition-all duration-200 flex items-center justify-center gap-2 shrink-0 cursor-pointer shadow-soft hover:shadow-float hover:-translate-y-0.5 active:scale-95"
-          >
-            <span>Cari Kos</span>
-            <ArrowRight className="w-4 h-4" />
-          </button>
-        </form>
+        <div className="w-full max-w-2xl mt-8 sm:mt-10 relative z-30">
+          <SmartSearchBar
+            variant="hero"
+            onSearch={handleSearch}
+            placeholder="Ketik lokasi, nama kampus, atau fasilitas kos..."
+            showSuggestions={true}
+          />
+        </div>
 
         {/* Quick Map Link */}
         <div className="mt-4 flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">

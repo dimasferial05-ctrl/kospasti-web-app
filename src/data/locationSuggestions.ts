@@ -326,7 +326,7 @@ export const CATEGORY_BADGES: Record<LocationSuggestion["category"], { text: str
  * Mencari saran lokasi menggunakan PREFIX MATCHING.
  * Minimal query 2 karakter.
  */
-export function getPrefixLocationSuggestions(query: string, maxResults = 5): LocationSuggestion[] {
+export function getPrefixLocationSuggestions(query: string, maxResults = 20): LocationSuggestion[] {
   const q = query.trim().toLowerCase();
   if (q.length < 2) return [];
 

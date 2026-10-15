@@ -58,10 +58,11 @@ export function SmartSearchBar({
   const [highlightedIndex, setHighlightedIndex] = useState(-1);
   const containerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const listRef = useRef<HTMLDivElement>(null);
 
   const updateSuggestions = (val: string) => {
     if (val.trim().length >= 2) {
-      const results = getPrefixLocationSuggestions(val, 6);
+      const results = getPrefixLocationSuggestions(val, 20);
       setActiveSuggestions(results);
       setIsOpen(results.length > 0);
       setHighlightedIndex(-1);
@@ -80,6 +81,16 @@ export function SmartSearchBar({
     onChange?.(val);
     updateSuggestions(val);
   };
+
+  // Auto-scroll highlighted suggestion into view
+  useEffect(() => {
+    if (highlightedIndex >= 0 && listRef.current) {
+      const buttons = listRef.current.querySelectorAll("button");
+      if (buttons[highlightedIndex]) {
+        buttons[highlightedIndex].scrollIntoView({ block: "nearest" });
+      }
+    }
+  }, [highlightedIndex]);
 
   // Close dropdown on click outside or escape key
   useEffect(() => {
@@ -233,14 +244,17 @@ export function SmartSearchBar({
           </div>
         </form>
 
-        {/* Floating Autocomplete Suggestions */}
+        {/* Floating Autocomplete Suggestions with Scrollable Container */}
         {isOpen && activeSuggestions.length > 0 && (
-          <div className="absolute top-full left-0 right-0 mt-2 z-50 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-float overflow-hidden transition-all duration-200 animate-in fade-in slide-in-from-top-2">
-            <div className="p-2 flex flex-col gap-1">
-              <div className="px-3 py-1.5 text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider flex items-center justify-between">
-                <span>Saran Lokasi</span>
-                <span className="text-[9px] font-medium opacity-80">Gunakan ↑↓ atau klik untuk memilih</span>
-              </div>
+          <div className="absolute top-full left-0 right-0 mt-2 z-50 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-float overflow-hidden transition-all duration-200 animate-in fade-in slide-in-from-top-2 flex flex-col">
+            <div className="px-3.5 py-2 text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider flex items-center justify-between border-b border-slate-100 dark:border-slate-800/80 bg-slate-50/70 dark:bg-slate-900/70 shrink-0 select-none">
+              <span>Saran Lokasi ({activeSuggestions.length})</span>
+              <span className="text-[9px] font-medium opacity-80">Gunakan ↑↓ atau klik untuk memilih</span>
+            </div>
+            <div
+              ref={listRef}
+              className="p-1.5 flex flex-col gap-1 max-h-60 sm:max-h-72 overflow-y-auto overscroll-contain"
+            >
               {activeSuggestions.map((item, idx) => {
                 const badge = CATEGORY_BADGES[item.category];
                 const isHighlighted = idx === highlightedIndex;
