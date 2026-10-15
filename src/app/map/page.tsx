@@ -356,12 +356,14 @@ function MapSearchContent() {
           </div>
 
           {/* Search Card */}
-          <div className="bg-white/95 dark:bg-slate-900/95 backdrop-blur-md p-4 sm:p-6 rounded-3xl border border-slate-200/80 dark:border-slate-800 shadow-soft-lg mb-4 relative overflow-hidden">
+          <div className="bg-white/95 dark:bg-slate-900/95 backdrop-blur-md p-4 sm:p-6 rounded-3xl border border-slate-200/80 dark:border-slate-800 shadow-soft-lg mb-4 relative z-30">
             {/* Topographical Contour Lines Shader Decoration */}
-            <div className="absolute inset-0 pointer-events-none opacity-20 -z-10 overflow-hidden">
-              <IsolineBloom height="100%" preset="emerald" interactive={true} />
+            <div className="absolute inset-0 rounded-3xl overflow-hidden pointer-events-none -z-10">
+              <div className="absolute inset-0 opacity-20">
+                <IsolineBloom height="100%" preset="emerald" interactive={true} />
+              </div>
+              <div className="absolute -right-8 -top-8 w-40 h-40 bg-emerald-100/30 dark:bg-emerald-900/20 rounded-full blur-3xl"></div>
             </div>
-            <div className="absolute -right-8 -top-8 w-40 h-40 bg-emerald-100/30 dark:bg-emerald-900/20 rounded-full blur-3xl pointer-events-none -z-10"></div>
 
             <div className="relative z-10">
               <SmartSearchBar
