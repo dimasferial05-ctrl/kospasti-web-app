@@ -201,3 +201,20 @@ model Payout {
   updated_at             DateTime  @updatedAt
 }
 
+model Location {
+  id          String   @id @default(uuid())
+  name        String
+  category    String   // "kampus" | "sekolah" | "rumah_sakit" | "pabrik" | "landmark" | "wilayah" | "kota"
+  latitude    Float
+  longitude   Float
+  aliases     String?  // Daftar alias dipisahkan koma, contoh: "smeri, tubun, smk tubun"
+  subdistrict String?  // Nama kecamatan di Subang, contoh: "Subang", "Cibogo", "Kalijati"
+  is_active   Boolean  @default(true)
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+
+  @@index([name])
+  @@index([category])
+  @@index([subdistrict])
+}
+

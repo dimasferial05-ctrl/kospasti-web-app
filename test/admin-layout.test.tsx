@@ -57,6 +57,7 @@ describe("Admin Layout & Protection Component (/admin/layout)", () => {
     expect(html).toContain("Pemilik Kos");
     expect(html).toContain("Data Pengguna");
     expect(html).toContain("Data Transaksi");
+    expect(html).toContain("Kelola Lokasi");
   });
 
   it("memiliki struktur Sidebar admin lengkap dengan navigasi dan tombol logout API", () => {
@@ -78,6 +79,8 @@ describe("Admin Layout & Protection Component (/admin/layout)", () => {
     expect(content).toContain("Data Pengguna");
     expect(content).toContain('href: "/admin/bookings"');
     expect(content).toContain("Data Transaksi");
+    expect(content).toContain('href: "/admin/locations"');
+    expect(content).toContain("Kelola Lokasi");
 
     // Tombol Logout & Endpoint
     expect(content).toContain("Logout");
