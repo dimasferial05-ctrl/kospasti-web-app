@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useMemo, useCallback } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   MapPin,
   Plus,
@@ -20,6 +20,8 @@ import {
   Globe,
   SlidersHorizontal,
   X,
+  Copy,
+  Check,
 } from "lucide-react";
 import LocationPicker from "@/components/map/LocationPicker";
 
@@ -41,6 +43,12 @@ interface PaginationMeta {
   limit: number;
   total: number;
   totalPages: number;
+}
+
+interface GlobalStats {
+  totalGlobal: number;
+  activeTotal: number;
+  educationTotal: number;
 }
 
 const CATEGORY_OPTIONS = [
@@ -119,15 +127,25 @@ export default function AdminLocationsPage() {
     total: 0,
     totalPages: 1,
   });
+  const [globalStats, setGlobalStats] = useState<GlobalStats>({
+    totalGlobal: 0,
+    activeTotal: 0,
+    educationTotal: 0,
+  });
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [successToast, setSuccessToast] = useState<string | null>(null);
 
-  // Filters
+  // Filters & Search with Debounce
   const [searchQuery, setSearchQuery] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("ALL");
   const [selectedStatus, setSelectedStatus] = useState("ALL");
   const [currentPage, setCurrentPage] = useState(1);
+
+  // Quick Action States
+  const [togglingId, setTogglingId] = useState<string | null>(null);
+  const [copiedId, setCopiedId] = useState<string | null>(null);
 
   // Modal Form States
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -139,6 +157,8 @@ export default function AdminLocationsPage() {
   const [formAliases, setFormAliases] = useState("");
   const [formLat, setFormLat] = useState<number>(DEFAULT_SUBANG_CENTER.lat);
   const [formLng, setFormLng] = useState<number>(DEFAULT_SUBANG_CENTER.lng);
+  const [formLatStr, setFormLatStr] = useState<string>(DEFAULT_SUBANG_CENTER.lat.toFixed(6));
+  const [formLngStr, setFormLngStr] = useState<string>(DEFAULT_SUBANG_CENTER.lng.toFixed(6));
   const [formIsActive, setFormIsActive] = useState(true);
   const [formSubmitting, setFormSubmitting] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
@@ -147,6 +167,27 @@ export default function AdminLocationsPage() {
   const [deleteTarget, setDeleteTarget] = useState<LocationItem | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
 
+  // Search Debounce Handler (300ms)
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchQuery);
+      setCurrentPage(1);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
+  // Lock Body Scroll when Modal Open
+  useEffect(() => {
+    if (isModalOpen || deleteTarget) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "unset";
+    }
+    return () => {
+      document.body.style.overflow = "unset";
+    };
+  }, [isModalOpen, deleteTarget]);
+
   // Fetch Locations
   const fetchLocations = useCallback(async () => {
     try {
@@ -154,7 +195,7 @@ export default function AdminLocationsPage() {
       setErrorMessage(null);
 
       const params = new URLSearchParams();
-      if (searchQuery.trim()) params.append("search", searchQuery.trim());
+      if (debouncedSearch.trim()) params.append("search", debouncedSearch.trim());
       if (selectedCategory !== "ALL") params.append("category", selectedCategory);
       if (selectedStatus !== "ALL") params.append("status", selectedStatus);
       params.append("page", currentPage.toString());
@@ -168,6 +209,9 @@ export default function AdminLocationsPage() {
         if (data.pagination) {
           setPagination(data.pagination);
         }
+        if (data.stats) {
+          setGlobalStats(data.stats);
+        }
       } else {
         setErrorMessage(data.error || "Gagal memuat data lokasi");
       }
@@ -177,7 +221,7 @@ export default function AdminLocationsPage() {
     } finally {
       setIsLoading(false);
     }
-  }, [searchQuery, selectedCategory, selectedStatus, currentPage]);
+  }, [debouncedSearch, selectedCategory, selectedStatus, currentPage]);
 
   useEffect(() => {
     let ignore = false;
@@ -187,7 +231,7 @@ export default function AdminLocationsPage() {
         setErrorMessage(null);
 
         const params = new URLSearchParams();
-        if (searchQuery.trim()) params.append("search", searchQuery.trim());
+        if (debouncedSearch.trim()) params.append("search", debouncedSearch.trim());
         if (selectedCategory !== "ALL") params.append("category", selectedCategory);
         if (selectedStatus !== "ALL") params.append("status", selectedStatus);
         params.append("page", currentPage.toString());
@@ -201,6 +245,9 @@ export default function AdminLocationsPage() {
             setLocations(data.data || []);
             if (data.pagination) {
               setPagination(data.pagination);
+            }
+            if (data.stats) {
+              setGlobalStats(data.stats);
             }
           } else {
             setErrorMessage(data.error || "Gagal memuat data lokasi");
@@ -223,7 +270,7 @@ export default function AdminLocationsPage() {
     return () => {
       ignore = true;
     };
-  }, [searchQuery, selectedCategory, selectedStatus, currentPage]);
+  }, [debouncedSearch, selectedCategory, selectedStatus, currentPage]);
 
   // Toast Auto-dismiss
   useEffect(() => {
@@ -243,6 +290,8 @@ export default function AdminLocationsPage() {
     setFormAliases("");
     setFormLat(DEFAULT_SUBANG_CENTER.lat);
     setFormLng(DEFAULT_SUBANG_CENTER.lng);
+    setFormLatStr(DEFAULT_SUBANG_CENTER.lat.toFixed(6));
+    setFormLngStr(DEFAULT_SUBANG_CENTER.lng.toFixed(6));
     setFormIsActive(true);
     setFormError(null);
     setIsModalOpen(true);
@@ -258,6 +307,8 @@ export default function AdminLocationsPage() {
     setFormAliases(item.aliases || "");
     setFormLat(item.latitude);
     setFormLng(item.longitude);
+    setFormLatStr(item.latitude.toString());
+    setFormLngStr(item.longitude.toString());
     setFormIsActive(item.is_active);
     setFormError(null);
     setIsModalOpen(true);
@@ -317,6 +368,59 @@ export default function AdminLocationsPage() {
     }
   };
 
+  // Quick Status Toggle on Table
+  const handleToggleActive = async (item: LocationItem) => {
+    try {
+      setTogglingId(item.id);
+      const newStatus = !item.is_active;
+
+      // Optimistic update
+      setLocations((prev) =>
+        prev.map((l) => (l.id === item.id ? { ...l, is_active: newStatus } : l))
+      );
+
+      const res = await fetch(`/api/admin/locations/${item.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ is_active: newStatus }),
+      });
+
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        // Rollback
+        setLocations((prev) =>
+          prev.map((l) => (l.id === item.id ? { ...l, is_active: !newStatus } : l))
+        );
+        alert(data.error || "Gagal mengubah status lokasi");
+      } else {
+        setSuccessToast(
+          `Status "${item.name}" diubah ke ${newStatus ? "Aktif" : "Nonaktif"}.`
+        );
+        setGlobalStats((prev) => ({
+          ...prev,
+          activeTotal: newStatus ? prev.activeTotal + 1 : Math.max(0, prev.activeTotal - 1),
+        }));
+      }
+    } catch (err) {
+      console.error("Gagal toggle active:", err);
+      setLocations((prev) =>
+        prev.map((l) => (l.id === item.id ? { ...l, is_active: !item.is_active } : l))
+      );
+    } finally {
+      setTogglingId(null);
+    }
+  };
+
+  // Quick Copy Coordinates
+  const handleCopyCoords = (item: LocationItem) => {
+    const text = `${item.latitude}, ${item.longitude}`;
+    navigator.clipboard.writeText(text);
+    setCopiedId(item.id);
+    setTimeout(() => {
+      setCopiedId(null);
+    }, 2000);
+  };
+
   // Execute Delete
   const handleConfirmDelete = async () => {
     if (!deleteTarget) return;
@@ -341,17 +445,6 @@ export default function AdminLocationsPage() {
       setIsDeleting(false);
     }
   };
-
-  // Summary Counts
-  const educationCount = useMemo(() => {
-    return locations.filter(
-      (l) => l.category === "sekolah" || l.category === "kampus"
-    ).length;
-  }, [locations]);
-
-  const activeCount = useMemo(() => {
-    return locations.filter((l) => l.is_active).length;
-  }, [locations]);
 
   return (
     <div className="flex-1 overflow-y-auto p-4 md:p-8 bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 min-h-screen">
@@ -409,7 +502,7 @@ export default function AdminLocationsPage() {
           </div>
         </div>
 
-        {/* Stats Grid */}
+        {/* Stats Grid - Global Authentic Counts */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 p-5 shadow-soft flex items-center justify-between">
             <div>
@@ -417,8 +510,9 @@ export default function AdminLocationsPage() {
                 Total Master Lokasi
               </p>
               <p className="text-2xl font-black text-slate-900 dark:text-slate-100 mt-1">
-                {pagination.total.toLocaleString("id-ID")}
+                {(globalStats.totalGlobal || pagination.total).toLocaleString("id-ID")}
               </p>
+              <p className="text-[11px] font-medium text-slate-400 mt-0.5">Database Terdaftar</p>
             </div>
             <div className="w-12 h-12 rounded-xl bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
               <MapPin className="w-6 h-6" />
@@ -431,9 +525,9 @@ export default function AdminLocationsPage() {
                 Sekolah & Kampus
               </p>
               <p className="text-2xl font-black text-slate-900 dark:text-slate-100 mt-1">
-                {educationCount}
-                <span className="text-xs font-medium text-slate-400 ml-1.5">(halaman ini)</span>
+                {(globalStats.educationTotal || 0).toLocaleString("id-ID")}
               </p>
+              <p className="text-[11px] font-medium text-slate-400 mt-0.5">Institusi Pendidikan</p>
             </div>
             <div className="w-12 h-12 rounded-xl bg-blue-50 dark:bg-blue-950/50 text-blue-600 dark:text-blue-400 flex items-center justify-center">
               <GraduationCap className="w-6 h-6" />
@@ -446,9 +540,9 @@ export default function AdminLocationsPage() {
                 Lokasi Aktif
               </p>
               <p className="text-2xl font-black text-emerald-600 dark:text-emerald-400 mt-1">
-                {activeCount}
-                <span className="text-xs font-medium text-slate-400 ml-1.5">(halaman ini)</span>
+                {(globalStats.activeTotal || 0).toLocaleString("id-ID")}
               </p>
+              <p className="text-[11px] font-medium text-slate-400 mt-0.5">Tampil di Search & AI</p>
             </div>
             <div className="w-12 h-12 rounded-xl bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
               <CheckCircle2 className="w-6 h-6" />
@@ -463,6 +557,7 @@ export default function AdminLocationsPage() {
               <p className="text-2xl font-black text-slate-900 dark:text-slate-100 mt-1">
                 Kab. Subang
               </p>
+              <p className="text-[11px] font-medium text-slate-400 mt-0.5">30 Kecamatan</p>
             </div>
             <div className="w-12 h-12 rounded-xl bg-purple-50 dark:bg-purple-950/50 text-purple-600 dark:text-purple-400 flex items-center justify-center">
               <Building className="w-6 h-6" />
@@ -480,19 +575,13 @@ export default function AdminLocationsPage() {
                 type="text"
                 placeholder="Cari nama tempat, alias, atau kecamatan..."
                 value={searchQuery}
-                onChange={(e) => {
-                  setSearchQuery(e.target.value);
-                  setCurrentPage(1);
-                }}
+                onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full pl-10 pr-10 py-2.5 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-medium focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 transition-all text-slate-800 dark:text-slate-100 placeholder:text-slate-400"
               />
               {searchQuery && (
                 <button
                   type="button"
-                  onClick={() => {
-                    setSearchQuery("");
-                    setCurrentPage(1);
-                  }}
+                  onClick={() => setSearchQuery("")}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-1"
                 >
                   <X className="w-3.5 h-3.5" />
@@ -671,35 +760,58 @@ export default function AdminLocationsPage() {
                           {item.subdistrict || "Subang"}
                         </td>
 
-                        {/* Koordinat */}
+                        {/* Koordinat & Quick Copy */}
                         <td className="px-4 py-4 whitespace-nowrap">
-                          <a
-                            href={`https://www.google.com/maps?q=${item.latitude},${item.longitude}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="inline-flex items-center gap-1.5 text-xs font-mono font-medium text-emerald-600 dark:text-emerald-400 hover:underline group"
-                            title="Buka di Google Maps"
-                          >
-                            <span>
-                              {item.latitude.toFixed(4)}, {item.longitude.toFixed(4)}
-                            </span>
-                            <ExternalLink className="w-3 h-3 opacity-60 group-hover:opacity-100" />
-                          </a>
+                          <div className="flex items-center gap-2">
+                            <a
+                              href={`https://www.google.com/maps?q=${item.latitude},${item.longitude}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-1.5 text-xs font-mono font-medium text-emerald-600 dark:text-emerald-400 hover:underline group"
+                              title="Buka di Google Maps"
+                            >
+                              <span>
+                                {item.latitude.toFixed(4)}, {item.longitude.toFixed(4)}
+                              </span>
+                              <ExternalLink className="w-3 h-3 opacity-60 group-hover:opacity-100" />
+                            </a>
+                            <button
+                              type="button"
+                              onClick={() => handleCopyCoords(item)}
+                              className="p-1 rounded text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors"
+                              title="Salin koordinat"
+                            >
+                              {copiedId === item.id ? (
+                                <Check className="w-3.5 h-3.5 text-emerald-500" />
+                              ) : (
+                                <Copy className="w-3.5 h-3.5" />
+                              )}
+                            </button>
+                          </div>
                         </td>
 
-                        {/* Status Aktif */}
+                        {/* Status Aktif Quick Toggle */}
                         <td className="px-4 py-4 text-center whitespace-nowrap">
-                          {item.is_active ? (
-                            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-100/80 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800">
+                          <button
+                            type="button"
+                            onClick={() => handleToggleActive(item)}
+                            disabled={togglingId === item.id}
+                            className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold transition-all duration-200 active:scale-95 cursor-pointer hover:shadow-soft ${
+                              item.is_active
+                                ? "bg-emerald-100/80 hover:bg-emerald-200/80 dark:bg-emerald-950/60 dark:hover:bg-emerald-900/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800"
+                                : "bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-slate-700"
+                            }`}
+                            title="Klik untuk mengubah status aktif/nonaktif secara instan"
+                          >
+                            {togglingId === item.id ? (
+                              <Loader2 className="w-3 h-3 animate-spin" />
+                            ) : item.is_active ? (
                               <CheckCircle2 className="w-3 h-3" />
-                              Aktif
-                            </span>
-                          ) : (
-                            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-slate-100 dark:bg-slate-800 text-slate-500 border border-slate-200 dark:border-slate-700">
+                            ) : (
                               <XCircle className="w-3 h-3" />
-                              Nonaktif
-                            </span>
-                          )}
+                            )}
+                            <span>{item.is_active ? "Aktif" : "Nonaktif"}</span>
+                          </button>
                         </td>
 
                         {/* Tombol Aksi */}
@@ -891,21 +1003,30 @@ export default function AdminLocationsPage() {
                   onChange={(lat, lng) => {
                     setFormLat(lat);
                     setFormLng(lng);
+                    setFormLatStr(lat.toFixed(6));
+                    setFormLngStr(lng.toFixed(6));
                   }}
                 />
               </div>
 
-              {/* Koordinat Display / Manual Inputs */}
+              {/* Koordinat Display / Free-Typing Manual Inputs */}
               <div className="grid grid-cols-2 gap-3 pt-1">
                 <div>
                   <label className="block text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">
                     Latitude
                   </label>
                   <input
-                    type="number"
-                    step="any"
-                    value={formLat}
-                    onChange={(e) => setFormLat(parseFloat(e.target.value) || 0)}
+                    type="text"
+                    inputMode="decimal"
+                    value={formLatStr}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      setFormLatStr(val);
+                      const parsed = parseFloat(val);
+                      if (!isNaN(parsed) && parsed >= -90 && parsed <= 90) {
+                        setFormLat(parsed);
+                      }
+                    }}
                     className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-mono font-medium focus:outline-none focus:ring-2 focus:ring-emerald-500/50 text-slate-800 dark:text-slate-100"
                   />
                 </div>
@@ -914,10 +1035,17 @@ export default function AdminLocationsPage() {
                     Longitude
                   </label>
                   <input
-                    type="number"
-                    step="any"
-                    value={formLng}
-                    onChange={(e) => setFormLng(parseFloat(e.target.value) || 0)}
+                    type="text"
+                    inputMode="decimal"
+                    value={formLngStr}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      setFormLngStr(val);
+                      const parsed = parseFloat(val);
+                      if (!isNaN(parsed) && parsed >= -180 && parsed <= 180) {
+                        setFormLng(parsed);
+                      }
+                    }}
                     className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-mono font-medium focus:outline-none focus:ring-2 focus:ring-emerald-500/50 text-slate-800 dark:text-slate-100"
                   />
                 </div>

@@ -44,7 +44,7 @@ export async function GET(request: NextRequest) {
       whereClause.is_active = false;
     }
 
-    const [locations, total] = await Promise.all([
+    const [locations, total, activeTotal, educationTotal] = await Promise.all([
       prisma.location.findMany({
         where: whereClause,
         orderBy: { updated_at: "desc" },
@@ -52,6 +52,10 @@ export async function GET(request: NextRequest) {
         take: limit,
       }),
       prisma.location.count({ where: whereClause }),
+      prisma.location.count({ where: { is_active: true } }),
+      prisma.location.count({
+        where: { category: { in: ["sekolah", "kampus"] } },
+      }),
     ]);
 
     return NextResponse.json({
@@ -62,6 +66,11 @@ export async function GET(request: NextRequest) {
         limit,
         total,
         totalPages: Math.ceil(total / limit),
+      },
+      stats: {
+        totalGlobal: await prisma.location.count(),
+        activeTotal,
+        educationTotal,
       },
     });
   } catch (error) {

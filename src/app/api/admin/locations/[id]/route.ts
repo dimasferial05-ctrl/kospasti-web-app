@@ -150,3 +150,36 @@ export async function DELETE(
     );
   }
 }
+
+export async function PATCH(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    if (!verifyAdmin(request)) {
+      return NextResponse.json(
+        { success: false, error: "Unauthorized: Akses ditolak. Token admin tidak valid." },
+        { status: 401 }
+      );
+    }
+
+    const { id } = await params;
+    const body = await request.json();
+    const { is_active } = body;
+
+    const updated = await prisma.location.update({
+      where: { id },
+      data: {
+        is_active: typeof is_active === "boolean" ? is_active : undefined,
+      },
+    });
+
+    return NextResponse.json({ success: true, data: updated });
+  } catch (error) {
+    console.error("Gagal mengubah status lokasi:", error);
+    return NextResponse.json(
+      { success: false, error: "Gagal memperbarui status lokasi" },
+      { status: 500 }
+    );
+  }
+}
