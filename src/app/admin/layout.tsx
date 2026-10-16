@@ -13,6 +13,7 @@ import {
   Loader2,
   Star,
   Wallet,
+  MapPin,
 } from "lucide-react";
 import { Sidebar, SidebarBody, SidebarLink, type Links } from "@/components/ui/sidebar";
 import { SidebarThemeToggle } from "@/components/ui/SidebarThemeToggle";
@@ -137,6 +138,19 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         />
       ),
       active: Boolean(pathname?.startsWith("/admin/reviews")),
+    },
+    {
+      label: "Kelola Lokasi",
+      href: "/admin/locations",
+      icon: (
+        <MapPin
+          size={20}
+          className={`shrink-0 transition-colors ${
+            pathname?.startsWith("/admin/locations") ? "text-emerald-400" : "text-slate-400"
+          }`}
+        />
+      ),
+      active: Boolean(pathname?.startsWith("/admin/locations")),
     },
   ];
 
