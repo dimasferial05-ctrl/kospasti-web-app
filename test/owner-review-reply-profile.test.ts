@@ -52,7 +52,7 @@ describe("Property Reviews - Owner Reply Profile (Issue #227)", () => {
       },
     ];
 
-    const findManySpy = vi.spyOn(prisma.review, "findMany").mockResolvedValue(mockReviews as any);
+    const findManySpy = vi.spyOn(prisma.review, "findMany").mockResolvedValue(mockReviews as unknown as never);
 
     const req = new NextRequest(`http://localhost:3000/api/properties/${propertyId}/reviews`);
     const res = await propertyReviewsGET(req, {
@@ -76,9 +76,9 @@ describe("Property Reviews - Owner Reply Profile (Issue #227)", () => {
           property: {
             select: {
               owner: {
-                select: {
+                select: expect.objectContaining({
                   name: true,
-                },
+                }),
               },
             },
           },
@@ -107,7 +107,7 @@ describe("Property Reviews - Owner Reply Profile (Issue #227)", () => {
       },
     ];
 
-    vi.spyOn(prisma.review, "findMany").mockResolvedValue(mockReviews as any);
+    vi.spyOn(prisma.review, "findMany").mockResolvedValue(mockReviews as unknown as never);
 
     const req = new NextRequest(`http://localhost:3000/api/properties/${propertyId}/reviews`);
     const res = await propertyReviewsGET(req, {

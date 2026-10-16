@@ -22,10 +22,8 @@ import {
   Maximize2,
   X,
   Tv,
-  FileText,
   ShieldAlert,
   Layers,
-  ScrollText,
   BadgeCheck,
 } from "lucide-react";
 import PropertyLocationMap from "@/components/map/PropertyLocationMap";
@@ -73,6 +71,7 @@ interface PropertyDetail {
   owner?: {
     name: string;
     whatsapp_number: string;
+    avatar_url?: string | null;
   };
 }
 
@@ -134,7 +133,7 @@ export default function PropertyDetailPage() {
   const [waNumber, setWaNumber] = useState("");
   const [userAvatar, setUserAvatar] = useState<string | null>(null);
   const [moveInDate, setMoveInDate] = useState("");
-  const [minDate, setMinDate] = useState("");
+  const [minDate] = useState(() => new Date().toISOString().split("T")[0]);
   const [pendingBookingNotice, setPendingBookingNotice] = useState<{
     isOpen: boolean;
     message: string;
@@ -241,7 +240,6 @@ export default function PropertyDetailPage() {
     if (typeof window !== "undefined") {
       window.scrollTo({ top: 0, left: 0, behavior: "instant" });
     }
-    setMinDate(new Date().toISOString().split("T")[0]);
   }, [id]);
 
   useEffect(() => {
@@ -1326,9 +1324,22 @@ export default function PropertyDetailPage() {
           {/* Card 8: Info Pemilik / Pengelola */}
           <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl sm:rounded-3xl border border-slate-200/80 dark:border-slate-800 shadow-soft flex items-center justify-between">
             <div className="flex items-center gap-3.5">
-              <div className="w-11 h-11 rounded-2xl bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center font-bold text-sm shadow-2xs">
-                <User className="w-5 h-5" />
-              </div>
+              {property.owner?.avatar_url ? (
+                <div className="w-11 h-11 rounded-2xl overflow-hidden shrink-0 border border-emerald-300 dark:border-emerald-700 shadow-xs">
+                  <Image
+                    src={property.owner.avatar_url}
+                    alt={property.owner.name || "Pemilik Kos"}
+                    width={44}
+                    height={44}
+                    className="w-full h-full object-cover"
+                    unoptimized
+                  />
+                </div>
+              ) : (
+                <div className="w-11 h-11 rounded-2xl bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center font-bold text-sm shadow-2xs">
+                  <User className="w-5 h-5" />
+                </div>
+              )}
               <div>
                 <p className="text-[11px] font-medium text-slate-400 uppercase tracking-wider">
                   Dikelola oleh

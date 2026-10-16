@@ -32,6 +32,7 @@ export async function GET() {
         name: true,
         email: true,
         whatsapp_number: true,
+        avatar_url: true,
         created_at: true,
         _count: {
           select: {
@@ -58,6 +59,7 @@ export async function GET() {
           name: owner.name,
           email: owner.email,
           whatsapp_number: owner.whatsapp_number,
+          avatar_url: owner.avatar_url,
           total_properties: owner._count.properties,
           created_at: owner.created_at,
         },

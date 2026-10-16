@@ -54,6 +54,7 @@ export async function GET(
             owner: {
               select: {
                 name: true,
+                avatar_url: true,
               },
             },
           },
