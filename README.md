@@ -2,7 +2,7 @@
 
 <div align="center">
 
-![KosPasti Banner](https://images.unsplash.com/photo-1555854877-bab0e564b8d5?auto=format&fit=crop&w=1200&q=80)
+![KosPasti Desktop Preview](public/images/desktop-preview.jpeg)
 
 **Platform Cerdas Ekosistem Pencarian, Pemesanan, dan Manajemen Kos Terintegrasi**
 
