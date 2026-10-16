@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useCallback } from "react";
+import Image from "next/image";
 import {
   Star,
   Check,
@@ -25,6 +26,7 @@ export interface ReviewItem {
   property?: {
     owner?: {
       name: string;
+      avatar_url?: string | null;
     } | null;
   } | null;
 }
@@ -466,10 +468,23 @@ export function ReviewSection({ propertyId, propertyName }: ReviewSectionProps) 
                   return (
                     <div className="mt-4 ml-8 sm:ml-12 bg-emerald-50/50 dark:bg-emerald-950/40 border border-emerald-100/70 dark:border-emerald-800 rounded-2xl p-4 sm:p-5 transition-all shadow-xs">
                       <div className="flex items-center gap-3 mb-3">
-                        {/* Avatar Inisial */}
-                        <div className="w-8 h-8 rounded-full bg-emerald-100 dark:bg-emerald-900 text-emerald-800 dark:text-emerald-200 font-extrabold flex items-center justify-center shrink-0 border border-emerald-200/80 dark:border-emerald-700 text-xs select-none">
-                          {ownerInitial}
-                        </div>
+                        {/* Avatar Mitra (Foto atau Inisial) */}
+                        {rev.property?.owner?.avatar_url ? (
+                          <div className="w-8 h-8 rounded-full overflow-hidden shrink-0 border border-emerald-300 dark:border-emerald-700 shadow-xs">
+                            <Image
+                              src={rev.property.owner.avatar_url}
+                              alt={ownerName}
+                              width={32}
+                              height={32}
+                              className="w-full h-full object-cover"
+                              unoptimized
+                            />
+                          </div>
+                        ) : (
+                          <div className="w-8 h-8 rounded-full bg-emerald-100 dark:bg-emerald-900 text-emerald-800 dark:text-emerald-200 font-extrabold flex items-center justify-center shrink-0 border border-emerald-200/80 dark:border-emerald-700 text-xs select-none">
+                            {ownerInitial}
+                          </div>
+                        )}
 
                         {/* Detail Nama & Badge */}
                         <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">

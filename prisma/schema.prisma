@@ -16,6 +16,7 @@ model Owner {
   whatsapp_number String      @unique
   email           String?     @unique // Tambahan untuk login portal
   password        String?             // Tambahan untuk login portal (Hashed)
+  avatar_url      String?             // Foto profil atau logo pengelola kos
   created_at      DateTime    @default(now())
   updated_at      DateTime    @updatedAt
   properties      Property[]

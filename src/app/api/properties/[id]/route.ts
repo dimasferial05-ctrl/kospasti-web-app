@@ -27,6 +27,7 @@ export async function GET(
           select: {
             name: true,
             whatsapp_number: true,
+            avatar_url: true,
           },
         },
         media: true,

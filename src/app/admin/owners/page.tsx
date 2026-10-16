@@ -1,10 +1,9 @@
 "use client";
 
-import { useState, useEffect, useMemo, useCallback } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import {
-  Users,
-  Search,
   MessageSquare,
   Loader2,
   Building2,
@@ -27,6 +26,7 @@ interface OwnerItem {
   id: string;
   name: string;
   whatsapp_number: string;
+  avatar_url?: string | null;
   created_at: string;
   _count?: {
     properties: number;
@@ -73,27 +73,32 @@ export default function AdminOwnersPage() {
   const [isDeletingOwner, setIsDeletingOwner] = useState(false);
   const [deleteOwnerError, setDeleteOwnerError] = useState<string | null>(null);
 
-  const fetchOwners = useCallback(async () => {
-    try {
-      const res = await fetch("/api/admin/owners");
-      if (res.status === 401) {
-        router.push("/admin/login");
-        return;
-      }
-      const data = await res.json();
-      if (data && data.success && Array.isArray(data.data)) {
-        setOwners(data.data);
-      }
-    } catch (err) {
-      console.error("Fetch owners error:", err);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [router]);
-
   useEffect(() => {
-    fetchOwners();
-  }, [fetchOwners]);
+    let ignore = false;
+    const loadOwners = async () => {
+      try {
+        const res = await fetch("/api/admin/owners");
+        if (res.status === 401) {
+          router.push("/admin/login");
+          return;
+        }
+        const data = await res.json();
+        if (!ignore && data && data.success && Array.isArray(data.data)) {
+          setOwners(data.data);
+        }
+      } catch (err) {
+        console.error("Fetch owners error:", err);
+      } finally {
+        if (!ignore) {
+          setIsLoading(false);
+        }
+      }
+    };
+    void loadOwners();
+    return () => {
+      ignore = true;
+    };
+  }, [router]);
 
   // Listener tombol Escape untuk menutup modal
   useEffect(() => {
@@ -424,12 +429,30 @@ export default function AdminOwnersPage() {
                 return (
                   <tr key={owner.id} className="hover:bg-slate-50/80 dark:hover:bg-slate-800/50 transition-colors">
                     <td className="p-4">
-                      <div className="font-bold text-slate-900 dark:text-slate-100">{owner.name}</div>
-                      {owner.properties && owner.properties.length > 0 && (
-                        <div className="text-xs text-slate-400 dark:text-slate-500 mt-0.5 line-clamp-1">
-                          {owner.properties.map((p) => p.name).join(", ")}
+                      <div className="flex items-center gap-3">
+                        <div className="w-9 h-9 rounded-full overflow-hidden shrink-0 border border-slate-200 dark:border-slate-700 bg-emerald-50 dark:bg-emerald-950/40 flex items-center justify-center font-bold text-xs text-emerald-700 dark:text-emerald-300">
+                          {owner.avatar_url ? (
+                            <Image
+                              src={owner.avatar_url}
+                              alt={owner.name}
+                              width={36}
+                              height={36}
+                              className="w-full h-full object-cover"
+                              unoptimized
+                            />
+                          ) : (
+                            <span>{owner.name.trim().charAt(0).toUpperCase()}</span>
+                          )}
                         </div>
-                      )}
+                        <div>
+                          <div className="font-bold text-slate-900 dark:text-slate-100">{owner.name}</div>
+                          {owner.properties && owner.properties.length > 0 && (
+                            <div className="text-xs text-slate-400 dark:text-slate-500 mt-0.5 line-clamp-1">
+                              {owner.properties.map((p) => p.name).join(", ")}
+                            </div>
+                          )}
+                        </div>
+                      </div>
                     </td>
                     <td className="p-4">
                       <div className="font-medium text-slate-700 dark:text-slate-300 font-mono text-xs">
