@@ -21,8 +21,6 @@ import {
   X,
   Copy,
   Check,
-  Power,
-  PowerOff,
 } from "lucide-react";
 import LocationPicker from "@/components/map/LocationPicker";
 
@@ -832,30 +830,6 @@ export default function AdminLocationsPage() {
                         {/* Tombol Aksi */}
                         <td className="px-5 py-4 text-right whitespace-nowrap">
                           <div className="flex items-center justify-end gap-1.5">
-                            {/* Tombol Aktifkan/Nonaktifkan Cepat */}
-                            <button
-                              type="button"
-                              onClick={() => handleToggleActive(item)}
-                              disabled={togglingId === item.id}
-                              className={`p-2 rounded-xl transition-colors active:scale-90 ${
-                                item.is_active
-                                  ? "text-slate-500 dark:text-slate-400 hover:text-amber-600 dark:hover:text-amber-400 hover:bg-amber-50 dark:hover:bg-slate-800"
-                                  : "text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-slate-800"
-                              }`}
-                              title={
-                                item.is_active
-                                  ? "Nonaktifkan Lokasi"
-                                  : "Aktifkan Lokasi"
-                              }
-                            >
-                              {togglingId === item.id ? (
-                                <Loader2 className="w-4 h-4 animate-spin text-slate-400" />
-                              ) : item.is_active ? (
-                                <Power className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
-                              ) : (
-                                <PowerOff className="w-4 h-4 text-slate-400" />
-                              )}
-                            </button>
                             <button
                               type="button"
                               onClick={() => handleOpenEditModal(item)}
