@@ -94,3 +94,14 @@ export async function verifyOwnerToken(token: string): Promise<OwnerTokenPayload
   }
 }
 
+/**
+ * Memvalidasi apakah path tujuan redirect aman (relative path internal lokal).
+ * Mencegah celah Open Redirect melalui protocol-relative URL (//attacker.com atau /\\attacker.com).
+ */
+export function isSafeRedirectPath(url?: string | null): boolean {
+  if (!url || typeof url !== "string") {
+    return false;
+  }
+  return url.startsWith("/") && !url.startsWith("//") && !url.startsWith("/\\");
+}
+

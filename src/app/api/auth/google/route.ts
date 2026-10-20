@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { isSafeRedirectPath } from "@/lib/auth";
 
 export async function GET(request: NextRequest) {
   try {
@@ -15,7 +16,8 @@ export async function GET(request: NextRequest) {
     }
 
     const searchParams = request.nextUrl.searchParams;
-    const callbackUrl = searchParams.get("callbackUrl") || "/";
+    const rawCallback = searchParams.get("callbackUrl");
+    const callbackUrl = isSafeRedirectPath(rawCallback) ? (rawCallback as string) : "/";
 
     // Tentukan origin URL aplikasi
     const origin =
