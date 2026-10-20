@@ -4,8 +4,6 @@ import React, { useState, useEffect, useMemo, useRef, useCallback, Suspense } fr
 import { useSearchParams, useRouter } from "next/navigation";
 import MapViewer, { PropertyMapItem, SearchTargetLocation } from "@/components/map/MapViewer";
 import { SmartSearchBar } from "@/components/features/SmartSearchBar";
-import IsolineBloom from "@/components/ui/isoline-bloom";
-import Link from "next/link";
 import {
   MapPin,
   Home,
@@ -356,16 +354,8 @@ function MapSearchContent() {
           </div>
 
           {/* Search Card */}
-          <div className="bg-white/95 dark:bg-slate-900/95 backdrop-blur-md p-4 sm:p-6 rounded-3xl border border-slate-200/80 dark:border-slate-800 shadow-soft-lg mb-4 relative z-30">
-            {/* Topographical Contour Lines Shader Decoration */}
-            <div className="absolute inset-0 rounded-3xl overflow-hidden pointer-events-none -z-10">
-              <div className="absolute inset-0 opacity-20">
-                <IsolineBloom height="100%" preset="emerald" interactive={true} />
-              </div>
-              <div className="absolute -right-8 -top-8 w-40 h-40 bg-emerald-100/30 dark:bg-emerald-900/20 rounded-full blur-3xl"></div>
-            </div>
-
-            <div className="relative z-10">
+          <div className="bg-white dark:bg-slate-900 p-4 sm:p-5 rounded-2xl sm:rounded-3xl border border-slate-200/80 dark:border-slate-800 shadow-soft mb-4 relative z-30">
+            <div>
               <SmartSearchBar
                 value={aiPrompt}
                 onChange={setAiPrompt}
@@ -433,9 +423,9 @@ function MapSearchContent() {
             {/* Quick Adjustment Toolbar */}
             <div className="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800 flex flex-wrap items-center justify-between gap-3 text-xs">
               <div className="flex items-center gap-2">
-                <span className="text-slate-400 font-medium">Filter Manual:</span>
+                <span className="text-xs font-bold text-slate-700 dark:text-slate-300">Filter Manual:</span>
                 {/* Gender Pills */}
-                <div className="flex items-center gap-1">
+                <div className="flex items-center gap-1.5">
                   {[
                     { id: "ALL", label: "Semua" },
                     { id: "PUTRA", label: "Putra" },
@@ -446,10 +436,11 @@ function MapSearchContent() {
                       key={g.id}
                       type="button"
                       onClick={() => setSelectedGender(g.id)}
-                      className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer ${selectedGender === g.id
-                          ? "bg-slate-800 dark:bg-emerald-600 text-white shadow-xs"
-                          : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700"
-                        }`}
+                      className={`px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                        selectedGender === g.id
+                          ? "bg-emerald-600 text-white shadow-xs active:scale-95"
+                          : "bg-slate-100 hover:bg-slate-200/80 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-semibold border border-slate-200/60 dark:border-slate-700 active:scale-95"
+                      }`}
                     >
                       {g.label}
                     </button>
@@ -459,11 +450,11 @@ function MapSearchContent() {
 
               {/* Price Filter */}
               <div className="flex items-center gap-2">
-                <span className="text-slate-400 dark:text-slate-500 font-medium">Harga:</span>
+                <span className="text-xs font-bold text-slate-700 dark:text-slate-300">Harga:</span>
                 <select
                   value={maxPrice}
                   onChange={(e) => setMaxPrice(e.target.value)}
-                  className="px-2.5 py-1 text-xs font-medium bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-700 dark:text-slate-200 focus:outline-none"
+                  className="px-3 py-1.5 text-xs font-semibold bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 shadow-2xs cursor-pointer"
                 >
                   <option value="">Semua Harga</option>
                   <option value="1000000">Maks. Rp 1 Jt</option>
