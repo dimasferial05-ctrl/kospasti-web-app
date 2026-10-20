@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, Suspense } from "react";
+import { useState, useEffect, useRef, Suspense, useSyncExternalStore } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
@@ -93,11 +93,11 @@ function ProfileContent() {
   const setActiveTab = (tab: "profile" | "bookings" | "security") => setManualTab(tab);
 
   const { theme, setTheme } = useTheme();
-  const [themeMounted, setThemeMounted] = useState(false);
-
-  useEffect(() => {
-    setThemeMounted(true);
-  }, []);
+  const themeMounted = useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false
+  );
 
   const [isLoadingUser, setIsLoadingUser] = useState(true);
   const [user, setUser] = useState<UserProfile | null>(null);
@@ -1281,16 +1281,28 @@ function ProfileContent() {
                   </div>
                 </div>
 
-                {/* Banner edukasi jika belum ada password */}
-                {!user?.hasPassword && (
+                {/* Banner informasi akun Google SSO */}
+                {user?.isGoogleLinked ? (
+                  <div className="mb-6 p-4 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-emerald-900 dark:text-emerald-200 text-xs sm:text-sm flex items-start gap-3">
+                    <ShieldCheck className="w-5 h-5 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
+                    <div>
+                      <p className="font-bold text-emerald-900 dark:text-emerald-100 mb-0.5">
+                        Akun Diamankan oleh Google SSO
+                      </p>
+                      <p className="text-emerald-800/90 dark:text-emerald-300/90 leading-relaxed">
+                        Akun Anda terhubung langsung dengan Google ({user?.email}). Anda dapat masuk secara instan tanpa perlu mengelola kata sandi terpisah.
+                      </p>
+                    </div>
+                  </div>
+                ) : !user?.hasPassword && (
                   <div className="mb-6 p-4 rounded-xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 text-amber-900 dark:text-amber-200 text-xs sm:text-sm flex items-start gap-3">
                     <AlertCircle className="w-5 h-5 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
                     <div>
                       <p className="font-semibold text-amber-900 dark:text-amber-200 mb-0.5">
-                        Aktifkan Password untuk Akses Fleksibel
+                        Autentikasi Akun
                       </p>
                       <p className="text-amber-800 dark:text-amber-300 leading-relaxed">
-                        Dengan mengatur password, Anda dapat masuk menggunakan alamat email ({user?.email}) dan password ini di perangkat mana saja tanpa harus selalu login via akun Google.
+                        Disarankan untuk masuk menggunakan akun Google Anda untuk pengalaman login 1-klik yang lebih aman dan praktis.
                       </p>
                     </div>
                   </div>
@@ -1989,8 +2001,8 @@ function ProfileContent() {
                         if (refreshData.success && Array.isArray(refreshData.bookings)) {
                           setBookings(refreshData.bookings);
                         }
-                      } catch (err: any) {
-                        setDisputeError(err.message || "Terjadi kesalahan saat mengirim laporan.");
+                      } catch (err: unknown) {
+                        setDisputeError(err instanceof Error ? err.message : "Terjadi kesalahan saat mengirim laporan.");
                       } finally {
                         setIsSubmittingDispute(false);
                       }

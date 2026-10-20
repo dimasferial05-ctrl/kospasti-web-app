@@ -17,7 +17,7 @@ vi.mock("next/navigation", () => ({
 
 import LoginPage from "../src/app/login/page";
 
-describe("User Login Page UI (/login) - Issue #120", () => {
+describe("User Login Page UI (/login) - Google SSO Only", () => {
   beforeEach(() => {
     vi.restoreAllMocks();
   });
@@ -29,82 +29,39 @@ describe("User Login Page UI (/login) - Issue #120", () => {
     expect(firstLine).toMatch(/^["']use client["'];?$/);
   });
 
-  it("merender judul, input email, input password, dan tombol submit", () => {
+  it("merender judul dan tombol utama Masuk dengan Google", () => {
     const html = renderToStaticMarkup(<LoginPage />);
 
     // Header
-    expect(html).toContain("Masuk ke Akun Anda");
+    expect(html).toContain("Masuk ke KosPasti");
 
-    // Input Email
-    expect(html).toContain("Email");
-    expect(html).toContain("login-email");
-    expect(html).toContain('type="email"');
-    expect(html).toContain('placeholder="nama@email.com"');
+    // Tombol Google SSO
+    expect(html).toContain("Lanjutkan dengan Google");
+    expect(html).toContain("/api/auth/google?callbackUrl=%2Fpesanan");
 
-    // Input Password
-    expect(html).toContain("Password");
-    expect(html).toContain("login-password");
-    expect(html).toContain('placeholder="••••••••"');
-
-    // Tombol Submit
-    expect(html).toContain("Masuk");
-    expect(html).toContain('type="submit"');
+    // Tidak ada input form manual
+    expect(html).not.toContain('id="login-email"');
+    expect(html).not.toContain('id="login-password"');
   });
 
-  it("merender tautan navigasi ke halaman pendaftaran (register) dan beranda", () => {
+  it("merender tautan navigasi ke portal mitra dan kembali ke beranda", () => {
     const html = renderToStaticMarkup(<LoginPage />);
 
-    // Tautan register
-    expect(html).toContain("Belum punya akun?");
-    expect(html).toContain("Daftar di sini");
-    expect(html).toContain('href="/register"');
+    // Tautan mitra
+    expect(html).toContain("Pemilik Kos? Masuk ke Portal Mitra");
+    expect(html).toContain('href="/partner/login"');
 
     // Tautan beranda
     expect(html).toContain("Kembali ke Beranda");
     expect(html).toContain('href="/"');
   });
 
-  it("memiliki logika validasi client-side (cek kosong dan format email)", () => {
+  it("menerapkan styling responsif dan desain modern", () => {
     const filePath = path.resolve(__dirname, "../src/app/login/page.tsx");
     const content = fs.readFileSync(filePath, "utf-8");
 
-    // Cek Kosong
-    expect(content).toContain("Alamat email wajib diisi.");
-    expect(content).toContain("Password wajib diisi.");
-
-    // Cek Format Email
-    expect(content).toContain("Format alamat email tidak valid.");
-    expect(content).toMatch(/emailRegex/);
-  });
-
-  it("menerapkan atribut aksesibilitas dan styling responsif", () => {
-    const filePath = path.resolve(__dirname, "../src/app/login/page.tsx");
-    const content = fs.readFileSync(filePath, "utf-8");
-
-    expect(content).toContain("aria-invalid");
-    expect(content).toContain("aria-describedby");
     expect(content).toContain("max-w-md");
     expect(content).toContain("rounded-2xl");
-  });
-
-  it("memiliki integrasi HTTP fetch ke endpoint /api/login dan penanganan redirect callbackUrl", () => {
-    const filePath = path.resolve(__dirname, "../src/app/login/page.tsx");
-    const content = fs.readFileSync(filePath, "utf-8");
-
-    expect(content).toContain('fetch("/api/login"');
-    expect(content).toContain('method: "POST"');
-    expect(content).toContain("data?.error");
-    expect(content).toContain("setIsSuccess(true)");
-    expect(content).toContain("router.push(callbackUrl)");
-    expect(content).toContain("useSearchParams");
-  });
-
-  it("merender tombol Masuk dengan Google dan divider 'Atau masuk dengan'", () => {
-    const html = renderToStaticMarkup(<LoginPage />);
-
-    expect(html).toContain("Masuk dengan Google");
-    expect(html).toContain("Atau masuk dengan");
-    expect(html).toContain("/api/auth/google");
+    expect(content).toContain("shadow-soft-lg");
   });
 });
-
