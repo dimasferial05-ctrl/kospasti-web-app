@@ -6,7 +6,7 @@ import { clearDatabase } from "./helpers";
 describe("POST /api/magic-link/generate", () => {
   const authHeaders = {
     "Content-Type": "application/json",
-    Authorization: "Bearer 778899",
+    cookie: "admin_token=kospasti_admin_authenticated",
   };
 
   beforeEach(async () => {
@@ -14,7 +14,7 @@ describe("POST /api/magic-link/generate", () => {
   });
 
   describe("Skenario Autentikasi / Keamanan", () => {
-    it("mengembalikan status 401 Unauthorized jika header Authorization tidak disertakan", async () => {
+    it("mengembalikan status 401 Unauthorized jika cookie admin_token tidak disertakan", async () => {
       const request = new Request("http://localhost:3000/api/magic-link/generate", {
         method: "POST",
         body: JSON.stringify({ ownerId: "some-owner-id" }),
@@ -29,13 +29,13 @@ describe("POST /api/magic-link/generate", () => {
       expect(data.error).toContain("Unauthorized");
     });
 
-    it("mengembalikan status 401 Unauthorized jika token PIN salah", async () => {
+    it("mengembalikan status 401 Unauthorized jika header Authorization Bearer 778899 digunakan (backdoor ditolak)", async () => {
       const request = new Request("http://localhost:3000/api/magic-link/generate", {
         method: "POST",
         body: JSON.stringify({ ownerId: "some-owner-id" }),
         headers: {
           "Content-Type": "application/json",
-          Authorization: "Bearer 000000",
+          Authorization: "Bearer 778899",
         },
       });
 

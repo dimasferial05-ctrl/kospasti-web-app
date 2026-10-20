@@ -1,21 +1,12 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import crypto from "crypto";
-import { isValidAdminRequest } from "@/lib/admin-auth";
+import { isValidAdminRequest, createAdminUnauthorizedResponse } from "@/lib/admin-auth";
 
 export async function POST(request: Request) {
   try {
-    const isAdmin = isValidAdminRequest(request);
-    const authHeader = request.headers.get("authorization");
-
-    if (!isAdmin && authHeader !== "Bearer 778899") {
-      return NextResponse.json(
-        {
-          success: false,
-          error: "Unauthorized: Akses ditolak. Token autentikasi admin tidak valid.",
-        },
-        { status: 401 }
-      );
+    if (!isValidAdminRequest(request)) {
+      return createAdminUnauthorizedResponse();
     }
 
     const body = await request.json().catch(() => null);
