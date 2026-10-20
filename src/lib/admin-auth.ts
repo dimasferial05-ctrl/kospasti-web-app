@@ -17,7 +17,14 @@ export function isValidAdminRequest(request: NextRequest | Request): boolean {
 
   const cookieHeader = request.headers.get("cookie") || "";
   const match = cookieHeader.match(/(?:^|;\s*)admin_token=([^;]+)/);
-  const token = match ? decodeURIComponent(match[1]) : null;
+  let token: string | null = null;
+  if (match) {
+    try {
+      token = decodeURIComponent(match[1]);
+    } catch {
+      token = match[1];
+    }
+  }
   return isValidAdminToken(token);
 }
 

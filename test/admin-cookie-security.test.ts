@@ -81,9 +81,14 @@ describe("Admin Cookie Security & Value Validation (Issue #261)", () => {
         headers: { cookie: "user_token=some_token" },
       });
 
+      const malformedReq = new Request("http://localhost:3000/api/properties/prop-1", {
+        headers: { cookie: "admin_token=%E0%A4%A" },
+      });
+
       expect(isValidAdminRequest(validReq)).toBe(true);
       expect(isValidAdminRequest(invalidReq)).toBe(false);
       expect(isValidAdminRequest(noTokenReq)).toBe(false);
+      expect(isValidAdminRequest(malformedReq)).toBe(false);
     });
 
     it("createAdminUnauthorizedResponse menghasilkan respons 401 JSON", async () => {
