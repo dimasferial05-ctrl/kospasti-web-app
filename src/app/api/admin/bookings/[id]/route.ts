@@ -3,10 +3,12 @@ import { prisma } from "@/lib/prisma";
 import { sendWhatsAppMessage } from "@/lib/whatsapp";
 import { isValidAdminRequest, createAdminUnauthorizedResponse } from "@/lib/admin-auth";
 
-const ALLOWED_STATUSES = [
+export const ALLOWED_STATUSES = [
   "PENDING",
+  "PAID",
   "SUCCESS",
   "CONFIRMED",
+  "ACCEPTED",
   "APPROVED",
   "REJECTED",
   "CANCELLED",
@@ -16,6 +18,16 @@ const ALLOWED_STATUSES = [
   "DISPUTED",
   "PAYOUT_PENDING",
   "PAYOUT_PAID",
+];
+
+export const ACTIVE_BOOKING_STATUSES = [
+  "PENDING",
+  "PAID",
+  "SUCCESS",
+  "CONFIRMED",
+  "ACCEPTED",
+  "APPROVED",
+  "COMPLETED",
 ];
 
 export async function PATCH(
@@ -119,8 +131,8 @@ export async function PATCH(
         },
       });
 
-      const isOldActive = ["PENDING", "SUCCESS", "CONFIRMED", "APPROVED"].includes(existingBooking.status);
-      const isNewActive = ["PENDING", "SUCCESS", "CONFIRMED", "APPROVED"].includes(status);
+      const isOldActive = ACTIVE_BOOKING_STATUSES.includes(existingBooking.status);
+      const isNewActive = ACTIVE_BOOKING_STATUSES.includes(status);
 
       if (isOldActive && !isNewActive && existingBooking.property_id) {
         await tx.property.update({
