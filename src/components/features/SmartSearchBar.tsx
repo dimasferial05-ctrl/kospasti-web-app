@@ -77,10 +77,10 @@ export interface SuggestionItem {
 }
 
 export const DEFAULT_SUGGESTIONS: SuggestionItem[] = [
-  { label: "Dekat UI, <2 Jt", prompt: "Kos putri dekat UI ada AC harga di bawah 2 juta" },
-  { label: "Dekat Monas, WiFi", prompt: "Kos putra dekat Monas Jakarta fasilitas WiFi" },
-  { label: "Dekat Polsub Subang", prompt: "Kos dekat Politeknik Negeri Subang harga murah" },
-  { label: "Dekat Gandaria, 1.5Jt", prompt: "Kos campur dekat Mall Gandaria City budget 1.5jt" },
+  { label: "Dekat Polsub Subang", prompt: "Kos dekat Politeknik Negeri Subang harga terjangkau" },
+  { label: "Dekat Alun-Alun Subang", prompt: "Kos dekat Alun-alun Subang fasilitas lengkap" },
+  { label: "Dekat RSUD Subang", prompt: "Kos dekat RSUD Subang aman dan nyaman" },
+  { label: "Campur, <1 Jt Subang", prompt: "Kos campur di Subang harga di bawah 1 juta" },
 ];
 
 interface SmartSearchBarProps {
@@ -104,7 +104,7 @@ export function SmartSearchBar({
   onSearch,
   isLoading = false,
   error = null,
-  placeholder = 'Cari kos... contoh: "Kos putri dekat UI ada AC harga di bawah 2 juta"',
+  placeholder = 'Cari kos... contoh: "Kos putri dekat Polsub Subang ada AC di bawah 1 juta"',
   variant = "hero",
   showSuggestions = true,
   suggestions = DEFAULT_SUGGESTIONS,
@@ -391,7 +391,7 @@ export function SmartSearchBar({
       {/* Suggestion Chips: Horizontal scrollable carousel on mobile */}
       {showSuggestions && suggestions.length > 0 && (
         <div className="flex items-center gap-2 overflow-x-auto sm:flex-wrap no-scrollbar pb-1 sm:pb-0 px-1 text-xs">
-          <span className="font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider text-[10px] shrink-0">
+          <span className="font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider text-[11px] shrink-0">
             Saran:
           </span>
           <div className="flex items-center gap-2 sm:flex-wrap shrink-0">
@@ -400,7 +400,7 @@ export function SmartSearchBar({
                 key={idx}
                 type="button"
                 onClick={() => handleSuggestionClick(item.prompt)}
-                className="inline-flex items-center px-3 py-1 rounded-full bg-slate-100/90 hover:bg-emerald-50 text-slate-600 hover:text-emerald-700 border border-slate-200/80 hover:border-emerald-300 dark:bg-slate-800/90 dark:hover:bg-emerald-950/60 dark:text-slate-300 dark:hover:text-emerald-300 dark:border-slate-700 dark:hover:border-emerald-700 text-[11px] sm:text-xs font-medium transition-all duration-200 hover:-translate-y-0.5 cursor-pointer whitespace-nowrap shrink-0 text-left shadow-2xs"
+                className="inline-flex items-center px-3 py-1.5 rounded-full bg-white dark:bg-slate-800 hover:bg-emerald-50 dark:hover:bg-emerald-950/60 text-slate-700 dark:text-slate-200 hover:text-emerald-700 dark:hover:text-emerald-300 border border-slate-200/90 dark:border-slate-700 hover:border-emerald-300 dark:hover:border-emerald-700 text-xs font-semibold shadow-2xs hover:shadow-soft transition-all duration-200 active:scale-95 cursor-pointer whitespace-nowrap shrink-0 text-left"
               >
                 {item.label}
               </button>

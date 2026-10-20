@@ -131,7 +131,7 @@ export default function SearchPage() {
           <SmartSearchBar
             variant="hero"
             onSearch={handleSearch}
-            placeholder='Ketik kebutuhan kos... contoh: "Kos putri dekat UI ada AC harga di bawah 2 juta"'
+            placeholder='Ketik kebutuhan kos... contoh: "Kos putri dekat Polsub Subang ada AC di bawah 1 juta"'
           />
         </div>
 
