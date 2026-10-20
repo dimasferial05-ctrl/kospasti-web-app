@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import { isSafeRedirectPath } from "@/lib/auth";
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -71,8 +72,8 @@ export function middleware(request: NextRequest) {
   // 5. Logika User: Pengguna yang sudah login tidak boleh mengakses /login atau /register
   if ((pathname === "/login" || pathname === "/register") && userToken) {
     const callbackUrl = request.nextUrl.searchParams.get("callbackUrl");
-    if (callbackUrl && callbackUrl.startsWith("/")) {
-      return NextResponse.redirect(new URL(callbackUrl, request.url));
+    if (isSafeRedirectPath(callbackUrl)) {
+      return NextResponse.redirect(new URL(callbackUrl as string, request.url));
     }
     return NextResponse.redirect(new URL("/", request.url));
   }

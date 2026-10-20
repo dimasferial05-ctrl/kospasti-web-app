@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { signUserToken } from "@/lib/auth";
+import { signUserToken, isSafeRedirectPath } from "@/lib/auth";
 
 export async function GET(request: NextRequest) {
   const origin =
@@ -110,8 +110,8 @@ export async function GET(request: NextRequest) {
       bio: user.bio,
     });
 
-    // 5. Tentukan tujuan redirect
-    const targetPath = state && state.startsWith("/") ? state : "/";
+    // 5. Tentukan tujuan redirect (Cegah celah Open Redirect via protocol-relative URL //)
+    const targetPath = isSafeRedirectPath(state) ? (state as string) : "/";
     const redirectTarget = new URL(targetPath, origin);
 
     const response = NextResponse.redirect(redirectTarget);
