@@ -202,5 +202,49 @@ describe("Admin Cookie Security & Value Validation (Issue #261)", () => {
       const json = await res.json();
       expect(json.success).toBe(false);
     });
+
+    it("POST /api/magic-link/generate menolak token backdoor Authorization: Bearer 778899 dengan status 401", async () => {
+      const req = new Request("http://localhost:3000/api/magic-link/generate", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: "Bearer 778899",
+        },
+        body: JSON.stringify({ ownerId: "owner-1" }),
+      });
+      const res = await generateMagicLink(req);
+      expect(res.status).toBe(401);
+      const json = await res.json();
+      expect(json.success).toBe(false);
+      expect(json.error).toContain("Unauthorized");
+    });
+
+    it("POST /api/magic-link/generate menolak request tanpa autentikasi dengan status 401", async () => {
+      const req = new Request("http://localhost:3000/api/magic-link/generate", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ ownerId: "owner-1" }),
+      });
+      const res = await generateMagicLink(req);
+      expect(res.status).toBe(401);
+      const json = await res.json();
+      expect(json.success).toBe(false);
+    });
+
+    it("POST /api/magic-link/generate lolos autentikasi admin jika cookie admin_token valid disertakan", async () => {
+      const req = new Request("http://localhost:3000/api/magic-link/generate", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          cookie: "admin_token=kospasti_admin_authenticated",
+        },
+        body: JSON.stringify({ ownerId: "invalid-owner-id-xyz" }),
+      });
+      const res = await generateMagicLink(req);
+      // Status bukan 401 (lolos autentikasi admin, lanjut ke pengecekan database owner)
+      expect(res.status).not.toBe(401);
+    });
   });
 });
