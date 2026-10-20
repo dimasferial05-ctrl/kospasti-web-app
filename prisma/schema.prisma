@@ -53,6 +53,9 @@ model Property {
   media           PropertyMedia[]
   saved_by        SavedProperty[]
   reviews         Review[]
+
+  @@index([owner_id])
+  @@index([status])
 }
 
 model RoomType {
@@ -68,6 +71,8 @@ model RoomType {
   property_id     String
   property        Property  @relation(fields: [property_id], references: [id], onDelete: Cascade)
   bookings        Booking[]
+
+  @@index([property_id])
 }
 
 model PropertyMedia {
@@ -77,6 +82,8 @@ model PropertyMedia {
   created_at  DateTime @default(now())
   property_id String
   property    Property @relation(fields: [property_id], references: [id], onDelete: Cascade)
+
+  @@index([property_id])
 }
 
 model MagicLink {
@@ -118,6 +125,10 @@ model Booking {
   magic_links            MagicLink[]
   review                 Review?
   payout                 Payout?
+
+  @@index([property_id])
+  @@index([user_id])
+  @@index([status])
 }
 
 model User {
@@ -200,6 +211,9 @@ model Payout {
   notes                  String?   // Catatan internal admin
   created_at             DateTime  @default(now())
   updated_at             DateTime  @updatedAt
+
+  @@index([owner_id])
+  @@index([status])
 }
 
 model Location {
