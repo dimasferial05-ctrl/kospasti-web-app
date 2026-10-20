@@ -8,12 +8,12 @@ async function executeMonthlyUpdateRoutine(request: Request) {
     const authHeader = request.headers.get("authorization");
     const cronSecret = process.env.CRON_SECRET;
 
-    // If CRON_SECRET is configured, check authorization header
-    if (cronSecret && authHeader !== `Bearer ${cronSecret}`) {
+    // Tolak jika CRON_SECRET belum dikonfigurasi atau header authorization tidak cocok
+    if (!cronSecret || authHeader !== `Bearer ${cronSecret}`) {
       return NextResponse.json(
         {
           success: false,
-          error: "Unauthorized: Invalid CRON secret token",
+          error: "Unauthorized: Invalid or missing CRON secret token",
         },
         { status: 401 }
       );
