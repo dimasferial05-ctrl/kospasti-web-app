@@ -86,7 +86,23 @@ export async function POST(
       const cancellationReason = reason?.trim() || "Dibatalkan oleh penyewa";
 
       const updated = await prisma.$transaction(async (tx) => {
-        // Kembalikan kuota kamar
+        // Pembaruan bersyarat: hanya update jika status masih PENDING
+        const updateResult = await tx.booking.updateMany({
+          where: {
+            id: booking.id,
+            status: "PENDING",
+          },
+          data: {
+            status: "CANCELLED",
+            cancellation_reason: cancellationReason,
+          },
+        });
+
+        if (updateResult.count === 0) {
+          throw new Error("Pesanan ini sudah dibatalkan atau status telah berubah.");
+        }
+
+        // Kembalikan kuota kamar HANYA jika baris yang terupdate tepat berjumlah 1
         await tx.property.update({
           where: { id: booking.property_id },
           data: { available_rooms: { increment: 1 } },
@@ -110,12 +126,8 @@ export async function POST(
           },
         });
 
-        return await tx.booking.update({
+        return await tx.booking.findUnique({
           where: { id: booking.id },
-          data: {
-            status: "CANCELLED",
-            cancellation_reason: cancellationReason,
-          },
         });
       });
 
@@ -152,7 +164,26 @@ export async function POST(
       }
 
       const updated = await prisma.$transaction(async (tx) => {
-        // Kembalikan kuota kamar secara real-time ke sistem
+        // Pembaruan bersyarat: hanya update jika status masih salah satu dari PAID / APPROVED / ACCEPTED
+        const updateResult = await tx.booking.updateMany({
+          where: {
+            id: booking.id,
+            status: { in: ["PAID", "APPROVED", "ACCEPTED"] },
+          },
+          data: {
+            status: "REFUND_REQUESTED",
+            cancellation_reason: reason.trim(),
+            refund_bank_name: bankName.trim(),
+            refund_account_number: accountNumber.trim(),
+            refund_account_holder: accountHolder.trim(),
+          },
+        });
+
+        if (updateResult.count === 0) {
+          throw new Error("Pengajuan pembatalan sudah diproses atau status pesanan telah berubah.");
+        }
+
+        // Kembalikan kuota kamar secara real-time ke sistem HANYA jika baris terupdate tepat berjumlah 1
         await tx.property.update({
           where: { id: booking.property_id },
           data: { available_rooms: { increment: 1 } },
@@ -176,15 +207,8 @@ export async function POST(
           },
         });
 
-        return await tx.booking.update({
+        return await tx.booking.findUnique({
           where: { id: booking.id },
-          data: {
-            status: "REFUND_REQUESTED",
-            cancellation_reason: reason.trim(),
-            refund_bank_name: bankName.trim(),
-            refund_account_number: accountNumber.trim(),
-            refund_account_holder: accountHolder.trim(),
-          },
         });
       });
 
@@ -208,12 +232,19 @@ export async function POST(
     );
   } catch (error) {
     console.error("Gagal membatalkan pesanan:", error);
+    const errorMessage =
+      error instanceof Error ? error.message : "Terjadi kesalahan internal pada server saat membatalkan pesanan.";
+    const isConflict =
+      errorMessage.includes("sudah dibatalkan") ||
+      errorMessage.includes("sudah diproses") ||
+      errorMessage.includes("status telah berubah");
+
     return NextResponse.json(
       {
         success: false,
-        error: "Terjadi kesalahan internal pada server saat membatalkan pesanan.",
+        error: errorMessage,
       },
-      { status: 500 }
+      { status: isConflict ? 400 : 500 }
     );
   }
 }
