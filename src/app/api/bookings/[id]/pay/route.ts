@@ -1,13 +1,39 @@
 import { NextResponse } from "next/server";
+import { cookies } from "next/headers";
 import { prisma } from "@/lib/prisma";
 import crypto from "crypto";
 import { sendWhatsAppMessage } from "@/lib/whatsapp";
+import { verifyUserToken } from "@/lib/auth";
 
 export async function POST(
   request: Request,
   { params }: { params: Promise<{ id: string }> | { id: string } }
 ) {
   try {
+    const cookieStore = await cookies();
+    const userToken = cookieStore.get("user_token")?.value;
+
+    if (!userToken) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Unauthorized: Anda harus login terlebih dahulu.",
+        },
+        { status: 401 }
+      );
+    }
+
+    const payload = await verifyUserToken(userToken);
+    if (!payload || !payload.userId) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Unauthorized: Sesi pengguna tidak valid atau telah kedaluwarsa.",
+        },
+        { status: 401 }
+      );
+    }
+
     const resolvedParams = await params;
     const id = resolvedParams?.id;
 
@@ -40,6 +66,16 @@ export async function POST(
           error: "Booking tidak ditemukan",
         },
         { status: 404 }
+      );
+    }
+
+    if (booking.user_id && booking.user_id !== payload.userId) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Akses ditolak: Anda tidak memiliki izin untuk memproses pembayaran pesanan ini.",
+        },
+        { status: 403 }
       );
     }
 
