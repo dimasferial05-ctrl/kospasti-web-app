@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import {
-  getBookingAmount,
   aggregateMonthlyRevenue,
   calculateRevenueGrowth,
   VALID_REVENUE_STATUSES,
@@ -14,32 +13,6 @@ export async function GET(request: NextRequest) {
       return createAdminUnauthorizedResponse();
     }
 
-    const bookings = await prisma.booking.findMany({
-      include: {
-        property: {
-          select: {
-            id: true,
-            name: true,
-            price_per_month: true,
-            owner: {
-              select: {
-                name: true,
-                whatsapp_number: true,
-              },
-            },
-          },
-        },
-        room_type: {
-          select: {
-            id: true,
-            name: true,
-            price_per_month: true,
-          },
-        },
-      },
-      orderBy: { created_at: "asc" },
-    });
-
     const now = new Date();
     const currentYear = now.getFullYear();
     const currentMonth = now.getMonth();
@@ -47,57 +20,123 @@ export async function GET(request: NextRequest) {
     const startOfThisMonth = new Date(currentYear, currentMonth, 1);
     const startOfLastMonth = new Date(currentYear, currentMonth - 1, 1);
     const endOfLastMonth = new Date(currentYear, currentMonth, 0, 23, 59, 59, 999);
+    const startOfSixMonthsAgo = new Date(currentYear, currentMonth - 5, 1);
 
-    let totalGtv = 0;
-    let thisMonthGtv = 0;
-    let lastMonthGtv = 0;
-    let successfulBookingsCount = 0;
+    const [totalAgg, thisMonthAgg, lastMonthAgg, recentBookings, topPropertiesGroup] =
+      await Promise.all([
+        // 1. Total omzet keseluruhan & total transaksi sukses
+        prisma.booking.aggregate({
+          where: { status: { in: VALID_REVENUE_STATUSES } },
+          _sum: { amount: true },
+          _count: { _all: true },
+        }),
+        // 2. Omzet bulan berjalan (This Month)
+        prisma.booking.aggregate({
+          where: {
+            status: { in: VALID_REVENUE_STATUSES },
+            created_at: { gte: startOfThisMonth },
+          },
+          _sum: { amount: true },
+        }),
+        // 3. Omzet bulan lalu (Last Month)
+        prisma.booking.aggregate({
+          where: {
+            status: { in: VALID_REVENUE_STATUSES },
+            created_at: { gte: startOfLastMonth, lte: endOfLastMonth },
+          },
+          _sum: { amount: true },
+        }),
+        // 4. Data transaksi hanya 6 bulan terakhir untuk grafik tren bulanan
+        prisma.booking.findMany({
+          where: {
+            status: { in: VALID_REVENUE_STATUSES },
+            created_at: { gte: startOfSixMonthsAgo },
+          },
+          select: {
+            id: true,
+            created_at: true,
+            status: true,
+            amount: true,
+            property_id: true,
+            room_type: {
+              select: {
+                id: true,
+                name: true,
+                price_per_month: true,
+              },
+            },
+            property: {
+              select: {
+                id: true,
+                name: true,
+                price_per_month: true,
+                owner: {
+                  select: {
+                    name: true,
+                    whatsapp_number: true,
+                  },
+                },
+              },
+            },
+          },
+          orderBy: { created_at: "asc" },
+        }),
+        // 5. Agregasi 5 properti dengan omzet tertinggi
+        prisma.booking.groupBy({
+          by: ["property_id"],
+          where: { status: { in: VALID_REVENUE_STATUSES } },
+          _sum: { amount: true },
+          _count: { _all: true },
+          orderBy: {
+            _sum: { amount: "desc" },
+          },
+          take: 5,
+        }),
+      ]);
 
-    const propertyRevenueMap = new Map<
-      string,
-      { id: string; name: string; ownerName: string; revenue: number; bookingsCount: number }
-    >();
-
-    for (const b of bookings) {
-      const isSuccess = VALID_REVENUE_STATUSES.includes(b.status);
-      if (!isSuccess) continue;
-
-      const amount = getBookingAmount(b);
-      totalGtv += amount;
-      successfulBookingsCount += 1;
-
-      const bDate = new Date(b.created_at);
-
-      if (bDate >= startOfThisMonth) {
-        thisMonthGtv += amount;
-      } else if (bDate >= startOfLastMonth && bDate <= endOfLastMonth) {
-        lastMonthGtv += amount;
-      }
-
-      if (b.property) {
-        const propId = b.property.id;
-        const existing = propertyRevenueMap.get(propId) || {
-          id: propId,
-          name: b.property.name,
-          ownerName: b.property.owner?.name || "-",
-          revenue: 0,
-          bookingsCount: 0,
-        };
-        existing.revenue += amount;
-        existing.bookingsCount += 1;
-        propertyRevenueMap.set(propId, existing);
-      }
-    }
+    const totalGtv = totalAgg._sum.amount || 0;
+    const successfulBookingsCount = totalAgg._count._all || 0;
+    const thisMonthGtv = thisMonthAgg._sum.amount || 0;
+    const lastMonthGtv = lastMonthAgg._sum.amount || 0;
 
     const gtvGrowth = calculateRevenueGrowth(thisMonthGtv, lastMonthGtv);
     const averageOrderValue =
       successfulBookingsCount > 0 ? Math.round(totalGtv / successfulBookingsCount) : 0;
 
-    const monthlyTrend = aggregateMonthlyRevenue(bookings, 6);
+    const monthlyTrend = aggregateMonthlyRevenue(recentBookings, 6);
 
-    const topProperties = Array.from(propertyRevenueMap.values())
-      .sort((a, b) => b.revenue - a.revenue)
-      .slice(0, 5);
+    const topPropertyIds = topPropertiesGroup
+      .map((g) => g.property_id)
+      .filter((id): id is string => Boolean(id));
+
+    const propertyDetails =
+      topPropertyIds.length > 0
+        ? await prisma.property.findMany({
+            where: { id: { in: topPropertyIds } },
+            select: {
+              id: true,
+              name: true,
+              owner: {
+                select: {
+                  name: true,
+                },
+              },
+            },
+          })
+        : [];
+
+    const propMap = new Map(propertyDetails.map((p) => [p.id, p]));
+
+    const topProperties = topPropertiesGroup.map((g) => {
+      const detail = propMap.get(g.property_id);
+      return {
+        id: g.property_id,
+        name: detail?.name || "Kos",
+        ownerName: detail?.owner?.name || "-",
+        revenue: g._sum?.amount || 0,
+        bookingsCount: g._count?._all || 0,
+      };
+    });
 
     return NextResponse.json({
       success: true,
