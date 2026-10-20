@@ -1,19 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { Prisma } from "@prisma/client";
-
-function verifyAdmin(request: NextRequest) {
-  const token = request.cookies.get("admin_token")?.value;
-  return Boolean(token);
-}
+import { isValidAdminRequest, createAdminUnauthorizedResponse } from "@/lib/admin-auth";
 
 export async function GET(request: NextRequest) {
   try {
-    if (!verifyAdmin(request)) {
-      return NextResponse.json(
-        { success: false, error: "Unauthorized: Akses ditolak. Token admin tidak valid." },
-        { status: 401 }
-      );
+    if (!isValidAdminRequest(request)) {
+      return createAdminUnauthorizedResponse("Unauthorized: Akses ditolak. Token admin tidak valid.");
     }
 
     const { searchParams } = new URL(request.url);
@@ -84,11 +77,8 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    if (!verifyAdmin(request)) {
-      return NextResponse.json(
-        { success: false, error: "Unauthorized: Akses ditolak. Token admin tidak valid." },
-        { status: 401 }
-      );
+    if (!isValidAdminRequest(request)) {
+      return createAdminUnauthorizedResponse("Unauthorized: Akses ditolak. Token admin tidak valid.");
     }
 
     const body = await request.json();

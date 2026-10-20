@@ -1,15 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { processReadyPayouts } from "@/lib/payout-processor";
+import { isValidAdminRequest, createAdminUnauthorizedResponse } from "@/lib/admin-auth";
 
 export async function GET(request: NextRequest) {
   try {
-    const adminToken = request.cookies.get("admin_token")?.value;
-    if (!adminToken) {
-      return NextResponse.json(
-        { success: false, error: "Unauthorized: Akses ditolak. Anda harus login sebagai admin." },
-        { status: 401 }
-      );
+    if (!isValidAdminRequest(request)) {
+      return createAdminUnauthorizedResponse("Unauthorized: Akses ditolak. Anda harus login sebagai admin.");
     }
 
     // Jalankan lazy evaluation untuk memproses booking COMPLETED yang sudah melewati grace period 12 jam

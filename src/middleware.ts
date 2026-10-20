@@ -5,20 +5,22 @@ export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   const adminToken = request.cookies.get("admin_token")?.value;
+  const validAdminToken = process.env.ADMIN_TOKEN || "kospasti_admin_authenticated";
+  const isValidAdmin = adminToken === validAdminToken;
   const userToken = request.cookies.get("user_token")?.value;
   const partnerToken = request.cookies.get("partner_token")?.value;
 
   // 1. Pengecualian rute login Admin
   if (pathname === "/api/admin/login" || pathname === "/admin/login") {
     // Jika admin sudah login dan mencoba mengakses halaman login UI admin, arahkan ke dasbor admin
-    if (pathname === "/admin/login" && adminToken) {
+    if (pathname === "/admin/login" && isValidAdmin) {
       return NextResponse.redirect(new URL("/admin", request.url));
     }
     return NextResponse.next();
   }
 
   // 2. Proteksi Admin
-  if (!adminToken) {
+  if (!isValidAdmin) {
     // Proteksi endpoint API Admin
     if (pathname.startsWith("/api/admin")) {
       return NextResponse.json(

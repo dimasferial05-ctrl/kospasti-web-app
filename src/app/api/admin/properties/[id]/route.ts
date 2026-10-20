@@ -1,23 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { saveUploadedFiles, saveUploadedFile, detectMediaType, deleteUploadedFile } from "@/lib/upload";
+import { isValidAdminRequest, createAdminUnauthorizedResponse } from "@/lib/admin-auth";
 
 export async function PATCH(
   request: NextRequest,
   context: { params: Promise<{ id: string }> | { id: string } }
 ) {
   try {
-    const adminToken = request.cookies.get("admin_token")?.value;
-    if (!adminToken) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: "Unauthorized: Akses ditolak. Token autentikasi admin tidak valid.",
-        },
-        {
-          status: 401,
-        }
-      );
+    if (!isValidAdminRequest(request)) {
+      return createAdminUnauthorizedResponse();
     }
 
     const resolvedParams = await context.params;
@@ -237,7 +229,7 @@ export async function PATCH(
       }
     }
 
-    let room_types_data: typeof room_types = room_types;
+    const room_types_data: typeof room_types = room_types;
 
     const updateData: {
       name?: string;
@@ -538,16 +530,8 @@ export async function DELETE(
   context: { params: Promise<{ id: string }> | { id: string } }
 ) {
   try {
-    const adminToken = request.cookies.get("admin_token")?.value;
-    const validToken = process.env.ADMIN_TOKEN || "kospasti_admin_authenticated";
-    if (!adminToken || adminToken !== validToken) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: "Unauthorized: Akses ditolak. Token autentikasi admin tidak valid.",
-        },
-        { status: 401 }
-      );
+    if (!isValidAdminRequest(request)) {
+      return createAdminUnauthorizedResponse();
     }
 
     const resolvedParams = await context.params;

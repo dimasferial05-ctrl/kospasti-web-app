@@ -6,18 +6,12 @@ import {
   calculateRevenueGrowth,
   VALID_REVENUE_STATUSES,
 } from "@/lib/revenue-helper";
+import { isValidAdminRequest, createAdminUnauthorizedResponse } from "@/lib/admin-auth";
 
 export async function GET(request: NextRequest) {
   try {
-    const adminToken = request.cookies.get("admin_token")?.value;
-    if (!adminToken) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: "Unauthorized: Akses ditolak. Token autentikasi admin tidak valid.",
-        },
-        { status: 401 }
-      );
+    if (!isValidAdminRequest(request)) {
+      return createAdminUnauthorizedResponse();
     }
 
     const bookings = await prisma.booking.findMany({

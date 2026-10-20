@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { isValidAdminRequest, createAdminUnauthorizedResponse } from "@/lib/admin-auth";
 
 /**
  * Placeholder fungsi untuk notifikasi WhatsApp ke pemilik kos
@@ -27,15 +28,8 @@ export async function PATCH(
   props: { params: Promise<{ id: string }> }
 ) {
   try {
-    const adminToken = request.cookies.get("admin_token")?.value;
-    if (!adminToken) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: "Unauthorized: Akses ditolak. Token autentikasi admin tidak valid.",
-        },
-        { status: 401 }
-      );
+    if (!isValidAdminRequest(request)) {
+      return createAdminUnauthorizedResponse();
     }
 
     const { id } = await props.params;

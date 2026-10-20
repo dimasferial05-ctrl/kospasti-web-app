@@ -1,20 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { saveUploadedFiles, saveUploadedFile, detectMediaType } from "@/lib/upload";
+import { isValidAdminRequest, createAdminUnauthorizedResponse } from "@/lib/admin-auth";
 
 export async function GET(request: NextRequest) {
   try {
-    const adminToken = request.cookies.get("admin_token")?.value;
-    if (!adminToken) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: "Unauthorized: Akses ditolak. Token autentikasi admin tidak valid.",
-        },
-        {
-          status: 401,
-        }
-      );
+    if (!isValidAdminRequest(request)) {
+      return createAdminUnauthorizedResponse();
     }
 
     const properties = await prisma.property.findMany({
@@ -60,17 +52,8 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const adminToken = request.cookies.get("admin_token")?.value;
-    if (!adminToken) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: "Unauthorized: Akses ditolak. Token autentikasi admin tidak valid.",
-        },
-        {
-          status: 401,
-        }
-      );
+    if (!isValidAdminRequest(request)) {
+      return createAdminUnauthorizedResponse();
     }
 
     const contentType = request.headers.get("content-type") || "";

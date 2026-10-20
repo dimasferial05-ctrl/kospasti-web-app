@@ -1,18 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { notifyPayoutProcessed } from "@/lib/notifications";
+import { isValidAdminRequest, createAdminUnauthorizedResponse } from "@/lib/admin-auth";
 
 export async function POST(
   request: NextRequest,
   props: { params: Promise<{ id: string }> }
 ) {
   try {
-    const adminToken = request.cookies.get("admin_token")?.value;
-    if (!adminToken) {
-      return NextResponse.json(
-        { success: false, error: "Unauthorized: Akses ditolak. Anda harus login sebagai admin." },
-        { status: 401 }
-      );
+    if (!isValidAdminRequest(request)) {
+      return createAdminUnauthorizedResponse("Unauthorized: Akses ditolak. Anda harus login sebagai admin.");
     }
 
     const { id } = await props.params;
