@@ -42,7 +42,7 @@ function LoginForm() {
             width={52}
             height={52}
             priority
-            className="w-13 h-13 rounded-2xl object-cover shadow-soft border border-slate-200/80 dark:border-slate-800 block dark:hidden"
+            className="w-[52px] h-[52px] rounded-2xl object-cover shadow-soft border border-slate-200/80 dark:border-slate-800 block dark:hidden"
           />
           <Image
             src="/logo-dark.png"
@@ -50,7 +50,7 @@ function LoginForm() {
             width={52}
             height={52}
             priority
-            className="w-13 h-13 rounded-2xl object-cover shadow-soft border border-slate-200/80 dark:border-slate-800 hidden dark:block"
+            className="w-[52px] h-[52px] rounded-2xl object-cover shadow-soft border border-slate-200/80 dark:border-slate-800 hidden dark:block"
           />
         </div>
 

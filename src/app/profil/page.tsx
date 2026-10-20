@@ -1072,9 +1072,7 @@ function ProfileContent() {
               </div>
             )}
 
-
-
-            {/* TAB 3: RIWAYAT PESANAN */}
+            {/* TAB 2: RIWAYAT PESANAN */}
             {activeTab === "bookings" && (
               <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 sm:p-8 shadow-sm">
                 <div className="border-b border-slate-100 dark:border-slate-800 pb-4 mb-6">
