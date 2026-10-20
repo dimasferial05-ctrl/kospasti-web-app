@@ -1,5 +1,8 @@
 import { NextResponse } from "next/server";
+import { cookies } from "next/headers";
 import { GoogleGenAI } from "@google/genai";
+import { verifyOwnerToken } from "@/lib/auth";
+import { isValidAdminRequest, isValidAdminToken } from "@/lib/admin-auth";
 
 function cleanPlainText(text: string): string {
   return text
@@ -87,6 +90,23 @@ ${rulesText}${termsText} Informasi lengkap mengenai ketersediaan kamar serta pem
 
 export async function POST(request: Request) {
   try {
+    // 1. Verifikasi Autentikasi: Harus Mitra (Owner) atau Admin
+    const cookieStore = await cookies();
+    const partnerToken = cookieStore.get("partner_token")?.value;
+    const partnerPayload = partnerToken ? await verifyOwnerToken(partnerToken) : null;
+    const adminToken = cookieStore.get("admin_token")?.value;
+    const isAdmin = isValidAdminRequest(request) || isValidAdminToken(adminToken);
+
+    if (!partnerPayload?.ownerId && !isAdmin) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Unauthorized: Anda harus login sebagai mitra atau admin untuk menggunakan fitur AI.",
+        },
+        { status: 401 }
+      );
+    }
+
     const body = await request.json().catch(() => ({}));
     const {
       name,
