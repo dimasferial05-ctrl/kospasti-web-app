@@ -15,6 +15,12 @@ export async function GET(request?: Request) {
     const lat = searchParams.get("lat");
     const lng = searchParams.get("lng");
     const radius = searchParams.get("radius");
+    const pageParam = searchParams.get("page");
+    const limitParam = searchParams.get("limit");
+
+    const page = Math.max(1, parseInt(pageParam || "1", 10) || 1);
+    const limit = Math.max(1, Math.min(parseInt(limitParam || "24", 10) || 24, 100));
+    const skip = (page - 1) * limit;
 
     const whereClause: Prisma.PropertyWhereInput = {
       status: "PUBLISHED",
@@ -48,9 +54,16 @@ export async function GET(request?: Request) {
     if (maxPrice && maxPrice.trim()) {
       const parsedMaxPrice = parseInt(maxPrice.trim(), 10);
       if (!isNaN(parsedMaxPrice) && parsedMaxPrice >= 0) {
-        whereClause.price_per_month = {
-          lte: parsedMaxPrice,
-        };
+        whereClause.OR = [
+          { price_per_month: { lte: parsedMaxPrice } },
+          {
+            room_types: {
+              some: {
+                price_per_month: { lte: parsedMaxPrice },
+              },
+            },
+          },
+        ];
       }
     }
 
@@ -70,33 +83,38 @@ export async function GET(request?: Request) {
       whereClause.is_24_hours = true;
     }
 
-    const rawProperties = await prisma.property.findMany({
-      where: whereClause,
-      orderBy: {
-        updated_at: "desc",
-      },
-      include: {
-        owner: {
-          select: {
-            name: true,
+    const [total, rawProperties] = await Promise.all([
+      prisma.property.count({ where: whereClause }),
+      prisma.property.findMany({
+        where: whereClause,
+        orderBy: {
+          updated_at: "desc",
+        },
+        skip,
+        take: limit,
+        include: {
+          owner: {
+            select: {
+              name: true,
+            },
+          },
+          media: true,
+          room_types: {
+            orderBy: {
+              price_per_month: "asc",
+            },
+          },
+          reviews: {
+            where: {
+              is_hidden: false,
+            },
+            select: {
+              rating: true,
+            },
           },
         },
-        media: true,
-        room_types: {
-          orderBy: {
-            price_per_month: "asc",
-          },
-        },
-        reviews: {
-          where: {
-            is_hidden: false,
-          },
-          select: {
-            rating: true,
-          },
-        },
-      },
-    });
+      }),
+    ]);
 
     const properties = rawProperties.map((property) => {
       const roomTypes = property.room_types || [];
@@ -150,6 +168,12 @@ export async function GET(request?: Request) {
       {
         success: true,
         data: properties,
+        pagination: {
+          page,
+          limit,
+          total,
+          total_pages: Math.ceil(total / limit),
+        },
       },
       { status: 200 }
     );
