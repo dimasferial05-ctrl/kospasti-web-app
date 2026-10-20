@@ -6,6 +6,17 @@ export interface UploadedMediaResult {
   type: "IMAGE" | "VIDEO";
 }
 
+export const ALLOWED_FILE_EXTENSIONS = new Set([
+  ".jpg",
+  ".jpeg",
+  ".png",
+  ".webp",
+  ".mp4",
+  ".webm",
+]);
+
+export const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
+
 const VIDEO_EXTENSIONS = new Set([
   ".mp4",
   ".webm",
@@ -42,14 +53,31 @@ export async function saveUploadedFile(
   file: File,
   subDir = "properties"
 ): Promise<UploadedMediaResult> {
+  // 1. Validasi batas ukuran file (maksimal 10MB)
+  if (file.size > MAX_FILE_SIZE) {
+    throw new Error(
+      `Ukuran file melebihi batas maksimal 10MB (ukuran saat ini: ${(file.size / (1024 * 1024)).toFixed(2)}MB).`
+    );
+  }
+
+  // 2. Ekstraksi dan normalisasi ekstensi file
+  const originalName = file.name || "media";
+  const rawExt = path.extname(originalName).toLowerCase();
+  const ext = rawExt || (file.type && file.type.startsWith("video/") ? ".mp4" : ".jpg");
+
+  // 3. Validasi ekstensi file terhadap whitelist
+  if (!ALLOWED_FILE_EXTENSIONS.has(ext)) {
+    throw new Error(
+      `Format file '${ext}' tidak didukung. Ekstensi yang diizinkan: ${Array.from(ALLOWED_FILE_EXTENSIONS).join(", ")}`
+    );
+  }
+
   const uploadDir = path.join(process.cwd(), "public", "uploads", subDir);
 
   if (!fs.existsSync(uploadDir)) {
     fs.mkdirSync(uploadDir, { recursive: true });
   }
 
-  const originalName = file.name || "media";
-  const ext = path.extname(originalName) || (file.type.startsWith("video/") ? ".mp4" : ".jpg");
   const sanitizedBase = path
     .basename(originalName, ext)
     .replace(/[^a-zA-Z0-9_-]/g, "_")
