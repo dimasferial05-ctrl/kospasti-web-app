@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { verifyOwnerToken } from "@/lib/auth";
+import { isValidAdminRequest } from "@/lib/admin-auth";
 
 export async function GET(
   request: Request,
@@ -69,7 +70,7 @@ export async function GET(
     // Jika properti belum PUBLISHED, hanya izinkan jika diakses oleh admin atau pemilik properti
     if (property.status !== "PUBLISHED") {
       const cookieHeader = request.headers.get("cookie") || "";
-      const hasAdminToken = cookieHeader.includes("admin_token=");
+      const isAdmin = isValidAdminRequest(request);
       let isOwner = false;
       const partnerTokenMatch = cookieHeader.match(/partner_token=([^;]+)/);
       if (partnerTokenMatch) {
@@ -79,7 +80,7 @@ export async function GET(
         }
       }
 
-      if (!hasAdminToken && !isOwner) {
+      if (!isAdmin && !isOwner) {
         return NextResponse.json(
           {
             success: false,

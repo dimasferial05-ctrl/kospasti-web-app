@@ -1,11 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { deleteUploadedFile } from "@/lib/upload";
+import { isValidAdminRequest } from "@/lib/admin-auth";
 
 function validateAdminAuth(request: NextRequest): boolean {
-  const adminToken = request.cookies.get("admin_token")?.value;
-  const validToken = process.env.ADMIN_TOKEN || "kospasti_admin_authenticated";
-  return Boolean(adminToken && adminToken === validToken);
+  return isValidAdminRequest(request);
 }
 
 const WA_REGEX = /^[0-9+]{8,15}$/;

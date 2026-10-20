@@ -1,14 +1,14 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import crypto from "crypto";
+import { isValidAdminRequest } from "@/lib/admin-auth";
 
 export async function POST(request: Request) {
   try {
-    const adminToken = (request as unknown as { cookies?: { get: (k: string) => { value?: string } | undefined } }).cookies?.get?.("admin_token")?.value ||
-      request.headers.get("cookie")?.includes("admin_token=");
+    const isAdmin = isValidAdminRequest(request);
     const authHeader = request.headers.get("authorization");
 
-    if (!adminToken && authHeader !== "Bearer 778899") {
+    if (!isAdmin && authHeader !== "Bearer 778899") {
       return NextResponse.json(
         {
           success: false,

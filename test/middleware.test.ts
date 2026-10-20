@@ -41,6 +41,17 @@ describe("Next.js Security Middleware (src/middleware.ts)", () => {
 
       expect(response.status).toBe(200);
     });
+
+    it("menolak akses ke /api/admin/* dan mengembalikan 401 jika cookie admin_token bernilai acak/palsu", () => {
+      const request = new NextRequest("http://localhost:3000/api/admin/bookings", {
+        headers: {
+          cookie: "admin_token=fake_random_attacker_token",
+        },
+      });
+      const response = middleware(request);
+
+      expect(response.status).toBe(401);
+    });
   });
 
   describe("Proteksi Routing UI Admin (/admin/*)", () => {
@@ -83,6 +94,29 @@ describe("Next.js Security Middleware (src/middleware.ts)", () => {
       const request = new NextRequest("http://localhost:3000/admin", {
         headers: {
           cookie: "admin_token=kospasti_admin_authenticated",
+        },
+      });
+      const response = middleware(request);
+
+      expect(response.status).toBe(200);
+    });
+
+    it("melakukan redirect ke /admin/login jika pengguna mengakses /admin dengan cookie admin_token acak/palsu", () => {
+      const request = new NextRequest("http://localhost:3000/admin", {
+        headers: {
+          cookie: "admin_token=fake_unauthorized_token",
+        },
+      });
+      const response = middleware(request);
+
+      expect(response.status).toBe(307);
+      expect(response.headers.get("location")).toContain("/admin/login");
+    });
+
+    it("tidak mengalihkan ke /admin saat membuka /admin/login jika cookie admin_token palsu", () => {
+      const request = new NextRequest("http://localhost:3000/admin/login", {
+        headers: {
+          cookie: "admin_token=fake_unauthorized_token",
         },
       });
       const response = middleware(request);

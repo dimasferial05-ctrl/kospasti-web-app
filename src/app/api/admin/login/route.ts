@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import crypto from "crypto";
+import { getValidAdminToken } from "@/lib/admin-auth";
 
 // In-memory rate limiting for failed login attempts
 interface RateLimitRecord {
@@ -139,7 +140,7 @@ export async function POST(request: Request) {
     // Set secure HTTP-Only Cookie
     response.cookies.set({
       name: "admin_token",
-      value: "kospasti_admin_authenticated",
+      value: getValidAdminToken(),
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       path: "/",

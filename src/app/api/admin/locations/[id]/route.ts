@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { Prisma } from "@prisma/client";
+import { isValidAdminRequest } from "@/lib/admin-auth";
 
 function verifyAdmin(request: NextRequest) {
-  const token = request.cookies.get("admin_token")?.value;
-  return Boolean(token);
+  return isValidAdminRequest(request);
 }
 
 export async function GET(
