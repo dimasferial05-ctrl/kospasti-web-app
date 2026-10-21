@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { deleteUploadedFile, detectMediaType } from "@/lib/upload";
+import { deleteUploadedFile } from "@/lib/upload";
 import { isValidAdminRequest, createAdminUnauthorizedResponse } from "@/lib/admin-auth";
 import { parsePropertyPayload } from "@/lib/property-form-parser";
 
@@ -177,19 +177,6 @@ export async function PATCH(
 
     if (image_url !== undefined) {
       updateData.image_url = image_url ? String(image_url).trim() : null;
-      const existsInCurrentMedia = existingProperty.media.some(
-        (m) => m.url === updateData.image_url
-      );
-      if (
-        updateData.image_url &&
-        !existsInCurrentMedia &&
-        !newMediaToCreate.some((m) => m.url === updateData.image_url)
-      ) {
-        newMediaToCreate.push({
-          url: updateData.image_url,
-          type: detectMediaType(undefined, updateData.image_url),
-        });
-      }
     }
 
     if (address !== undefined) {
