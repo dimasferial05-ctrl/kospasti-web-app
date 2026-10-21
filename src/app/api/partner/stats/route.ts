@@ -25,11 +25,12 @@ export async function GET() {
 
     const ownerId = payload.ownerId;
 
-    // Ambil properti milik owner
+    // Ambil properti milik owner (hanya kolom yang diperlukan)
     const properties = await prisma.property.findMany({
       where: { owner_id: ownerId },
-      include: {
-        bookings: true,
+      select: {
+        id: true,
+        available_rooms: true,
       },
     });
 
@@ -41,16 +42,34 @@ export async function GET() {
 
     const propertyIds = properties.map((p) => p.id);
 
-    const bookings = await prisma.booking.findMany({
-      where: {
-        property_id: { in: propertyIds },
-      },
-    });
+    let totalBookings = 0;
+    let pendingBookings = 0;
+    let approvedBookings = 0;
+    let rejectedBookings = 0;
 
-    const totalBookings = bookings.length;
-    const pendingBookings = bookings.filter((b) => b.status === "PENDING" || b.status === "PAID").length;
-    const approvedBookings = bookings.filter((b) => b.status === "APPROVED" || b.status === "ACCEPTED").length;
-    const rejectedBookings = bookings.filter((b) => b.status === "REJECTED").length;
+    if (propertyIds.length > 0) {
+      const statusGroups = await prisma.booking.groupBy({
+        by: ["status"],
+        where: {
+          property_id: { in: propertyIds },
+        },
+        _count: {
+          _all: true,
+        },
+      });
+
+      for (const group of statusGroups) {
+        const count = group._count._all;
+        totalBookings += count;
+        if (group.status === "PENDING" || group.status === "PAID") {
+          pendingBookings += count;
+        } else if (group.status === "APPROVED" || group.status === "ACCEPTED") {
+          approvedBookings += count;
+        } else if (group.status === "REJECTED") {
+          rejectedBookings += count;
+        }
+      }
+    }
 
     return NextResponse.json(
       {
