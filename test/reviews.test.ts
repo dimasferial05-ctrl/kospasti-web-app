@@ -453,7 +453,7 @@ describe("Review & Rating Feature (Issue #118)", () => {
 
       const req = new NextRequest("http://localhost/api/admin/reviews", {
         headers: {
-          cookie: "admin_token=mock_admin_token",
+          cookie: "admin_token=kospasti_admin_authenticated",
         },
       });
 
@@ -494,7 +494,7 @@ describe("Review & Rating Feature (Issue #118)", () => {
       const patchReq = new NextRequest(`http://localhost/api/admin/reviews/${review.id}`, {
         method: "PATCH",
         headers: {
-          cookie: "admin_token=mock_admin_token",
+          cookie: "admin_token=kospasti_admin_authenticated",
         },
         body: JSON.stringify({ is_hidden: true }),
       });
