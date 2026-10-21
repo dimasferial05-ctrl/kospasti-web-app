@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
+import { isValidPartnerPassword, PARTNER_PASSWORD_ERROR_MESSAGE } from "@/lib/auth";
 
 export async function POST(request: Request) {
   try {
@@ -57,13 +58,11 @@ export async function POST(request: Request) {
     }
 
     // Password minimal 8 karakter, mengandung huruf besar, huruf kecil, dan angka
-    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
-    if (!passwordRegex.test(password)) {
+    if (!isValidPartnerPassword(password)) {
       return NextResponse.json(
         {
           success: false,
-          error:
-            "Password harus minimal 8 karakter dan mengandung setidaknya 1 huruf besar, 1 huruf kecil, dan 1 angka.",
+          error: PARTNER_PASSWORD_ERROR_MESSAGE,
         },
         { status: 400 }
       );

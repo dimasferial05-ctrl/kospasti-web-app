@@ -235,8 +235,12 @@ export default function PartnerProfilePage() {
   const handleSubmitPassword = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!newPassword || newPassword.length < 6) {
-      showToast("error", "Kata sandi baru minimal 6 karakter.");
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
+    if (!newPassword || !passwordRegex.test(newPassword)) {
+      showToast(
+        "error",
+        "Kata sandi baru harus minimal 8 karakter dan mengandung setidaknya 1 huruf besar, 1 huruf kecil, dan 1 angka."
+      );
       return;
     }
 
@@ -565,10 +569,10 @@ export default function PartnerProfilePage() {
                         type={showNewPassword ? "text" : "password"}
                         value={newPassword}
                         onChange={(e) => setNewPassword(e.target.value)}
-                        placeholder="Minimal 6 karakter"
+                        placeholder="Minimal 8 karakter (kombinasi huruf & angka)"
                         className="w-full pl-3.5 pr-10 py-2.5 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-medium focus:outline-none focus:ring-2 focus:ring-emerald-500/50 text-slate-900 dark:text-white"
                         required
-                        minLength={6}
+                        minLength={8}
                       />
                       <button
                         type="button"

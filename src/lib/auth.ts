@@ -105,3 +105,16 @@ export function isSafeRedirectPath(url?: string | null): boolean {
   return url.startsWith("/") && !url.startsWith("//") && !url.startsWith("/\\");
 }
 
+/**
+ * Aturan kekuatan kata sandi mitra:
+ * Minimal 8 karakter, mengandung setidaknya 1 huruf besar, 1 huruf kecil, dan 1 angka.
+ */
+export const PARTNER_PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
+export const PARTNER_PASSWORD_ERROR_MESSAGE =
+  "Password harus minimal 8 karakter dan mengandung setidaknya 1 huruf besar, 1 huruf kecil, dan 1 angka.";
+
+export function isValidPartnerPassword(password: unknown): boolean {
+  if (typeof password !== "string") return false;
+  return PARTNER_PASSWORD_REGEX.test(password);
+}
+

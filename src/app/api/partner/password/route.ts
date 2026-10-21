@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
-import { verifyOwnerToken } from "@/lib/auth";
+import { verifyOwnerToken, isValidPartnerPassword, PARTNER_PASSWORD_ERROR_MESSAGE } from "@/lib/auth";
 
 async function getPartnerToken(request?: NextRequest): Promise<string | undefined> {
   let token: string | undefined;
@@ -59,9 +59,9 @@ export async function PUT(request: NextRequest) {
       );
     }
 
-    if (new_password.length < 6) {
+    if (!isValidPartnerPassword(new_password)) {
       return NextResponse.json(
-        { success: false, error: "Kata sandi baru minimal 6 karakter." },
+        { success: false, error: PARTNER_PASSWORD_ERROR_MESSAGE },
         { status: 400 }
       );
     }
