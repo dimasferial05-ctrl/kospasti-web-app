@@ -27,16 +27,17 @@ export async function GET(request?: Request) {
     };
 
     let distanceMap: Map<string, number> | null = null;
+    let nearbyIds: string[] = [];
     if (lat && lng && !isNaN(parseFloat(lat)) && !isNaN(parseFloat(lng))) {
       const radiusKm = radius && !isNaN(parseFloat(radius)) ? parseFloat(radius) : 10;
       const nearbyList = await findPropertiesWithinRadius(
         parseFloat(lat),
         parseFloat(lng),
         radiusKm,
-        50
+        Math.max(100, skip + limit)
       );
       distanceMap = new Map();
-      const nearbyIds: string[] = [];
+      nearbyIds = [];
       for (const item of nearbyList) {
         nearbyIds.push(item.id);
         distanceMap.set(item.id, item.distance);
@@ -83,38 +84,94 @@ export async function GET(request?: Request) {
       whereClause.is_24_hours = true;
     }
 
-    const [total, rawProperties] = await Promise.all([
-      prisma.property.count({ where: whereClause }),
-      prisma.property.findMany({
-        where: whereClause,
+    type RawPropertyItem = Prisma.PropertyGetPayload<{
+      include: {
+        owner: {
+          select: {
+            name: true;
+          };
+        };
+        media: true;
+        room_types: {
+          orderBy: {
+            price_per_month: "asc";
+          };
+        };
+        reviews: {
+          where: {
+            is_hidden: false;
+          };
+          select: {
+            rating: true;
+          };
+        };
+      };
+    }>;
+
+    const propertyInclude = {
+      owner: {
+        select: {
+          name: true,
+        },
+      },
+      media: true,
+      room_types: {
         orderBy: {
-          updated_at: "desc",
+          price_per_month: "asc" as const,
         },
-        skip,
-        take: limit,
-        include: {
-          owner: {
-            select: {
-              name: true,
-            },
-          },
-          media: true,
-          room_types: {
-            orderBy: {
-              price_per_month: "asc",
-            },
-          },
-          reviews: {
-            where: {
-              is_hidden: false,
-            },
-            select: {
-              rating: true,
-            },
-          },
+      },
+      reviews: {
+        where: {
+          is_hidden: false,
         },
-      }),
-    ]);
+        select: {
+          rating: true,
+        },
+      },
+    };
+
+    let total = 0;
+    let rawProperties: RawPropertyItem[] = [];
+
+    if (distanceMap) {
+      if (nearbyIds.length === 0) {
+        total = 0;
+        rawProperties = [];
+      } else {
+        const matchingRows = await prisma.property.findMany({
+          where: whereClause,
+          select: { id: true },
+        });
+        const matchingIdSet = new Set(matchingRows.map((r) => r.id));
+        const filteredSortedIds = nearbyIds.filter((id) => matchingIdSet.has(id));
+        total = filteredSortedIds.length;
+        const pageIds = filteredSortedIds.slice(skip, skip + limit);
+
+        if (pageIds.length > 0) {
+          rawProperties = await prisma.property.findMany({
+            where: { id: { in: pageIds } },
+            include: propertyInclude,
+          });
+        } else {
+          rawProperties = [];
+        }
+      }
+    } else {
+      const [countResult, propertiesResult] = await Promise.all([
+        prisma.property.count({ where: whereClause }),
+        prisma.property.findMany({
+          where: whereClause,
+          orderBy: {
+            updated_at: "desc",
+          },
+          skip,
+          take: limit,
+          include: propertyInclude,
+        }),
+      ]);
+      total = countResult;
+      rawProperties = propertiesResult;
+    }
 
     const properties = rawProperties.map((property) => {
       const roomTypes = property.room_types || [];
