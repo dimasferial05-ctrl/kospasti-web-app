@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { saveUploadedFiles, saveUploadedFile, detectMediaType } from "@/lib/upload";
+import { detectMediaType } from "@/lib/upload";
+import { parsePropertyPayload } from "@/lib/property-form-parser";
 import { isValidAdminRequest, createAdminUnauthorizedResponse } from "@/lib/admin-auth";
 
 export async function GET(request: NextRequest) {
@@ -56,157 +57,29 @@ export async function POST(request: NextRequest) {
       return createAdminUnauthorizedResponse();
     }
 
-    const contentType = request.headers.get("content-type") || "";
+    const parsed = await parsePropertyPayload(request);
+    const {
+      name,
+      gender_type,
+      facilities,
+      image_url,
+      address,
+      latitude,
+      longitude,
+      owner_id,
+      description,
+      rules,
+      rental_terms,
+      youtube_url,
+      room_types = [],
+      newMediaToCreate = [],
+    } = parsed;
 
-    let name: string | undefined;
-    let price_per_month: number | string | undefined;
-    let available_rooms: number | string | undefined;
-    let gender_type: string | undefined;
-    let facilities: string | undefined;
-    let image_url: string | null | undefined;
-    let address: string | null | undefined;
-    let latitude: number | string | null | undefined;
-    let longitude: number | string | null | undefined;
-    let owner_id: string | undefined;
-    let is_pet_friendly: boolean = false;
-    let is_24_hours: boolean = false;
-    let description: string | null | undefined;
-    let rules: string | null | undefined;
-    let rental_terms: string | null | undefined;
-    let youtube_url: string | null | undefined;
-    let room_types: Array<{
-      name: string;
-      price_per_month: number;
-      available_rooms: number;
-      facilities?: string | null;
-      specifications?: string | null;
-      image_url?: string | null;
-    }> = [];
-    const mediaToCreate: { url: string; type: string }[] = [];
-
-    if (contentType.includes("multipart/form-data")) {
-      const formData = await request.formData();
-      name = (formData.get("name") as string) || undefined;
-      price_per_month = formData.get("price_per_month") as string | undefined;
-      available_rooms = formData.get("available_rooms") as string | undefined;
-      gender_type = (formData.get("gender_type") as string) || undefined;
-      facilities = (formData.get("facilities") as string) || undefined;
-      image_url = (formData.get("image_url") as string) || null;
-      address = (formData.get("address") as string) || null;
-      latitude = formData.get("latitude") as string | undefined;
-      longitude = formData.get("longitude") as string | undefined;
-      owner_id = (formData.get("owner_id") as string) || undefined;
-      description = (formData.get("description") as string) || null;
-      rules = (formData.get("rules") as string) || null;
-      rental_terms = (formData.get("rental_terms") as string) || null;
-      youtube_url = (formData.get("youtube_url") as string) || null;
-      is_pet_friendly =
-        formData.get("is_pet_friendly") === "true" ||
-        formData.get("is_pet_friendly") === "1";
-      is_24_hours =
-        formData.get("is_24_hours") === "true" ||
-        formData.get("is_24_hours") === "1";
-
-      const rawRoomTypes = formData.get("room_types") as string | null;
-      if (rawRoomTypes) {
-        try {
-          const parsed = JSON.parse(rawRoomTypes);
-          if (Array.isArray(parsed) && parsed.length > 0) {
-            for (let i = 0; i < parsed.length; i++) {
-              const rt = parsed[i];
-              let rtImageUrl = rt.image_url ? String(rt.image_url).trim() : null;
-
-              // Cek file foto tipe kamar yang diunggah
-              const rtFile = formData.get(`room_type_file_${i}`);
-              if (rtFile && typeof rtFile === "object" && "arrayBuffer" in rtFile && (rtFile as File).size > 0) {
-                const saved = await saveUploadedFile(rtFile as File, "properties");
-                rtImageUrl = saved.url;
-              }
-
-              room_types.push({
-                name: String(rt.name || "Standar").trim(),
-                price_per_month: Math.floor(Number(rt.price_per_month || 0)),
-                available_rooms: Math.floor(Number(rt.available_rooms || 0)),
-                facilities: rt.facilities ? String(rt.facilities).trim() : null,
-                specifications: rt.specifications ? String(rt.specifications).trim() : null,
-                image_url: rtImageUrl,
-              });
-            }
-          }
-        } catch (err) {
-          console.warn("Gagal parsing room_types formData:", err);
-        }
-      }
-
-      // Ambil file media yang diunggah
-      const filesFromMedia = formData.getAll("media");
-      const filesFromFiles = formData.getAll("files");
-      const allRawFiles = [...filesFromMedia, ...filesFromFiles];
-
-      const validFiles: File[] = [];
-      for (const item of allRawFiles) {
-        if (item && typeof item === "object" && "arrayBuffer" in item && (item as File).size > 0) {
-          validFiles.push(item as File);
-        } else if (typeof item === "string" && item.trim()) {
-          mediaToCreate.push({
-            url: item.trim(),
-            type: detectMediaType(undefined, item.trim()),
-          });
-        }
-      }
-
-      if (validFiles.length > 0) {
-        const saved = await saveUploadedFiles(validFiles);
-        for (const item of saved) {
-          mediaToCreate.push(item);
-        }
-      }
-    } else {
-      const body = await request.json();
-      name = body.name;
-      price_per_month = body.price_per_month;
-      available_rooms = body.available_rooms;
-      gender_type = body.gender_type;
-      facilities = body.facilities;
-      image_url = body.image_url;
-      address = body.address;
-      latitude = body.latitude;
-      longitude = body.longitude;
-      owner_id = body.owner_id;
-      description = body.description;
-      rules = body.rules;
-      rental_terms = body.rental_terms;
-      youtube_url = body.youtube_url;
-      is_pet_friendly = Boolean(body.is_pet_friendly);
-      is_24_hours = Boolean(body.is_24_hours);
-
-      if (Array.isArray(body.room_types) && body.room_types.length > 0) {
-        room_types = body.room_types.map((rt: { name?: string; price_per_month?: number | string; available_rooms?: number | string; facilities?: string; specifications?: string; image_url?: string }) => ({
-          name: String(rt.name || "Standar").trim(),
-          price_per_month: Math.floor(Number(rt.price_per_month || 0)),
-          available_rooms: Math.floor(Number(rt.available_rooms || 0)),
-          facilities: rt.facilities ? String(rt.facilities).trim() : null,
-          specifications: rt.specifications ? String(rt.specifications).trim() : null,
-          image_url: rt.image_url ? String(rt.image_url).trim() : null,
-        }));
-      }
-
-      if (Array.isArray(body.media)) {
-        for (const m of body.media) {
-          if (typeof m === "string" && m.trim()) {
-            mediaToCreate.push({
-              url: m.trim(),
-              type: detectMediaType(undefined, m.trim()),
-            });
-          } else if (m && typeof m === "object" && m.url) {
-            mediaToCreate.push({
-              url: String(m.url).trim(),
-              type: m.type === "VIDEO" ? "VIDEO" : "IMAGE",
-            });
-          }
-        }
-      }
-    }
+    let price_per_month = parsed.price_per_month;
+    let available_rooms = parsed.available_rooms;
+    const is_pet_friendly = Boolean(parsed.is_pet_friendly);
+    const is_24_hours = Boolean(parsed.is_24_hours);
+    const mediaToCreate = [...newMediaToCreate];
 
     if (room_types.length > 0) {
       if (price_per_month === undefined || price_per_month === null || isNaN(Number(price_per_month)) || Number(price_per_month) <= 0) {
