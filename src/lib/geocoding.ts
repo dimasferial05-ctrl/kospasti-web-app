@@ -1,7 +1,7 @@
 import {
   COMMON_LOCATION_COORDINATES,
   findCoordinateInDictionary,
-} from "@/app/api/ai-search/route";
+} from "@/data/coordinates";
 
 export { COMMON_LOCATION_COORDINATES, findCoordinateInDictionary };
 
