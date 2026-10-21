@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { deleteUploadedFile } from "@/lib/upload";
+import { deleteUploadedFile, detectMediaType } from "@/lib/upload";
 import { isValidAdminRequest, createAdminUnauthorizedResponse } from "@/lib/admin-auth";
 import { parsePropertyPayload } from "@/lib/property-form-parser";
 
