@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { reverseGeocodeCoordinate } from "@/lib/geocoding";
 
 export async function GET(request: Request) {
   try {
@@ -23,29 +24,20 @@ export async function GET(request: Request) {
       );
     }
 
-    const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latNum}&lon=${lngNum}&addressdetails=1&accept-language=id`;
+    const result = await reverseGeocodeCoordinate(latNum, lngNum);
 
-    const res = await fetch(url, {
-      headers: {
-        "User-Agent": "KosPasti-App/1.0 (adminkospasti@gmail.com)",
-      },
-      next: { revalidate: 3600 },
-    });
-
-    if (!res.ok) {
+    if (!result.success) {
       return NextResponse.json(
-        { success: false, error: "Gagal memproses geocoding." },
+        { success: false, error: result.error || "Gagal memproses geocoding." },
         { status: 502 }
       );
     }
 
-    const data = await res.json();
-    const displayName = data?.display_name || "";
-
     return NextResponse.json({
       success: true,
-      address: displayName,
-      details: data?.address || null,
+      address: result.address,
+      details: result.details,
+      source: result.source,
     });
   } catch (error) {
     console.error("Error reverse geocoding:", error);
