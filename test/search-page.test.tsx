@@ -64,12 +64,13 @@ describe("Search Page Component (/search)", () => {
     expect(content).toContain("text-slate-300");
   });
 
-  it("membungkus setiap kartu kos dengan Link ke /kos/[id]", () => {
+  it("memastikan setiap kartu kos dirender mandiri tanpa nesting tautan ilegal pada grid", () => {
     const filePath = path.resolve(__dirname, "../src/app/search/page.tsx");
     const content = fs.readFileSync(filePath, "utf-8");
 
-    expect(content).toContain("import Link from \"next/link\"");
-    expect(content).toContain("href={`/kos/${property.id}`}");
+    // Kartu kos dibungkus dalam div responsif, bukan tag Link luar yang ilegal untuk elemen interaktif di dalamnya
+    expect(content).toContain("<KosPropertyCard");
+    expect(content).not.toMatch(/<Link[^>]*>\s*<KosPropertyCard/);
   });
 
   it("menggunakan layout CSS Grid responsif untuk daftar kos", () => {
