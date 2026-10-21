@@ -1,6 +1,7 @@
 import { execSync } from "child_process";
 import fs from "fs";
 import path from "path";
+import { toTestDatabaseUrl } from "./setup-env";
 
 export default function setup() {
   try {
@@ -16,10 +17,14 @@ export default function setup() {
     }
 
     if (process.env.DATABASE_URL) {
-      execSync("npx prisma db push --skip-generate", {
-        stdio: "pipe",
-        env: { ...process.env },
-      });
+      process.env.DATABASE_URL = toTestDatabaseUrl(process.env.DATABASE_URL);
+
+      if (process.env.FORCE_DB_PUSH === "true") {
+        execSync("npx prisma db push --skip-generate", {
+          stdio: "pipe",
+          env: { ...process.env },
+        });
+      }
     }
   } catch {
     // Abaikan jika database push gagal di environment testing
