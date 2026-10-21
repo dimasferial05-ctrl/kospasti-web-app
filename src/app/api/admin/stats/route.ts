@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { isValidAdminRequest, createAdminUnauthorizedResponse } from "@/lib/admin-auth";
+import { getWibDayRange } from "@/lib/date-utils";
 
 export async function GET(request: NextRequest) {
   try {
@@ -11,10 +12,8 @@ export async function GET(request: NextRequest) {
     // 1. Hitung total kos
     const totalProperties = await prisma.property.count();
 
-    // 2. Hitung total booking & booking hari ini (reset harian)
-    const now = new Date();
-    const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0);
-    const endOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
+    // 2. Hitung total booking & booking hari ini (reset harian zona WIB UTC+7)
+    const { startOfToday, endOfToday } = getWibDayRange();
 
     const totalBookings = await prisma.booking.count();
     const todayBookings = await prisma.booking.count({
