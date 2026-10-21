@@ -96,13 +96,17 @@ export async function POST(request: Request) {
       year: "numeric",
     });
 
-    // Execute decision in atomic transaction
-    await prisma.$transaction(async (tx) => {
-      // 1. Mark magic link as used
-      await tx.magicLink.update({
-        where: { id: magicLink.id },
+    // Execute decision in atomic transaction with concurrency protection
+    const decisionResult = await prisma.$transaction(async (tx) => {
+      // 1. Mark magic link as used atomically with conditional update
+      const updated = await tx.magicLink.updateMany({
+        where: { id: magicLink.id, is_used: false },
         data: { is_used: true },
       });
+
+      if (updated.count === 0) {
+        return { alreadyUsed: true };
+      }
 
       if (action === "ACCEPT") {
         // Update booking to ACCEPTED
@@ -134,7 +138,19 @@ export async function POST(request: Request) {
           });
         }
       }
+
+      return { alreadyUsed: false };
     });
+
+    if (decisionResult.alreadyUsed) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Tautan verifikasi ini sudah pernah digunakan sebelumnya atau sedang diproses.",
+        },
+        { status: 410 }
+      );
+    }
 
     // Send WhatsApp notification to student regarding owner's decision
     if (booking.student_whatsapp) {
