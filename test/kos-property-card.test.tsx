@@ -1,7 +1,14 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { KosPropertyCard } from "../src/components/features/KosPropertyCard";
+
+// Mock next/navigation
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({
+    push: vi.fn(),
+  }),
+}));
 
 describe("KosPropertyCard Component", () => {
   const defaultProps = {
@@ -104,6 +111,35 @@ describe("KosPropertyCard Component", () => {
     );
     expect(html).toContain("Mulai Rp 500.000");
     expect(html).toContain("3 Tipe");
+  });
+
+  it("merender tautan spesifik ke /kos/[id] pada thumbnail dan judul saat id disertakan", () => {
+    const html = renderToStaticMarkup(
+      <KosPropertyCard
+        {...defaultProps}
+        id="prop-123"
+      />
+    );
+    expect(html).toContain('href="/kos/prop-123"');
+    // Thumbnail link
+    expect(html).toContain('aria-label="Lihat detail Kos Mawar Putra"');
+    // Title link
+    expect(html).toContain('>Kos Mawar Putra</a>');
+  });
+
+  it("memastikan tidak ada elemen button yang bersarang di dalam elemen jangkar (<a>)", () => {
+    const html = renderToStaticMarkup(
+      <KosPropertyCard
+        {...defaultProps}
+        id="prop-123"
+        roomTypes={[
+          { name: "Deluxe", price_per_month: 800000, image_url: "https://example.com/deluxe.jpg" },
+        ]}
+      />
+    );
+
+    // Memastikan tidak ada pola <a ...><button ...></a> (illegal interactive nesting)
+    expect(html).not.toMatch(/<a\b[^>]*>(?:(?!<\/a>)[\s\S])*?<button\b/i);
   });
 });
 

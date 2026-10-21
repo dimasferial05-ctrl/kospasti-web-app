@@ -8,7 +8,6 @@ import {
   Search,
   ArrowLeft,
   Sparkles,
-  Loader2,
   LogIn,
   SlidersHorizontal,
   Building2,
@@ -383,9 +382,8 @@ export default function FavoritPage() {
           /* Cards Grid */
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {filteredItems.map(({ property }) => (
-              <Link
+              <div
                 key={property.id}
-                href={`/kos/${property.id}`}
                 className="block h-full transition-transform hover:scale-[1.02]"
               >
                 <KosPropertyCard
@@ -407,7 +405,7 @@ export default function FavoritPage() {
                   isSaved={true}
                   onWishlistToggle={(isSaved) => handleWishlistToggle(property.id, isSaved)}
                 />
-              </Link>
+              </div>
             ))}
           </div>
         )}
