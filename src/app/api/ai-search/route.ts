@@ -22,42 +22,14 @@ import {
   COMMON_LOCATION_COORDINATES,
   findCoordinateInDictionary,
 } from "@/data/coordinates";
+import { geocodeLocation } from "@/lib/geocoding";
 
 export { COMMON_LOCATION_COORDINATES, findCoordinateInDictionary };
 
-
-
 export async function fetchOnlineGeocode(query: string): Promise<{ lat: number; lng: number } | null> {
-  try {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 2000);
-
-    const res = await fetch(
-      `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(
-        query + ", Indonesia"
-      )}&format=json&limit=1&countrycodes=id`,
-      {
-        headers: {
-          "User-Agent": "Kospasti-AI-App/1.0",
-          "Accept-Language": "id",
-        },
-        signal: controller.signal,
-      }
-    );
-    clearTimeout(timeoutId);
-
-    if (res.ok) {
-      const data = await res.json();
-      if (Array.isArray(data) && data.length > 0) {
-        const lat = parseFloat(data[0].lat);
-        const lon = parseFloat(data[0].lon);
-        if (!isNaN(lat) && !isNaN(lon)) {
-          return { lat, lng: lon };
-        }
-      }
-    }
-  } catch {
-    // Abaikan jika timeout atau offline
+  const result = await geocodeLocation(query);
+  if (result) {
+    return { lat: result.lat, lng: result.lng };
   }
   return null;
 }
