@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useMemo, useRef, useCallback, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
+import Image from "next/image";
 import MapViewer, { PropertyMapItem, SearchTargetLocation } from "@/components/map/MapViewer";
 import { SmartSearchBar } from "@/components/features/SmartSearchBar";
 import {
@@ -550,12 +551,12 @@ function MapSearchContent() {
                         {/* Thumbnail Image */}
                         <div className="relative w-28 h-28 shrink-0 rounded-xl overflow-hidden bg-slate-100 dark:bg-slate-800">
                           {property.image_url ? (
-                            /* eslint-disable-next-line @next/next/no-img-element */
-                            <img
+                            <Image
                               src={property.image_url}
                               alt={property.name}
-                              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                              loading="lazy"
+                              fill
+                              sizes="112px"
+                              className="object-cover group-hover:scale-105 transition-transform duration-300"
                             />
                           ) : (
                             <div className="w-full h-full flex items-center justify-center text-slate-400 dark:text-slate-500 text-xs">

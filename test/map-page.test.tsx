@@ -184,6 +184,12 @@ describe("Interactive Google Maps Property Search (/map) - Issue #121", () => {
       expect(content).toContain("focus-visible:ring-emerald-500");
       expect(content).toContain("focus:outline-none");
     });
+
+    it("menggunakan Image dari next/image dan tidak memiliki linter suppression no-img-element pada thumbnail kartu kos", () => {
+      expect(content).toContain('import Image from "next/image"');
+      expect(content).not.toContain("@next/next/no-img-element");
+      expect(content).not.toMatch(/<img\b/);
+    });
   });
 });
 

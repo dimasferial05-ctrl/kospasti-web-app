@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { Home, User, Clock, ChevronLeft, ChevronRight, Star, MapPin } from "lucide-react";
 import { WishlistButton } from "@/components/features/WishlistButton";
@@ -166,12 +167,13 @@ export function KosPropertyCard({
           >
             {slides.length > 0 ? (
               slides.map((slide, idx) => (
-                /* eslint-disable-next-line @next/next/no-img-element */
-                <img
+                <Image
                   key={slide.imageUrl + idx}
                   src={slide.imageUrl}
                   alt={name}
-                  className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-700 ease-in-out group-hover:scale-110 transition-transform ${
+                  fill
+                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 380px"
+                  className={`object-cover transition-opacity duration-700 ease-in-out group-hover:scale-110 transition-transform ${
                     idx === activeSlideIndex
                       ? "opacity-100 z-10"
                       : "opacity-0 z-0 pointer-events-none"
@@ -189,12 +191,13 @@ export function KosPropertyCard({
           </Link>
         ) : slides.length > 0 ? (
           slides.map((slide, idx) => (
-            /* eslint-disable-next-line @next/next/no-img-element */
-            <img
+            <Image
               key={slide.imageUrl + idx}
               src={slide.imageUrl}
               alt={name}
-              className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-700 ease-in-out group-hover:scale-110 transition-transform ${
+              fill
+              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 380px"
+              className={`object-cover transition-opacity duration-700 ease-in-out group-hover:scale-110 transition-transform ${
                 idx === activeSlideIndex
                   ? "opacity-100 z-10"
                   : "opacity-0 z-0 pointer-events-none"
