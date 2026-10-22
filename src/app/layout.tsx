@@ -55,7 +55,7 @@ export default async function RootLayout({
           <NetworkStatusNotifier />
           <Header isLoggedIn={isLoggedIn} />
           <ProfileCompletionModal />
-          <div className="flex-1 pb-20 md:pb-0 flex flex-col">
+          <div className={`flex-1 flex flex-col ${isLoggedIn ? "pb-20 md:pb-0" : ""}`}>
             {children}
           </div>
           <BottomNav isLoggedIn={isLoggedIn} />
