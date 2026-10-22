@@ -245,10 +245,18 @@ export function SmartSearchBar({
               <Search className={isHero ? "w-5 h-5 sm:w-6 sm:h-6 text-emerald-600/70 dark:text-emerald-400" : "w-4 h-4 text-emerald-600/70 dark:text-emerald-400"} />
             </div>
 
-            {/* Text Input */}
+            {/* Text Input dengan Semantik WAI-ARIA Combobox & Label Aksesibel */}
             <input
               ref={inputRef}
               type="text"
+              role="combobox"
+              aria-autocomplete="list"
+              aria-expanded={isOpen && activeSuggestions.length > 0}
+              aria-controls="location-suggestions-list"
+              aria-activedescendant={
+                isOpen && highlightedIndex >= 0 ? `suggestion-item-${highlightedIndex}` : undefined
+              }
+              aria-label="Cari kos berdasarkan lokasi, kampus, atau fasilitas"
               value={currentValue}
               onChange={handleChange}
               onKeyDown={handleInputKeyDown}
@@ -273,6 +281,7 @@ export function SmartSearchBar({
                 <button
                   type="button"
                   onClick={onReset}
+                  aria-label="Reset pencarian"
                   className="p-2 sm:px-3.5 sm:py-2 text-xs font-semibold text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200 bg-slate-100/80 hover:bg-slate-200/80 dark:bg-slate-800 dark:hover:bg-slate-700 rounded-xl sm:rounded-full transition-all flex items-center gap-1 cursor-pointer active:scale-95"
                   title="Reset Pencarian"
                 >
@@ -285,6 +294,7 @@ export function SmartSearchBar({
               <button
                 type="submit"
                 disabled={isLoading || !currentValue.trim()}
+                aria-label="Cari kos"
                 className={`rounded-xl sm:rounded-full bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-bold transition-all duration-200 shadow-soft hover:shadow-float flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer focus:outline-none focus:ring-2 focus:ring-emerald-500/50 ${
                   isHero
                     ? "px-5 sm:px-7 py-2.5 sm:py-3 text-xs sm:text-sm"
@@ -326,8 +336,11 @@ export function SmartSearchBar({
               </div>
             </div>
 
-            {/* Scrollable List with sleek custom scrollbar */}
+            {/* Scrollable List with sleek custom scrollbar & Semantik Listbox */}
             <div
+              id="location-suggestions-list"
+              role="listbox"
+              aria-label="Rekomendasi Lokasi"
               ref={listRef}
               className="p-1.5 flex flex-col gap-0.5 max-h-64 sm:max-h-72 overflow-y-auto overscroll-contain [scrollbar-width:thin] [scrollbar-color:theme(colors.slate.200)_transparent] dark:[scrollbar-color:theme(colors.slate.700)_transparent] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:bg-slate-200 dark:[&::-webkit-scrollbar-thumb]:bg-slate-700 [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-slate-300 dark:hover:[&::-webkit-scrollbar-thumb]:bg-slate-600"
             >
@@ -339,6 +352,9 @@ export function SmartSearchBar({
                 return (
                   <button
                     key={idx}
+                    id={`suggestion-item-${idx}`}
+                    role="option"
+                    aria-selected={isHighlighted}
                     type="button"
                     onClick={() => handleSelectLocation(item)}
                     onMouseEnter={() => setHighlightedIndex(idx)}
