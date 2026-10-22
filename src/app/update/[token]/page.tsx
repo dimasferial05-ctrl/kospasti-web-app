@@ -13,6 +13,8 @@ import {
   ArrowLeft,
   Building2,
   BedDouble,
+  AlertCircle,
+  X,
 } from "lucide-react";
 
 interface RoomType {
@@ -45,6 +47,7 @@ export default function UpdateRoomPage() {
   const [roomCounts, setRoomCounts] = useState<Record<string, number>>({});
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [isSuccess, setIsSuccess] = useState<boolean>(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!token) return;
@@ -134,12 +137,13 @@ export default function UpdateRoomPage() {
       propertyData?.properties[0];
 
     if (!token || !targetProperty) {
-      alert("Data properti atau token tidak valid.");
+      setSubmitError("Data properti atau token tidak valid.");
       return;
     }
 
     try {
       setIsSubmitting(true);
+      setSubmitError(null);
 
       const hasRoomTypes =
         targetProperty.room_types && targetProperty.room_types.length > 0;
@@ -173,11 +177,11 @@ export default function UpdateRoomPage() {
       if (response.ok && result.success) {
         setIsSuccess(true);
       } else {
-        alert(result.error || "Gagal menyimpan data.");
+        setSubmitError(result.error || "Gagal menyimpan data.");
       }
     } catch (err) {
       console.error("Gagal mengirim data pembaruan:", err);
-      alert("Gagal menyimpan data. Terjadi kesalahan jaringan.");
+      setSubmitError("Gagal menyimpan data. Terjadi kesalahan jaringan.");
     } finally {
       setIsSubmitting(false);
     }
@@ -492,6 +496,28 @@ export default function UpdateRoomPage() {
           Tekan tombol <span className="font-bold text-slate-600">[+]</span> atau{" "}
           <span className="font-bold text-slate-600">[-]</span> untuk memperbarui jumlah kamar kosong siap sewa.
         </p>
+
+        {/* Submit Error Banner */}
+        {submitError && (
+          <div
+            role="alert"
+            aria-live="assertive"
+            className="w-full p-4 rounded-2xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800/60 text-rose-800 dark:text-rose-200 text-sm font-semibold flex items-center justify-between gap-3 animate-in fade-in"
+          >
+            <div className="flex items-center gap-2.5">
+              <AlertCircle className="w-5 h-5 text-rose-600 dark:text-rose-400 shrink-0" />
+              <span>{submitError}</span>
+            </div>
+            <button
+              type="button"
+              onClick={() => setSubmitError(null)}
+              className="text-rose-500 hover:text-rose-700 dark:text-rose-400 dark:hover:text-rose-200 p-0.5 rounded transition-colors cursor-pointer"
+              aria-label="Tutup pesan error"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        )}
 
         {/* Submit Button */}
         <div className="w-full pt-2">

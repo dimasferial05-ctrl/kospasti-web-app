@@ -51,6 +51,7 @@ export default function AdminOwnersPage() {
   const [generatingId, setGeneratingId] = useState<string | null>(null);
   const [generatedModal, setGeneratedModal] = useState<GeneratedModalData | null>(null);
   const [copied, setCopied] = useState(false);
+  const [errorNotice, setErrorNotice] = useState<string | null>(null);
 
   // State Modal Tambah Pemilik
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -169,6 +170,7 @@ export default function AdminOwnersPage() {
   const handleGenerateLink = async (owner: OwnerItem) => {
     if (generatingId) return;
     setGeneratingId(owner.id);
+    setErrorNotice(null);
 
     try {
       const res = await fetch("/api/magic-link/generate", {
@@ -192,11 +194,11 @@ export default function AdminOwnersPage() {
           ownerPhone: owner.whatsapp_number,
         });
       } else {
-        alert(data.error || "Gagal membuat magic link");
+        setErrorNotice(data.error || "Gagal membuat magic link");
       }
     } catch (err) {
       console.error("Error generating magic link:", err);
-      alert("Terjadi kesalahan koneksi saat membuat magic link");
+      setErrorNotice("Terjadi kesalahan koneksi saat membuat magic link");
     } finally {
       setGeneratingId(null);
     }
@@ -400,6 +402,27 @@ export default function AdminOwnersPage() {
           </button>
         </div>
       </div>
+
+      {errorNotice && (
+        <div
+          role="alert"
+          aria-live="assertive"
+          className="p-4 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800/60 text-rose-800 dark:text-rose-200 text-sm font-semibold flex items-center justify-between gap-3 animate-in fade-in"
+        >
+          <div className="flex items-center gap-2.5">
+            <AlertCircle className="w-5 h-5 text-rose-600 dark:text-rose-400 shrink-0" />
+            <span>{errorNotice}</span>
+          </div>
+          <button
+            type="button"
+            onClick={() => setErrorNotice(null)}
+            className="text-rose-500 hover:text-rose-700 dark:text-rose-400 dark:hover:text-rose-200 p-1 rounded-lg transition-colors cursor-pointer"
+            aria-label="Tutup pesan error"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+      )}
 
       {/* Owners Table */}
       <div className="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 overflow-hidden">

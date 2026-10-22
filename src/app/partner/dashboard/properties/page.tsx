@@ -111,6 +111,7 @@ export default function PartnerPropertiesPage() {
   const [properties, setProperties] = useState<Property[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [actionError, setActionError] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
 
   // Modal State
@@ -169,6 +170,7 @@ export default function PartnerPropertiesPage() {
     setEditingProperty(null);
     setModalMode("NEW");
     setErrorMsg(null);
+    setActionError(null);
   };
 
   const openEditModal = (prop: Property) => {
@@ -223,12 +225,14 @@ export default function PartnerPropertiesPage() {
     setSelectedFiles([]);
     setModalMode("EDIT");
     setErrorMsg(null);
+    setActionError(null);
   };
 
   const closeModal = () => {
     setModalMode(null);
     setEditingProperty(null);
     setSelectedFiles([]);
+    setActionError(null);
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -261,7 +265,7 @@ export default function PartnerPropertiesPage() {
 
   const removeRoomType = (index: number) => {
     if (roomTypes.length <= 1) {
-      alert("Properti wajib memiliki minimal 1 tipe kamar.");
+      setActionError("Properti wajib memiliki minimal 1 tipe kamar.");
       return;
     }
     setRoomTypes((prev) => prev.filter((_, i) => i !== index));
@@ -313,10 +317,10 @@ export default function PartnerPropertiesPage() {
           image_url: mediaUrl && !mediaUrl.startsWith("/uploads/") ? mediaUrl : "",
         }));
       } else {
-        alert(data.error || "Gagal mengatur thumbnail.");
+        setActionError(data.error || "Gagal mengatur thumbnail.");
       }
     } catch {
-      alert("Terjadi kesalahan saat mengatur thumbnail.");
+      setActionError("Terjadi kesalahan saat mengatur thumbnail.");
     } finally {
       setSettingThumbnailUrl(null);
     }
@@ -353,10 +357,10 @@ export default function PartnerPropertiesPage() {
           prev.map((p) => (p.id === editingProperty.id ? updatedProperty : p))
         );
       } else {
-        alert(data.error || "Gagal menghapus media.");
+        setActionError(data.error || "Gagal menghapus media.");
       }
     } catch {
-      alert("Terjadi kesalahan saat menghapus media.");
+      setActionError("Terjadi kesalahan saat menghapus media.");
     } finally {
       setDeletingMediaId(null);
     }
@@ -839,6 +843,27 @@ export default function PartnerPropertiesPage() {
                 <p className="text-[11px] text-amber-800 dark:text-amber-300 leading-relaxed">
                   💡 Silakan perbaiki data atau foto kos sesuai catatan di atas. Begitu Anda klik tombol <strong>&ldquo;Simpan &amp; Ajukan Ulang ke Admin&rdquo;</strong> di bawah, kos ini akan otomatis diajukan kembali ke Admin untuk ditinjau ulang.
                 </p>
+              </div>
+            )}
+
+            {actionError && (
+              <div
+                role="alert"
+                aria-live="assertive"
+                className="mt-4 p-3.5 rounded-2xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800/60 text-rose-800 dark:text-rose-200 text-xs sm:text-sm font-semibold flex items-center justify-between gap-3 animate-in fade-in"
+              >
+                <div className="flex items-center gap-2">
+                  <AlertCircle className="w-4 h-4 text-rose-600 dark:text-rose-400 shrink-0" />
+                  <span>{actionError}</span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setActionError(null)}
+                  className="text-rose-500 hover:text-rose-700 dark:text-rose-400 dark:hover:text-rose-200 p-0.5 rounded transition-colors cursor-pointer"
+                  aria-label="Tutup pesan error"
+                >
+                  <X className="w-4 h-4" />
+                </button>
               </div>
             )}
 
@@ -1357,6 +1382,27 @@ export default function PartnerPropertiesPage() {
                   Syarat dan ketentuan untuk calon penyewa saat mengajukan sewa kamar kos ini.
                 </p>
               </div>
+
+              {actionError && (
+                <div
+                  role="alert"
+                  aria-live="assertive"
+                  className="p-3.5 rounded-2xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800/60 text-rose-800 dark:text-rose-200 text-xs sm:text-sm font-semibold flex items-center justify-between gap-3 animate-in fade-in"
+                >
+                  <div className="flex items-center gap-2">
+                    <AlertCircle className="w-4 h-4 text-rose-600 dark:text-rose-400 shrink-0" />
+                    <span>{actionError}</span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setActionError(null)}
+                    className="text-rose-500 hover:text-rose-700 dark:text-rose-400 dark:hover:text-rose-200 p-0.5 rounded transition-colors cursor-pointer"
+                    aria-label="Tutup pesan error"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+              )}
 
               {/* Modal Actions */}
               <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-100 dark:border-slate-800">

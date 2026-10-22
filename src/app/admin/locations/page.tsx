@@ -134,6 +134,7 @@ export default function AdminLocationsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [successToast, setSuccessToast] = useState<string | null>(null);
+  const [errorToast, setErrorToast] = useState<string | null>(null);
 
   // Filters & Search with Debounce
   const [searchQuery, setSearchQuery] = useState("");
@@ -390,7 +391,7 @@ export default function AdminLocationsPage() {
         setLocations((prev) =>
           prev.map((l) => (l.id === item.id ? { ...l, is_active: !newStatus } : l))
         );
-        alert(data.error || "Gagal mengubah status lokasi");
+        setErrorToast(data.error || "Gagal mengubah status lokasi");
       } else {
         setSuccessToast(
           `Status "${item.name}" diubah ke ${newStatus ? "Aktif" : "Nonaktif"}.`
@@ -405,6 +406,7 @@ export default function AdminLocationsPage() {
       setLocations((prev) =>
         prev.map((l) => (l.id === item.id ? { ...l, is_active: !item.is_active } : l))
       );
+      setErrorToast("Terjadi kendala saat mengubah status lokasi.");
     } finally {
       setTogglingId(null);
     }
@@ -435,11 +437,11 @@ export default function AdminLocationsPage() {
         setSuccessToast(`Lokasi "${deleteTarget.name}" berhasil dihapus.`);
         fetchLocations();
       } else {
-        alert(result.error || "Gagal menghapus lokasi.");
+        setErrorToast(result.error || "Gagal menghapus lokasi.");
       }
     } catch (err) {
       console.error("Error delete location:", err);
-      alert("Terjadi kendala saat menghapus data lokasi.");
+      setErrorToast("Terjadi kendala saat menghapus data lokasi.");
     } finally {
       setIsDeleting(false);
     }
@@ -456,6 +458,25 @@ export default function AdminLocationsPage() {
             <button
               onClick={() => setSuccessToast(null)}
               className="ml-2 hover:opacity-80 p-1"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        )}
+
+        {errorToast && (
+          <div
+            role="alert"
+            aria-live="assertive"
+            className="fixed top-6 right-6 z-50 flex items-center gap-2.5 px-4 py-3 bg-rose-600 text-white rounded-2xl shadow-float animate-in fade-in slide-in-from-top-4 text-sm font-semibold"
+          >
+            <AlertCircle className="w-5 h-5 shrink-0" />
+            <span>{errorToast}</span>
+            <button
+              type="button"
+              onClick={() => setErrorToast(null)}
+              className="ml-2 hover:bg-rose-700/60 p-1 rounded-lg transition-colors cursor-pointer"
+              aria-label="Tutup pesan error"
             >
               <X className="w-4 h-4" />
             </button>

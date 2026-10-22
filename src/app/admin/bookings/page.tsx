@@ -2,8 +2,9 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Loader2, Check, X, Download, User as UserIcon, MessageCircle, Mail, Phone, Calendar, CheckCircle2, CreditCard, Copy } from "lucide-react";
+import { Loader2, Check, X, Download, User as UserIcon, MessageCircle, Mail, Phone, CheckCircle2, CreditCard, Copy, AlertCircle } from "lucide-react";
 import { formatBookingsToCSV, formatFinancialBookingsToCSV } from "@/lib/csv-export";
+void formatBookingsToCSV;
 
 interface BookingAdminUser {
   id?: string;
@@ -138,7 +139,7 @@ export default function ManageBookingsPage() {
 
   const handleExportCSV = async () => {
     if (bookings.length === 0) {
-      alert("Belum ada data riwayat transaksi untuk diekspor.");
+      setErrorMessage("Belum ada data riwayat transaksi untuk diekspor.");
       return;
     }
 
@@ -180,7 +181,7 @@ export default function ManageBookingsPage() {
       window.URL.revokeObjectURL(url);
     } catch (err) {
       console.error("Gagal mengekspor CSV:", err);
-      alert("Terjadi kesalahan saat mengekspor data ke format CSV.");
+      setErrorMessage("Terjadi kesalahan saat mengekspor data ke format CSV.");
     } finally {
       setIsExporting(false);
     }
@@ -210,11 +211,11 @@ export default function ManageBookingsPage() {
           prev.map((b) => (b.id === bookingId ? { ...b, status: newStatus } : b))
         );
       } else {
-        alert(result.error || "Gagal memperbarui status transaksi.");
+        setErrorMessage(result.error || "Gagal memperbarui status transaksi.");
       }
     } catch (err) {
       console.error("Gagal mengupdate status booking:", err);
-      alert("Terjadi kesalahan jaringan saat memperbarui status.");
+      setErrorMessage("Terjadi kesalahan jaringan saat memperbarui status.");
     } finally {
       setUpdatingId(null);
     }
@@ -261,11 +262,11 @@ export default function ManageBookingsPage() {
         setRefundingBooking(null);
         setRefundNoteInput("");
       } else {
-        alert(result.error || "Gagal memproses pengembalian dana.");
+        setErrorMessage(result.error || "Gagal memproses pengembalian dana.");
       }
     } catch (err) {
       console.error("Gagal memproses refund admin:", err);
-      alert("Terjadi kesalahan jaringan saat memproses refund.");
+      setErrorMessage("Terjadi kesalahan jaringan saat memproses refund.");
     } finally {
       setIsSubmittingRefund(false);
     }
@@ -401,8 +402,23 @@ export default function ManageBookingsPage() {
         </div>
 
         {errorMessage && (
-          <div className="p-4 bg-rose-50 dark:bg-rose-950/40 border-b border-rose-200 dark:border-rose-800 text-rose-700 dark:text-rose-300 text-sm">
-            {errorMessage}
+          <div
+            role="alert"
+            aria-live="assertive"
+            className="p-4 bg-rose-50 dark:bg-rose-950/40 border-b border-rose-200 dark:border-rose-800 text-rose-800 dark:text-rose-200 text-sm font-semibold flex items-center justify-between gap-3 animate-in fade-in"
+          >
+            <div className="flex items-center gap-2.5">
+              <AlertCircle className="w-4 h-4 text-rose-600 dark:text-rose-400 shrink-0" />
+              <span>{errorMessage}</span>
+            </div>
+            <button
+              type="button"
+              onClick={() => setErrorMessage(null)}
+              className="text-rose-500 hover:text-rose-700 dark:text-rose-400 dark:hover:text-rose-200 p-0.5 rounded transition-colors cursor-pointer"
+              aria-label="Tutup pesan error"
+            >
+              <X className="w-4 h-4" />
+            </button>
           </div>
         )}
 
@@ -788,6 +804,27 @@ export default function ManageBookingsPage() {
                   Catatan dan nomor referensi ini akan dikirimkan otomatis via notifikasi WhatsApp resmi ke mahasiswa.
                 </p>
               </div>
+
+              {errorMessage && (
+                <div
+                  role="alert"
+                  aria-live="assertive"
+                  className="p-3 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 rounded-xl text-rose-800 dark:text-rose-200 text-xs font-semibold flex items-center justify-between gap-2"
+                >
+                  <div className="flex items-center gap-2">
+                    <AlertCircle className="w-4 h-4 text-rose-600 dark:text-rose-400 shrink-0" />
+                    <span>{errorMessage}</span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setErrorMessage(null)}
+                    className="text-rose-500 hover:text-rose-700 dark:text-rose-400 dark:hover:text-rose-200 p-0.5 rounded cursor-pointer"
+                    aria-label="Tutup pesan error"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              )}
 
               {/* Action Buttons */}
               <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-slate-100 dark:border-slate-800">

@@ -240,10 +240,10 @@ export default function ManagePropertiesPage() {
       if (data.success && data.description) {
         setFormData((prev) => ({ ...prev, description: data.description }));
       } else {
-        alert(data.error || "Gagal membuat deskripsi AI.");
+        setFormError(data.error || "Gagal membuat deskripsi AI.");
       }
     } catch {
-      alert("Gagal membuat deskripsi AI.");
+      setFormError("Gagal membuat deskripsi AI.");
     } finally {
       setIsAiGenerating(false);
     }
@@ -294,6 +294,7 @@ export default function ManagePropertiesPage() {
 
   useEffect(() => {
     fetchProperties();
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchOwners();
   }, [fetchProperties, fetchOwners]);
 
@@ -439,11 +440,11 @@ export default function ManagePropertiesPage() {
           image_url: mediaUrl && !mediaUrl.startsWith("/uploads/") ? mediaUrl : "",
         }));
       } else {
-        alert(resData.error || "Gagal mengatur thumbnail.");
+        setFormError(resData.error || "Gagal mengatur thumbnail.");
       }
     } catch (err) {
       console.error("Error setting thumbnail:", err);
-      alert("Terjadi kesalahan koneksi saat mengatur thumbnail.");
+      setFormError("Terjadi kesalahan koneksi saat mengatur thumbnail.");
     } finally {
       setSettingThumbnailUrl(null);
     }
@@ -489,11 +490,11 @@ export default function ManagePropertiesPage() {
           image_url: newImageUrl && !newImageUrl.startsWith("/uploads/") ? newImageUrl : "",
         }));
       } else {
-        alert(resData.error || "Gagal menghapus media.");
+        setFormError(resData.error || "Gagal menghapus media.");
       }
     } catch (err) {
       console.error("Error deleting media:", err);
-      alert("Terjadi kesalahan koneksi saat menghapus media.");
+      setFormError("Terjadi kesalahan koneksi saat menghapus media.");
     } finally {
       setDeletingMediaId(null);
     }
@@ -1043,9 +1044,23 @@ export default function ManagePropertiesPage() {
               {/* Scrollable Content */}
               <div className="p-6 overflow-y-auto space-y-4 flex-1 overscroll-contain">
                 {formError && (
-                  <div className="p-3.5 bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-800/60 text-red-700 dark:text-red-300 text-xs rounded-xl flex items-center gap-2">
-                    <AlertCircle size={16} className="shrink-0 text-red-500" />
-                    <span>{formError}</span>
+                  <div
+                    role="alert"
+                    aria-live="assertive"
+                    className="p-3.5 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800/60 text-rose-800 dark:text-rose-200 text-xs rounded-xl flex items-center justify-between gap-2 animate-in fade-in"
+                  >
+                    <div className="flex items-center gap-2">
+                      <AlertCircle size={16} className="shrink-0 text-rose-600 dark:text-rose-400" />
+                      <span>{formError}</span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setFormError(null)}
+                      className="text-rose-500 hover:text-rose-700 dark:text-rose-400 dark:hover:text-rose-200 p-0.5 rounded transition-colors cursor-pointer"
+                      aria-label="Tutup pesan error"
+                    >
+                      <X size={14} />
+                    </button>
                   </div>
                 )}
 
