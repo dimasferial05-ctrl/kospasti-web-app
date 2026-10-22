@@ -1,5 +1,7 @@
 import { describe, it, expect, vi } from "vitest";
 import React from "react";
+import fs from "fs";
+import path from "path";
 import { renderToStaticMarkup } from "react-dom/server";
 import { KosPropertyCard } from "../src/components/features/KosPropertyCard";
 
@@ -38,13 +40,15 @@ describe("KosPropertyCard Component", () => {
     }).not.toThrow();
   });
 
-  it("menampilkan tag img jika imageUrl tersedia", () => {
+  it("menampilkan tag img teroptimasi dengan Next.js Image jika imageUrl tersedia", () => {
     const html = renderToStaticMarkup(
       <KosPropertyCard {...defaultProps} imageUrl="https://example.com/kos.jpg" />
     );
     expect(html).toContain("<img");
-    expect(html).toContain('src="https://example.com/kos.jpg"');
+    expect(html).toContain("example.com%2Fkos.jpg");
     expect(html).toContain('alt="Kos Mawar Putra"');
+    expect(html).toContain('data-nimg="fill"');
+    expect(html).toContain('sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 380px"');
   });
 
   it("otomatis memformat harga menjadi gaya Rupiah (Rp)", () => {
@@ -140,6 +144,14 @@ describe("KosPropertyCard Component", () => {
 
     // Memastikan tidak ada pola <a ...><button ...></a> (illegal interactive nesting)
     expect(html).not.toMatch(/<a\b[^>]*>(?:(?!<\/a>)[\s\S])*?<button\b/i);
+  });
+
+  it("menggunakan Image dari next/image dan tidak memiliki linter suppression no-img-element", () => {
+    const filePath = path.resolve(__dirname, "../src/components/features/KosPropertyCard.tsx");
+    const content = fs.readFileSync(filePath, "utf-8");
+    expect(content).toContain('import Image from "next/image"');
+    expect(content).not.toContain("@next/next/no-img-element");
+    expect(content).not.toMatch(/<img\b/);
   });
 });
 
