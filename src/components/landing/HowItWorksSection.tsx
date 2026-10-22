@@ -1,5 +1,5 @@
 import React from "react";
-import Image from "next/image";
+import { ThemeImage } from "@/components/ui/ThemeImage";
 import { Laptop } from "lucide-react";
 
 export function HowItWorksSection() {
@@ -63,18 +63,12 @@ export function HowItWorksSection() {
 
               {/* Desktop Image View */}
               <div className="w-full bg-slate-100 dark:bg-slate-800 overflow-hidden relative aspect-[16/10]">
-                <Image
-                  src="/images/desktop-preview.jpeg"
+                <ThemeImage
+                  srcLight="/images/desktop-preview.jpeg"
+                  srcDark="/images/desktop-dark-preview.jpeg"
                   alt="Tampilan Desktop KosPasti Web App"
                   fill
-                  className="object-cover object-top hover:scale-[1.02] transition-transform duration-500 block dark:hidden"
-                  sizes="(max-width: 768px) 100vw, 500px"
-                />
-                <Image
-                  src="/images/desktop-dark-preview.jpeg"
-                  alt="Tampilan Desktop KosPasti Web App (Dark Mode)"
-                  fill
-                  className="object-cover object-top hover:scale-[1.02] transition-transform duration-500 hidden dark:block"
+                  className="object-cover object-top hover:scale-[1.02] transition-transform duration-500"
                   sizes="(max-width: 768px) 100vw, 500px"
                 />
               </div>
@@ -86,18 +80,12 @@ export function HowItWorksSection() {
               <div className="w-12 h-2.5 bg-slate-800 rounded-full mx-auto mb-1.5" />
               {/* Smartphone Image Container */}
               <div className="w-full h-[calc(100%-14px)] rounded-[22px] overflow-hidden bg-white dark:bg-slate-900 shadow-inner relative">
-                <Image
-                  src="/images/mobile-preview.jpeg"
+                <ThemeImage
+                  srcLight="/images/mobile-preview.jpeg"
+                  srcDark="/images/mobile-dark-preview.jpeg"
                   alt="Tampilan Mobile PWA KosPasti"
                   fill
-                  className="object-cover object-top block dark:hidden"
-                  sizes="200px"
-                />
-                <Image
-                  src="/images/mobile-dark-preview.jpeg"
-                  alt="Tampilan Mobile PWA KosPasti (Dark Mode)"
-                  fill
-                  className="object-cover object-top hidden dark:block"
+                  className="object-cover object-top"
                   sizes="200px"
                 />
               </div>
