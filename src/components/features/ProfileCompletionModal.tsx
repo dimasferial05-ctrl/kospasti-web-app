@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { Phone, ShieldCheck, AlertCircle, Loader2, CheckCircle2, User as UserIcon } from "lucide-react";
+import { useFocusTrap } from "@/hooks/useFocusTrap";
 
 interface UserProfile {
   id: string;
@@ -22,6 +23,11 @@ export function ProfileCompletionModal() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isSuccess, setIsSuccess] = useState(false);
+
+  const modalRef = useFocusTrap<HTMLDivElement>({
+    isOpen,
+    autoFocus: false, // input WhatsApp sudah memiliki autoFocus bawaan
+  });
 
   const checkUserSession = useCallback(async () => {
     // Jangan tampilkan modal di rute admin atau saat di halaman login / register
@@ -142,17 +148,22 @@ export function ProfileCompletionModal() {
       className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/70 backdrop-blur-sm p-4 animate-in fade-in duration-200"
       aria-modal="true"
       role="dialog"
+      aria-labelledby="profile-modal-title"
+      aria-describedby="profile-modal-desc"
     >
-      <div className="bg-white dark:bg-slate-900 w-full max-w-md rounded-2xl shadow-2xl border border-slate-150 dark:border-slate-800 overflow-hidden">
+      <div
+        ref={modalRef}
+        className="bg-white dark:bg-slate-900 w-full max-w-md rounded-2xl shadow-2xl border border-slate-150 dark:border-slate-800 overflow-hidden"
+      >
         {/* Header Visual */}
         <div className="bg-gradient-to-br from-slate-900 via-slate-850 to-slate-900 text-white p-6 pb-5">
           <div className="w-12 h-12 rounded-xl bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-emerald-400 mb-4">
             <ShieldCheck className="w-6 h-6" />
           </div>
-          <h3 className="text-lg font-semibold tracking-tight text-white">
+          <h3 id="profile-modal-title" className="text-lg font-semibold tracking-tight text-white">
             Lengkapi Data Diri Anda
           </h3>
-          <p className="text-xs text-slate-300 mt-1.5 leading-relaxed">
+          <p id="profile-modal-desc" className="text-xs text-slate-300 mt-1.5 leading-relaxed">
             Satu langkah lagi sebelum melanjutkan. Masukkan nomor WhatsApp aktif Anda untuk keperluan konfirmasi dan pemesanan kos.
           </p>
         </div>
