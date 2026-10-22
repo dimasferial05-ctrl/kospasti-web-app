@@ -562,7 +562,7 @@ export default function PropertyDetailPage() {
     : [];
 
   return (
-    <div className="max-w-7xl mx-auto min-h-screen bg-slate-50 dark:bg-slate-950 pb-24 lg:pb-12 px-0 lg:px-8 flex flex-col relative shadow-sm w-full min-w-0">
+    <div id="kos-detail-page" className="max-w-7xl mx-auto min-h-screen bg-slate-50 dark:bg-slate-950 pb-24 sm:pb-32 lg:pb-12 px-0 lg:px-8 flex flex-col relative shadow-sm w-full min-w-0">
       {/* Top Header Bar */}
       <div className="sticky top-0 z-30 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border-b border-slate-200/80 dark:border-slate-800 py-3">
         <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 flex items-center justify-between gap-3">
@@ -1362,8 +1362,8 @@ export default function PropertyDetailPage() {
         {/* KOLOM KANAN (KARTU AMANKAN KAMAR STICKY DI BAWAH FOTO PROPERTI)          */}
         {/* ========================================================================= */}
         <div className="w-full lg:w-[380px] shrink-0">
-          <div className="fixed bottom-0 left-0 w-full bg-white dark:bg-slate-900 border-t border-slate-200/80 dark:border-slate-800 p-4 flex justify-between items-center z-40 lg:static lg:block lg:p-6 lg:border lg:border-slate-200/60 dark:lg:border-slate-800 lg:rounded-2xl lg:shadow-soft lg:sticky lg:top-32">
-            <div className="max-w-md mx-auto lg:max-w-none w-full flex justify-between lg:flex-col lg:gap-4 items-center lg:items-start">
+          <div className="fixed bottom-0 left-0 w-full bg-white dark:bg-slate-900 border-t border-slate-200/80 dark:border-slate-800 p-4 pb-[max(1rem,env(safe-area-inset-bottom))] flex justify-between items-center z-[60] lg:static lg:block lg:p-6 lg:border lg:border-slate-200/60 dark:lg:border-slate-800 lg:rounded-2xl lg:shadow-soft lg:sticky lg:top-32">
+            <div className="max-w-7xl mx-auto lg:max-w-none w-full px-2 sm:px-4 lg:px-0 flex justify-between lg:flex-col lg:gap-4 items-center lg:items-start">
               <div className="lg:w-full">
                 <p className="text-[10px] lg:text-xs text-slate-400 font-semibold uppercase tracking-wider">
                   {selectedRoomType ? `Harga (${selectedRoomType.name})` : "Harga per bulan"}

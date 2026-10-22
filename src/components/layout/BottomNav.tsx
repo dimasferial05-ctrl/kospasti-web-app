@@ -31,12 +31,18 @@ export function BottomNav({ isLoggedIn: initialIsLoggedIn = false }: BottomNavPr
     };
   }, [pathname]);
 
+  // Deteksi rute detail kos secara komprehensif
+  const isKosDetailPage =
+    pathname?.startsWith("/kos") ||
+    pathname?.includes("/kos/") ||
+    (typeof window !== "undefined" && window.location.pathname.includes("/kos"));
+
   // Sembunyikan BottomNav pada halaman admin, partner, detail kos, auth, atau jika user belum login
   if (!isLoggedIn) return null;
   if (
     pathname?.startsWith("/admin") ||
     pathname?.startsWith("/partner") ||
-    pathname?.startsWith("/kos") ||
+    isKosDetailPage ||
     pathname === "/login" ||
     pathname === "/register"
   ) {
@@ -75,7 +81,7 @@ export function BottomNav({ isLoggedIn: initialIsLoggedIn = false }: BottomNavPr
   return (
     <nav
       aria-label="Mobile Navigation Bar"
-      className="fixed bottom-0 left-0 right-0 z-50 md:hidden bg-white/95 dark:bg-slate-900/95 backdrop-blur-lg border-t border-slate-200/90 dark:border-slate-800 shadow-[0_-4px_24px_rgba(0,0,0,0.06)] pb-[max(0.6rem,env(safe-area-inset-bottom))] pt-2 transition-all duration-300"
+      className="mobile-bottom-nav fixed bottom-0 left-0 right-0 z-50 md:hidden bg-white/95 dark:bg-slate-900/95 backdrop-blur-lg border-t border-slate-200/90 dark:border-slate-800 shadow-[0_-4px_24px_rgba(0,0,0,0.06)] pb-[max(0.6rem,env(safe-area-inset-bottom))] pt-2 transition-all duration-300"
     >
       <div className="max-w-md mx-auto grid grid-cols-4 px-2">
         {navItems.map((item) => {

@@ -234,4 +234,10 @@
   filter: invert(1) brightness(0.9) !important;
 }
 
+/* Sembunyikan BottomNav secara absolut jika berada di halaman detail kos */
+body:has(#kos-detail-page) .mobile-bottom-nav,
+body:has(#kos-detail-page) nav[aria-label="Mobile Navigation Bar"] {
+  display: none !important;
+}
+
 
