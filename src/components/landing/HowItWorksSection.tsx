@@ -75,7 +75,7 @@ export function HowItWorksSection() {
             </div>
 
             {/* Overlapping Floating Smartphone Mockup on Bottom-Right */}
-            <div className="absolute -bottom-4 right-0 sm:-right-2 w-36 sm:w-44 h-72 sm:h-84 bg-slate-950 rounded-[32px] p-2 shadow-2xl border-2 border-slate-700 animate-float z-20">
+            <div className="absolute -bottom-4 right-0 sm:-right-2 w-36 sm:w-44 h-72 sm:h-84 bg-slate-950 rounded-[32px] p-2 shadow-2xl border-2 border-slate-700 animate-float motion-reduce:animate-none z-20">
               {/* Smartphone Top Speaker Notch */}
               <div className="w-12 h-2.5 bg-slate-800 rounded-full mx-auto mb-1.5" />
               {/* Smartphone Image Container */}

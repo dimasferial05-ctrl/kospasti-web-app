@@ -16,7 +16,7 @@ export function RoleCardsSection() {
         {/* 2 Floating Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-10">
           {/* Card 1: Pencari Kos */}
-          <div className="group relative bg-white dark:bg-slate-900 rounded-3xl p-8 sm:p-10 border border-slate-200/80 dark:border-slate-800 shadow-soft hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 flex flex-col items-center text-center animate-float">
+          <div className="group relative bg-white dark:bg-slate-900 rounded-3xl p-8 sm:p-10 border border-slate-200/80 dark:border-slate-800 shadow-soft hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 flex flex-col items-center text-center animate-float motion-reduce:animate-none">
             {/* Illustration / Graphic Icon Container */}
             <div className="w-24 h-24 rounded-2xl bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-100 dark:border-emerald-800 flex items-center justify-center text-emerald-600 dark:text-emerald-400 mb-6 group-hover:scale-110 group-hover:bg-emerald-100 dark:group-hover:bg-emerald-900/60 transition-all duration-300 shadow-xs">
               <Home className="w-12 h-12 stroke-[1.5]" />
@@ -57,7 +57,7 @@ export function RoleCardsSection() {
           </div>
 
           {/* Card 2: Pemilik Kos */}
-          <div className="group relative bg-white dark:bg-slate-900 rounded-3xl p-8 sm:p-10 border border-slate-200/80 dark:border-slate-800 shadow-soft hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 flex flex-col items-center text-center animate-float-slow">
+          <div className="group relative bg-white dark:bg-slate-900 rounded-3xl p-8 sm:p-10 border border-slate-200/80 dark:border-slate-800 shadow-soft hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 flex flex-col items-center text-center animate-float-slow motion-reduce:animate-none">
             {/* Illustration / Graphic Icon Container */}
             <div className="w-24 h-24 rounded-2xl bg-teal-50 dark:bg-teal-950/60 border border-teal-100 dark:border-teal-800 flex items-center justify-center text-teal-600 dark:text-teal-400 mb-6 group-hover:scale-110 group-hover:bg-teal-100 dark:group-hover:bg-teal-900/60 transition-all duration-300 shadow-xs">
               <Building2 className="w-12 h-12 stroke-[1.5]" />
