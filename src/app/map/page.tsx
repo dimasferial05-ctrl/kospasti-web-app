@@ -516,18 +516,30 @@ function MapSearchContent() {
                   const isHovered = hoveredPropertyId === property.id;
                   const isAvailable = property.available_rooms > 0;
 
+                  const handleSelect = () => {
+                    setSelectedPropertyId(property.id);
+                    if (window.innerWidth < 1024) {
+                      setMobileView("map");
+                    }
+                  };
+
                   return (
                     <div
                       key={property.id}
+                      role="button"
+                      tabIndex={0}
+                      aria-pressed={isSelected}
+                      aria-label={`Pilih ${property.name} di peta, harga ${formatRupiah(property.price_per_month)} per bulan`}
                       onMouseEnter={() => setHoveredPropertyId(property.id)}
                       onMouseLeave={() => setHoveredPropertyId(null)}
-                      onClick={() => {
-                        setSelectedPropertyId(property.id);
-                        if (window.innerWidth < 1024) {
-                          setMobileView("map");
+                      onClick={handleSelect}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" || e.key === " ") {
+                          e.preventDefault();
+                          handleSelect();
                         }
                       }}
-                      className={`group bg-white dark:bg-slate-900 rounded-2xl p-3.5 border transition-all duration-200 cursor-pointer ${isSelected
+                      className={`group bg-white dark:bg-slate-900 rounded-2xl p-3.5 border transition-all duration-200 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900 select-none ${isSelected
                           ? "border-emerald-500 ring-2 ring-emerald-500/20 shadow-float bg-emerald-50/20 dark:bg-emerald-950/20 -translate-y-0.5"
                           : isHovered
                             ? "border-slate-400/80 dark:border-slate-600 shadow-float -translate-y-0.5"

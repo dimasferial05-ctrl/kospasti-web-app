@@ -158,4 +158,32 @@ describe("Interactive Google Maps Property Search (/map) - Issue #121", () => {
     expect(content).toContain('href="/map"');
     expect(content).toContain("Peta Kos");
   });
+
+  describe("Aksesibilitas Keyboard & Semantik Tombol Kartu Daftar Kos (Issue #324)", () => {
+    const pagePath = path.resolve(__dirname, "../src/app/map/page.tsx");
+    const content = fs.readFileSync(pagePath, "utf-8");
+
+    it("memastikan kartu properti memiliki role='button' dan tabIndex={0} untuk navigasi keyboard", () => {
+      expect(content).toContain('role="button"');
+      expect(content).toContain("tabIndex={0}");
+    });
+
+    it("memastikan kartu properti memiliki atribut aria-pressed dan aria-label deskriptif", () => {
+      expect(content).toContain("aria-pressed={isSelected}");
+      expect(content).toContain("aria-label={`Pilih ${property.name} di peta, harga ${formatRupiah(property.price_per_month)} per bulan`}");
+    });
+
+    it("memastikan kartu properti menangani penekanan tombol keyboard Enter dan Spasi", () => {
+      expect(content).toContain('if (e.key === "Enter" || e.key === " ")');
+      expect(content).toContain("e.preventDefault()");
+      expect(content).toContain("handleSelect()");
+    });
+
+    it("memastikan kartu properti memiliki cincin fokus aksesibilitas Tailwind yang kontras", () => {
+      expect(content).toContain("focus-visible:ring-2");
+      expect(content).toContain("focus-visible:ring-emerald-500");
+      expect(content).toContain("focus:outline-none");
+    });
+  });
 });
+
