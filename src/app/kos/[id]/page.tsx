@@ -29,6 +29,7 @@ import {
 import PropertyLocationMap from "@/components/map/PropertyLocationMap";
 import { WishlistButton } from "@/components/features/WishlistButton";
 import { ReviewSection } from "@/components/features/ReviewSection";
+import { useFocusTrap } from "@/hooks/useFocusTrap";
 
 interface PropertyMediaItem {
   id?: string;
@@ -142,6 +143,16 @@ export default function PropertyDetailPage() {
   }>({
     isOpen: false,
     message: "",
+  });
+
+  const bookingModalRef = useFocusTrap<HTMLDivElement>({
+    isOpen: isModalOpen,
+    onClose: () => setIsModalOpen(false),
+  });
+
+  const pendingModalRef = useFocusTrap<HTMLDivElement>({
+    isOpen: pendingBookingNotice.isOpen,
+    onClose: () => setPendingBookingNotice({ isOpen: false, message: "" }),
   });
 
   const handleOpenBookingModal = async (roomTypeToBook?: RoomTypeItem) => {
@@ -1506,13 +1517,25 @@ export default function PropertyDetailPage() {
       {/* 4. BOOKING FORM MODAL                                                    */}
       {/* ========================================================================= */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-[60] bg-black/60 flex items-end sm:items-center justify-center p-0 sm:p-4">
-          <div className="bg-white dark:bg-slate-900 w-full max-w-md p-6 rounded-t-2xl sm:rounded-2xl shadow-xl border border-transparent dark:border-slate-800 flex flex-col gap-4 animate-in fade-in zoom-in-95 duration-200">
+        <div
+          className="fixed inset-0 z-[60] bg-black/60 flex items-end sm:items-center justify-center p-0 sm:p-4 animate-in fade-in duration-200"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setIsModalOpen(false);
+          }}
+        >
+          <div
+            ref={bookingModalRef}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="booking-modal-title"
+            aria-describedby="booking-modal-desc"
+            className="bg-white dark:bg-slate-900 w-full max-w-md p-6 rounded-t-2xl sm:rounded-2xl shadow-xl border border-transparent dark:border-slate-800 flex flex-col gap-4 animate-in zoom-in-95 duration-200"
+          >
             <div>
-              <h3 className="text-lg font-bold text-slate-900 dark:text-white">
+              <h3 id="booking-modal-title" className="text-lg font-bold text-slate-900 dark:text-white">
                 Konfirmasi Pemesanan
               </h3>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+              <p id="booking-modal-desc" className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
                 Pilih rencana tanggal mulai masuk untuk kamar kos ini.
               </p>
             </div>
@@ -1622,14 +1645,26 @@ export default function PropertyDetailPage() {
       {/* 5. MODAL PERINGATAN PESANAN PENDING (ANTI-SPAM BOOKING)                   */}
       {/* ========================================================================= */}
       {pendingBookingNotice.isOpen && (
-        <div className="fixed inset-0 z-[70] bg-black/60 flex items-center justify-center p-4 animate-in fade-in duration-200">
-          <div className="bg-white dark:bg-slate-900 w-full max-w-md p-6 rounded-2xl shadow-xl border border-transparent dark:border-slate-800 flex flex-col gap-4 animate-in zoom-in-95 duration-200">
+        <div
+          className="fixed inset-0 z-[70] bg-black/60 flex items-center justify-center p-4 animate-in fade-in duration-200"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setPendingBookingNotice({ isOpen: false, message: "" });
+          }}
+        >
+          <div
+            ref={pendingModalRef}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="pending-booking-title"
+            aria-describedby="pending-booking-desc"
+            className="bg-white dark:bg-slate-900 w-full max-w-md p-6 rounded-2xl shadow-xl border border-transparent dark:border-slate-800 flex flex-col gap-4 animate-in zoom-in-95 duration-200"
+          >
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-full bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-400 flex items-center justify-center shrink-0">
                 <AlertCircle className="w-5 h-5 text-amber-600 dark:text-amber-400" />
               </div>
               <div>
-                <h3 className="text-base font-bold text-slate-900 dark:text-white">
+                <h3 id="pending-booking-title" className="text-base font-bold text-slate-900 dark:text-white">
                   Pesanan Masih Menunggu Pembayaran
                 </h3>
                 <p className="text-xs text-slate-500 dark:text-slate-400">
@@ -1638,7 +1673,7 @@ export default function PropertyDetailPage() {
               </div>
             </div>
 
-            <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed bg-amber-50/70 dark:bg-amber-950/40 p-3.5 rounded-xl border border-amber-200/80 dark:border-amber-800">
+            <p id="pending-booking-desc" className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed bg-amber-50/70 dark:bg-amber-950/40 p-3.5 rounded-xl border border-amber-200/80 dark:border-amber-800">
               {pendingBookingNotice.message}
             </p>
 
