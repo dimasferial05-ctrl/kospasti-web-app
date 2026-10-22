@@ -67,4 +67,14 @@ describe("BottomNav Component (/components/layout/BottomNav) - Issue #170", () =
     const registerHtml = renderToStaticMarkup(<BottomNav isLoggedIn={true} />);
     expect(registerHtml).toBe("");
   });
+
+  it("menyembunyikan BottomNav pada rute detail kos /kos/[id]", () => {
+    mockPathname = "/kos/54d64b51-b57d-4ca5-9163-e20c96736cdf";
+    const kosHtml = renderToStaticMarkup(<BottomNav isLoggedIn={true} />);
+    expect(kosHtml).toBe("");
+
+    mockPathname = "/kos/kos-mawar-putra";
+    const kosSlugHtml = renderToStaticMarkup(<BottomNav isLoggedIn={true} />);
+    expect(kosSlugHtml).toBe("");
+  });
 });

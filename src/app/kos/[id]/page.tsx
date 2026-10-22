@@ -133,7 +133,8 @@ export default function PropertyDetailPage() {
   const [waNumber, setWaNumber] = useState("");
   const [userAvatar, setUserAvatar] = useState<string | null>(null);
   const [moveInDate, setMoveInDate] = useState("");
-  const [minDate] = useState(() => new Date().toISOString().split("T")[0]);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [minDate, setMinDate] = useState(() => new Date().toISOString().split("T")[0]);
   const [pendingBookingNotice, setPendingBookingNotice] = useState<{
     isOpen: boolean;
     message: string;

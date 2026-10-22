@@ -31,11 +31,12 @@ export function BottomNav({ isLoggedIn: initialIsLoggedIn = false }: BottomNavPr
     };
   }, [pathname]);
 
-  // Sembunyikan BottomNav pada halaman admin, partner, auth, atau jika user belum login
+  // Sembunyikan BottomNav pada halaman admin, partner, detail kos, auth, atau jika user belum login
   if (!isLoggedIn) return null;
   if (
     pathname?.startsWith("/admin") ||
     pathname?.startsWith("/partner") ||
+    pathname?.startsWith("/kos") ||
     pathname === "/login" ||
     pathname === "/register"
   ) {
@@ -49,7 +50,6 @@ export function BottomNav({ isLoggedIn: initialIsLoggedIn = false }: BottomNavPr
       icon: Search,
       isActive:
         pathname === "/search" ||
-        pathname?.startsWith("/kos/") ||
         pathname === "/",
     },
     {
