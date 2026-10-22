@@ -1,6 +1,6 @@
 import React from "react";
 import Link from "next/link";
-import Image from "next/image";
+import { ThemeImage } from "@/components/ui/ThemeImage";
 import { MessageCircle, Mail, MapPin, Heart } from "lucide-react";
 
 export function LandingFooter() {
@@ -11,19 +11,13 @@ export function LandingFooter() {
           {/* Brand Info */}
           <div className="lg:col-span-2 flex flex-col items-start gap-4">
             <Link href="/" className="flex items-center gap-2.5">
-              <Image
-                src="/logo.jpg"
+              <ThemeImage
+                srcLight="/logo.jpg"
+                srcDark="/logo-dark.png"
                 alt="KosPasti Logo"
                 width={32}
                 height={32}
-                className="w-8 h-8 rounded-lg object-cover shadow-xs shrink-0 block dark:hidden"
-              />
-              <Image
-                src="/logo-dark.png"
-                alt="KosPasti Logo"
-                width={32}
-                height={32}
-                className="w-8 h-8 rounded-lg object-cover shadow-xs shrink-0 hidden dark:block"
+                className="w-8 h-8 rounded-lg object-cover shadow-xs shrink-0"
               />
               <div className="flex flex-col">
                 <span className="text-lg font-extrabold text-slate-900 dark:text-white tracking-tight leading-none">
@@ -137,52 +131,34 @@ export function LandingFooter() {
           <div className="flex items-end justify-center -space-x-px w-full max-w-5xl">
             {/* Mirrored Left */}
             <div className="w-1/3 h-20 sm:h-28 md:h-32 relative flex justify-end overflow-hidden">
-              <Image
-                src="/images/footer-skyline.jpg"
+              <ThemeImage
+                srcLight="/images/footer-skyline.jpg"
+                srcDark="/images/footer-skyline-dark.png"
                 alt="City Skyline Left"
                 fill
-                className="object-cover object-bottom scale-x-[-1] block dark:hidden"
-                sizes="(max-width: 768px) 33vw, 300px"
-              />
-              <Image
-                src="/images/footer-skyline-dark.png"
-                alt="City Skyline Left"
-                fill
-                className="object-cover object-bottom scale-x-[-1] hidden dark:block"
+                className="object-cover object-bottom scale-x-[-1]"
                 sizes="(max-width: 768px) 33vw, 300px"
               />
             </div>
             {/* Center Normal */}
             <div className="w-1/3 h-20 sm:h-28 md:h-32 relative flex justify-center overflow-hidden">
-              <Image
-                src="/images/footer-skyline.jpg"
+              <ThemeImage
+                srcLight="/images/footer-skyline.jpg"
+                srcDark="/images/footer-skyline-dark.png"
                 alt="City Skyline Center"
                 fill
-                className="object-cover object-bottom block dark:hidden"
-                sizes="(max-width: 768px) 33vw, 300px"
-              />
-              <Image
-                src="/images/footer-skyline-dark.png"
-                alt="City Skyline Center"
-                fill
-                className="object-cover object-bottom hidden dark:block"
+                className="object-cover object-bottom"
                 sizes="(max-width: 768px) 33vw, 300px"
               />
             </div>
             {/* Mirrored Right */}
             <div className="w-1/3 h-20 sm:h-28 md:h-32 relative flex justify-start overflow-hidden">
-              <Image
-                src="/images/footer-skyline.jpg"
+              <ThemeImage
+                srcLight="/images/footer-skyline.jpg"
+                srcDark="/images/footer-skyline-dark.png"
                 alt="City Skyline Right"
                 fill
-                className="object-cover object-bottom scale-x-[-1] block dark:hidden"
-                sizes="(max-width: 768px) 33vw, 300px"
-              />
-              <Image
-                src="/images/footer-skyline-dark.png"
-                alt="City Skyline Right"
-                fill
-                className="object-cover object-bottom scale-x-[-1] hidden dark:block"
+                className="object-cover object-bottom scale-x-[-1]"
                 sizes="(max-width: 768px) 33vw, 300px"
               />
             </div>
