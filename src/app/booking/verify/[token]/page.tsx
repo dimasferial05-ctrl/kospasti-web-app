@@ -19,6 +19,8 @@ import {
   HelpCircle,
   BedDouble,
   BadgeCheck,
+  AlertCircle,
+  X,
 } from "lucide-react";
 
 interface BookingDetail {
@@ -58,6 +60,7 @@ export default function BookingVerifyPage() {
   // Decision State
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [decisionResult, setDecisionResult] = useState<"ACCEPTED" | "REJECTED" | null>(null);
+  const [decisionError, setDecisionError] = useState<string | null>(null);
   const [showRejectModal, setShowRejectModal] = useState(false);
   const [rejectReason, setRejectReason] = useState("");
 
@@ -98,6 +101,7 @@ export default function BookingVerifyPage() {
 
     try {
       setIsSubmitting(true);
+      setDecisionError(null);
       const res = await fetch("/api/magic-link/booking/decision", {
         method: "POST",
         headers: {
@@ -113,7 +117,7 @@ export default function BookingVerifyPage() {
       const json = await res.json();
 
       if (!res.ok || !json.success) {
-        alert(json.error || "Gagal memproses keputusan.");
+        setDecisionError(json.error || "Gagal memproses keputusan.");
         setIsSubmitting(false);
         return;
       }
@@ -122,7 +126,7 @@ export default function BookingVerifyPage() {
       setShowRejectModal(false);
     } catch (err) {
       console.error("Gagal mengirim keputusan:", err);
-      alert("Terjadi kesalahan jaringan saat memproses keputusan.");
+      setDecisionError("Terjadi kesalahan jaringan saat memproses keputusan.");
     } finally {
       setIsSubmitting(false);
     }
@@ -405,6 +409,27 @@ export default function BookingVerifyPage() {
 
             {/* Action Buttons Section */}
             <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-md space-y-3">
+              {decisionError && (
+                <div
+                  role="alert"
+                  aria-live="assertive"
+                  className="p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs sm:text-sm font-semibold flex items-center justify-between gap-3 animate-in fade-in"
+                >
+                  <div className="flex items-center gap-2">
+                    <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
+                    <span>{decisionError}</span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setDecisionError(null)}
+                    className="text-rose-500 hover:text-rose-700 p-0.5 rounded transition-colors cursor-pointer"
+                    aria-label="Tutup pesan error"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+              )}
+
               <p className="text-xs font-semibold text-slate-700 text-center">
                 Apakah Anda menerima calon penghuni ini?
               </p>
@@ -458,6 +483,27 @@ export default function BookingVerifyPage() {
               <p className="text-xs text-slate-600 leading-relaxed">
                 Anda akan menolak pesanan dari <strong>{data?.booking.studentName}</strong>. Jumlah kamar akan otomatis dikembalikan ke stok dan sistem akan memberitahukan proses pengembalian dana (*refund*) kepada calon penghuni.
               </p>
+
+              {decisionError && (
+                <div
+                  role="alert"
+                  aria-live="assertive"
+                  className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs font-semibold flex items-center justify-between gap-2 animate-in fade-in"
+                >
+                  <div className="flex items-center gap-2">
+                    <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
+                    <span>{decisionError}</span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setDecisionError(null)}
+                    className="text-rose-500 hover:text-rose-700 p-0.5 rounded cursor-pointer"
+                    aria-label="Tutup pesan error"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              )}
 
               <div>
                 <label className="block text-xs font-semibold text-slate-700 mb-1.5">
