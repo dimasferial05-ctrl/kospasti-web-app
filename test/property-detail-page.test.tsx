@@ -179,9 +179,10 @@ describe("Property Detail Page Component (/kos/[id])", () => {
     expect(content).toContain("isSubmitting");
     expect(content).toContain("setIsSubmitting");
 
-    // Validasi form
+    // Validasi form & banner inline (Issue #330: ganti alert dengan banner error & state feedback)
     expect(content).toContain("!moveInDate");
-    expect(content).toContain("alert(\"Mohon pilih rencana tanggal masuk Anda.\")");
+    expect(content).toContain("Mohon pilih rencana tanggal masuk Anda");
+    expect(content).not.toContain("alert(");
 
     // Panggilan API /api/bookings
     expect(content).toContain("fetch(\"/api/bookings\"");
