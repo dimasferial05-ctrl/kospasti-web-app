@@ -104,9 +104,14 @@ export function RevenueChart({
               return (
                 <div
                   key={item.monthKey || index}
-                  className="relative z-10 flex-1 flex flex-col items-center h-full justify-end group cursor-pointer"
+                  tabIndex={0}
+                  role="graphics-symbol"
+                  aria-label={`Bulan ${item.month}: ${formatRupiah(item.revenue)}, ${item.bookingsCount} pesanan`}
+                  onFocus={() => setHoveredIndex(index)}
+                  onBlur={() => setHoveredIndex(null)}
                   onMouseEnter={() => setHoveredIndex(index)}
                   onMouseLeave={() => setHoveredIndex(null)}
+                  className="relative z-10 flex-1 flex flex-col items-center h-full justify-end group cursor-pointer rounded-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900"
                 >
                   {/* Tooltip Mengambang */}
                   {isHovered && (
