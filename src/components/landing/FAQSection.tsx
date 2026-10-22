@@ -78,7 +78,7 @@ export function FAQSection() {
                 <button
                   type="button"
                   onClick={() => toggleFAQ(idx)}
-                  className="w-full text-left px-5 sm:px-6 py-4 sm:py-5 flex items-center justify-between gap-4 cursor-pointer focus:outline-hidden"
+                  className="w-full text-left px-5 sm:px-6 py-4 sm:py-5 flex items-center justify-between gap-4 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900 rounded-2xl"
                   aria-expanded={isOpen}
                 >
                   <span className="font-bold text-slate-900 dark:text-white text-sm sm:text-base leading-snug">
