@@ -10,10 +10,9 @@ import {
   Building2,
   Calendar,
   BedDouble,
-  Receipt,
   AlertCircle,
+  X,
 } from "lucide-react";
-import Link from "next/link";
 
 interface BookingDetail {
   id: string;
@@ -72,13 +71,13 @@ export default function CheckoutPage() {
   const bookingId = params?.bookingId as string;
 
   const [booking, setBooking] = useState<BookingDetail | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(Boolean(bookingId));
   const [fetchError, setFetchError] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [paymentError, setPaymentError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!bookingId) {
-      setIsLoading(false);
       return;
     }
 
@@ -120,6 +119,7 @@ export default function CheckoutPage() {
   }, [bookingId]);
 
   const handleSimulatePayment = async () => {
+    setPaymentError(null);
     setIsProcessing(true);
     try {
       const res = await fetch(`/api/bookings/${bookingId}/pay`, {
@@ -140,7 +140,7 @@ export default function CheckoutPage() {
         error instanceof Error
           ? error.message
           : "Terjadi kesalahan saat memproses pembayaran. Silakan coba lagi.";
-      alert(errorMessage);
+      setPaymentError(errorMessage);
       setIsProcessing(false);
     }
   };
@@ -340,6 +340,33 @@ export default function CheckoutPage() {
                   Nominal: {formatRupiah(totalPrice)}
                 </div>
               </div>
+
+              {/* Banner Notifikasi Error Pembayaran */}
+              {paymentError && (
+                <div
+                  role="alert"
+                  aria-live="assertive"
+                  className="mb-4 p-3.5 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 rounded-xl text-rose-800 dark:text-rose-200 text-xs sm:text-sm flex items-start justify-between gap-2.5 animate-in fade-in duration-200 text-left"
+                >
+                  <div className="flex items-start gap-2.5">
+                    <AlertCircle className="w-4 h-4 text-rose-600 dark:text-rose-400 shrink-0 mt-0.5" />
+                    <div>
+                      <p className="font-bold">Pembayaran Gagal Diproses</p>
+                      <p className="text-xs text-rose-700 dark:text-rose-300 mt-0.5 leading-relaxed">
+                        {paymentError}
+                      </p>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setPaymentError(null)}
+                    className="text-rose-500 hover:text-rose-700 dark:text-rose-400 dark:hover:text-rose-200 p-1 rounded-md transition-colors"
+                    aria-label="Tutup pesan error"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+              )}
 
               {/* Tombol Simulasi Pembayaran */}
               <button

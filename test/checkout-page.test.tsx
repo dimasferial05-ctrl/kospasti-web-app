@@ -126,4 +126,19 @@ describe("Checkout Page Component (/checkout/[bookingId])", () => {
     // Acceptance Criteria 5: Panduan Pembayaran di kolom kiri
     expect(content).toContain("Panduan Pembayaran:");
   });
+
+  it("menggunakan notifikasi inline modern dan tidak menggunakan dialog bawaan browser alert() (Issue #330)", () => {
+    const filePath = path.resolve(
+      __dirname,
+      "../src/app/checkout/[bookingId]/page.tsx"
+    );
+    const content = fs.readFileSync(filePath, "utf-8");
+
+    expect(content).toContain("paymentError");
+    expect(content).toContain("setPaymentError");
+    expect(content).not.toContain("alert(");
+    expect(content).toContain('role="alert"');
+    expect(content).toContain('aria-live="assertive"');
+    expect(content).toContain("Pembayaran Gagal Diproses");
+  });
 });

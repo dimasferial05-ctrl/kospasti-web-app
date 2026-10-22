@@ -130,6 +130,8 @@ export default function PropertyDetailPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isCheckingAuth, setIsCheckingAuth] = useState(false);
+  const [bookingError, setBookingError] = useState<string | null>(null);
+  const [dateValidationError, setDateValidationError] = useState<boolean>(false);
   const [studentName, setStudentName] = useState("");
   const [waNumber, setWaNumber] = useState("");
   const [userAvatar, setUserAvatar] = useState<string | null>(null);
@@ -147,7 +149,11 @@ export default function PropertyDetailPage() {
 
   const bookingModalRef = useFocusTrap<HTMLDivElement>({
     isOpen: isModalOpen,
-    onClose: () => setIsModalOpen(false),
+    onClose: () => {
+      setIsModalOpen(false);
+      setBookingError(null);
+      setDateValidationError(false);
+    },
   });
 
   const pendingModalRef = useFocusTrap<HTMLDivElement>({
@@ -156,6 +162,8 @@ export default function PropertyDetailPage() {
   });
 
   const handleOpenBookingModal = async (roomTypeToBook?: RoomTypeItem) => {
+    setBookingError(null);
+    setDateValidationError(false);
     if (roomTypeToBook) {
       setSelectedRoomType(roomTypeToBook);
     }
@@ -193,10 +201,13 @@ export default function PropertyDetailPage() {
 
   const handleBookingSubmit = async () => {
     if (!moveInDate) {
-      alert("Mohon pilih rencana tanggal masuk Anda.");
+      setDateValidationError(true);
+      setBookingError("Mohon pilih rencana tanggal masuk Anda.");
       return;
     }
 
+    setBookingError(null);
+    setDateValidationError(false);
     setIsSubmitting(true);
 
     try {
@@ -215,9 +226,11 @@ export default function PropertyDetailPage() {
       const responseData = await response.json();
 
       if (response.status === 401) {
-        alert("Sesi Anda belum login atau telah berakhir. Silakan login kembali.");
+        setBookingError("Sesi Anda belum login atau telah berakhir. Mengarahkan ke halaman login...");
         const callbackUrl = encodeURIComponent(`/kos/${id}`);
-        router.push(`/login?callbackUrl=${callbackUrl}`);
+        setTimeout(() => {
+          router.push(`/login?callbackUrl=${callbackUrl}`);
+        }, 1200);
         return;
       }
 
@@ -238,10 +251,10 @@ export default function PropertyDetailPage() {
 
       router.push(`/checkout/${responseData.data.bookingId}`);
     } catch (error: unknown) {
-      alert(
+      setBookingError(
         error instanceof Error
           ? error.message
-          : "Gagal melakukan pemesanan."
+          : "Gagal melakukan pemesanan. Silakan periksa koneksi Anda dan coba lagi."
       );
     } finally {
       setIsSubmitting(false);
@@ -1520,7 +1533,11 @@ export default function PropertyDetailPage() {
         <div
           className="fixed inset-0 z-[60] bg-black/60 flex items-end sm:items-center justify-center p-0 sm:p-4 animate-in fade-in duration-200"
           onClick={(e) => {
-            if (e.target === e.currentTarget) setIsModalOpen(false);
+            if (e.target === e.currentTarget) {
+              setIsModalOpen(false);
+              setBookingError(null);
+              setDateValidationError(false);
+            }
           }}
         >
           <div
@@ -1605,6 +1622,27 @@ export default function PropertyDetailPage() {
             </div>
 
             <div className="flex flex-col gap-4 mt-1">
+              {bookingError && (
+                <div
+                  role="alert"
+                  aria-live="assertive"
+                  className="p-3 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 rounded-xl text-rose-800 dark:text-rose-200 text-xs flex items-start justify-between gap-2 animate-in fade-in duration-200"
+                >
+                  <div className="flex items-start gap-2">
+                    <AlertCircle className="w-4 h-4 text-rose-600 dark:text-rose-400 shrink-0 mt-0.5" />
+                    <p className="font-medium leading-relaxed">{bookingError}</p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setBookingError(null)}
+                    className="text-rose-500 hover:text-rose-700 dark:text-rose-400 dark:hover:text-rose-200 p-0.5 rounded transition-colors"
+                    aria-label="Tutup pemberitahuan error"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              )}
+
               <div>
                 <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
                   Rencana Tanggal Masuk <span className="text-rose-500">*</span>
@@ -1613,16 +1651,28 @@ export default function PropertyDetailPage() {
                   type="date"
                   min={minDate}
                   value={moveInDate}
-                  onChange={(e) => setMoveInDate(e.target.value)}
+                  onChange={(e) => {
+                    setMoveInDate(e.target.value);
+                    if (dateValidationError) setDateValidationError(false);
+                    if (bookingError) setBookingError(null);
+                  }}
                   required
-                  className="w-full px-3.5 py-2.5 text-sm border border-slate-300 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent text-slate-800 dark:text-white bg-white dark:bg-slate-800"
+                  className={`w-full px-3.5 py-2.5 text-sm border rounded-xl focus:outline-none transition-colors ${
+                    dateValidationError
+                      ? "border-rose-500 focus:ring-2 focus:ring-rose-500/40 text-slate-800 dark:text-white bg-white dark:bg-slate-800"
+                      : "border-slate-300 dark:border-slate-700 focus:ring-2 focus:ring-emerald-500 text-slate-800 dark:text-white bg-white dark:bg-slate-800"
+                  }`}
                 />
               </div>
 
               <div className="flex gap-3 mt-3">
                 <button
                   type="button"
-                  onClick={() => setIsModalOpen(false)}
+                  onClick={() => {
+                    setIsModalOpen(false);
+                    setBookingError(null);
+                    setDateValidationError(false);
+                  }}
                   className="w-full py-2.5 px-4 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-semibold transition-colors cursor-pointer text-sm"
                 >
                   Batal
