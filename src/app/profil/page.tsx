@@ -600,11 +600,19 @@ function ProfileContent() {
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 items-start">
           {/* Sidebar Menu */}
           <aside className="lg:col-span-1 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-3 shadow-sm">
-            <nav className="flex lg:flex-col gap-1.5 overflow-x-auto lg:overflow-visible">
+            <nav
+              role="tablist"
+              aria-label="Menu Tab Profil"
+              className="flex lg:flex-col gap-1.5 overflow-x-auto lg:overflow-visible"
+            >
               <button
                 type="button"
+                role="tab"
+                id="tab-profile"
+                aria-selected={activeTab === "profile"}
+                aria-controls="panel-profile"
                 onClick={() => setActiveTab("profile")}
-                className={`flex-1 lg:flex-none flex items-center justify-center lg:justify-start gap-2.5 px-4 py-3 rounded-xl text-sm font-semibold transition-colors cursor-pointer whitespace-nowrap ${
+                className={`flex-1 lg:flex-none flex items-center justify-center lg:justify-start gap-2.5 px-4 py-3 rounded-xl text-sm font-semibold transition-colors cursor-pointer whitespace-nowrap focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 ${
                   activeTab === "profile"
                     ? "bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800"
                     : "text-slate-650 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white"
@@ -617,8 +625,12 @@ function ProfileContent() {
 
               <button
                 type="button"
+                role="tab"
+                id="tab-bookings"
+                aria-selected={activeTab === "bookings"}
+                aria-controls="panel-bookings"
                 onClick={() => setActiveTab("bookings")}
-                className={`flex-1 lg:flex-none flex items-center justify-center lg:justify-start gap-2.5 px-4 py-3 rounded-xl text-sm font-semibold transition-colors cursor-pointer whitespace-nowrap ${
+                className={`flex-1 lg:flex-none flex items-center justify-center lg:justify-start gap-2.5 px-4 py-3 rounded-xl text-sm font-semibold transition-colors cursor-pointer whitespace-nowrap focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 ${
                   activeTab === "bookings"
                     ? "bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800"
                     : "text-slate-650 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white"
@@ -650,7 +662,13 @@ function ProfileContent() {
           <main className="lg:col-span-3">
             {/* TAB 1: DATA DIRI */}
             {activeTab === "profile" && (
-              <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 sm:p-8 shadow-sm">
+              <div
+                role="tabpanel"
+                id="panel-profile"
+                aria-labelledby="tab-profile"
+                tabIndex={0}
+                className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 sm:p-8 shadow-sm focus:outline-none"
+              >
                 <div className="border-b border-slate-100 dark:border-slate-800 pb-4 mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                   <div>
                     <h2 className="text-lg font-bold text-slate-900 dark:text-white">Data Diri & Profil</h2>
@@ -1074,7 +1092,13 @@ function ProfileContent() {
 
             {/* TAB 2: RIWAYAT PESANAN */}
             {activeTab === "bookings" && (
-              <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 sm:p-8 shadow-sm">
+              <div
+                role="tabpanel"
+                id="panel-bookings"
+                aria-labelledby="tab-bookings"
+                tabIndex={0}
+                className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 sm:p-8 shadow-sm focus:outline-none"
+              >
                 <div className="border-b border-slate-100 dark:border-slate-800 pb-4 mb-6">
                   <h2 className="text-lg font-bold text-slate-900 dark:text-white">Riwayat Pemesanan Kos</h2>
                   <p className="text-sm text-slate-500 dark:text-slate-400">
