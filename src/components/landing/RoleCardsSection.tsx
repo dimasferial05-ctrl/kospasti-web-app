@@ -6,6 +6,9 @@ export function RoleCardsSection() {
   return (
     <section className="py-16 sm:py-24 bg-slate-50/70 dark:bg-slate-950">
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Screen Reader Only Heading for Semantic Hierarchy */}
+        <h2 className="sr-only">Pilihan Peran Pengguna KosPasti</h2>
+
         {/* Intro text */}
         <div className="text-center max-w-2xl mx-auto mb-12 sm:mb-16">
           <p className="text-base sm:text-lg font-medium text-slate-700 dark:text-slate-300 leading-relaxed">

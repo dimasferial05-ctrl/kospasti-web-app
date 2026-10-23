@@ -103,9 +103,9 @@ export function HeroSection() {
           <div className="absolute inset-0 flex flex-col justify-end p-6 sm:p-10 z-10">
             <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
               <div>
-                <h3 className="text-xl sm:text-2xl lg:text-3xl font-extrabold text-white mt-2 drop-shadow-sm">
+                <h2 className="text-xl sm:text-2xl lg:text-3xl font-extrabold text-white mt-2 drop-shadow-sm">
                   Ribuan Kamar Kos Siap Huni &amp; Terverifikasi
-                </h3>
+                </h2>
                 <p className="text-xs sm:text-sm text-slate-200 mt-1 max-w-lg drop-shadow-xs">
                   Bebas biaya siluman dengan jaminan pengembalian dana 100% jika kondisi kamar tidak sesuai deskripsi.
                 </p>
