@@ -456,7 +456,7 @@ export default function PropertyLocationMap({
 
           {/* Container Google Maps */}
           <div className="w-full h-80 sm:h-96 rounded-xl overflow-hidden border border-slate-200 relative shadow-inner">
-            <APIProvider apiKey={apiKey}>
+            <APIProvider apiKey={apiKey} language="id" region="ID">
               <Map
                 defaultCenter={kosCoords}
                 defaultZoom={15}

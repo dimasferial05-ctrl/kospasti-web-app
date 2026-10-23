@@ -5,6 +5,7 @@ import { useSearchParams, useRouter } from "next/navigation";
 import Image from "next/image";
 import MapViewer, { PropertyMapItem, SearchTargetLocation } from "@/components/map/MapViewer";
 import { SmartSearchBar } from "@/components/features/SmartSearchBar";
+import { MapPropertyCardSkeleton } from "@/components/features/MapPropertyCardSkeleton";
 import {
   MapPin,
   Home,
@@ -490,9 +491,16 @@ function MapSearchContent() {
             </div>
 
             {isLoading ? (
-              <div className="flex-1 flex flex-col items-center justify-center p-12 text-slate-400 dark:text-slate-500 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/60 dark:border-slate-800 shadow-soft">
-                <div className="w-8 h-8 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin mb-3"></div>
-                <p className="text-sm font-medium">Memuat data kos...</p>
+              <div
+                role="status"
+                aria-label="Memuat data kos di peta..."
+                aria-busy="true"
+                className="flex-1 overflow-y-auto pr-1 space-y-3.5 max-h-[calc(100vh-280px)]"
+              >
+                <span className="sr-only">Memuat data kos...</span>
+                {Array.from({ length: 4 }).map((_, idx) => (
+                  <MapPropertyCardSkeleton key={idx} />
+                ))}
               </div>
             ) : filteredProperties.length === 0 ? (
               <div className="flex-1 flex flex-col items-center justify-center p-8 text-center bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/60 dark:border-slate-800 shadow-soft">
