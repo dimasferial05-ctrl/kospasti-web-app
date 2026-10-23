@@ -26,6 +26,7 @@ import {
   Layers,
   BadgeCheck,
   MessageCircle,
+  Share2,
 } from "lucide-react";
 import PropertyLocationMap from "@/components/map/PropertyLocationMap";
 import { WishlistButton } from "@/components/features/WishlistButton";
@@ -112,6 +113,7 @@ export default function PropertyDetailPage() {
   const [property, setProperty] = useState<PropertyDetail | null>(null);
   const [selectedRoomType, setSelectedRoomType] = useState<RoomTypeItem | null>(null);
   const [isSaved, setIsSaved] = useState<boolean>(false);
+  const [isCopied, setIsCopied] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -138,6 +140,34 @@ export default function PropertyDetailPage() {
   const [waNumber, setWaNumber] = useState("");
   const [userAvatar, setUserAvatar] = useState<string | null>(null);
   const [moveInDate, setMoveInDate] = useState("");
+
+  const handleShare = async () => {
+    if (typeof window === "undefined" || !property) return;
+
+    const shareData = {
+      title: property.name,
+      text: `Cek kos ${property.name} di KosPasti!`,
+      url: window.location.href,
+    };
+
+    if (navigator.share) {
+      try {
+        await navigator.share(shareData);
+      } catch (err: unknown) {
+        if ((err as Error).name !== "AbortError") {
+          console.error("Gagal membagikan:", err);
+        }
+      }
+    } else if (navigator.clipboard) {
+      try {
+        await navigator.clipboard.writeText(window.location.href);
+        setIsCopied(true);
+        setTimeout(() => setIsCopied(false), 2000);
+      } catch (err) {
+        console.error("Gagal menyalin tautan:", err);
+      }
+    }
+  };
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [minDate, setMinDate] = useState(() => new Date().toISOString().split("T")[0]);
   const [pendingBookingNotice, setPendingBookingNotice] = useState<{
@@ -611,13 +641,34 @@ export default function PropertyDetailPage() {
               {property.name}
             </h1>
           </div>
-          <WishlistButton
-            propertyId={property.id}
-            initialIsSaved={isSaved}
-            variant="button"
-            showText
-            onToggle={(saved) => setIsSaved(saved)}
-          />
+          <div className="flex items-center gap-2 shrink-0">
+            <button
+              type="button"
+              onClick={handleShare}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 text-xs font-semibold shadow-2xs hover:shadow-soft active:scale-95 transition-all duration-200 cursor-pointer"
+              aria-label="Bagikan informasi kos"
+              title="Bagikan tautan kos"
+            >
+              {isCopied ? (
+                <>
+                  <Check className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+                  <span className="text-emerald-600 dark:text-emerald-400">Tersalin!</span>
+                </>
+              ) : (
+                <>
+                  <Share2 className="w-3.5 h-3.5 text-slate-600 dark:text-slate-300" />
+                  <span className="hidden sm:inline">Bagikan</span>
+                </>
+              )}
+            </button>
+            <WishlistButton
+              propertyId={property.id}
+              initialIsSaved={isSaved}
+              variant="button"
+              showText
+              onToggle={(saved) => setIsSaved(saved)}
+            />
+          </div>
         </div>
       </div>
 
