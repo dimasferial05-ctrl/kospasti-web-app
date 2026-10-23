@@ -228,7 +228,7 @@ export function KosPropertyCard({
               type="button"
               onClick={handlePrevSlide}
               aria-label="Foto sebelumnya"
-              className="absolute left-2 top-1/2 -translate-y-1/2 z-20 w-7 h-7 rounded-full bg-white/95 hover:bg-white text-slate-700 dark:bg-slate-800/90 dark:hover:bg-slate-800 dark:text-slate-200 shadow-soft hover:shadow-float hover:scale-105 active:scale-95 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-200 cursor-pointer"
+              className="absolute left-2 top-1/2 -translate-y-1/2 z-20 w-8 h-8 sm:w-7 sm:h-7 rounded-full bg-white/95 hover:bg-white text-slate-700 dark:bg-slate-800/90 dark:hover:bg-slate-800 dark:text-slate-200 shadow-soft hover:shadow-float hover:scale-105 active:scale-95 flex items-center justify-center opacity-90 sm:opacity-0 sm:group-hover:opacity-100 focus:opacity-100 focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-emerald-500 before:content-[''] before:absolute before:-inset-2 before:rounded-full touch-manipulation transition-all duration-200 cursor-pointer"
             >
               <ChevronLeft className="w-4 h-4" />
             </button>
@@ -236,7 +236,7 @@ export function KosPropertyCard({
               type="button"
               onClick={handleNextSlide}
               aria-label="Foto berikutnya"
-              className="absolute right-2 top-1/2 -translate-y-1/2 z-20 w-7 h-7 rounded-full bg-white/95 hover:bg-white text-slate-700 dark:bg-slate-800/90 dark:hover:bg-slate-800 dark:text-slate-200 shadow-soft hover:shadow-float hover:scale-105 active:scale-95 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-200 cursor-pointer"
+              className="absolute right-2 top-1/2 -translate-y-1/2 z-20 w-8 h-8 sm:w-7 sm:h-7 rounded-full bg-white/95 hover:bg-white text-slate-700 dark:bg-slate-800/90 dark:hover:bg-slate-800 dark:text-slate-200 shadow-soft hover:shadow-float hover:scale-105 active:scale-95 flex items-center justify-center opacity-90 sm:opacity-0 sm:group-hover:opacity-100 focus:opacity-100 focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-emerald-500 before:content-[''] before:absolute before:-inset-2 before:rounded-full touch-manipulation transition-all duration-200 cursor-pointer"
             >
               <ChevronRight className="w-4 h-4" />
             </button>
