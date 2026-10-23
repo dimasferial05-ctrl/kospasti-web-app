@@ -4,8 +4,9 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { KosPropertyCard } from "@/components/features/KosPropertyCard";
+import { KosPropertyCardSkeleton } from "@/components/features/KosPropertyCardSkeleton";
 import { SmartSearchBar } from "@/components/features/SmartSearchBar";
-import { Loader2, AlertCircle, SearchX, MapPin } from "lucide-react";
+import { AlertCircle, SearchX, MapPin } from "lucide-react";
 import { TypeAnimation } from "react-type-animation";
 
 interface PropertyItem {
@@ -172,9 +173,16 @@ export default function SearchPage() {
         </div>
 
         {isLoading && (
-          <div className="py-20 flex flex-col items-center justify-center gap-3 text-slate-500 dark:text-slate-400">
-            <Loader2 className="w-8 h-8 animate-spin text-emerald-600 dark:text-emerald-400" />
-            <p className="text-sm font-semibold text-slate-600 dark:text-slate-300">Memuat daftar kos...</p>
+          <div
+            role="status"
+            aria-label="Memuat daftar kos..."
+            aria-busy="true"
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
+          >
+            <span className="sr-only">Memuat daftar kos...</span>
+            {Array.from({ length: 8 }).map((_, idx) => (
+              <KosPropertyCardSkeleton key={idx} />
+            ))}
           </div>
         )}
 
