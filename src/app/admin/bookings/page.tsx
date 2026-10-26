@@ -607,7 +607,7 @@ export default function ManageBookingsPage() {
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header Modal */}
-            <div className="bg-gradient-to-r from-blue-600 to-indigo-600 p-6 text-white relative">
+            <div className="bg-gradient-to-r from-slate-900 to-slate-800 p-6 text-white relative">
               <button
                 type="button"
                 onClick={() => setSelectedUser(null)}
@@ -619,7 +619,7 @@ export default function ManageBookingsPage() {
               <div className="flex flex-col items-center text-center">
                 <UserAvatar src={selectedUser.avatar} name={selectedUser.name} size="lg" />
                 <h3 className="text-xl font-bold tracking-tight">{selectedUser.name || "Pencari Kos"}</h3>
-                <p className="text-blue-100 text-xs mt-0.5">Detail Profil Pencari Kos</p>
+                <p className="text-slate-300 text-xs mt-0.5">Detail Profil Pencari Kos</p>
               </div>
             </div>
 

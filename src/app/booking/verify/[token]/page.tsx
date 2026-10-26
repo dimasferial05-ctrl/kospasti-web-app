@@ -286,7 +286,7 @@ export default function BookingVerifyPage() {
                     Konfirmasi Reservasi
                   </p>
                   <h1 className="text-lg font-bold text-slate-900 mt-0.5">
-                    Halo, Bapak/Ibu {data.ownerName}! 👋
+                    Halo, Bapak/Ibu {data.ownerName}!
                   </h1>
                 </div>
                 <div className="px-2.5 py-1 rounded-full bg-amber-50 text-amber-800 border border-amber-200 text-xs font-bold flex items-center gap-1.5">

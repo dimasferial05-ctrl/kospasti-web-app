@@ -490,7 +490,7 @@ export default function PropertyLocationMap({
                       <div className="px-2 py-0.5 bg-emerald-700 text-white text-[10px] font-bold rounded shadow mb-1">
                         Posisi Anda
                       </div>
-                      <div className="w-4 h-4 rounded-full bg-emerald-500 border-2 border-white shadow-lg animate-pulse ring-4 ring-emerald-400/30" />
+                      <div className="w-4 h-4 rounded-full bg-emerald-500 border-2 border-white shadow-md ring-2 ring-emerald-500/30" />
                     </div>
                   </AdvancedMarker>
                 )}

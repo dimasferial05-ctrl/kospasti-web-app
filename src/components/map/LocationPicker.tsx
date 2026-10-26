@@ -392,8 +392,8 @@ export default function LocationPicker({
                   title="Geser pin untuk memindahkan posisi kos"
                 >
                   <div className="relative flex flex-col items-center group cursor-grab active:cursor-grabbing select-none">
-                    <div className="px-2 py-0.5 bg-slate-900/90 backdrop-blur-xs text-white text-[10px] font-bold rounded shadow-md mb-1 border border-slate-700 whitespace-nowrap animate-bounce">
-                      📍 Titik Kos (Bisa Digeser)
+                    <div className="px-2 py-0.5 bg-slate-900/90 text-white text-[10px] font-bold rounded shadow-md mb-1 border border-slate-700 whitespace-nowrap">
+                      Titik Kos (Bisa Digeser)
                     </div>
                     <div className="w-9 h-9 rounded-full bg-rose-600 border-2 border-white text-white flex items-center justify-center shadow-xl ring-4 ring-rose-500/30 transform group-hover:scale-110 transition">
                       <MapPin className="w-5 h-5 fill-white text-rose-600" />

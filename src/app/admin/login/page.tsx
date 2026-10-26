@@ -68,24 +68,14 @@ export default function AdminLoginPage() {
   };
 
   return (
-    <div className="relative min-h-screen flex items-center justify-center p-4 sm:p-6 bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950 overflow-hidden">
+    <div className="relative min-h-screen flex items-center justify-center p-4 sm:p-6 bg-slate-50 dark:bg-slate-950 overflow-hidden">
 
-      {/* Ambient decorative glow spheres */}
-      <div
-        className="absolute -top-32 -left-32 w-80 h-80 bg-blue-500/15 rounded-full blur-3xl pointer-events-none"
-        aria-hidden="true"
-      />
-      <div
-        className="absolute -bottom-32 -right-32 w-80 h-80 bg-indigo-500/20 rounded-full blur-3xl pointer-events-none"
-        aria-hidden="true"
-      />
-
-      {/* Main Glassmorphism Card */}
-      <div className="relative z-10 w-full max-w-md bg-white/95 dark:bg-slate-900/90 backdrop-blur-xl p-8 sm:p-10 rounded-3xl shadow-2xl border border-white/20 dark:border-slate-800/80 transition-all">
+      {/* Main Card */}
+      <div className="relative z-10 w-full max-w-md bg-white dark:bg-slate-900 p-8 sm:p-10 rounded-2xl shadow-soft border border-slate-200/80 dark:border-slate-800 transition-all">
         {/* Header Branding */}
         <div className="text-center mb-8">
-          <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-slate-900 via-blue-900 to-blue-600 text-white flex items-center justify-center shadow-lg shadow-blue-900/30 mx-auto mb-4 border border-white/20">
-            <ShieldCheck className="w-7 h-7 text-blue-300" />
+          <div className="w-12 h-12 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mx-auto mb-4 border border-emerald-200 dark:border-emerald-800 shadow-xs">
+            <ShieldCheck className="w-6 h-6" />
           </div>
 
           <h1 className="text-2xl font-black tracking-tight text-slate-900 dark:text-white">
@@ -122,7 +112,7 @@ export default function AdminLoginPage() {
                 autoComplete="email"
                 aria-invalid={!!error}
                 aria-describedby={error ? "admin-login-error" : undefined}
-                className="w-full pl-11 pr-4 py-3 bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/80 rounded-xl text-sm font-medium text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-600/30 focus:border-blue-600 transition-all disabled:opacity-50"
+                className="w-full pl-11 pr-4 py-3 bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/80 rounded-xl text-sm font-medium text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-600 transition-all disabled:opacity-50"
               />
             </div>
           </div>
@@ -150,7 +140,7 @@ export default function AdminLoginPage() {
                 autoComplete="current-password"
                 aria-invalid={!!error}
                 aria-describedby={error ? "admin-login-error" : undefined}
-                className="w-full pl-11 pr-11 py-3 bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/80 rounded-xl text-sm font-medium text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-600/30 focus:border-blue-600 transition-all disabled:opacity-50"
+                className="w-full pl-11 pr-11 py-3 bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/80 rounded-xl text-sm font-medium text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-600 transition-all disabled:opacity-50"
               />
               <button
                 type="button"
@@ -185,7 +175,7 @@ export default function AdminLoginPage() {
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full py-3.5 px-4 bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-700 hover:from-blue-500 hover:via-indigo-500 hover:to-blue-600 active:scale-[0.99] text-white font-semibold rounded-xl shadow-lg shadow-blue-600/25 transition-all cursor-pointer flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed mt-2"
+            className="w-full py-3.5 px-4 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-bold rounded-xl shadow-soft hover:shadow-float transition-all duration-200 cursor-pointer flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed mt-2"
           >
             {isLoading ? (
               <>
@@ -194,7 +184,7 @@ export default function AdminLoginPage() {
               </>
             ) : (
               <>
-                <ShieldCheck className="w-4 h-4 text-blue-200" />
+                <ShieldCheck className="w-4 h-4 text-emerald-200" />
                 <span>Masuk ke Dasbor Admin</span>
               </>
             )}
@@ -205,7 +195,7 @@ export default function AdminLoginPage() {
         <div className="mt-8 pt-6 border-t border-slate-200/80 dark:border-slate-800/80 text-center">
           <Link
             href="/"
-            className="inline-flex items-center gap-1.5 text-xs text-slate-500 hover:text-slate-800 dark:hover:text-slate-300 font-medium transition-colors"
+            className="inline-flex items-center gap-1.5 text-xs text-slate-500 hover:text-emerald-600 dark:hover:text-emerald-400 font-medium transition-colors"
           >
             <ArrowLeft className="w-3.5 h-3.5" />
             <span>Kembali ke Halaman Utama</span>
