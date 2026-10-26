@@ -32,12 +32,13 @@ describe("Anti-Slop UI Cleanliness Verification (Issue #354)", () => {
     expect(layoutContent).toContain('title: "KosPasti - Kepastian Kos Real-Time"');
   });
 
-  it("memastikan Header.tsx tidak memiliki emoji 🏠 pada sr-only dan navigasi bebas dari icon AI klise", () => {
+  it("memastikan Header.tsx tidak memiliki emoji (🏠, 🗺️) dan navigasi bebas dari icon AI klise", () => {
     const headerPath = path.join(rootDir, "src/components/layout/Header.tsx");
     const headerContent = fs.readFileSync(headerPath, "utf-8");
 
     expect(headerContent).not.toContain('<span className="sr-only">🏠</span>');
     expect(headerContent).toContain('<span className="sr-only">Beranda KosPasti</span>');
+    expect(headerContent).not.toContain("🗺️");
     expect(headerContent).not.toContain("icon: Zap");
     expect(headerContent).not.toContain("icon: Sparkles");
   });
