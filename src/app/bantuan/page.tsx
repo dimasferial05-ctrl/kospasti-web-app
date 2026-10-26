@@ -11,12 +11,13 @@ import {
   MapPin,
   KeyRound,
   Building2,
-  Zap,
+  Smartphone,
   DollarSign,
   TrendingUp,
   CheckCircle2,
   HelpCircle,
   Info,
+  ChevronLeft,
   ChevronRight,
   ThumbsUp,
   ThumbsDown,
@@ -45,8 +46,8 @@ function renderArticleIcon(name: string, className: string = "w-5 h-5") {
       return <KeyRound className={className} />;
     case "Building2":
       return <Building2 className={className} />;
-    case "Zap":
-      return <Zap className={className} />;
+    case "Smartphone":
+      return <Smartphone className={className} />;
     case "DollarSign":
       return <DollarSign className={className} />;
     case "TrendingUp":
@@ -542,8 +543,9 @@ function HelpCenterContent() {
                       }}
                       className="p-4 rounded-2xl border border-slate-200 dark:border-slate-800 hover:border-emerald-300 dark:hover:border-emerald-700 hover:bg-emerald-50/40 dark:hover:bg-slate-800/50 text-left transition-all group cursor-pointer"
                     >
-                      <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider block">
-                        ← Panduan Sebelumnya
+                      <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider inline-flex items-center gap-1">
+                        <ChevronLeft className="w-3 h-3" />
+                        <span>Panduan Sebelumnya</span>
                       </span>
                       <span className="text-xs font-bold text-slate-900 dark:text-white group-hover:text-emerald-700 dark:group-hover:text-emerald-400 line-clamp-1 mt-0.5">
                         {prevArticle.title}
@@ -562,8 +564,9 @@ function HelpCenterContent() {
                       }}
                       className="p-4 rounded-2xl border border-slate-200 dark:border-slate-800 hover:border-emerald-300 dark:hover:border-emerald-700 hover:bg-emerald-50/40 dark:hover:bg-slate-800/50 text-right transition-all group cursor-pointer"
                     >
-                      <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider block">
-                        Panduan Selanjutnya →
+                      <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider inline-flex items-center justify-end gap-1">
+                        <span>Panduan Selanjutnya</span>
+                        <ChevronRight className="w-3 h-3" />
                       </span>
                       <span className="text-xs font-bold text-slate-900 dark:text-white group-hover:text-emerald-700 dark:group-hover:text-emerald-400 line-clamp-1 mt-0.5">
                         {nextArticle.title}

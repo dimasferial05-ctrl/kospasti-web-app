@@ -13,9 +13,13 @@ import {
   AlertCircle,
   Loader2,
   Building,
+  Building2,
   GraduationCap,
+  School,
   Hospital,
+  HeartPulse,
   Factory,
+  Compass,
   Globe,
   SlidersHorizontal,
   X,
@@ -63,53 +67,59 @@ const CATEGORY_OPTIONS = [
 
 const CATEGORY_STYLE: Record<
   string,
-  { label: string; icon: string; bg: string; text: string; border: string }
+  {
+    label: string;
+    icon: React.ComponentType<{ className?: string }>;
+    bg: string;
+    text: string;
+    border: string;
+  }
 > = {
   kampus: {
     label: "Kampus",
-    icon: "🎓",
+    icon: GraduationCap,
     bg: "bg-purple-50 dark:bg-purple-950/40",
     text: "text-purple-700 dark:text-purple-300",
     border: "border-purple-200 dark:border-purple-800/60",
   },
   sekolah: {
     label: "Sekolah",
-    icon: "🏫",
+    icon: School,
     bg: "bg-blue-50 dark:bg-blue-950/40",
     text: "text-blue-700 dark:text-blue-300",
     border: "border-blue-200 dark:border-blue-800/60",
   },
   rumah_sakit: {
     label: "Faskes / RS",
-    icon: "🏥",
+    icon: HeartPulse,
     bg: "bg-rose-50 dark:bg-rose-950/40",
     text: "text-rose-700 dark:text-rose-300",
     border: "border-rose-200 dark:border-rose-800/60",
   },
   pabrik: {
     label: "Industri",
-    icon: "🏭",
+    icon: Factory,
     bg: "bg-amber-50 dark:bg-amber-950/40",
     text: "text-amber-700 dark:text-amber-300",
     border: "border-amber-200 dark:border-amber-800/60",
   },
   landmark: {
     label: "Landmark",
-    icon: "📍",
+    icon: Compass,
     bg: "bg-emerald-50 dark:bg-emerald-950/40",
     text: "text-emerald-700 dark:text-emerald-300",
     border: "border-emerald-200 dark:border-emerald-800/60",
   },
   wilayah: {
     label: "Wilayah",
-    icon: "🗺️",
+    icon: MapPin,
     bg: "bg-cyan-50 dark:bg-cyan-950/40",
     text: "text-cyan-700 dark:text-cyan-300",
     border: "border-cyan-200 dark:border-cyan-800/60",
   },
   kota: {
     label: "Kota",
-    icon: "🌆",
+    icon: Building2,
     bg: "bg-indigo-50 dark:bg-indigo-950/40",
     text: "text-indigo-700 dark:text-indigo-300",
     border: "border-indigo-200 dark:border-indigo-800/60",
@@ -733,11 +743,12 @@ export default function AdminLocationsPage() {
                   locations.map((item) => {
                     const badge = CATEGORY_STYLE[item.category] || {
                       label: item.category,
-                      icon: "📍",
+                      icon: MapPin,
                       bg: "bg-slate-100 dark:bg-slate-800",
                       text: "text-slate-700 dark:text-slate-300",
                       border: "border-slate-200 dark:border-slate-700",
                     };
+                    const BadgeIcon = badge.icon;
 
                     return (
                       <tr
@@ -770,7 +781,7 @@ export default function AdminLocationsPage() {
                           <span
                             className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold border ${badge.bg} ${badge.text} ${badge.border}`}
                           >
-                            <span>{badge.icon}</span>
+                            <BadgeIcon className="w-3.5 h-3.5 shrink-0" />
                             <span>{badge.label}</span>
                           </span>
                         </td>

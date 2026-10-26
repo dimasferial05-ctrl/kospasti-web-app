@@ -14,7 +14,7 @@ export default function PaymentSuccessPage() {
         {/* Header Card Sukses */}
         <div className="bg-green-500 dark:bg-emerald-600 p-6 sm:p-8 text-center text-white flex flex-col items-center justify-center">
           <div className="bg-white/20 p-3 rounded-full mb-3 backdrop-blur-xs">
-            <CheckCircle2 className="w-16 h-16 text-white animate-bounce-short" />
+            <CheckCircle2 className="w-16 h-16 text-white" />
           </div>
           <h1 className="text-xl sm:text-2xl font-bold tracking-tight">
             Pembayaran DP Berhasil!

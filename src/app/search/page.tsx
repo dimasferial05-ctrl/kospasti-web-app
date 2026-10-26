@@ -130,7 +130,7 @@ export default function SearchPage() {
             className="font-semibold text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 hover:underline inline-flex items-center gap-1 transition-colors"
           >
             <MapPin className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
-            <span>Buka Peta Interaktif →</span>
+            <span>Buka Peta Interaktif</span>
           </Link>
         </div>
       </section>
