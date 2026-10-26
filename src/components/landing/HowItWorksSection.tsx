@@ -81,7 +81,7 @@ export function HowItWorksSection() {
                 key={step.number}
                 className="group flex items-start gap-6 p-4 rounded-2xl hover:bg-slate-50 dark:hover:bg-slate-800/60 transition-colors"
               >
-                <span className="text-4xl sm:text-5xl font-extrabold text-emerald-600 dark:text-emerald-400 font-mono shrink-0 leading-none group-hover:scale-110 transition-transform">
+                <span className="text-4xl sm:text-5xl font-black text-emerald-600 dark:text-emerald-400 shrink-0 leading-none group-hover:scale-110 transition-transform">
                   {step.number}
                 </span>
                 <div>

@@ -17,7 +17,7 @@ import {
   ArrowLeft,
   Tag,
   Clock,
-  Sparkles,
+  PawPrint,
   Users,
   SlidersHorizontal,
 } from "lucide-react";
@@ -414,7 +414,7 @@ function MapSearchContent() {
 
                   {activeCriteria.is_pet_friendly && (
                     <span className="inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-lg bg-emerald-50 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 border border-emerald-200/80 dark:border-emerald-800">
-                      <Sparkles className="w-3 h-3 text-emerald-600 dark:text-emerald-400" />
+                      <PawPrint className="w-3 h-3 text-emerald-600 dark:text-emerald-400" />
                       <span>Boleh Bawa Hewan</span>
                     </span>
                   )}
@@ -603,7 +603,8 @@ function MapSearchContent() {
 
                               {typeof property.distance_km === "number" && (
                                 <span className="inline-flex items-center gap-1 font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/60 px-2 py-0.5 rounded-full text-[10px] border border-emerald-200/60 dark:border-emerald-800">
-                                  📍 {property.distance_km} km
+                                  <MapPin className="w-3 h-3 text-emerald-600 dark:text-emerald-400" />
+                                  <span>{property.distance_km} km</span>
                                 </span>
                               )}
                             </div>

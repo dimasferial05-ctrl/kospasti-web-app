@@ -9,7 +9,7 @@ import {
   useMap,
 } from "@vis.gl/react-google-maps";
 import Link from "next/link";
-import { MapPin, Navigation, ExternalLink, AlertCircle, Sparkles } from "lucide-react";
+import { MapPin, Navigation, ExternalLink, AlertCircle, Compass } from "lucide-react";
 
 export interface PropertyMapItem {
   id: string;
@@ -193,7 +193,6 @@ function MapViewerInner({
         setActiveProperty(found);
       }
     } else {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
       setActiveProperty(null);
     }
   }, [selectedPropertyId, properties]);
@@ -286,7 +285,7 @@ function MapViewerInner({
           pada file <code className="font-mono text-xs">.env</code> Anda.
         </p>
         <div className="text-xs text-slate-500 bg-white p-3 rounded-lg border border-slate-200">
-          📍 {validProperties.length} kos dengan koordinat siap ditampilkan setelah API Key aktif.
+          <span className="font-semibold text-slate-700">{validProperties.length}</span> kos dengan koordinat siap ditampilkan setelah API Key aktif.
         </div>
       </div>
     );
@@ -330,11 +329,11 @@ function MapViewerInner({
               title={`Target Pencarian: ${searchTarget.name}`}
             >
               <div className="relative flex flex-col items-center group cursor-pointer z-20">
-                <div className="bg-indigo-600 text-white text-[11px] font-bold px-3 py-1.5 rounded-full shadow-xl border-2 border-white flex items-center gap-1.5 whitespace-nowrap animate-pulse">
-                  <Sparkles className="w-3.5 h-3.5 text-amber-300" />
-                  <span>📍 {searchTarget.name}</span>
+                <div className="bg-emerald-600 text-white text-[11px] font-bold px-3 py-1.5 rounded-full shadow-lg border-2 border-white flex items-center gap-1.5 whitespace-nowrap">
+                  <Compass className="w-3.5 h-3.5 text-white" />
+                  <span>{searchTarget.name}</span>
                 </div>
-                <div className="w-2.5 h-2.5 bg-indigo-600 rotate-45 -mt-1 border-r-2 border-b-2 border-white"></div>
+                <div className="w-2.5 h-2.5 bg-emerald-600 rotate-45 -mt-1 border-r-2 border-b-2 border-white"></div>
               </div>
             </AdvancedMarker>
           )}

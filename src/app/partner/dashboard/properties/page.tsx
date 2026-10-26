@@ -647,8 +647,9 @@ export default function PartnerPropertiesPage() {
                     </span>
                   )}
                   {prop.is_pet_friendly && (
-                    <span className="text-[10px] font-bold px-2 py-1 rounded-full bg-amber-600/90 text-white backdrop-blur-md">
-                      🐾 Pet
+                    <span className="text-[10px] font-bold px-2 py-1 rounded-full bg-amber-600/90 text-white backdrop-blur-md inline-flex items-center gap-1">
+                      <PawPrint className="w-3 h-3" />
+                      <span>Pet</span>
                     </span>
                   )}
                 </div>

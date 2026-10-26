@@ -711,8 +711,9 @@ export default function AdminPayoutsPage() {
                     a.n. <strong className="text-slate-900 dark:text-white">{selectedPayout.owner.payout_method.account_holder}</strong>
                   </p>
                   {!selectedPayout.owner.payout_method.is_verified && (
-                    <p className="text-rose-600 font-bold pt-1">
-                      ⚠️ Peringatan: Rekening ini belum diverifikasi. Harap verifikasi terlebih dahulu di tab Verifikasi Rekening Mitra.
+                    <p className="text-rose-600 font-bold pt-1 flex items-start gap-1.5">
+                      <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
+                      <span>Peringatan: Rekening ini belum diverifikasi. Harap verifikasi terlebih dahulu di tab Verifikasi Rekening Mitra.</span>
                     </p>
                   )}
                 </>

@@ -7,7 +7,6 @@ import { KosPropertyCard } from "@/components/features/KosPropertyCard";
 import { KosPropertyCardSkeleton } from "@/components/features/KosPropertyCardSkeleton";
 import { SmartSearchBar } from "@/components/features/SmartSearchBar";
 import { AlertCircle, SearchX, MapPin } from "lucide-react";
-import { TypeAnimation } from "react-type-animation";
 
 interface PropertyItem {
   id: string;
@@ -104,22 +103,9 @@ export default function SearchPage() {
         {/* Main Headline */}
         <h1 className="text-3xl sm:text-5xl font-extrabold text-slate-900 dark:text-white tracking-tight max-w-3xl leading-[1.15]">
           Cari Kos Sesuai{" "}
-          <TypeAnimation
-            sequence={[
-              "Kebutuhanmu",
-              2000,
-              "Impianmu",
-              2000,
-              "Budgetmu",
-              2000,
-              "Kriteriamu",
-              2000,
-            ]}
-            wrapper="span"
-            speed={50}
-            className="text-emerald-600 dark:text-emerald-400 inline-block"
-            repeat={Infinity}
-          />
+          <span className="text-emerald-600 dark:text-emerald-400">
+            Kebutuhan &amp; Kriteriamu
+          </span>
         </h1>
 
         {/* Subtitle */}
@@ -168,7 +154,6 @@ export default function SearchPage() {
             className="text-xs sm:text-sm font-bold text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 hover:underline inline-flex items-center gap-1 self-start sm:self-auto"
           >
             <span>Lihat semua di peta</span>
-            <span>→</span>
           </Link>
         </div>
 

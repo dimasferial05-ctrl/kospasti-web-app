@@ -1057,7 +1057,6 @@ export default function PropertyDetailPage() {
           {property.description && (
             <div id="section-deskripsi" className="bg-white dark:bg-slate-900 p-5 sm:p-6 rounded-2xl sm:rounded-3xl border border-slate-200/80 dark:border-slate-800 shadow-soft flex flex-col gap-3.5">
               <div className="flex items-center gap-2">
-                <span className="w-2.5 h-2.5 rounded-full bg-emerald-600"></span>
                 <h3 className="text-base font-bold text-slate-900 dark:text-white">Deskripsi Kos</h3>
               </div>
               <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed whitespace-pre-line font-medium">
@@ -1071,7 +1070,6 @@ export default function PropertyDetailPage() {
             <div id="section-tipe-kamar" className="bg-white dark:bg-slate-900 p-5 sm:p-6 rounded-2xl sm:rounded-3xl border border-slate-200/90 dark:border-slate-800 shadow-xs flex flex-col gap-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-600"></span>
                   <h3 className="text-base font-bold text-slate-900 dark:text-white">Pilihan Tipe Kamar</h3>
                 </div>
                 <span className="text-xs font-medium text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 px-2.5 py-1 rounded-md border border-slate-200 dark:border-slate-700">
@@ -1180,7 +1178,6 @@ export default function PropertyDetailPage() {
           <div id="section-fasilitas-kamar" className="bg-white dark:bg-slate-900 p-5 sm:p-6 rounded-2xl sm:rounded-3xl border border-slate-200/80 dark:border-slate-800 shadow-soft flex flex-col gap-4">
             <div className="flex items-center justify-between flex-wrap gap-2">
               <div className="flex items-center gap-2">
-                <span className="w-2.5 h-2.5 rounded-full bg-teal-600"></span>
                 <h3 className="text-base font-bold text-slate-900 dark:text-white">
                   Fasilitas Kamar
                 </h3>
@@ -1228,7 +1225,6 @@ export default function PropertyDetailPage() {
           {/* ========================================================================= */}
           <div id="section-fasilitas-umum" className="bg-white dark:bg-slate-900 p-5 sm:p-6 rounded-2xl sm:rounded-3xl border border-slate-200/80 dark:border-slate-800 shadow-soft flex flex-col gap-4">
             <div className="flex items-center gap-2">
-              <span className="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
               <h3 className="text-base font-bold text-slate-900 dark:text-white">Fasilitas Umum</h3>
             </div>
 
@@ -1258,7 +1254,6 @@ export default function PropertyDetailPage() {
           {/* ========================================================================= */}
           <div id="section-spesifikasi-aturan" className="bg-white dark:bg-slate-900 p-5 sm:p-6 rounded-2xl sm:rounded-3xl border border-slate-200/80 dark:border-slate-800 shadow-soft flex flex-col gap-4">
             <div className="flex items-center gap-2">
-              <span className="w-2.5 h-2.5 rounded-full bg-amber-500"></span>
               <h3 className="text-base font-bold text-slate-900 dark:text-white">Peraturan &amp; Kebijakan Kos</h3>
             </div>
 
@@ -1355,7 +1350,6 @@ export default function PropertyDetailPage() {
           {/* ========================================================================= */}
           <div id="section-ketentuan-sewa" className="bg-white dark:bg-slate-900 p-5 sm:p-6 rounded-2xl sm:rounded-3xl border border-slate-200/80 dark:border-slate-800 shadow-soft flex flex-col gap-4">
             <div className="flex items-center gap-2">
-              <span className="w-2.5 h-2.5 rounded-full bg-blue-600"></span>
               <h3 className="text-base font-bold text-slate-900 dark:text-white">Ketentuan Pengajuan Sewa</h3>
             </div>
 

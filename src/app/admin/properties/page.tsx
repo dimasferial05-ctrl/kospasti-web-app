@@ -792,7 +792,7 @@ export default function ManagePropertiesPage() {
           >
             <span>Butuh Persetujuan</span>
             {properties.filter((p) => (p.status || "PENDING_REVIEW") === "PENDING_REVIEW").length > 0 && (
-              <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-amber-100 text-amber-900 font-black animate-pulse">
+              <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-amber-100 text-amber-900 font-black">
                 {properties.filter((p) => (p.status || "PENDING_REVIEW") === "PENDING_REVIEW").length}
               </span>
             )}
@@ -942,7 +942,7 @@ export default function ManagePropertiesPage() {
                           )}
                         </div>
                       ) : (
-                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-800 border border-amber-200 animate-pulse">
+                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-800 border border-amber-200">
                           <Clock size={12} className="text-amber-600" />
                           <span>Menunggu Review</span>
                         </span>

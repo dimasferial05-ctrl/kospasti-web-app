@@ -88,4 +88,71 @@ describe("Anti-Slop UI Cleanliness Verification (Issue #354)", () => {
     expect(content).not.toMatch(/rounded-full bg-emerald-500 animate-pulse/);
     expect(content).not.toMatch(/rounded-full bg-amber-500 animate-pulse/);
   });
+
+  it("memastikan admin login bebas dari glow orbs blur-3xl dan gradien indigo klise (#356)", () => {
+    const adminLoginPath = path.join(rootDir, "src/app/admin/login/page.tsx");
+    const content = fs.readFileSync(adminLoginPath, "utf-8");
+
+    expect(content).not.toContain("blur-3xl");
+    expect(content).not.toContain("to-indigo-950");
+    expect(content).not.toContain("from-blue-600 via-indigo-600");
+    expect(content).toContain("bg-slate-50");
+    expect(content).toContain("bg-emerald-600");
+  });
+
+  it("memastikan search page bebas dari TypeAnimation (#356)", () => {
+    const searchPath = path.join(rootDir, "src/app/search/page.tsx");
+    const content = fs.readFileSync(searchPath, "utf-8");
+
+    expect(content).not.toContain("TypeAnimation");
+    expect(content).not.toContain("repeat={Infinity}");
+  });
+
+  it("memastikan MapViewer dan map/page bebas dari ikon Sparkles (#356)", () => {
+    const mapViewerPath = path.join(rootDir, "src/components/map/MapViewer.tsx");
+    const mapPagePath = path.join(rootDir, "src/app/map/page.tsx");
+
+    const mapViewerContent = fs.readFileSync(mapViewerPath, "utf-8");
+    const mapPageContent = fs.readFileSync(mapPagePath, "utf-8");
+
+    expect(mapViewerContent).not.toContain("Sparkles");
+    expect(mapViewerContent).toContain("Compass");
+    expect(mapPageContent).not.toContain("Sparkles");
+    expect(mapPageContent).toContain("PawPrint");
+  });
+
+  it("memastikan LocationPicker bebas dari animate-bounce (#356)", () => {
+    const pickerPath = path.join(rootDir, "src/components/map/LocationPicker.tsx");
+    const content = fs.readFileSync(pickerPath, "utf-8");
+
+    expect(content).not.toContain("animate-bounce");
+    expect(content).not.toContain("📍 Titik Kos");
+  });
+
+  it("memastikan halaman detail kos bebas dari decorative status dots pada heading (#356)", () => {
+    const kosDetailPath = path.join(rootDir, "src/app/kos/[id]/page.tsx");
+    const content = fs.readFileSync(kosDetailPath, "utf-8");
+
+    expect(content).not.toContain('span className="w-2.5 h-2.5 rounded-full bg-emerald-600"');
+    expect(content).not.toContain('span className="w-2.5 h-2.5 rounded-full bg-teal-600"');
+    expect(content).not.toContain('span className="w-2.5 h-2.5 rounded-full bg-emerald-500"');
+    expect(content).not.toContain('span className="w-2.5 h-2.5 rounded-full bg-amber-500"');
+    expect(content).not.toContain('span className="w-2.5 h-2.5 rounded-full bg-blue-600"');
+  });
+
+  it("memastikan HowItWorksSection nomor langkah tidak menggunakan font-mono (#356)", () => {
+    const howPath = path.join(rootDir, "src/components/landing/HowItWorksSection.tsx");
+    const content = fs.readFileSync(howPath, "utf-8");
+
+    expect(content).not.toMatch(/step\.number[\s\S]*font-mono/);
+    expect(content).toContain("text-emerald-600 dark:text-emerald-400 shrink-0 leading-none group-hover:scale-110");
+  });
+
+  it("memastikan modal detail user di admin bookings tidak menggunakan gradien blue-indigo (#356)", () => {
+    const bookingsPath = path.join(rootDir, "src/app/admin/bookings/page.tsx");
+    const content = fs.readFileSync(bookingsPath, "utf-8");
+
+    expect(content).not.toContain("bg-gradient-to-r from-blue-600 to-indigo-600");
+    expect(content).toContain("bg-gradient-to-r from-slate-900 to-slate-800");
+  });
 });
