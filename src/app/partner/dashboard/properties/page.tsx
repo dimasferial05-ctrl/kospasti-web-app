@@ -8,14 +8,13 @@ import {
   Edit,
   Trash2,
   BedDouble,
-  Sparkles,
+  PawPrint,
   MapPin,
   Loader2,
   CheckCircle2,
   X,
   Info,
   ExternalLink,
-  HelpCircle,
   FileText,
   Star,
   Play,
@@ -674,7 +673,7 @@ export default function PartnerPropertiesPage() {
                   <div className="mb-2.5">
                     {prop.status === "PUBLISHED" ? (
                       <span className="inline-flex items-center gap-1.5 text-[11px] font-bold px-2.5 py-1 rounded-full bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/60">
-                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
                         <span>Aktif (Disetujui)</span>
                       </span>
                     ) : prop.status === "REJECTED" ? (
@@ -684,7 +683,7 @@ export default function PartnerPropertiesPage() {
                       </span>
                     ) : (
                       <span className="inline-flex items-center gap-1.5 text-[11px] font-bold px-2.5 py-1 rounded-full bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800/60">
-                        <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
+                        <span className="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
                         <span>Menunggu Persetujuan Admin</span>
                       </span>
                     )}
@@ -711,8 +710,8 @@ export default function PartnerPropertiesPage() {
                         </p>
                       </div>
 
-                      <div className="pt-2 border-t border-rose-200/60 dark:border-rose-800/40 flex items-start gap-1.5 text-rose-900 dark:text-rose-200 text-[11px] bg-white/70 dark:bg-slate-900/70 p-2 rounded-xl">
-                        <span className="text-sm leading-none shrink-0">💡</span>
+                      <div className="pt-2 border-t border-rose-200/60 dark:border-rose-800/40 flex items-start gap-2 text-rose-900 dark:text-rose-200 text-[11px] bg-white/70 dark:bg-slate-900/70 p-2 rounded-xl">
+                        <Info className="w-3.5 h-3.5 text-rose-600 dark:text-rose-400 shrink-0 mt-0.5" />
                         <p className="leading-snug">
                           <span className="font-bold">Cara Mengajukan Ulang:</span> Klik tombol <strong>&ldquo;Perbaiki &amp; Ajukan Ulang&rdquo;</strong> di bawah untuk merevisi data kos. Setelah disimpan, kos akan otomatis diajukan kembali ke Admin untuk ditinjau.
                         </p>
@@ -841,7 +840,7 @@ export default function PartnerPropertiesPage() {
                   </p>
                 </div>
                 <p className="text-[11px] text-amber-800 dark:text-amber-300 leading-relaxed">
-                  💡 Silakan perbaiki data atau foto kos sesuai catatan di atas. Begitu Anda klik tombol <strong>&ldquo;Simpan &amp; Ajukan Ulang ke Admin&rdquo;</strong> di bawah, kos ini akan otomatis diajukan kembali ke Admin untuk ditinjau ulang.
+                  Silakan perbaiki data atau foto kos sesuai catatan di atas. Begitu Anda klik tombol <strong>&ldquo;Simpan &amp; Ajukan Ulang ke Admin&rdquo;</strong> di bawah, kos ini akan otomatis diajukan kembali ke Admin untuk ditinjau ulang.
                 </p>
               </div>
             )}
@@ -1008,7 +1007,7 @@ export default function PartnerPropertiesPage() {
                   </div>
                   <div className="text-xs">
                     <div className="font-semibold flex items-center gap-1.5">
-                      <Sparkles size={13} className={formData.is_pet_friendly ? "text-emerald-200" : "text-slate-400"} />
+                      <PawPrint size={13} className={formData.is_pet_friendly ? "text-emerald-200" : "text-slate-400"} />
                       <span>Pet Friendly</span>
                     </div>
                     <p className={`text-[11px] mt-0.5 ${formData.is_pet_friendly ? "text-emerald-200" : "text-slate-400"}`}>

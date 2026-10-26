@@ -117,10 +117,14 @@ export function LandingFooter() {
                 </Link>
               </li>
               <li>
-                <span className="text-slate-400 dark:text-slate-600 cursor-not-allowed">Syarat &amp; Ketentuan</span>
+                <Link href="/bantuan?tab=user" className="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">
+                  Syarat &amp; Ketentuan
+                </Link>
               </li>
               <li>
-                <span className="text-slate-400 dark:text-slate-600 cursor-not-allowed">Kebijakan Privasi</span>
+                <Link href="/bantuan?tab=user" className="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">
+                  Kebijakan Privasi
+                </Link>
               </li>
             </ul>
           </div>

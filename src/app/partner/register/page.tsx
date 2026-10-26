@@ -17,14 +17,11 @@ import {
   ArrowRight,
   ArrowLeft,
   Loader2,
-  HelpCircle,
-  Sparkles,
   Info,
   Eye,
   EyeOff,
   ShieldCheck,
 } from "lucide-react";
-import { GradientWave } from "@/components/ui/gradient-wave";
 import LocationPicker from "@/components/map/LocationPicker";
 
 export default function PartnerRegisterPage() {
@@ -220,12 +217,6 @@ export default function PartnerRegisterPage() {
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col justify-center py-10 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
-      {/* Background Animated Gradient Wave */}
-      <GradientWave
-        colors={["#ecfdf5", "#a7f3d0", "#34d399", "#ffffff", "#6ee7b7", "#ffffff"]}
-        noiseSpeed={0.000003}
-        className="opacity-40 -z-10 pointer-events-none"
-      />
       {/* Background Decor */}
       <div className="max-w-3xl mx-auto w-full relative z-10">
         {/* Back to Home Action */}
@@ -852,7 +843,7 @@ export default function PartnerRegisterPage() {
                     </>
                   ) : (
                     <>
-                      <Sparkles className="w-4 h-4" />
+                      <CheckCircle2 className="w-4 h-4" />
                       <span>Selesaikan &amp; Buat Akun Mitra</span>
                     </>
                   )}

@@ -177,26 +177,10 @@
 
 .animate-float-slow {
   animation: floatSlow 6s ease-in-out infinite;
-}
-
-@keyframes aurora {
-  from {
-    background-position: 50% 50%, 50% 50%;
-  }
-  to {
-    background-position: 350% 50%, 350% 50%;
-  }
-}
-
-.animate-aurora {
-  animation: aurora 45s linear infinite;
-}
-
 /* Aksesibilitas: Nonaktifkan animasi melayang jika pengguna mengaktifkan preferensi Reduce Motion */
 @media (prefers-reduced-motion: reduce) {
   .animate-float,
-  .animate-float-slow,
-  .animate-aurora {
+  .animate-float-slow {
     animation: none !important;
     transform: none !important;
   }
@@ -213,10 +197,6 @@
 
 .shadow-float {
   box-shadow: 0 20px 40px -8px rgba(15, 23, 42, 0.12), 0 8px 16px -4px rgba(15, 23, 42, 0.04);
-}
-
-.shadow-glow-emerald {
-  box-shadow: 0 8px 30px -4px rgba(16, 185, 129, 0.2);
 }
 
 .glass-panel {

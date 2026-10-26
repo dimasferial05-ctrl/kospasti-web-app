@@ -5,8 +5,6 @@ import { useRouter } from "next/navigation";
 import { MapPin } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
-import { TypeAnimation } from "react-type-animation";
-import { GradientWave } from "@/components/ui/gradient-wave";
 import { SmartSearchBar } from "@/components/features/SmartSearchBar";
 
 export function HeroSection() {
@@ -21,37 +19,14 @@ export function HeroSection() {
   };
 
   return (
-    <section className="relative w-full overflow-hidden bg-gradient-to-b from-emerald-50/60 via-slate-50 to-white dark:from-slate-950 dark:via-slate-950 dark:to-slate-900 pt-10 sm:pt-16 pb-0">
-      {/* Background Animated Gradient Wave */}
-      <GradientWave
-        colors={["#ecfdf5", "#a7f3d0", "#34d399", "#10b981", "#ffffff", "#059669"]}
-        noiseSpeed={0.000004}
-        className="opacity-40 -z-10 pointer-events-none"
-      />
-
-      {/* Glow decorative blur */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-5xl h-80 bg-gradient-to-b from-emerald-200/30 via-teal-100/20 to-transparent dark:from-emerald-950/30 dark:via-emerald-900/10 blur-3xl -z-10 pointer-events-none" />
-
+    <section className="relative w-full overflow-hidden bg-gradient-to-b from-emerald-50/50 via-slate-50/30 to-white dark:from-slate-950 dark:via-slate-950 dark:to-slate-900 pt-10 sm:pt-16 pb-0">
       <div className="relative z-30 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center flex flex-col items-center">
 
-        {/* Big centered question headline */}
+        {/* Big centered headline */}
         <h1 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold text-slate-900 dark:text-white tracking-tight leading-[1.18] max-w-3xl">
           <span className="block">Temukan Kos Impian atau</span>
-          <span className="block text-emerald-600 dark:text-emerald-400 min-h-[1.25em]">
-            <TypeAnimation
-              sequence={[
-                "Kelola Propertimu?",
-                2500,
-                "Cari Tempat Nyaman?",
-                2500,
-                "Mulai Bisnis Kos?",
-                2500,
-              ]}
-              wrapper="span"
-              speed={50}
-              className="inline-block"
-              repeat={Infinity}
-            />
+          <span className="block text-emerald-600 dark:text-emerald-400">
+            Kelola Properti dengan Pasti
           </span>
         </h1>
 
@@ -114,7 +89,7 @@ export function HeroSection() {
               <div className="flex items-center gap-3 shrink-0">
                 <Link
                   href="/search"
-                  className="px-6 py-2.5 rounded-full bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-bold text-xs sm:text-sm hover:bg-emerald-50 dark:hover:bg-slate-700 hover:text-emerald-700 dark:hover:text-emerald-400 transition-all shadow-lg hover:scale-105"
+                  className="px-6 py-2.5 rounded-xl bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-bold text-xs sm:text-sm hover:bg-emerald-50 dark:hover:bg-slate-700 hover:text-emerald-700 dark:hover:text-emerald-400 transition-all shadow-md hover:-translate-y-0.5"
                 >
                   Jelajahi Listing
                 </Link>

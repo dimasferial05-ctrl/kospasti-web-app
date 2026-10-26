@@ -33,7 +33,7 @@ describe("Header Component (/components/layout/Header) - Issue #133, #138 & #170
     const html = renderToStaticMarkup(<Header isLoggedIn={true} />);
 
     expect(html).toContain("KosPasti");
-    expect(html).toContain("🏠");
+    expect(html).toContain("Beranda KosPasti");
     expect(html).toContain("Menu Pengguna");
     expect(html).not.toContain("Masuk / Daftar");
   });
@@ -43,7 +43,7 @@ describe("Header Component (/components/layout/Header) - Issue #133, #138 & #170
     const html = renderToStaticMarkup(<Header isLoggedIn={false} />);
 
     expect(html).toContain("KosPasti");
-    expect(html).toContain("🏠");
+    expect(html).toContain("Beranda KosPasti");
     expect(html).toContain("Masuk / Daftar");
     expect(html).not.toContain("Menu Pengguna");
   });

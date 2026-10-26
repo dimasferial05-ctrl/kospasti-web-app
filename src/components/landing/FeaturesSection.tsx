@@ -3,7 +3,7 @@ import Link from "next/link";
 import {
   ShieldCheck,
   Star,
-  Sparkles,
+  Search,
   MapPin,
   BellRing,
   ArrowRight,
@@ -52,7 +52,7 @@ export function FeaturesSection() {
               </div>
               <div className="flex items-center gap-2">
                 <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
-                <span>Chat langsung dengan pemilik kos di dalam aplikasi</span>
+                <span>Komunikasi langsung dengan pemilik kos via WhatsApp</span>
               </div>
             </div>
 
@@ -136,8 +136,8 @@ export function FeaturesSection() {
             <div className="w-full max-w-md grid grid-cols-2 gap-4">
               {/* Feature Bubble 1 */}
               <div className="p-5 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/60 dark:border-slate-800 shadow-soft hover:shadow-float hover:-translate-y-1 transition-all duration-300 flex flex-col gap-3 group">
-                <div className="w-10 h-10 rounded-xl bg-purple-50 dark:bg-purple-950/60 text-purple-600 dark:text-purple-400 flex items-center justify-center border border-purple-100 dark:border-purple-800 transition-transform group-hover:scale-110">
-                  <Sparkles className="w-5 h-5" />
+                <div className="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center border border-emerald-100 dark:border-emerald-800 transition-transform group-hover:scale-110">
+                  <Search className="w-5 h-5" />
                 </div>
                 <div className="text-xs font-bold text-slate-900 dark:text-white group-hover:text-emerald-700 dark:group-hover:text-emerald-400 transition-colors">Pencarian Cerdas AI</div>
                 <p className="text-[11px] font-medium text-slate-500 dark:text-slate-400 leading-relaxed">

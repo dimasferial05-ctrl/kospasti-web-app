@@ -16,8 +16,8 @@ import {
   Layers,
   Home,
   Users,
-  Zap,
-  Sparkles,
+  Workflow,
+  ShieldCheck,
   Building2,
   HelpCircle,
   PhoneCall,
@@ -206,13 +206,13 @@ export function Header({ isLoggedIn: initialIsLoggedIn = false }: HeaderProps) {
       label: "Cara Kerja",
       sublabel: "3 langkah mudah sewa kos",
       href: "#cara-kerja",
-      icon: Zap,
+      icon: Workflow,
     },
     {
       label: "Fitur Unggulan",
       sublabel: "Proteksi real-time & escrow",
       href: "#fitur",
-      icon: Sparkles,
+      icon: ShieldCheck,
     },
     {
       label: "Mitra Pemilik Kos",
@@ -247,7 +247,7 @@ export function Header({ isLoggedIn: initialIsLoggedIn = false }: HeaderProps) {
             href="/"
             className="group flex items-center gap-2.5 transition-transform duration-300 hover:scale-[1.02]"
           >
-            <span className="sr-only">🏠</span>
+            <span className="sr-only">Beranda KosPasti</span>
             <Image
               src="/logo.jpg"
               alt="KosPasti Logo"

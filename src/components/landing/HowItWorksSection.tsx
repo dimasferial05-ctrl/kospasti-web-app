@@ -1,6 +1,5 @@
 import React from "react";
 import { ThemeImage } from "@/components/ui/ThemeImage";
-import { Laptop } from "lucide-react";
 
 export function HowItWorksSection() {
   const steps = [
@@ -14,7 +13,7 @@ export function HowItWorksSection() {
       number: "2",
       title: "Tanya Pemilik & Cek Ulasan",
       description:
-        "Diskusikan ketersediaan kamar lewat chat langsung di aplikasi dan baca ulasan jujur dari penghuni yang terverifikasi.",
+        "Hubungi pemilik langsung via WhatsApp dan baca ulasan jujur dari penghuni yang terverifikasi.",
     },
     {
       number: "3",
@@ -42,25 +41,8 @@ export function HowItWorksSection() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
           {/* Left Column: Responsive Desktop + Mobile Overlap Showcase */}
           <div className="lg:col-span-6 flex justify-center relative pb-10 sm:pb-12">
-            {/* Desktop Browser Frame */}
-            <div className="w-full max-w-lg bg-slate-900 rounded-2xl shadow-2xl border border-slate-700/80 overflow-hidden relative">
-              {/* Browser Window Top Bar */}
-              <div className="bg-slate-800 px-4 py-2.5 flex items-center gap-2 border-b border-slate-700">
-                <div className="flex items-center gap-1.5">
-                  <span className="w-2.5 h-2.5 rounded-full bg-rose-500" />
-                  <span className="w-2.5 h-2.5 rounded-full bg-amber-500" />
-                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
-                </div>
-                {/* Browser URL bar */}
-                <div className="flex-1 max-w-xs mx-auto bg-slate-900/80 rounded-md px-3 py-1 text-[11px] text-slate-300 font-mono flex items-center justify-center gap-1.5 border border-slate-700">
-                  <span className="text-emerald-400">🔒</span>
-                  <span>https://kospasti.id</span>
-                </div>
-                <div className="flex items-center gap-1 text-slate-400 text-xs">
-                  <Laptop className="w-3.5 h-3.5" />
-                </div>
-              </div>
-
+            {/* Desktop Preview Frame */}
+            <div className="w-full max-w-lg bg-slate-900 rounded-2xl shadow-xl border border-slate-200/80 dark:border-slate-800 overflow-hidden relative">
               {/* Desktop Image View */}
               <div className="w-full bg-slate-100 dark:bg-slate-800 overflow-hidden relative aspect-[16/10]">
                 <ThemeImage
@@ -74,12 +56,12 @@ export function HowItWorksSection() {
               </div>
             </div>
 
-            {/* Overlapping Floating Smartphone Mockup on Bottom-Right */}
-            <div className="absolute -bottom-4 right-0 sm:-right-2 w-36 sm:w-44 h-72 sm:h-84 bg-slate-950 rounded-[32px] p-2 shadow-2xl border-2 border-slate-700 animate-float motion-reduce:animate-none z-20">
+            {/* Overlapping Mobile Smartphone Mockup on Bottom-Right */}
+            <div className="absolute -bottom-4 right-0 sm:-right-2 w-36 sm:w-44 h-72 sm:h-84 bg-slate-950 rounded-[28px] p-2 shadow-xl border-2 border-slate-800 z-20">
               {/* Smartphone Top Speaker Notch */}
               <div className="w-12 h-2.5 bg-slate-800 rounded-full mx-auto mb-1.5" />
               {/* Smartphone Image Container */}
-              <div className="w-full h-[calc(100%-14px)] rounded-[22px] overflow-hidden bg-white dark:bg-slate-900 shadow-inner relative">
+              <div className="w-full h-[calc(100%-14px)] rounded-[20px] overflow-hidden bg-white dark:bg-slate-900 shadow-inner relative">
                 <ThemeImage
                   srcLight="/images/mobile-preview.jpeg"
                   srcDark="/images/mobile-dark-preview.jpeg"

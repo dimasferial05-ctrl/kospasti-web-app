@@ -8,14 +8,13 @@ import {
   Plus,
   Pencil,
   X,
-  Building2,
   AlertCircle,
   FileText,
   Trash2,
   Star,
   Play,
   Clock,
-  Sparkles,
+  PawPrint,
   MapPin,
   Upload,
   Image as ImageIcon,
@@ -864,7 +863,7 @@ export default function ManagePropertiesPage() {
                           )}
                           {prop.is_pet_friendly && (
                             <span className="inline-flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-md bg-emerald-50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 border border-emerald-200/80 dark:border-emerald-800/60">
-                              <Sparkles size={10} className="text-emerald-600" />
+                              <PawPrint size={10} className="text-emerald-600" />
                               <span>Pet Friendly</span>
                             </span>
                           )}
@@ -1515,7 +1514,7 @@ export default function ManagePropertiesPage() {
                     </div>
                     <div className="text-xs">
                       <div className="font-semibold flex items-center gap-1.5">
-                        <Sparkles
+                        <PawPrint
                           size={13}
                           className={formData.is_pet_friendly ? "text-emerald-200" : "text-slate-400"}
                         />

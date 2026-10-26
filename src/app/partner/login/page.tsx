@@ -14,7 +14,6 @@ import {
   Info,
   CheckCircle2,
 } from "lucide-react";
-import { GradientWave } from "@/components/ui/gradient-wave";
 
 function PartnerLoginForm() {
   const router = useRouter();
@@ -167,12 +166,6 @@ function PartnerLoginForm() {
 export default function PartnerLoginPage() {
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
-      {/* Background Animated Gradient Wave */}
-      <GradientWave
-        colors={["#ecfdf5", "#a7f3d0", "#34d399", "#ffffff", "#6ee7b7", "#ffffff"]}
-        noiseSpeed={0.000003}
-        className="opacity-40 -z-10 pointer-events-none"
-      />
       <div className="max-w-md mx-auto w-full relative z-10">
         {/* Back to Home Action */}
         <div className="mb-6 flex items-center justify-between">

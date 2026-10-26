@@ -20,7 +20,7 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  title: "KosPasti 🏠 - Kepastian Kos Real-Time",
+  title: "KosPasti - Kepastian Kos Real-Time",
   description:
     "Platform Web Pencarian Kos (PWA) yang memberikan kepastian ketersediaan kamar secara real-time dan effortless.",
   manifest: "/manifest.json",

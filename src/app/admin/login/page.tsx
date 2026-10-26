@@ -13,7 +13,6 @@ import {
   AlertCircle,
   ArrowLeft,
 } from "lucide-react";
-import { GradientWave } from "@/components/ui/gradient-wave";
 
 export default function AdminLoginPage() {
   const router = useRouter();
@@ -70,12 +69,6 @@ export default function AdminLoginPage() {
 
   return (
     <div className="relative min-h-screen flex items-center justify-center p-4 sm:p-6 bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950 overflow-hidden">
-      {/* Background Animated Gradient Wave with deep slate/indigo theme */}
-      <GradientWave
-        colors={["#020617", "#0f172a", "#1e1b4b", "#1e293b", "#312e81", "#020617"]}
-        noiseSpeed={0.000003}
-        className="opacity-50 -z-10 pointer-events-none"
-      />
 
       {/* Ambient decorative glow spheres */}
       <div

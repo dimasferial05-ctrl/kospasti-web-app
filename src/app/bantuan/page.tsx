@@ -4,7 +4,6 @@ import React, { useState, useMemo, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { LandingFooter } from "@/components/landing/LandingFooter";
 import { HELP_CATEGORIES, HelpArticle } from "@/lib/data/help-center";
-import { AuroraBackground } from "@/components/ui/aurora-background";
 import {
   Search,
   CalendarCheck,
@@ -165,43 +164,41 @@ function HelpCenterContent() {
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex flex-col selection:bg-emerald-500 selection:text-white">
-      {/* Hero Search Section with Aurora Background */}
-      <section className="relative bg-zinc-950">
-        <AuroraBackground className="py-16 sm:py-24 bg-zinc-950 text-white relative w-full border-b border-white/[0.08]">
-          <div className="relative z-10 max-w-4xl mx-auto text-center space-y-4 px-4 sm:px-6 lg:px-8 w-full">
-            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight leading-tight text-white">
-              Ada yang bisa kami bantu?
-            </h1>
+      {/* Hero Search Section */}
+      <section className="bg-slate-900 dark:bg-slate-950 text-white py-16 sm:py-24 border-b border-slate-800">
+        <div className="max-w-4xl mx-auto text-center space-y-4 px-4 sm:px-6 lg:px-8 w-full">
+          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight leading-tight text-white">
+            Ada yang bisa kami bantu?
+          </h1>
 
-            <p className="text-sm sm:text-base text-slate-300 max-w-2xl mx-auto leading-relaxed">
-              Temukan jawaban lengkap seputar alur booking, pembayaran DP, garansi refund, serta panduan operasional mitra pemilik kos.
-            </p>
+          <p className="text-sm sm:text-base text-slate-300 max-w-2xl mx-auto leading-relaxed">
+            Temukan jawaban lengkap seputar alur booking, pembayaran DP, garansi refund, serta panduan operasional mitra pemilik kos.
+          </p>
 
-            {/* Quick Realtime Search Bar */}
-            <div className="max-w-2xl mx-auto pt-3">
-              <div className="relative flex items-center">
-                <Search className="w-5 h-5 text-slate-400 absolute left-4 pointer-events-none" />
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Ketik pertanyaan atau kata kunci (contoh: refund, magic link, bayar DP, stok kamar)..."
-                  className="w-full pl-12 pr-10 py-3.5 rounded-2xl bg-white dark:bg-slate-900 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 text-sm font-medium shadow-2xl border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-4 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all"
-                />
-                {searchQuery && (
-                  <button
-                    type="button"
-                    onClick={() => setSearchQuery("")}
-                    className="absolute right-3.5 p-1 rounded-full text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors text-xs font-bold"
-                    aria-label="Hapus Pencarian"
-                  >
-                    ✕
-                  </button>
-                )}
-              </div>
+          {/* Quick Realtime Search Bar */}
+          <div className="max-w-2xl mx-auto pt-3">
+            <div className="relative flex items-center">
+              <Search className="w-5 h-5 text-slate-400 absolute left-4 pointer-events-none" />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Ketik pertanyaan atau kata kunci (contoh: refund, magic link, bayar DP, stok kamar)..."
+                className="w-full pl-12 pr-10 py-3.5 rounded-xl bg-white dark:bg-slate-900 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 text-sm font-medium shadow-sm border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all"
+              />
+              {searchQuery && (
+                <button
+                  type="button"
+                  onClick={() => setSearchQuery("")}
+                  className="absolute right-3.5 p-1 rounded-full text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors text-xs font-bold"
+                  aria-label="Hapus Pencarian"
+                >
+                  ✕
+                </button>
+              )}
             </div>
           </div>
-        </AuroraBackground>
+        </div>
       </section>
 
       {/* Main Help Center Body */}

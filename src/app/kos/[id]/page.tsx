@@ -17,7 +17,7 @@ import {
   Play,
   Camera,
   Clock,
-  Sparkles,
+  PawPrint,
   Star,
   Maximize2,
   X,
@@ -1306,7 +1306,7 @@ export default function PropertyDetailPage() {
                       : "bg-slate-100 dark:bg-slate-800 text-slate-400"
                   }`}
                 >
-                  <Sparkles className="w-4 h-4" />
+                  <PawPrint className="w-4 h-4" />
                 </div>
                 <div>
                   <p className="font-bold">
