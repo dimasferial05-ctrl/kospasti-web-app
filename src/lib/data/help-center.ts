@@ -342,7 +342,7 @@ export const HELP_CATEGORIES: HelpCategory[] = [
         category: "partner",
         title: "Fitur Magic Link WhatsApp: Cara Kerja & Akses Sekali Klik",
         subtitle: "Kelola ketersediaan kamar dan setujui pesanan langsung dari notifikasi WhatsApp tanpa perlu login.",
-        iconName: "Zap",
+        iconName: "Smartphone",
         tags: ["Magic Link", "WhatsApp Bot", "Otomasi", "Update Stok"],
         readTime: "3 Menit",
         summary: "Magic Link adalah teknologi tautan aman terenkripsi berumur terbatas (tokenized URL) yang dikirimkan KosPasti ke WhatsApp pemilik kos untuk aksi cepat.",

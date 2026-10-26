@@ -53,7 +53,7 @@ export function HeroSection() {
             className="text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 font-semibold hover:underline inline-flex items-center gap-1"
           >
             <MapPin className="w-3.5 h-3.5" />
-            <span>Buka Peta Kos →</span>
+            <span>Buka Peta Kos</span>
           </Link>
         </div>
       </div>

@@ -215,8 +215,7 @@ export function KosPropertyCard({
 
         {/* Room Type Tag when cycling (Standalone, z-20) */}
         {slides.length > 1 && currentSlide && currentSlide.title !== "Utama" && (
-          <div className="absolute top-3 left-3 z-20 bg-slate-900/80 backdrop-blur-md text-white text-[11px] font-medium px-3 py-1 rounded-full border border-white/10 shadow-xs flex items-center gap-1.5 transition-all duration-300">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+          <div className="absolute top-3 left-3 z-20 bg-slate-900/80 backdrop-blur-md text-white text-[11px] font-medium px-3 py-1 rounded-full border border-white/10 shadow-xs flex items-center transition-all duration-300">
             <span className="truncate max-w-[150px]">{currentSlide.title}</span>
           </div>
         )}

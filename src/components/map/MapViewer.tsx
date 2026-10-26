@@ -314,10 +314,7 @@ function MapViewerInner({
           {userLocation && (
             <AdvancedMarker position={userLocation} title="Lokasi Anda Saat Ini">
               <div className="relative flex items-center justify-center">
-                <span className="animate-ping absolute inline-flex h-8 w-8 rounded-full bg-emerald-400 opacity-75"></span>
-                <div className="w-5 h-5 bg-emerald-600 border-2 border-white rounded-full shadow-lg flex items-center justify-center text-white">
-                  <div className="w-2 h-2 bg-white rounded-full"></div>
-                </div>
+                <div className="w-4 h-4 rounded-full bg-emerald-500 border-2 border-white shadow-md ring-2 ring-emerald-500/30" />
               </div>
             </AdvancedMarker>
           )}

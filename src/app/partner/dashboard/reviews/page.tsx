@@ -265,7 +265,10 @@ export default function PartnerReviewsPage() {
               stats.totalReviews > 0 ? Math.round((count / stats.totalReviews) * 100) : 0;
             return (
               <div key={ratingVal} className="flex items-center gap-2 text-xs">
-                <span className="font-bold text-slate-700 dark:text-slate-300 w-4">{ratingVal}★</span>
+                <span className="font-bold text-slate-700 dark:text-slate-300 w-6 inline-flex items-center gap-0.5 shrink-0">
+                  <span>{ratingVal}</span>
+                  <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
+                </span>
                 <div className="flex-1 h-2 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
                   <div
                     className="h-full bg-amber-400 rounded-full transition-all duration-300"

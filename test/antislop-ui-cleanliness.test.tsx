@@ -155,4 +155,73 @@ describe("Anti-Slop UI Cleanliness Verification (Issue #354)", () => {
     expect(content).not.toContain("bg-gradient-to-r from-blue-600 to-indigo-600");
     expect(content).toContain("bg-gradient-to-r from-slate-900 to-slate-800");
   });
+
+  it("memastikan admin locations menggunakan ikon semantik bukan emoji mentah (#358)", () => {
+    const locationsPath = path.join(rootDir, "src/app/admin/locations/page.tsx");
+    const content = fs.readFileSync(locationsPath, "utf-8");
+
+    expect(content).not.toContain('icon: "🎓"');
+    expect(content).not.toContain('icon: "🏫"');
+    expect(content).not.toContain('icon: "🏥"');
+    expect(content).not.toContain('icon: "📍"');
+    expect(content).toContain("GraduationCap");
+    expect(content).toContain("School");
+    expect(content).toContain("HeartPulse");
+    expect(content).toContain("Compass");
+  });
+
+  it("memastikan rating mini bar di partner reviews tidak menggunakan karakter bintang teks (#358)", () => {
+    const reviewsPath = path.join(rootDir, "src/app/partner/dashboard/reviews/page.tsx");
+    const content = fs.readFileSync(reviewsPath, "utf-8");
+
+    expect(content).not.toContain("{ratingVal}★");
+    expect(content).toContain("Star");
+  });
+
+  it("memastikan MapViewer bebas dari animate-ping (#358)", () => {
+    const mapViewerPath = path.join(rootDir, "src/components/map/MapViewer.tsx");
+    const content = fs.readFileSync(mapViewerPath, "utf-8");
+
+    expect(content).not.toContain("animate-ping");
+  });
+
+  it("memastikan CheckCircle2 di halaman sukses bebas dari animate-bounce-short (#358)", () => {
+    const successPath = path.join(rootDir, "src/app/success/[bookingId]/page.tsx");
+    const content = fs.readFileSync(successPath, "utf-8");
+
+    expect(content).not.toContain("animate-bounce-short");
+  });
+
+  it("memastikan link di HeroSection dan search page bebas dari panah literal (#358)", () => {
+    const heroPath = path.join(rootDir, "src/components/landing/HeroSection.tsx");
+    const searchPath = path.join(rootDir, "src/app/search/page.tsx");
+
+    const heroContent = fs.readFileSync(heroPath, "utf-8");
+    const searchContent = fs.readFileSync(searchPath, "utf-8");
+
+    expect(heroContent).not.toContain("Buka Peta Kos →");
+    expect(heroContent).toContain("Buka Peta Kos");
+    expect(searchContent).not.toContain("Buka Peta Interaktif →");
+    expect(searchContent).toContain("Buka Peta Interaktif");
+  });
+
+  it("memastikan KosPropertyCard bebas dari decorative status dot (#358)", () => {
+    const cardPath = path.join(rootDir, "src/components/features/KosPropertyCard.tsx");
+    const content = fs.readFileSync(cardPath, "utf-8");
+
+    expect(content).not.toContain('span className="w-1.5 h-1.5 rounded-full bg-emerald-400"');
+  });
+
+  it("memastikan help center tidak menggunakan ikon Zap klise (#358)", () => {
+    const helpDataPath = path.join(rootDir, "src/lib/data/help-center.ts");
+    const bantuanPagePath = path.join(rootDir, "src/app/bantuan/page.tsx");
+
+    const helpContent = fs.readFileSync(helpDataPath, "utf-8");
+    const bantuanContent = fs.readFileSync(bantuanPagePath, "utf-8");
+
+    expect(helpContent).not.toContain('iconName: "Zap"');
+    expect(helpContent).toContain('iconName: "Smartphone"');
+    expect(bantuanContent).not.toContain('case "Zap":');
+    expect(bantuanContent).toContain('case "Smartphone":');
+  });
 });
