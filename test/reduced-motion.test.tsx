@@ -12,18 +12,18 @@ describe("Accessibility: Reduced Motion Support (Issue continuous float)", () =>
     expect(content).toContain("animation: none !important");
   });
 
-  it("RoleCardsSection menyertakan utility motion-reduce:animate-none pada kedua kartu", () => {
+  it("RoleCardsSection bebas dari animasi melayang kontinu (animate-float / animate-float-slow)", () => {
     const filePath = path.resolve(__dirname, "../src/components/landing/RoleCardsSection.tsx");
     const content = fs.readFileSync(filePath, "utf-8");
 
-    expect(content).toContain("animate-float motion-reduce:animate-none");
-    expect(content).toContain("animate-float-slow motion-reduce:animate-none");
+    expect(content).not.toContain("animate-float");
+    expect(content).not.toContain("animate-float-slow");
   });
 
-  it("HowItWorksSection menyertakan utility motion-reduce:animate-none pada floating smartphone mockup", () => {
+  it("HowItWorksSection bebas dari animasi melayang kontinu (animate-float)", () => {
     const filePath = path.resolve(__dirname, "../src/components/landing/HowItWorksSection.tsx");
     const content = fs.readFileSync(filePath, "utf-8");
 
-    expect(content).toContain("animate-float motion-reduce:animate-none");
+    expect(content).not.toContain("animate-float");
   });
 });

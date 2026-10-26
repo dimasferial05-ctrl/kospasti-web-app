@@ -10,7 +10,7 @@ import {
 } from "@/components/landing";
 
 export const metadata = {
-  title: "KosPasti 🏠 - Sewa Kos Nyaman & Manajemen Properti Cerdas",
+  title: "KosPasti - Sewa Kos Nyaman & Manajemen Properti Cerdas",
   description:
     "Platform sewa kos terpercaya di Indonesia dengan jaminan kamar real-time, transaksi aman Escrow, ulasan terverifikasi, dan dashboard manajemen mitra kos.",
 };

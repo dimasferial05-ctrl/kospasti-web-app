@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { RefreshCw, Sparkles, X } from "lucide-react";
+import { RefreshCw, X } from "lucide-react";
 
 export function PwaUpdater() {
   const [showUpdate, setShowUpdate] = useState(false);
@@ -83,7 +83,7 @@ export function PwaUpdater() {
     >
       <div className="flex items-start gap-3">
         <div className="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800 flex items-center justify-center shrink-0 text-emerald-600 dark:text-emerald-400">
-          <Sparkles className="w-5 h-5" />
+          <RefreshCw className="w-5 h-5" />
         </div>
 
         <div className="flex-1 min-w-0 pr-1">

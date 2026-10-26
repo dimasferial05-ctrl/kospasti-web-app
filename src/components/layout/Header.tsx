@@ -16,10 +16,11 @@ import {
   Layers,
   Home,
   Users,
-  Zap,
-  Sparkles,
+  Workflow,
+  ShieldCheck,
   Building2,
   HelpCircle,
+  MapPin,
   PhoneCall,
   Menu,
   X,
@@ -65,6 +66,7 @@ export function Header({ isLoggedIn: initialIsLoggedIn = false }: HeaderProps) {
   const landingMenuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMounted(true);
   }, []);
 
@@ -93,6 +95,7 @@ export function Header({ isLoggedIn: initialIsLoggedIn = false }: HeaderProps) {
   // Fetch authentication status & user profile info
   useEffect(() => {
     let isMounted = true;
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setIsMobileDrawerOpen(false);
     fetch("/api/auth/me")
       .then((res) => res.json())
@@ -206,13 +209,13 @@ export function Header({ isLoggedIn: initialIsLoggedIn = false }: HeaderProps) {
       label: "Cara Kerja",
       sublabel: "3 langkah mudah sewa kos",
       href: "#cara-kerja",
-      icon: Zap,
+      icon: Workflow,
     },
     {
       label: "Fitur Unggulan",
       sublabel: "Proteksi real-time & escrow",
       href: "#fitur",
-      icon: Sparkles,
+      icon: ShieldCheck,
     },
     {
       label: "Mitra Pemilik Kos",
@@ -247,7 +250,7 @@ export function Header({ isLoggedIn: initialIsLoggedIn = false }: HeaderProps) {
             href="/"
             className="group flex items-center gap-2.5 transition-transform duration-300 hover:scale-[1.02]"
           >
-            <span className="sr-only">🏠</span>
+            <span className="sr-only">Beranda KosPasti</span>
             <Image
               src="/logo.jpg"
               alt="KosPasti Logo"
@@ -367,7 +370,7 @@ export function Header({ isLoggedIn: initialIsLoggedIn = false }: HeaderProps) {
                       : "text-slate-600 dark:text-slate-300 hover:text-emerald-700 dark:hover:text-emerald-400 hover:bg-emerald-50/60 dark:hover:bg-slate-800/70"
                   }`}
                 >
-                  <span className="text-base">🗺️</span>
+                  <MapPin className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
                   <span>Peta Kos</span>
                 </Link>
 
@@ -744,7 +747,7 @@ export function Header({ isLoggedIn: initialIsLoggedIn = false }: HeaderProps) {
                       : "text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800"
                   }`}
                 >
-                  <span className="text-base">🗺️</span>
+                  <MapPin className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
                   <span>Peta Kos</span>
                 </Link>
                 <Link

@@ -7,7 +7,6 @@ import {
   Heart,
   Search,
   ArrowLeft,
-  Sparkles,
   LogIn,
   SlidersHorizontal,
   Building2,
@@ -15,7 +14,6 @@ import {
   RefreshCw,
 } from "lucide-react";
 import { KosPropertyCard } from "@/components/features/KosPropertyCard";
-import { GooeyInput } from "@/components/ui/gooey-input";
 
 interface SavedPropertyItem {
   id: string;
@@ -172,11 +170,8 @@ export default function FavoritPage() {
     return (
       <div className="min-h-[80vh] bg-slate-50/50 dark:bg-slate-950 flex items-center justify-center px-4 sm:px-6 lg:px-8 py-16">
         <div className="max-w-md w-full text-center space-y-6 bg-white dark:bg-slate-900 p-8 sm:p-10 rounded-3xl border border-slate-200/80 dark:border-slate-800 shadow-soft">
-          <div className="relative mx-auto w-20 h-20 rounded-2xl bg-rose-50 dark:bg-rose-950/40 border border-rose-100 dark:border-rose-900/40 flex items-center justify-center text-rose-500 shadow-2xs">
+          <div className="mx-auto w-20 h-20 rounded-2xl bg-rose-50 dark:bg-rose-950/40 border border-rose-100 dark:border-rose-900/40 flex items-center justify-center text-rose-500 shadow-2xs">
             <Heart className="w-10 h-10 fill-rose-500/20 stroke-[1.8]" />
-            <div className="absolute -top-1.5 -right-1.5 bg-emerald-600 text-white p-1 rounded-full shadow-sm">
-              <Sparkles className="w-3.5 h-3.5" />
-            </div>
           </div>
 
           <div className="space-y-2">
@@ -323,15 +318,14 @@ export default function FavoritPage() {
 
         {/* Filter & Search Bar */}
         <div className="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-xs flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="relative w-full sm:w-auto flex items-center">
-            <GooeyInput
+          <div className="relative w-full sm:w-72">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 dark:text-slate-500 pointer-events-none" />
+            <input
+              type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Cari di favorit..."
-              collapsedWidth={150}
-              expandedWidth={260}
-              theme="emerald"
-              preserveLayoutSpace={true}
+              className="w-full pl-9 pr-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white dark:focus:bg-slate-800 transition-all"
             />
           </div>
 
