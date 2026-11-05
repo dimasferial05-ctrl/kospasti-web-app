@@ -1461,6 +1461,20 @@ export default function PropertyDetailPage() {
                 Gunakan tombol <strong className="text-slate-700 dark:text-slate-200">Amankan Kamar</strong> di KosPasti untuk jaminan garansi 100% uang kembali.
               </span>
             </div>
+
+            {/* Akses Cepat Bantuan CS KosPasti */}
+            <div className="pt-2.5 mt-1 border-t border-slate-100 dark:border-slate-800/60 flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
+              <span className="text-[11px]">Butuh konfirmasi atau bantuan tim KosPasti?</span>
+              <a
+                href="https://wa.me/6281315132327?text=Halo%20CS%20KosPasti%2C%20saya%20butuh%20bantuan%20terkait%20pemesanan%20kos"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-bold text-emerald-600 hover:text-emerald-700 dark:text-emerald-400 dark:hover:text-emerald-300 inline-flex items-center gap-1 transition-colors text-xs shrink-0"
+              >
+                <span>Chat CS</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </a>
+            </div>
           </div>
 
           {/* Card 9: Ulasan & Rating Penyewa */}
@@ -1841,6 +1855,7 @@ export default function PropertyDetailPage() {
         <CustomerSupportWidget
           propertyName={property.name}
           propertyId={property.id}
+          positionClassName="bottom-[5.25rem] lg:bottom-6 right-4 lg:right-6"
         />
       )}
     </div>

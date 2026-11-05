@@ -46,6 +46,7 @@ describe("Email Fallback & Notification System", () => {
       expect(html).toContain("Pembayaran Berhasil (PAID)");
       expect(html).toContain("Garansi Penahanan Dana (Escrow 12 Jam)");
       expect(html).toContain("Lihat Status Pesanan");
+      expect(html).toContain("6281315132327");
     });
   });
 
@@ -70,6 +71,7 @@ describe("Email Fallback & Notification System", () => {
       expect(html).toContain("Ibu Nurul");
       expect(html).toContain("menerima dan mengonfirmasi");
       expect(html).toContain("Buka Riwayat Pesanan");
+      expect(html).toContain("6281315132327");
     });
 
     it("should generate HTML for REJECT decision with refund notice and optional rejection reason", () => {
@@ -90,6 +92,7 @@ describe("Email Fallback & Notification System", () => {
       expect(html).toContain("Kamar baru saja terisi oleh penyewa lama yang memperpanjang sewa.");
       expect(html).toContain("Informasi Pengembalian Dana:");
       expect(html).toContain("Cari Kos Lainnya");
+      expect(html).toContain("6281315132327");
     });
   });
 
@@ -208,49 +211,56 @@ describe("Email Fallback & Notification System", () => {
 });
 
 describe("Customer Support WhatsApp URL Builder", () => {
+  it("should use new default CS phone 6281315132327 when not specified", () => {
+    delete process.env.NEXT_PUBLIC_CS_WHATSAPP_NUMBER;
+    const url = buildSupportWhatsAppUrl({});
+    expect(url).toContain("https://wa.me/6281315132327");
+  });
+
   it("should format support URL with bookingId and propertyName context", () => {
     const url = buildSupportWhatsAppUrl({
-      phone: "6281234567890",
+      phone: "6281315132327",
       bookingId: "bkg-999-xyz",
       propertyName: "Kos Putri Anggrek",
     });
 
-    expect(url).toContain("https://wa.me/6281234567890");
+    expect(url).toContain("https://wa.me/6281315132327");
     expect(url).toContain(encodeURIComponent("bkg-999-xyz"));
     expect(url).toContain(encodeURIComponent("Kos Putri Anggrek"));
     expect(decodeURIComponent(url)).toContain("pesanan kamar #bkg-999-xyz (Kos Putri Anggrek)");
+    expect(decodeURIComponent(url)).toContain("Mohon bantuannya");
   });
 
   it("should format support URL with propertyName and propertyId context", () => {
     const url = buildSupportWhatsAppUrl({
-      phone: "6289876543210",
+      phone: "6281315132327",
       propertyName: "Kos Eksklusif Melati",
       propertyId: "prop-555",
     });
 
-    expect(url).toContain("https://wa.me/6289876543210");
+    expect(url).toContain("https://wa.me/6281315132327");
     expect(decodeURIComponent(url)).toContain("Kos Eksklusif Melati (ID: prop-555)");
     expect(decodeURIComponent(url)).toContain("Apakah kamar masih tersedia?");
   });
 
   it("should format fallback general support URL when no context is provided", () => {
     const url = buildSupportWhatsAppUrl({
-      phone: "6281234567890",
+      phone: "6281315132327",
     });
 
-    expect(url).toContain("https://wa.me/6281234567890");
+    expect(url).toContain("https://wa.me/6281315132327");
     expect(decodeURIComponent(url)).toContain("Halo CS KosPasti, saya butuh bantuan terkait layanan pemesanan kos");
   });
 
   it("should clean leading zero or plus sign from phone numbers", () => {
     const urlWithPlus = buildSupportWhatsAppUrl({
-      phone: "+62 812-3456-7890",
+      phone: "+62 813-1513-2327",
     });
-    expect(urlWithPlus).toContain("https://wa.me/6281234567890");
+    expect(urlWithPlus).toContain("https://wa.me/6281315132327");
 
     const urlWithZero = buildSupportWhatsAppUrl({
-      phone: "081234567890",
+      phone: "081315132327",
     });
-    expect(urlWithZero).toContain("https://wa.me/6281234567890");
+    expect(urlWithZero).toContain("https://wa.me/6281315132327");
   });
 });

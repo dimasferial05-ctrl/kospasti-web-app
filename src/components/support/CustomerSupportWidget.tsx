@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useState } from "react";
-import { MessageCircle, X } from "lucide-react";
+import React from "react";
+import { MessageCircle } from "lucide-react";
 
 export interface CustomerSupportWidgetProps {
   propertyName?: string;
@@ -9,7 +9,10 @@ export interface CustomerSupportWidgetProps {
   bookingId?: string;
   customMessage?: string;
   className?: string;
-  hideTooltipInitially?: boolean;
+  /**
+   * Atur posisi custom jika halaman memiliki sticky bar bawah (misal halaman detail kos di mobile)
+   */
+  positionClassName?: string;
 }
 
 export function buildSupportWhatsAppUrl(params: {
@@ -19,7 +22,11 @@ export function buildSupportWhatsAppUrl(params: {
   bookingId?: string;
   customMessage?: string;
 }): string {
-  const rawPhone = params.phone || process.env.NEXT_PUBLIC_CS_WHATSAPP_NUMBER || "6281234567890";
+  // Nomor resmi CS KosPasti: 0813-1513-2327 (internasional: 6281315132327)
+  const rawPhone =
+    params.phone ||
+    process.env.NEXT_PUBLIC_CS_WHATSAPP_NUMBER ||
+    "6281315132327";
   let phone = rawPhone.replace(/\D/g, "");
 
   if (phone.startsWith("0")) {
@@ -33,12 +40,13 @@ export function buildSupportWhatsAppUrl(params: {
   if (!text) {
     if (params.bookingId) {
       const propText = params.propertyName ? ` (${params.propertyName})` : "";
-      text = `Halo CS KosPasti, saya butuh bantuan terkait pesanan kamar #${params.bookingId}${propText}. Mohon konfirmasinya.`;
+      text = `Halo CS KosPasti, saya butuh bantuan terkait pesanan kamar #${params.bookingId}${propText}. Mohon bantuannya.`;
     } else if (params.propertyName) {
       const idText = params.propertyId ? ` (ID: ${params.propertyId})` : "";
       text = `Halo CS KosPasti, saya ingin bertanya mengenai properti ${params.propertyName}${idText}. Apakah kamar masih tersedia?`;
     } else {
-      text = "Halo CS KosPasti, saya butuh bantuan terkait layanan pemesanan kos di aplikasi KosPasti.";
+      text =
+        "Halo CS KosPasti, saya butuh bantuan terkait layanan pemesanan kos di aplikasi KosPasti.";
     }
   }
 
@@ -51,10 +59,8 @@ export function CustomerSupportWidget({
   bookingId,
   customMessage,
   className = "",
-  hideTooltipInitially = false,
+  positionClassName = "bottom-6 right-4 sm:right-6",
 }: CustomerSupportWidgetProps) {
-  const [isTooltipDismissed, setIsTooltipDismissed] = useState(hideTooltipInitially);
-
   const waUrl = buildSupportWhatsAppUrl({
     propertyName,
     propertyId,
@@ -63,46 +69,32 @@ export function CustomerSupportWidget({
   });
 
   return (
-    <div
-      className={`fixed bottom-24 sm:bottom-6 right-4 sm:right-6 z-40 flex flex-col items-end pointer-events-none ${className}`}
+    <aside
+      aria-label="Bantuan Pelanggan KosPasti"
+      className={`fixed ${positionClassName} z-40 flex items-center ${className}`}
       data-testid="customer-support-widget"
     >
-      {/* Tooltip / Speech Bubble */}
-      {!isTooltipDismissed && (
-        <div
-          role="status"
-          aria-live="polite"
-          className="pointer-events-auto mb-2 flex items-center gap-1.5 py-1.5 px-3 bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-full shadow-md text-xs font-semibold text-slate-800 dark:text-slate-100 animate-in fade-in slide-in-from-bottom-2 duration-300"
-        >
-          <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shrink-0" />
-          <span>Butuh Bantuan? Chat CS</span>
-          <button
-            type="button"
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              setIsTooltipDismissed(true);
-            }}
-            aria-label="Tutup pesan bantuan"
-            className="ml-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-0.5 rounded-full transition-colors cursor-pointer"
-          >
-            <X className="w-3 h-3" />
-          </button>
-        </div>
-      )}
-
-      {/* Floating Action Button */}
       <a
         href={waUrl}
         target="_blank"
         rel="noopener noreferrer"
         aria-label="Hubungi Customer Support KosPasti via WhatsApp"
-        className="pointer-events-auto flex items-center justify-center w-14 h-14 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white rounded-full shadow-lg shadow-emerald-600/30 transition-all duration-200 group cursor-pointer"
-        title="Hubungi CS WhatsApp KosPasti"
+        className="group inline-flex items-center gap-2 px-3.5 py-2.5 sm:px-4 sm:py-2.5 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800/90 text-slate-800 dark:text-slate-100 border border-slate-200/90 dark:border-slate-800 rounded-full shadow-soft hover:shadow-float active:scale-95 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:ring-offset-2 cursor-pointer"
+        title="Hubungi CS WhatsApp KosPasti (0813-1513-2327)"
       >
-        <MessageCircle className="w-7 h-7 text-white transition-transform group-hover:scale-110" />
+        <span className="w-7 h-7 rounded-full bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+          <MessageCircle className="w-4 h-4 fill-emerald-600/20" />
+        </span>
+        <div className="flex flex-col text-left pr-0.5">
+          <span className="text-[10px] uppercase font-bold text-slate-400 dark:text-slate-500 tracking-wider leading-none">
+            Butuh Bantuan?
+          </span>
+          <span className="text-xs font-bold text-slate-800 dark:text-slate-100 leading-tight">
+            Chat CS
+          </span>
+        </div>
       </a>
-    </div>
+    </aside>
   );
 }
 
