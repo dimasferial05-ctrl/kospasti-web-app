@@ -1,12 +1,12 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo, Suspense } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { KosPropertyCard } from "@/components/features/KosPropertyCard";
 import { KosPropertyCardSkeleton } from "@/components/features/KosPropertyCardSkeleton";
 import { SmartSearchBar } from "@/components/features/SmartSearchBar";
-import { AlertCircle, SearchX, MapPin } from "lucide-react";
+import { AlertCircle, SearchX, MapPin, X } from "lucide-react";
 
 interface PropertyItem {
   id: string;
@@ -37,8 +37,11 @@ interface PropertyItem {
   }>;
 }
 
-export default function SearchPage() {
+function SearchPageContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const queryParam = searchParams?.get("q") || "";
+
   const [properties, setProperties] = useState<PropertyItem[]>([]);
   const [savedPropertyIds, setSavedPropertyIds] = useState<Set<string>>(new Set());
   const [isLoading, setIsLoading] = useState(true);
@@ -95,11 +98,21 @@ export default function SearchPage() {
     }
   };
 
+  const filteredProperties = useMemo(() => {
+    if (!queryParam.trim()) return properties;
+    const lowerQuery = queryParam.toLowerCase().trim();
+    return properties.filter((p) => {
+      const matchName = p.name.toLowerCase().includes(lowerQuery);
+      const matchFacilities = (p.facilities || "").toLowerCase().includes(lowerQuery);
+      const matchOwner = (p.owner?.name || "").toLowerCase().includes(lowerQuery);
+      return matchName || matchFacilities || matchOwner;
+    });
+  }, [properties, queryParam]);
+
   return (
     <main className="max-w-7xl mx-auto min-h-screen relative w-full px-4 sm:px-6 lg:px-8 py-8 sm:py-12 flex flex-col gap-10 sm:gap-14">
       {/* Search Header Section */}
       <section className="relative w-full flex flex-col items-center justify-center text-center pt-6 pb-8 sm:pt-10 sm:pb-12 px-4">
-
         {/* Main Headline */}
         <h1 className="text-3xl sm:text-5xl font-extrabold text-slate-900 dark:text-white tracking-tight max-w-3xl leading-[1.15]">
           Cari Kos Sesuai{" "}
@@ -139,18 +152,35 @@ export default function SearchPage() {
       <section className="flex flex-col gap-6">
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3 border-b border-slate-200/80 dark:border-slate-800 pb-5">
           <div>
-            <div className="flex items-center gap-2">
-
+            <div className="flex items-center gap-2 flex-wrap">
               <h2 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white tracking-tight">
-                Rekomendasi Kos Terbaru
+                {queryParam.trim() ? (
+                  <span>
+                    Hasil Pencarian untuk &ldquo;{queryParam}&rdquo;
+                  </span>
+                ) : (
+                  "Rekomendasi Kos Terbaru"
+                )}
               </h2>
+              {queryParam.trim() && (
+                <Link
+                  href="/search"
+                  className="inline-flex items-center gap-1 text-xs bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 px-2 py-0.5 rounded-full transition-colors"
+                  title="Hapus filter pencarian"
+                >
+                  <span>Reset filter</span>
+                  <X className="w-3 h-3" />
+                </Link>
+              )}
             </div>
             <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
-              Pilihan kamar kos terverifikasi dan siap huni di berbagai lokasi strategis.
+              {queryParam.trim()
+                ? `Menampilkan ${filteredProperties.length} properti kos yang sesuai dengan kriteria wilayah atau nama "${queryParam}".`
+                : "Pilihan kamar kos terverifikasi dan siap huni di berbagai lokasi strategis."}
             </p>
           </div>
           <Link
-            href="/map"
+            href={queryParam.trim() ? `/map?q=${encodeURIComponent(queryParam)}` : "/map"}
             className="text-xs sm:text-sm font-bold text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 hover:underline inline-flex items-center gap-1 self-start sm:self-auto"
           >
             <span>Lihat semua di peta</span>
@@ -178,7 +208,7 @@ export default function SearchPage() {
           </div>
         )}
 
-        {!isLoading && !error && properties.length === 0 && (
+        {!isLoading && !error && filteredProperties.length === 0 && (
           <div className="flex flex-col items-center justify-center p-14 text-center bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 border-dashed shadow-soft">
             <div className="w-16 h-16 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center mb-4">
               <SearchX className="w-8 h-8 text-slate-300 dark:text-slate-600" />
@@ -187,34 +217,34 @@ export default function SearchPage() {
               Kos Tidak Ditemukan
             </h3>
             <p className="text-xs text-slate-500 dark:text-slate-400 max-w-sm leading-relaxed">
-              Maaf, tidak ada kos yang sesuai dengan kriteria pencarian atau filter Anda. Saat ini belum ada listing kos yang terdaftar di sistem.
+              {queryParam.trim()
+                ? `Maaf, tidak ada kos yang sesuai dengan kata kunci "${queryParam}". Coba gunakan nama wilayah atau kriteria lain.`
+                : "Maaf, tidak ada kos yang sesuai dengan kriteria pencarian atau filter Anda. Saat ini belum ada listing kos yang terdaftar di sistem."}
             </p>
             <div className="mt-5 flex flex-wrap items-center justify-center gap-3">
-              <Link
-                href="/map"
-                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold shadow-soft hover:shadow-float active:scale-95 transition-all duration-200"
-              >
-                <MapPin className="w-3.5 h-3.5" />
-                <span>Eksplor Lewat Peta</span>
-              </Link>
-              <button
-                type="button"
-                onClick={() => {
-                  if (typeof window !== "undefined") {
-                    window.location.reload();
-                  }
-                }}
-                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-semibold shadow-soft hover:shadow-float active:scale-95 transition-all duration-200 cursor-pointer"
-              >
-                Segarkan Daftar
-              </button>
+              {queryParam.trim() ? (
+                <Link
+                  href="/search"
+                  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold shadow-soft hover:shadow-float active:scale-95 transition-all duration-200"
+                >
+                  <span>Tampilkan Semua Kos</span>
+                </Link>
+              ) : (
+                <Link
+                  href="/map"
+                  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold shadow-soft hover:shadow-float active:scale-95 transition-all duration-200"
+                >
+                  <MapPin className="w-3.5 h-3.5" />
+                  <span>Eksplor Lewat Peta</span>
+                </Link>
+              )}
             </div>
           </div>
         )}
 
-        {!isLoading && !error && properties.length > 0 && (
+        {!isLoading && !error && filteredProperties.length > 0 && (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {properties.map((property) => (
+            {filteredProperties.map((property) => (
               <div
                 key={property.id}
                 className="block h-full transition-transform hover:scale-[1.02]"
@@ -259,5 +289,23 @@ export default function SearchPage() {
         )}
       </section>
     </main>
+  );
+}
+
+export default function SearchPage() {
+  return (
+    <Suspense
+      fallback={
+        <main className="max-w-7xl mx-auto min-h-screen w-full px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 pt-24">
+            {Array.from({ length: 8 }).map((_, idx) => (
+              <KosPropertyCardSkeleton key={idx} />
+            ))}
+          </div>
+        </main>
+      }
+    >
+      <SearchPageContent />
+    </Suspense>
   );
 }

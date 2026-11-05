@@ -33,6 +33,7 @@ import { WishlistButton } from "@/components/features/WishlistButton";
 import { ReviewSection } from "@/components/features/ReviewSection";
 import { useFocusTrap } from "@/hooks/useFocusTrap";
 import { formatWhatsAppNumber } from "@/lib/whatsapp";
+import { generateLodgingJsonLd } from "@/lib/seo";
 
 interface PropertyMediaItem {
   id?: string;
@@ -617,8 +618,20 @@ export default function PropertyDetailPage() {
         .filter(Boolean)
     : [];
 
+  const baseUrl =
+    typeof window !== "undefined" && window.location.origin
+      ? window.location.origin
+      : (process.env.NEXT_PUBLIC_APP_URL || "https://kospasti.com");
+  const jsonLd = property ? generateLodgingJsonLd(property, baseUrl) : null;
+
   return (
     <div id="kos-detail-page" className="max-w-7xl mx-auto min-h-screen bg-slate-50 dark:bg-slate-950 pb-24 sm:pb-32 lg:pb-12 px-0 lg:px-8 flex flex-col relative shadow-sm w-full min-w-0">
+      {jsonLd && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+      )}
       {/* Top Header Bar */}
       <div className="sticky top-0 z-30 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border-b border-slate-200/80 dark:border-slate-800 py-3">
         <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 flex items-center justify-between gap-3">
