@@ -15,6 +15,7 @@ interface PropertyItem {
   available_rooms: number;
   gender_type: string;
   facilities: string;
+  address?: string | null;
   image_url?: string | null;
   is_pet_friendly?: boolean;
   is_24_hours?: boolean;
@@ -103,9 +104,10 @@ function SearchPageContent() {
     const lowerQuery = queryParam.toLowerCase().trim();
     return properties.filter((p) => {
       const matchName = p.name.toLowerCase().includes(lowerQuery);
+      const matchAddress = (p.address || "").toLowerCase().includes(lowerQuery);
       const matchFacilities = (p.facilities || "").toLowerCase().includes(lowerQuery);
       const matchOwner = (p.owner?.name || "").toLowerCase().includes(lowerQuery);
-      return matchName || matchFacilities || matchOwner;
+      return matchName || matchAddress || matchFacilities || matchOwner;
     });
   }, [properties, queryParam]);
 

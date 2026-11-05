@@ -59,12 +59,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       take: 50,
     });
 
-    const locationNames =
+    const rawNames =
       locations.length > 0
-        ? locations.map((l) => l.name)
+        ? locations.map((l) => l.name.trim()).filter(Boolean)
         : ["Subang Kota", "Polsub", "Kalijati", "Cibogo", "Pagaden", "Dawuan"];
 
-    locationRoutes = locationNames.map((loc) => ({
+    const uniqueLocationNames = Array.from(new Set(rawNames));
+
+    locationRoutes = uniqueLocationNames.map((loc) => ({
       url: `${baseUrl}/search?q=${encodeURIComponent(loc)}`,
       lastModified: new Date(),
       changeFrequency: "daily" as const,
@@ -76,3 +78,4 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   return [...staticRoutes, ...propertyRoutes, ...locationRoutes];
 }
+

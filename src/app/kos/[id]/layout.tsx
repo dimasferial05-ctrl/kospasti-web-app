@@ -7,60 +7,70 @@ export async function generateMetadata({
   params: Promise<{ id: string }>;
 }): Promise<Metadata> {
   const { id } = await params;
+  const baseUrl = (process.env.NEXT_PUBLIC_APP_URL || "https://kospasti.com").replace(/\/+$/, "");
 
   try {
     const property = await prisma.property.findUnique({
       where: { id },
       select: {
+        id: true,
         name: true,
-        description: true,
-        image_url: true,
+        address: true,
         price_per_month: true,
-        gender_type: true,
+        available_rooms: true,
+        image_url: true,
+        facilities: true,
       },
     });
 
     if (!property) {
       return {
         title: "Kos Tidak Ditemukan - KosPasti",
-        description: "Detail properti kos tidak ditemukan di sistem KosPasti.",
+        description: "Informasi kos tidak ditemukan atau sudah tidak tersedia.",
       };
     }
 
-    const title = `${property.name} - Sewa Kos di KosPasti`;
-    const formattedPrice = new Intl.NumberFormat("id-ID").format(property.price_per_month);
-    const description =
-      property.description?.slice(0, 160) ||
-      `Sewa kos ${property.name} (${property.gender_type}) mulai dari Rp ${formattedPrice}/bulan dengan jaminan ketersediaan kamar real-time di KosPasti.`;
-    const imageUrl = property.image_url || "/icons/icon-512x512.png";
+    const title = `${property.name} - Kos Murah Subang | KosPasti`;
+    const priceFormatted = `Rp ${property.price_per_month.toLocaleString("id-ID")}/bulan`;
+    const description = `Sewa kamar di ${property.name}, ${property.address || "Subang"}. Harga mulai ${priceFormatted}. Sisa kamar: ${property.available_rooms}. Fasilitas: ${property.facilities || "Lengkap"}. Jaminan kepastian kamar real-time.`;
+
+    const fullImageUrl = property.image_url
+      ? property.image_url.startsWith("http://") || property.image_url.startsWith("https://")
+        ? property.image_url
+        : `${baseUrl}${property.image_url.startsWith("/") ? "" : "/"}${property.image_url}`
+      : `${baseUrl}/icons/icon-512x512.png`;
 
     return {
       title,
       description,
       openGraph: {
-        title,
+        title: `${property.name} | KosPasti Subang`,
         description,
-        type: "website",
+        url: `${baseUrl}/kos/${property.id}`,
+        siteName: "KosPasti",
         images: [
           {
-            url: imageUrl,
+            url: fullImageUrl,
             width: 1200,
             height: 630,
             alt: property.name,
           },
         ],
+        type: "website",
+        locale: "id_ID",
       },
       twitter: {
         card: "summary_large_image",
-        title,
+        title: `${property.name} | KosPasti`,
         description,
-        images: [imageUrl],
+        images: [fullImageUrl],
       },
     };
-  } catch {
+  } catch (err) {
+    console.error("[SEO] Error generating metadata for property:", err);
     return {
       title: "Detail Kos - KosPasti",
-      description: "Platform pencarian kos dengan kepastian kamar real-time.",
+      description: "Platform pencarian kos real-time dan terpercaya di Subang.",
     };
   }
 }

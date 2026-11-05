@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import robots from "@/app/robots";
 import sitemap from "@/app/sitemap";
 import { generateLodgingJsonLd, PropertySeoData } from "@/lib/seo";
+import { generateMetadata as generateKosMetadata } from "@/app/kos/[id]/layout";
 import { prisma } from "@/lib/prisma";
 
 describe("SEO, Sitemap Dinamis & Schema.org Tests (#364)", () => {
@@ -36,14 +37,16 @@ describe("SEO, Sitemap Dinamis & Schema.org Tests (#364)", () => {
   });
 
   describe("2. Generator Sitemap Dinamis (src/app/sitemap.ts)", () => {
-    it("menghasilkan sitemap dengan rute statis, kos aktif, dan pencarian per wilayah", async () => {
+    it("menghasilkan sitemap dengan rute statis, kos aktif, dan pencarian per wilayah tanpa duplikasi", async () => {
       const mockProperties = [
         { id: "prop-subang-1", updated_at: new Date("2026-11-01T10:00:00Z") },
         { id: "prop-subang-2", updated_at: new Date("2026-11-02T10:00:00Z") },
       ];
 
+      // Terdapat nama lokasi duplikat "Kalijati"
       const mockLocations = [
         { name: "Polsub Subang", updated_at: new Date("2026-10-15T00:00:00Z") },
+        { name: "Kalijati", updated_at: new Date("2026-10-15T00:00:00Z") },
         { name: "Kalijati", updated_at: new Date("2026-10-15T00:00:00Z") },
       ];
 
@@ -65,9 +68,10 @@ describe("SEO, Sitemap Dinamis & Schema.org Tests (#364)", () => {
       expect(urls.some((u) => u.includes("/kos/prop-subang-1"))).toBe(true);
       expect(urls.some((u) => u.includes("/kos/prop-subang-2"))).toBe(true);
 
-      // Verifikasi rute pencarian wilayah
+      // Verifikasi rute pencarian wilayah dan deduplikasi
+      const kalijatiMatches = urls.filter((u) => u.includes("/search?q=Kalijati"));
+      expect(kalijatiMatches).toHaveLength(1); // Pastikan tidak duplikat
       expect(urls.some((u) => u.includes("/search?q=Polsub%20Subang"))).toBe(true);
-      expect(urls.some((u) => u.includes("/search?q=Kalijati"))).toBe(true);
     });
 
     it("tetap aman dan mengembalikan rute statis jika query database mengalami error", async () => {
@@ -82,7 +86,7 @@ describe("SEO, Sitemap Dinamis & Schema.org Tests (#364)", () => {
   });
 
   describe("3. Helper Schema.org JSON-LD (src/lib/seo.ts)", () => {
-    it("menghasilkan struktur data LodgingBusiness & Place dengan informasi lengkap", () => {
+    it("menghasilkan struktur data LodgingBusiness & Place dengan URL gambar absolut", () => {
       const mockProperty: PropertySeoData = {
         id: "kos-polsub-123",
         name: "Kos Melati Polsub",
@@ -90,7 +94,7 @@ describe("SEO, Sitemap Dinamis & Schema.org Tests (#364)", () => {
         price_per_month: 750000,
         available_rooms: 3,
         address: "Jl. Brigjen Katamso No. 45, Subang",
-        image_url: "https://kospasti.com/uploads/kamar.jpg",
+        image_url: "/uploads/properties/kamar.jpg", // path relatif
         facilities: "WiFi, AC, Kasur, Kamar Mandi Dalam",
         latitude: -6.5715,
         longitude: 107.7587,
@@ -109,6 +113,12 @@ describe("SEO, Sitemap Dinamis & Schema.org Tests (#364)", () => {
       expect(schema.name).toBe("Kos Melati Polsub");
       expect(schema.url).toBe("https://kospasti.com/kos/kos-polsub-123");
       expect(schema.priceRange).toContain("750.000");
+
+      // Verifikasi gambar absolut
+      expect(schema.image).toEqual(["https://kospasti.com/uploads/properties/kamar.jpg"]);
+
+      // Verifikasi nomor telepon dari WhatsApp owner
+      expect(schema.telephone).toBe("+6281234567890");
 
       // Verifikasi Address
       const address = schema.address as any;
@@ -147,7 +157,7 @@ describe("SEO, Sitemap Dinamis & Schema.org Tests (#364)", () => {
         id: "kos-penuh-99",
         name: "Kos Penuh",
         price_per_month: 500000,
-        available_rooms: 0, // Kamar penuh
+        available_rooms: 0,
         total_reviews: 0,
       };
 
@@ -157,6 +167,41 @@ describe("SEO, Sitemap Dinamis & Schema.org Tests (#364)", () => {
       expect(offers.availability).toBe("https://schema.org/OutOfStock");
       expect(schema.aggregateRating).toBeUndefined();
       expect(schema.geo).toBeUndefined();
+    });
+  });
+
+  describe("4. Server-Side OpenGraph Metadata (src/app/kos/[id]/layout.tsx)", () => {
+    it("menghasilkan metadata OpenGraph dinamis untuk kos yang ditemukan", async () => {
+      vi.spyOn(prisma.property, "findUnique").mockResolvedValue({
+        id: "kos-101",
+        name: "Kos Flamboyan",
+        address: "Jl. Otto Iskandardinata No. 10, Subang",
+        price_per_month: 800000,
+        available_rooms: 2,
+        image_url: "/uploads/cover.jpg",
+        facilities: "WiFi, AC",
+      } as unknown as never);
+
+      const metadata = await generateKosMetadata({
+        params: Promise.resolve({ id: "kos-101" }),
+      });
+
+      expect(metadata.title).toContain("Kos Flamboyan");
+      expect(metadata.description).toContain("800.000");
+
+      const og = metadata.openGraph as any;
+      expect(og.title).toContain("Kos Flamboyan");
+      expect(og.images[0].url).toContain("/uploads/cover.jpg");
+    });
+
+    it("menghasilkan metadata fallback jika kos tidak ditemukan", async () => {
+      vi.spyOn(prisma.property, "findUnique").mockResolvedValue(null);
+
+      const metadata = await generateKosMetadata({
+        params: Promise.resolve({ id: "kos-404" }),
+      });
+
+      expect(metadata.title).toContain("Kos Tidak Ditemukan");
     });
   });
 });

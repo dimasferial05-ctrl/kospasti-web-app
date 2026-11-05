@@ -24,6 +24,12 @@ export function generateLodgingJsonLd(property: PropertySeoData, baseUrl: string
     ? property.facilities.split(",").map((f) => f.trim()).filter(Boolean)
     : [];
 
+  const fullImageUrl = property.image_url
+    ? property.image_url.startsWith("http://") || property.image_url.startsWith("https://")
+      ? property.image_url
+      : `${cleanBase}${property.image_url.startsWith("/") ? "" : "/"}${property.image_url}`
+    : null;
+
   const schema: Record<string, unknown> = {
     "@context": "https://schema.org",
     "@type": ["LodgingBusiness", "Place"],
@@ -32,7 +38,7 @@ export function generateLodgingJsonLd(property: PropertySeoData, baseUrl: string
       property.description ||
       `Sewa kos ${property.name} di Subang dengan harga transparan dan kepastian kamar real-time.`,
     url: formattedUrl,
-    image: property.image_url ? [property.image_url] : [],
+    image: fullImageUrl ? [fullImageUrl] : [],
     priceRange: `Rp ${property.price_per_month.toLocaleString("id-ID")}`,
     address: {
       "@type": "PostalAddress",
@@ -52,6 +58,11 @@ export function generateLodgingJsonLd(property: PropertySeoData, baseUrl: string
       validFrom: new Date().toISOString().split("T")[0],
     },
   };
+
+  if (property.owner?.whatsapp_number) {
+    const rawWa = property.owner.whatsapp_number.replace(/\D/g, "");
+    schema.telephone = rawWa.startsWith("0") ? `+62${rawWa.slice(1)}` : `+${rawWa}`;
+  }
 
   if (property.latitude && property.longitude) {
     schema.geo = {
