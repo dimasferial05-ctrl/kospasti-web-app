@@ -55,6 +55,16 @@ function formatRupiah(amount: number): string {
   }).format(amount);
 }
 
+function escapeHtml(str?: string | null): string {
+  if (!str) return "";
+  return String(str)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
 function formatDateIndo(dateInput: string | Date): string {
   try {
     const d = typeof dateInput === "string" ? new Date(dateInput) : dateInput;
@@ -116,7 +126,7 @@ export function generateBookingReceiptHtml(data: BookingReceiptEmailData): strin
       <div class="badge">Pembayaran Berhasil (PAID)</div>
     </div>
     <div class="content">
-      <p class="greeting">Halo <strong>${data.studentName}</strong>,</p>
+      <p class="greeting">Halo <strong>${escapeHtml(data.studentName)}</strong>,</p>
       <p style="font-size: 13px; color: #475569;">
         Terima kasih telah melakukan pemesanan kamar kos melalui <strong>KosPasti</strong>. Pembayaran DP Anda telah kami terima dan pesanan Anda sedang diverifikasi oleh pemilik kos.
       </p>
@@ -125,21 +135,21 @@ export function generateBookingReceiptHtml(data: BookingReceiptEmailData): strin
         <div class="card-title">Ringkasan Pesanan</div>
         <div class="row">
           <span class="row-label">No. Pesanan:</span>
-          <span class="row-val font-mono">#${data.bookingId}</span>
+          <span class="row-val font-mono">#${escapeHtml(data.bookingId)}</span>
         </div>
         <div class="row">
           <span class="row-label">Nama Kos:</span>
-          <span class="row-val">${data.propertyName}</span>
+          <span class="row-val">${escapeHtml(data.propertyName)}</span>
         </div>
         ${data.roomTypeName ? `
         <div class="row">
           <span class="row-label">Tipe Kamar:</span>
-          <span class="row-val">${data.roomTypeName}</span>
+          <span class="row-val">${escapeHtml(data.roomTypeName)}</span>
         </div>` : ""}
         ${data.propertyAddress ? `
         <div class="row">
           <span class="row-label">Alamat:</span>
-          <span class="row-val">${data.propertyAddress}</span>
+          <span class="row-val">${escapeHtml(data.propertyAddress)}</span>
         </div>` : ""}
         <div class="row">
           <span class="row-label">Rencana Masuk:</span>
@@ -227,14 +237,14 @@ export function generateBookingDecisionHtml(data: BookingDecisionEmailData): str
       <div class="badge">${statusLabel}</div>
     </div>
     <div class="content">
-      <p>Halo <strong>${data.studentName}</strong>,</p>
+      <p>Halo <strong>${escapeHtml(data.studentName)}</strong>,</p>
       ${isAccepted ? `
       <p style="font-size: 14px; color: #334155;">
-        Kabar gembira! 🎉 Pemilik kos <strong>${data.ownerName || "Bapak/Ibu Kos"}</strong> telah <strong>menerima dan mengonfirmasi</strong> pesanan kamar Anda di <strong>${data.propertyName}</strong>.
+        Kabar gembira! 🎉 Pemilik kos <strong>${escapeHtml(data.ownerName || "Bapak/Ibu Kos")}</strong> telah <strong>menerima dan mengonfirmasi</strong> pesanan kamar Anda di <strong>${escapeHtml(data.propertyName)}</strong>.
       </p>
       ` : `
       <p style="font-size: 14px; color: #334155;">
-        Mohon maaf, pemilik kos belum dapat menerima pesanan Anda di <strong>${data.propertyName}</strong> ${data.reason ? `dengan alasan: <em>${data.reason}</em>` : ""}.
+        Mohon maaf, pemilik kos belum dapat menerima pesanan Anda di <strong>${escapeHtml(data.propertyName)}</strong> ${data.reason ? `dengan alasan: <em>${escapeHtml(data.reason)}</em>` : ""}.
       </p>
       <p style="font-size: 13px; color: #475569; background-color: #fef2f2; border: 1px solid #fecaca; padding: 12px; border-radius: 8px;">
         <strong>Informasi Pengembalian Dana:</strong> Seluruh pembayaran DP dan biaya layanan akan dikembalikan 100% tanpa potongan. Tim kami akan segera menghubungi Anda.
@@ -244,16 +254,16 @@ export function generateBookingDecisionHtml(data: BookingDecisionEmailData): str
       <div class="card">
         <div class="row">
           <span class="row-label">No. Pesanan:</span>
-          <span class="row-val font-mono">#${data.bookingId}</span>
+          <span class="row-val font-mono">#${escapeHtml(data.bookingId)}</span>
         </div>
         <div class="row">
           <span class="row-label">Nama Properti:</span>
-          <span class="row-val">${data.propertyName}</span>
+          <span class="row-val">${escapeHtml(data.propertyName)}</span>
         </div>
         ${data.roomTypeName ? `
         <div class="row">
           <span class="row-label">Tipe Kamar:</span>
-          <span class="row-val">${data.roomTypeName}</span>
+          <span class="row-val">${escapeHtml(data.roomTypeName)}</span>
         </div>` : ""}
         <div class="row">
           <span class="row-label">Rencana Masuk:</span>
