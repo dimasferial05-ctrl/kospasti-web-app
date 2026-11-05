@@ -167,34 +167,20 @@ export async function POST(request: Request) {
       );
     }
 
-    // 3. Validasi & Pengunggahan Media
-    const uploadedMediaList: UploadedMediaResult[] = [...directMediaUrls];
+    // 3. Validasi Keberadaan Berkas Foto Awal (Sebelum Upload)
+    const hasCandidateImage =
+      mediaFiles.some((f) => detectMediaType(f.type, f.name) === "IMAGE") ||
+      directMediaUrls.some((m) => m.type === "IMAGE") ||
+      Boolean(image_url && !image_url.includes("images.unsplash.com"));
 
-    if (mediaFiles.length > 0) {
-      const saved = await saveUploadedFiles(mediaFiles, "properties");
-      uploadedMediaList.push(...saved);
-    }
-
-    if (image_url && !image_url.includes("images.unsplash.com")) {
-      if (!uploadedMediaList.some((m) => m.url === image_url)) {
-        uploadedMediaList.push({
-          url: image_url,
-          type: detectMediaType(undefined, image_url),
-        });
-      }
-    }
-
-    if (uploadedMediaList.length === 0) {
+    if (!hasCandidateImage) {
       return NextResponse.json(
-        { success: false, error: "Wajib mengunggah minimal 1 foto properti kos untuk verifikasi." },
+        { success: false, error: "Wajib mengunggah minimal 1 foto kamar atau kos untuk verifikasi properti." },
         { status: 400 }
       );
     }
 
-    const firstImage = uploadedMediaList.find((m) => m.type === "IMAGE") || uploadedMediaList[0];
-    const mainThumbnailUrl = firstImage?.url || null;
-
-    // 4. Periksa apakah Email atau WhatsApp sudah terdaftar di tabel Owner
+    // 4. Periksa apakah Email atau WhatsApp sudah terdaftar di tabel Owner (sebelum upload ke Supabase Storage)
     const existingEmail = await prisma.owner.findUnique({
       where: { email: cleanEmail },
     });
@@ -217,6 +203,32 @@ export async function POST(request: Request) {
         { status: 400 }
       );
     }
+
+    // 5. Pengunggahan Media ke Supabase Storage
+    const uploadedMediaList: UploadedMediaResult[] = [...directMediaUrls];
+
+    if (mediaFiles.length > 0) {
+      const saved = await saveUploadedFiles(mediaFiles, "properties");
+      uploadedMediaList.push(...saved);
+    }
+
+    if (image_url && !image_url.includes("images.unsplash.com")) {
+      if (!uploadedMediaList.some((m) => m.url === image_url)) {
+        uploadedMediaList.push({
+          url: image_url,
+          type: detectMediaType(undefined, image_url),
+        });
+      }
+    }
+
+    const firstImage = uploadedMediaList.find((m) => m.type === "IMAGE");
+    if (!firstImage) {
+      return NextResponse.json(
+        { success: false, error: "Wajib mengunggah minimal 1 foto kamar atau kos untuk verifikasi properti." },
+        { status: 400 }
+      );
+    }
+    const mainThumbnailUrl = firstImage.url;
 
     // 5. Hash Password
     const hashedPassword = await bcrypt.hash(password, 10);

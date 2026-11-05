@@ -33,7 +33,74 @@ describe("Partner Registration Media Upload Tests (#362)", () => {
     expect(json.error).toContain("Wajib mengunggah minimal 1 foto");
   });
 
-  it("2. Berhasil mengunggah media foto & video, menyimpan ke Supabase storage & PropertyMedia, serta bebas dari Unsplash dummy URL", async () => {
+  it("2. Menolak pendaftaran jika HANYA mengunggah file video tanpa ada foto sama sekali", async () => {
+    const formData = new FormData();
+    formData.append("name", "Mitra Pengujian");
+    formData.append("email", "mitra.video@kospasti.com");
+    formData.append("password", "MitraPass123");
+    formData.append("whatsapp_number", "081234567891");
+    formData.append("propertyName", "Kos Video Only");
+    formData.append("address", "Jl. Subang No. 456");
+    formData.append("price_per_month", "600000");
+    formData.append("available_rooms", "3");
+    formData.append("gender_type", "PUTRA");
+
+    // Hanya kirim file video tanpa foto
+    const fakeVideo = new File(["dummy-video-content"], "room-tour.mp4", { type: "video/mp4" });
+    formData.append("media", fakeVideo);
+
+    const req = new Request("http://localhost:3000/api/partner/register", {
+      method: "POST",
+      body: formData,
+    });
+
+    const res = await registerHandler(req);
+    const json = await res.json();
+
+    expect(res.status).toBe(400);
+    expect(json.success).toBe(false);
+    expect(json.error).toContain("Wajib mengunggah minimal 1 foto kamar atau kos");
+  });
+
+  it("3. Menolak pendaftaran jika email sudah terdaftar SEBELUM mengunggah ke Supabase Storage (mencegah orphaned files)", async () => {
+    // Mock bahwa email sudah terdaftar di database
+    vi.spyOn(prisma.owner, "findUnique").mockResolvedValue({
+      id: "owner-existing",
+      email: "mitra.duplikat@kospasti.com",
+    } as unknown as never);
+
+    const mockSaveUploadedFiles = vi.spyOn(uploadModule, "saveUploadedFiles");
+
+    const formData = new FormData();
+    formData.append("name", "Mitra Duplikat");
+    formData.append("email", "mitra.duplikat@kospasti.com");
+    formData.append("password", "MitraPass123");
+    formData.append("whatsapp_number", "081234567892");
+    formData.append("propertyName", "Kos Duplikat");
+    formData.append("address", "Jl. Subang No. 789");
+    formData.append("price_per_month", "500000");
+    formData.append("available_rooms", "5");
+    formData.append("gender_type", "CAMPUR");
+
+    const fakeImage = new File(["dummy-image-content"], "kamar.jpg", { type: "image/jpeg" });
+    formData.append("media", fakeImage);
+
+    const req = new Request("http://localhost:3000/api/partner/register", {
+      method: "POST",
+      body: formData,
+    });
+
+    const res = await registerHandler(req);
+    const json = await res.json();
+
+    expect(res.status).toBe(400);
+    expect(json.success).toBe(false);
+    expect(json.error).toContain("Email ini sudah terdaftar");
+    // Pastikan saveUploadedFiles TIDAK dipanggil sama sekali
+    expect(mockSaveUploadedFiles).not.toHaveBeenCalled();
+  });
+
+  it("4. Berhasil mengunggah media foto & video, menyimpan ke Supabase storage & PropertyMedia, serta bebas dari Unsplash dummy URL", async () => {
     vi.spyOn(prisma.owner, "findUnique").mockResolvedValue(null);
 
     const mockSaveUploadedFiles = vi.spyOn(uploadModule, "saveUploadedFiles").mockResolvedValue([
