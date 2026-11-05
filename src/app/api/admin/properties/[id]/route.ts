@@ -6,7 +6,7 @@ import { parsePropertyPayload } from "@/lib/property-form-parser";
 
 export async function PATCH(
   request: NextRequest,
-  context: { params: Promise<{ id: string }> | { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
     if (!isValidAdminRequest(request)) {
@@ -361,7 +361,7 @@ export async function PATCH(
 
 export async function DELETE(
   request: NextRequest,
-  context: { params: Promise<{ id: string }> | { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
     if (!isValidAdminRequest(request)) {

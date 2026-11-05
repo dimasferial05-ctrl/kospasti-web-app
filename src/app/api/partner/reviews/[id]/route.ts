@@ -4,7 +4,7 @@ import { verifyOwnerToken } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
 interface RouteProps {
-  params: Promise<{ id: string }> | { id: string };
+  params: Promise<{ id: string }>;
 }
 
 /**

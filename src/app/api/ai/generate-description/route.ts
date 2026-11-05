@@ -3,6 +3,12 @@ import { cookies } from "next/headers";
 import { GoogleGenAI } from "@google/genai";
 import { verifyOwnerToken } from "@/lib/auth";
 import { isValidAdminRequest, isValidAdminToken } from "@/lib/admin-auth";
+import {
+  globalRateLimiter,
+  getClientIp,
+  createRateLimitResponse,
+  getRateLimitHeaders,
+} from "@/lib/rate-limiter";
 
 function cleanPlainText(text: string): string {
   return text
@@ -58,34 +64,35 @@ function fallbackDescriptionTemplate(params: {
       ? "khusus putra"
       : gender_type === "PUTRI"
       ? "khusus putri"
-      : "campur";
+      : "bebas untuk putra maupun putri (campur)";
 
-  const hourText = is_24_hours
-    ? " Properti ini menyediakan akses bebas 24 jam sehingga penghuni dapat beraktivitas dengan leluasa tanpa batasan jam malam."
-    : "";
+  const petPolicy = is_pet_friendly
+    ? "Kos ini ramah hewan peliharaan (pet friendly)."
+    : "Tidak diperkenankan membawa hewan peliharaan.";
 
-  const petText = is_pet_friendly
-    ? " Kos ini juga ramah terhadap hewan peliharaan."
-    : "";
+  const accessPolicy = is_24_hours
+    ? "Akses lingkungan kos bebas 24 jam tanpa jam malam."
+    : "Terdapat ketentuan jam malam demi kenyamanan bersama.";
 
-  const rulesText = rules.trim()
-    ? " Demi kenyamanan bersama, penghuni diharapkan selalu menjaga kebersihan dan menaati tata tertib lingkungan kos."
-    : "";
+  let roomTypesDesc = "";
+  if (Array.isArray(room_types) && room_types.length > 0) {
+    const validRooms = room_types.filter((r) => r && r.name);
+    if (validRooms.length > 0) {
+      roomTypesDesc =
+        " Tersedia beberapa pilihan tipe kamar seperti: " +
+        validRooms
+          .map((r) => `${r.name} (${r.price_per_month ? `Rp ${Number(r.price_per_month).toLocaleString("id-ID")}` : "tarif fleksibel"})`)
+          .join(", ") +
+        ".";
+    }
+  }
 
-  const termsText = rental_terms.trim()
-    ? " Pengajuan sewa dapat dilakukan dengan melengkapi berkas identitas dan persyaratan yang telah ditentukan."
-    : "";
+  const rulesText = rules ? ` Aturan hunian: ${rules}.` : "";
+  const termsText = rental_terms ? ` Ketentuan sewa: ${rental_terms}.` : "";
 
-  const roomTypesText =
-    room_types && room_types.length > 1
-      ? ` Tersedia beberapa pilihan tipe kamar yang dapat disesuaikan dengan kebutuhan dan preferensi kenyamanan Anda.`
-      : "";
+  return `${name} merupakan hunian kos ${genderLabel} yang beralamat di ${address}. Properti ini menawarkan kenyamanan optimal dengan fasilitas unggulan seperti ${facilities}.${roomTypesDesc}
 
-  return `${name} merupakan hunian kos ${genderLabel} yang berlokasi di ${address}. Hunian ini menawarkan suasana yang nyaman, bersih, dan strategis sehingga sangat ideal untuk mahasiswa maupun pekerja yang beraktivitas di sekitar wilayah ini.${roomTypesText}
-
-Fasilitas umum dan kamar yang tersedia meliputi ${facilities}. Biaya sewa ditawarkan mulai dari ${formattedPrice} per bulan dengan fasilitas yang siap menunjang kebutuhan istirahat serta produktivitas harian Anda.${hourText}${petText}
-
-${rulesText}${termsText} Informasi lengkap mengenai ketersediaan kamar serta pemesanan dapat dilakukan secara langsung dan praktis melalui platform KosPasti.`;
+${petPolicy} ${accessPolicy}${rulesText}${termsText} Dengan tarif sewa ${formattedPrice}, kos ini siap menjadi tempat tinggal yang aman, nyaman, dan strategis bagi aktivitas Anda sehari-hari.`;
 }
 
 export async function POST(request: Request) {
@@ -104,6 +111,22 @@ export async function POST(request: Request) {
           error: "Unauthorized: Anda harus login sebagai mitra atau admin untuk menggunakan fitur AI.",
         },
         { status: 401 }
+      );
+    }
+
+    // 2. Rate Limiting: 10 request / menit per IP atau per owner
+    const clientIp = getClientIp(request);
+    const identifier = partnerPayload?.ownerId ? `owner:${partnerPayload.ownerId}` : `ip:${clientIp}`;
+    const rateLimitResult = globalRateLimiter.check(identifier, {
+      maxRequests: 10,
+      windowMs: 60 * 1000,
+      prefix: "ai-description",
+    });
+
+    if (!rateLimitResult.success) {
+      return createRateLimitResponse(
+        rateLimitResult,
+        `Batas generate deskripsi AI tercapai. Silakan coba lagi dalam ${rateLimitResult.retryAfterSeconds} detik.`
       );
     }
 
@@ -137,11 +160,16 @@ export async function POST(request: Request) {
         room_types,
       });
 
-      return NextResponse.json({
-        success: true,
-        description: cleanPlainText(fallbackDesc),
-        source: "fallback",
-      });
+      return NextResponse.json(
+        {
+          success: true,
+          description: cleanPlainText(fallbackDesc),
+          source: "fallback",
+        },
+        {
+          headers: getRateLimitHeaders(rateLimitResult),
+        }
+      );
     }
 
     const ai = new GoogleGenAI({ apiKey });
@@ -220,11 +248,16 @@ ${rules ? `- Tata Tertib & Peraturan: ${rules}\n` : ""}${rental_terms ? `- Syara
 
     const finalDescription = cleanPlainText(generatedText);
 
-    return NextResponse.json({
-      success: true,
-      description: finalDescription,
-      source: "gemini",
-    });
+    return NextResponse.json(
+      {
+        success: true,
+        description: finalDescription,
+        source: "gemini",
+      },
+      {
+        headers: getRateLimitHeaders(rateLimitResult),
+      }
+    );
   } catch (error) {
     console.error("Gagal generate deskripsi AI:", error);
     return NextResponse.json(

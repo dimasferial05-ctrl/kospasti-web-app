@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import { POST as registerPOST } from "../src/app/api/register/route";
-import { POST as loginPOST, userLoginAttempts } from "../src/app/api/login/route";
+import { POST as loginPOST } from "../src/app/api/login/route";
+import { userLoginAttempts } from "../src/lib/rate-limiter";
 import { prisma } from "../src/lib/prisma";
 import bcrypt from "bcryptjs";
 import { signUserToken, verifyUserToken } from "../src/lib/auth";

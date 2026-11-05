@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
-import { POST as loginPOST, loginAttempts } from "../src/app/api/admin/login/route";
+import { POST as loginPOST } from "../src/app/api/admin/login/route";
+import { loginAttempts } from "../src/lib/rate-limiter";
 import { POST as logoutPOST } from "../src/app/api/admin/logout/route";
 
 describe("Admin Authentication API Endpoints (/api/admin/login & /api/admin/logout)", () => {

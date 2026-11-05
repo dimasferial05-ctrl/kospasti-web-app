@@ -1,10 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { NextRequest } from "next/server";
-import {
-  PATCH,
-  ALLOWED_STATUSES,
-  ACTIVE_BOOKING_STATUSES,
-} from "@/app/api/admin/bookings/[id]/route";
+import { PATCH } from "@/app/api/admin/bookings/[id]/route";
+import { ALLOWED_STATUSES, ACTIVE_BOOKING_STATUSES } from "@/lib/booking-statuses";
 import { prisma } from "@/lib/prisma";
 
 describe("Admin Booking Status & Inventory Synchronization (Issue #265)", () => {

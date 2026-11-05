@@ -4,7 +4,7 @@ import { isValidAdminRequest, createAdminUnauthorizedResponse } from "@/lib/admi
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> | { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     if (!isValidAdminRequest(request)) {

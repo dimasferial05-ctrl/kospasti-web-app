@@ -11,7 +11,7 @@ const WA_REGEX = /^[0-9+]{8,15}$/;
 
 export async function PATCH(
   request: NextRequest,
-  context: { params: Promise<{ id: string }> | { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
     if (!validateAdminAuth(request)) {
@@ -147,7 +147,7 @@ export async function PATCH(
 
 export async function DELETE(
   request: NextRequest,
-  context: { params: Promise<{ id: string }> | { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
     if (!validateAdminAuth(request)) {

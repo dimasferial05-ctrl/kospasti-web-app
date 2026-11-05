@@ -58,10 +58,10 @@ describe("Geocoding & Coordinates Architecture & Dependency Tests", () => {
     expect(distance).toBeLessThan(11);
   });
 
-  it("5. src/app/api/ai-search/route.ts berhasil me-re-export COMMON_LOCATION_COORDINATES untuk backward compatibility", async () => {
-    const routeModule = await import("@/app/api/ai-search/route");
-    expect(routeModule.COMMON_LOCATION_COORDINATES).toBeDefined();
-    expect(routeModule.findCoordinateInDictionary).toBeDefined();
-    expect(typeof routeModule.findCoordinateInDictionary).toBe("function");
+  it("5. src/lib/geocoding.ts dan src/data/coordinates.ts menyediakan COMMON_LOCATION_COORDINATES", async () => {
+    const geoModule = await import("@/lib/geocoding");
+    expect(geoModule.COMMON_LOCATION_COORDINATES).toBeDefined();
+    expect(geoModule.findCoordinateInDictionary).toBeDefined();
+    expect(typeof geoModule.findCoordinateInDictionary).toBe("function");
   });
 });
