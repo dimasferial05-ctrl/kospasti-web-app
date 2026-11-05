@@ -343,7 +343,7 @@ export default function ManagePropertiesPage() {
       gender_type: prop.gender_type || "CAMPUR",
       facilities: prop.facilities || "",
       image_url:
-        prop.image_url && !prop.image_url.startsWith("/uploads/")
+        prop.image_url && !prop.image_url.startsWith("/uploads/") && !prop.image_url.includes("images.unsplash.com")
           ? prop.image_url
           : "",
       address: prop.address || "",

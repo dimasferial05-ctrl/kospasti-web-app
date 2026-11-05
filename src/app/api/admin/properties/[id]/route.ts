@@ -176,7 +176,11 @@ export async function PATCH(
     }
 
     if (image_url !== undefined) {
-      updateData.image_url = image_url ? String(image_url).trim() : null;
+      if (image_url && !image_url.includes("images.unsplash.com")) {
+        updateData.image_url = String(image_url).trim();
+      } else if (!image_url) {
+        updateData.image_url = null;
+      }
     }
 
     if (address !== undefined) {
@@ -283,7 +287,12 @@ export async function PATCH(
       updateData.media = {
         create: newMediaToCreate,
       };
-      if (image_url === undefined && !existingProperty.image_url) {
+      const isLegacyDummyThumbnail =
+        !existingProperty.image_url ||
+        existingProperty.image_url.includes("images.unsplash.com") ||
+        !existingProperty.media.some((m) => m.url === existingProperty.image_url);
+
+      if ((image_url === undefined || (image_url && image_url.includes("images.unsplash.com"))) && isLegacyDummyThumbnail) {
         updateData.image_url =
           newMediaToCreate.find((m) => m.type === "IMAGE")?.url || newMediaToCreate[0]?.url;
       }
