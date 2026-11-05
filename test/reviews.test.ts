@@ -401,7 +401,7 @@ describe("Review & Rating Feature (Issue #118)", () => {
       });
 
       // Test GET /api/properties
-      const listRes = await propertiesGET();
+      const listRes = await propertiesGET(new Request("http://localhost:3000/api/properties"));
       const listData = await listRes.json();
       expect(listRes.status).toBe(200);
       const matchedProperty = listData.data.find((p: { id: string }) => p.id === property.id);

@@ -1,6 +1,6 @@
 import { PrismaClient } from "@prisma/client";
 import { LOCATION_DATA } from "../src/data/locationSuggestions";
-import { COMMON_LOCATION_COORDINATES } from "../src/app/api/ai-search/route";
+import { COMMON_LOCATION_COORDINATES } from "../src/data/coordinates";
 
 const prisma = new PrismaClient();
 const DEFAULT_SUBANG_COORDS = { lat: -6.5590, lng: 107.7583 };

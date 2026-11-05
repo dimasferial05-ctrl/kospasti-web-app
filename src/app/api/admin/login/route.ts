@@ -1,56 +1,13 @@
 import { NextResponse } from "next/server";
 import crypto from "crypto";
 import { getValidAdminToken } from "@/lib/admin-auth";
+import { globalRateLimiter, getClientIp } from "@/lib/rate-limiter";
 
-// In-memory rate limiting for failed login attempts
-interface RateLimitRecord {
-  count: number;
-  resetTime: number;
-}
-
-export const loginAttempts = new Map<string, RateLimitRecord>();
-const MAX_ATTEMPTS = 5;
-const LOCKOUT_PERIOD_MS = 15 * 60 * 1000; // 15 menit
-
-function getClientIdentifier(request: Request): string {
-  const forwarded = request.headers.get("x-forwarded-for");
-  if (forwarded) {
-    return forwarded.split(",")[0].trim();
-  }
-  return request.headers.get("x-real-ip") || "default_client";
-}
-
-function checkRateLimit(key: string): { limited: boolean; retryAfterSeconds: number } {
-  const now = Date.now();
-  const record = loginAttempts.get(key);
-
-  if (!record) {
-    return { limited: false, retryAfterSeconds: 0 };
-  }
-
-  if (now > record.resetTime) {
-    loginAttempts.delete(key);
-    return { limited: false, retryAfterSeconds: 0 };
-  }
-
-  if (record.count >= MAX_ATTEMPTS) {
-    const retryAfterSeconds = Math.ceil((record.resetTime - now) / 1000);
-    return { limited: true, retryAfterSeconds };
-  }
-
-  return { limited: false, retryAfterSeconds: 0 };
-}
-
-function recordFailedAttempt(key: string): void {
-  const now = Date.now();
-  const record = loginAttempts.get(key);
-
-  if (!record || now > record.resetTime) {
-    loginAttempts.set(key, { count: 1, resetTime: now + LOCKOUT_PERIOD_MS });
-  } else {
-    record.count += 1;
-  }
-}
+const RATE_LIMIT_OPTIONS = {
+  maxRequests: 5,
+  windowMs: 15 * 60 * 1000, // 15 menit
+  prefix: "admin-login",
+};
 
 // Constant-time string comparison using sha256 digests to prevent timing attacks
 function safeCompare(a: string, b: string): boolean {
@@ -61,11 +18,11 @@ function safeCompare(a: string, b: string): boolean {
 
 export async function POST(request: Request) {
   try {
-    const clientKey = getClientIdentifier(request);
+    const clientKey = getClientIp(request);
 
-    // Periksa rate limiting
-    const { limited, retryAfterSeconds } = checkRateLimit(clientKey);
-    if (limited) {
+    // 1. Periksa rate limiting
+    const blockStatus = globalRateLimiter.isBlocked(clientKey, RATE_LIMIT_OPTIONS);
+    if (blockStatus.blocked) {
       return NextResponse.json(
         {
           success: false,
@@ -74,7 +31,7 @@ export async function POST(request: Request) {
         {
           status: 429,
           headers: {
-            "Retry-After": String(retryAfterSeconds),
+            "Retry-After": String(blockStatus.retryAfterSeconds),
           },
         }
       );
@@ -102,7 +59,7 @@ export async function POST(request: Request) {
     const password = body?.password;
 
     if (!email || !password) {
-      recordFailedAttempt(clientKey);
+      globalRateLimiter.recordFailure(clientKey, RATE_LIMIT_OPTIONS);
       return NextResponse.json(
         {
           success: false,
@@ -116,7 +73,7 @@ export async function POST(request: Request) {
     const isPasswordValid = safeCompare(password, validPassword);
 
     if (!isEmailValid || !isPasswordValid) {
-      recordFailedAttempt(clientKey);
+      globalRateLimiter.recordFailure(clientKey, RATE_LIMIT_OPTIONS);
       return NextResponse.json(
         {
           success: false,
@@ -127,7 +84,7 @@ export async function POST(request: Request) {
     }
 
     // Login sukses: reset status percobaan untuk client ini
-    loginAttempts.delete(clientKey);
+    globalRateLimiter.reset(clientKey, RATE_LIMIT_OPTIONS.prefix);
 
     const response = NextResponse.json(
       {
@@ -160,4 +117,3 @@ export async function POST(request: Request) {
     );
   }
 }
-

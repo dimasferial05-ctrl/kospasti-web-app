@@ -34,7 +34,7 @@ async function getPartnerToken(request?: NextRequest): Promise<string | undefine
 /**
  * GET: Mengambil detail profil mitra saat ini
  */
-export async function GET(request?: NextRequest) {
+export async function GET(request: NextRequest) {
   try {
     const partnerToken = await getPartnerToken(request);
 

@@ -1,4 +1,10 @@
 import { NextResponse } from "next/server";
+import {
+  globalRateLimiter,
+  getClientIp,
+  createRateLimitResponse,
+  getRateLimitHeaders,
+} from "@/lib/rate-limiter";
 import { GoogleGenAI, Type } from "@google/genai";
 import {
   findPropertiesWithinRadius,
@@ -24,9 +30,8 @@ import {
 } from "@/data/coordinates";
 import { geocodeLocation } from "@/lib/geocoding";
 
-export { COMMON_LOCATION_COORDINATES, findCoordinateInDictionary };
 
-export async function fetchOnlineGeocode(query: string): Promise<{ lat: number; lng: number } | null> {
+async function fetchOnlineGeocode(query: string): Promise<{ lat: number; lng: number } | null> {
   const result = await geocodeLocation(query);
   if (result) {
     return { lat: result.lat, lng: result.lng };
@@ -34,7 +39,7 @@ export async function fetchOnlineGeocode(query: string): Promise<{ lat: number; 
   return null;
 }
 
-export function fallbackExtractCriteria(prompt: string): AISearchResult {
+function fallbackExtractCriteria(prompt: string): AISearchResult {
   const lower = prompt.toLowerCase();
 
   // 1. Gender extraction
@@ -133,6 +138,20 @@ export function fallbackExtractCriteria(prompt: string): AISearchResult {
 
 export async function POST(req: Request) {
   try {
+    const clientIp = getClientIp(req);
+    const rateLimitResult = globalRateLimiter.check(clientIp, {
+      maxRequests: 10,
+      windowMs: 60 * 1000,
+      prefix: "ai-search",
+    });
+
+    if (!rateLimitResult.success) {
+      return createRateLimitResponse(
+        rateLimitResult,
+        `Batas pencarian AI tercapai. Silakan coba lagi dalam ${rateLimitResult.retryAfterSeconds} detik.`
+      );
+    }
+
     const { prompt } = await req.json();
 
     if (!prompt || typeof prompt !== "string" || !prompt.trim()) {

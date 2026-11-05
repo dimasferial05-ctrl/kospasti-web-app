@@ -30,7 +30,7 @@ describe("GET /api/properties", () => {
         },
       });
 
-      const response = await GET();
+      const response = await GET(new Request("http://localhost:3000/api/properties"));
       const result = await response.json();
 
       expect(response.status).toBe(200);
@@ -52,7 +52,7 @@ describe("GET /api/properties", () => {
     });
 
     it("mengembalikan data kosong dengan array kosong jika belum ada properti", async () => {
-      const response = await GET();
+      const response = await GET(new Request("http://localhost:3000/api/properties"));
       const result = await response.json();
 
       expect(response.status).toBe(200);
@@ -105,7 +105,7 @@ describe("GET /api/properties", () => {
         },
       });
 
-      const response = await GET();
+      const response = await GET(new Request("http://localhost:3000/api/properties"));
       const result = await response.json();
 
       expect(response.status).toBe(200);
@@ -237,7 +237,7 @@ describe("GET /api/properties", () => {
     it("mengembalikan status 500 jika terjadi kesalahan database internal", async () => {
       vi.spyOn(prisma.property, "findMany").mockRejectedValueOnce(new Error("Database connection lost"));
 
-      const response = await GET();
+      const response = await GET(new Request("http://localhost:3000/api/properties"));
       const result = await response.json();
 
       expect(response.status).toBe(500);

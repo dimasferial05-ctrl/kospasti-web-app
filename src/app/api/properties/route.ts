@@ -3,7 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { Prisma } from "@prisma/client";
 import { findPropertiesWithinRadius } from "@/lib/propertyGeospatial";
 
-export async function GET(request?: Request) {
+export async function GET(request: Request) {
   try {
     const url = request ? new URL(request.url) : new URL("http://localhost/api/properties");
     const { searchParams } = url;

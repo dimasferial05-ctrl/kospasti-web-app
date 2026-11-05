@@ -3,36 +3,11 @@ import { prisma } from "@/lib/prisma";
 import { sendWhatsAppMessage } from "@/lib/whatsapp";
 import { isValidAdminRequest, createAdminUnauthorizedResponse } from "@/lib/admin-auth";
 
-export const ALLOWED_STATUSES = [
-  "PENDING",
-  "PAID",
-  "SUCCESS",
-  "CONFIRMED",
-  "ACCEPTED",
-  "APPROVED",
-  "REJECTED",
-  "CANCELLED",
-  "REFUND_REQUESTED",
-  "REFUNDED",
-  "COMPLETED",
-  "DISPUTED",
-  "PAYOUT_PENDING",
-  "PAYOUT_PAID",
-];
-
-export const ACTIVE_BOOKING_STATUSES = [
-  "PENDING",
-  "PAID",
-  "SUCCESS",
-  "CONFIRMED",
-  "ACCEPTED",
-  "APPROVED",
-  "COMPLETED",
-];
+import { ALLOWED_STATUSES, ACTIVE_BOOKING_STATUSES } from "@/lib/booking-statuses";
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> | { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     if (!isValidAdminRequest(request)) {

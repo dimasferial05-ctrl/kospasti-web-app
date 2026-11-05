@@ -7,7 +7,7 @@ import { verifyUserToken } from "@/lib/auth";
 
 export async function POST(
   request: Request,
-  { params }: { params: Promise<{ id: string }> | { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const cookieStore = await cookies();

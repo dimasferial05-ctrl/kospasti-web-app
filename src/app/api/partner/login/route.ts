@@ -2,53 +2,17 @@ import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
 import { signOwnerToken } from "@/lib/auth";
+import { globalRateLimiter, getClientIp } from "@/lib/rate-limiter";
 
-// In-memory rate limiting untuk percobaan login gagal
-interface RateLimitRecord {
-  count: number;
-  resetTime: number;
-}
-
-export const partnerLoginAttempts = new Map<string, RateLimitRecord>();
-const MAX_ATTEMPTS = 5;
-const LOCKOUT_PERIOD_MS = 15 * 60 * 1000; // 15 menit
+const RATE_LIMIT_OPTIONS = {
+  maxRequests: 5,
+  windowMs: 15 * 60 * 1000, // 15 menit
+  prefix: "partner-login",
+};
 
 function getClientIdentifier(request: Request, email?: string): string {
-  const forwarded = request.headers.get("x-forwarded-for");
-  const ip = forwarded ? forwarded.split(",")[0].trim() : (request.headers.get("x-real-ip") || "localhost");
+  const ip = getClientIp(request);
   return email ? `${ip}_${email.trim().toLowerCase()}` : ip;
-}
-
-function checkRateLimit(key: string): { limited: boolean; retryAfterSeconds: number } {
-  const now = Date.now();
-  const record = partnerLoginAttempts.get(key);
-
-  if (!record) {
-    return { limited: false, retryAfterSeconds: 0 };
-  }
-
-  if (now > record.resetTime) {
-    partnerLoginAttempts.delete(key);
-    return { limited: false, retryAfterSeconds: 0 };
-  }
-
-  if (record.count >= MAX_ATTEMPTS) {
-    const retryAfterSeconds = Math.ceil((record.resetTime - now) / 1000);
-    return { limited: true, retryAfterSeconds };
-  }
-
-  return { limited: false, retryAfterSeconds: 0 };
-}
-
-function recordFailedAttempt(key: string): void {
-  const now = Date.now();
-  const record = partnerLoginAttempts.get(key);
-
-  if (!record || now > record.resetTime) {
-    partnerLoginAttempts.set(key, { count: 1, resetTime: now + LOCKOUT_PERIOD_MS });
-  } else {
-    record.count += 1;
-  }
 }
 
 export async function POST(request: Request) {
@@ -60,17 +24,17 @@ export async function POST(request: Request) {
     const clientKey = getClientIdentifier(request, email);
 
     // 1. Periksa rate limit
-    const { limited, retryAfterSeconds } = checkRateLimit(clientKey);
-    if (limited) {
+    const blockStatus = globalRateLimiter.isBlocked(clientKey, RATE_LIMIT_OPTIONS);
+    if (blockStatus.blocked) {
       return NextResponse.json(
         {
           success: false,
-          error: `Terlalu banyak percobaan login gagal. Silakan coba lagi dalam ${retryAfterSeconds} detik.`,
+          error: `Terlalu banyak percobaan login gagal. Silakan coba lagi dalam ${blockStatus.retryAfterSeconds} detik.`,
         },
         {
           status: 429,
           headers: {
-            "Retry-After": String(retryAfterSeconds),
+            "Retry-After": String(blockStatus.retryAfterSeconds),
           },
         }
       );
@@ -78,7 +42,7 @@ export async function POST(request: Request) {
 
     // 2. Validasi input
     if (!email || !password) {
-      recordFailedAttempt(clientKey);
+      globalRateLimiter.recordFailure(clientKey, RATE_LIMIT_OPTIONS);
       return NextResponse.json(
         {
           success: false,
@@ -94,7 +58,7 @@ export async function POST(request: Request) {
     });
 
     if (!owner) {
-      recordFailedAttempt(clientKey);
+      globalRateLimiter.recordFailure(clientKey, RATE_LIMIT_OPTIONS);
       return NextResponse.json(
         {
           success: false,
@@ -106,7 +70,7 @@ export async function POST(request: Request) {
 
     // 4. Verifikasi apakah pemilik memiliki password (jika hanya terdaftar via nomor WhatsApp admin)
     if (!owner.password) {
-      recordFailedAttempt(clientKey);
+      globalRateLimiter.recordFailure(clientKey, RATE_LIMIT_OPTIONS);
       return NextResponse.json(
         {
           success: false,
@@ -119,7 +83,7 @@ export async function POST(request: Request) {
 
     const isPasswordValid = await bcrypt.compare(password, owner.password);
     if (!isPasswordValid) {
-      recordFailedAttempt(clientKey);
+      globalRateLimiter.recordFailure(clientKey, RATE_LIMIT_OPTIONS);
       return NextResponse.json(
         {
           success: false,
@@ -130,7 +94,7 @@ export async function POST(request: Request) {
     }
 
     // 5. Login sukses: bersihkan failed attempts
-    partnerLoginAttempts.delete(clientKey);
+    globalRateLimiter.reset(clientKey, RATE_LIMIT_OPTIONS.prefix);
 
     const sessionToken = await signOwnerToken({
       ownerId: owner.id,

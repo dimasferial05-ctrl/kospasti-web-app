@@ -2,11 +2,32 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import crypto from "crypto";
 import { isValidAdminRequest, createAdminUnauthorizedResponse } from "@/lib/admin-auth";
+import {
+  globalRateLimiter,
+  getClientIp,
+  createRateLimitResponse,
+  getRateLimitHeaders,
+} from "@/lib/rate-limiter";
+
+const RATE_LIMIT_OPTIONS = {
+  maxRequests: 5,
+  windowMs: 5 * 60 * 1000, // 5 menit
+  prefix: "magic-link",
+};
 
 export async function POST(request: Request) {
   try {
     if (!isValidAdminRequest(request)) {
       return createAdminUnauthorizedResponse();
+    }
+
+    const clientIp = getClientIp(request);
+    const rateLimitResult = globalRateLimiter.check(clientIp, RATE_LIMIT_OPTIONS);
+    if (!rateLimitResult.success) {
+      return createRateLimitResponse(
+        rateLimitResult,
+        `Terlalu banyak permintaan pembuatan Magic Link. Silakan coba lagi dalam ${rateLimitResult.retryAfterSeconds} detik.`
+      );
     }
 
     const body = await request.json().catch(() => null);
@@ -17,7 +38,10 @@ export async function POST(request: Request) {
           success: false,
           error: "ownerId diperlukan",
         },
-        { status: 400 }
+        {
+          status: 400,
+          headers: getRateLimitHeaders(rateLimitResult),
+        }
       );
     }
 
@@ -34,7 +58,10 @@ export async function POST(request: Request) {
           success: false,
           error: "Owner tidak ditemukan",
         },
-        { status: 404 }
+        {
+          status: 404,
+          headers: getRateLimitHeaders(rateLimitResult),
+        }
       );
     }
 
@@ -73,7 +100,10 @@ export async function POST(request: Request) {
         magicLink,
         expiresAt: expiresAt.toISOString(),
       },
-      { status: 200 }
+      {
+        status: 200,
+        headers: getRateLimitHeaders(rateLimitResult),
+      }
     );
   } catch (error) {
     console.error("Error generating magic link:", error);
