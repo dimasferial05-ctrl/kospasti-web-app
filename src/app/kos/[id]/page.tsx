@@ -33,6 +33,7 @@ import { WishlistButton } from "@/components/features/WishlistButton";
 import { ReviewSection } from "@/components/features/ReviewSection";
 import { useFocusTrap } from "@/hooks/useFocusTrap";
 import { formatWhatsAppNumber } from "@/lib/whatsapp";
+import { buildSupportWhatsAppUrl } from "@/components/support/CustomerSupportWidget";
 import { generateLodgingJsonLd } from "@/lib/seo";
 
 interface PropertyMediaItem {
@@ -1460,6 +1461,23 @@ export default function PropertyDetailPage() {
                 Gunakan tombol <strong className="text-slate-700 dark:text-slate-200">Amankan Kamar</strong> di KosPasti untuk jaminan garansi 100% uang kembali.
               </span>
             </div>
+
+            {/* Akses Cepat Bantuan CS KosPasti */}
+            <div className="pt-2.5 mt-1 border-t border-slate-100 dark:border-slate-800/60 flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
+              <span className="text-[11px]">Butuh konfirmasi atau bantuan tim KosPasti?</span>
+              <a
+                href={buildSupportWhatsAppUrl({
+                  propertyName: property.name,
+                  propertyId: property.id,
+                })}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-bold text-emerald-600 hover:text-emerald-700 dark:text-emerald-400 dark:hover:text-emerald-300 inline-flex items-center gap-1 transition-colors text-xs shrink-0"
+              >
+                <span>Chat CS</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </a>
+            </div>
           </div>
 
           {/* Card 9: Ulasan & Rating Penyewa */}
@@ -1491,22 +1509,39 @@ export default function PropertyDetailPage() {
                 )}
               </div>
 
-              <button
-                type="button"
-                disabled={isFull || isCheckingAuth}
-                onClick={() => handleOpenBookingModal()}
-                className={`px-6 py-2.5 lg:py-3.5 lg:w-full rounded-xl font-bold text-white transition-all duration-200 cursor-pointer shadow-sm ${
-                  isFull || isCheckingAuth
-                    ? "bg-slate-400 cursor-not-allowed"
-                    : "bg-emerald-600 hover:bg-emerald-700 hover:-translate-y-0.5 hover:shadow-md active:translate-y-0"
-                }`}
-              >
-                {isFull
-                  ? "Kamar Penuh"
-                  : isCheckingAuth
-                  ? "Memeriksa..."
-                  : "Amankan Kamar"}
-              </button>
+              <div className="flex items-center gap-2 w-auto lg:w-full">
+                {/* Tombol Bantuan CS WhatsApp di Mobile Bottom Bar */}
+                <a
+                  href={buildSupportWhatsAppUrl({
+                    propertyName: property.name,
+                    propertyId: property.id,
+                  })}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="lg:hidden p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 transition-colors shrink-0 flex items-center justify-center cursor-pointer shadow-2xs"
+                  title="Hubungi CS KosPasti via WhatsApp"
+                  aria-label="Hubungi CS KosPasti via WhatsApp"
+                >
+                  <MessageCircle className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+                </a>
+
+                <button
+                  type="button"
+                  disabled={isFull || isCheckingAuth}
+                  onClick={() => handleOpenBookingModal()}
+                  className={`px-5 sm:px-6 py-2.5 lg:py-3.5 w-full rounded-xl font-bold text-white transition-all duration-200 cursor-pointer shadow-sm ${
+                    isFull || isCheckingAuth
+                      ? "bg-slate-400 cursor-not-allowed"
+                      : "bg-emerald-600 hover:bg-emerald-700 hover:-translate-y-0.5 hover:shadow-md active:translate-y-0"
+                  }`}
+                >
+                  {isFull
+                    ? "Kamar Penuh"
+                    : isCheckingAuth
+                    ? "Memeriksa..."
+                    : "Amankan Kamar"}
+                </button>
+              </div>
 
               {/* Jaminan KosPasti */}
               <div className="hidden lg:flex flex-col gap-2 pt-3 border-t border-slate-100 dark:border-slate-800 text-[11px] text-slate-500 dark:text-slate-400 w-full">
@@ -1522,6 +1557,22 @@ export default function PropertyDetailPage() {
                   <Check className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
                   <span>Konfirmasi Langsung Pemilik</span>
                 </div>
+              </div>
+
+              {/* Tombol Bantuan CS di Desktop Sticky Card */}
+              <div className="hidden lg:block w-full pt-1">
+                <a
+                  href={buildSupportWhatsAppUrl({
+                    propertyName: property.name,
+                    propertyId: property.id,
+                  })}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full py-2 px-3 rounded-xl border border-slate-200/90 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/80 text-slate-700 dark:text-slate-300 text-xs font-semibold flex items-center justify-center gap-2 transition-all duration-200 cursor-pointer shadow-2xs hover:shadow-soft"
+                >
+                  <MessageCircle className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                  <span>Bantuan CS KosPasti</span>
+                </a>
               </div>
             </div>
           </div>
@@ -1835,6 +1886,7 @@ export default function PropertyDetailPage() {
           </div>
         </div>
       )}
+    
     </div>
   );
 }

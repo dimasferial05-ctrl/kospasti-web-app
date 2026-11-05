@@ -3,6 +3,7 @@ import { cookies } from "next/headers";
 import { verifyOwnerToken } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { sendWhatsAppMessage } from "@/lib/whatsapp";
+import { sendBookingDecisionEmail } from "@/lib/email";
 
 export async function PATCH(
   request: Request,
@@ -63,6 +64,7 @@ export async function PATCH(
           },
         },
         room_type: true,
+        user: true,
       },
     });
 
@@ -158,6 +160,22 @@ export async function PATCH(
           message: rejectMessage,
         }).catch((err) => console.error("Gagal kirim WA penolakan:", err));
       }
+    }
+
+    // Send fallback decision email to registered user if approved or rejected
+    if (existing.user?.email && previousStatus !== status && (status === "APPROVED" || status === "REJECTED")) {
+      await sendBookingDecisionEmail({
+        bookingId: existing.id,
+        studentName: existing.student_name,
+        studentEmail: existing.user.email,
+        propertyName: existing.property.name,
+        propertyAddress: existing.property.address || undefined,
+        roomTypeName: existing.room_type?.name || "Standar",
+        moveInDate: existing.move_in_date,
+        action: status === "APPROVED" ? "ACCEPT" : "REJECT",
+        ownerName: existing.property.owner?.name || "Pemilik Kos",
+        ownerWhatsapp: existing.property.owner?.whatsapp_number || undefined,
+      }).catch((err) => console.error("Gagal kirim email keputusan mitra:", err));
     }
 
     return NextResponse.json(

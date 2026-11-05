@@ -3,6 +3,7 @@ import { cookies } from "next/headers";
 import { prisma } from "@/lib/prisma";
 import crypto from "crypto";
 import { sendWhatsAppMessage } from "@/lib/whatsapp";
+import { sendBookingReceiptEmail } from "@/lib/email";
 import { verifyUserToken } from "@/lib/auth";
 
 export async function POST(
@@ -56,6 +57,7 @@ export async function POST(
           },
         },
         room_type: true,
+        user: true,
       },
     });
 
@@ -192,6 +194,25 @@ export async function POST(
         to: booking.student_whatsapp,
         message: studentMessage,
       });
+    }
+
+    // Send fallback digital booking receipt via email to registered user
+    const recipientEmail = booking.user?.email;
+    if (recipientEmail) {
+      await sendBookingReceiptEmail({
+        bookingId: booking.id,
+        studentName,
+        studentEmail: recipientEmail,
+        studentWhatsapp: booking.student_whatsapp,
+        propertyName,
+        propertyAddress: booking.property?.address || undefined,
+        roomTypeName: booking.room_type?.name || "Standar",
+        moveInDate: booking.move_in_date,
+        rentPrice: booking.amount,
+        adminFee: 0,
+        totalPrice: booking.amount,
+        status: "PAID",
+      }).catch((err) => console.error("Gagal kirim email bukti pemesanan:", err));
     }
 
     return NextResponse.json(
