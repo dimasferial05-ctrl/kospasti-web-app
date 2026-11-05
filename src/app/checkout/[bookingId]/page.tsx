@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
+import { CustomerSupportWidget } from "@/components/support/CustomerSupportWidget";
 import {
   QrCode,
   Loader2,
@@ -393,6 +394,13 @@ export default function CheckoutPage() {
           KosPasti Instant Checkout &bull; Pembayaran Otomatis & Terverifikasi
         </p>
       </div>
+          {/* Floating Customer Support WhatsApp Widget */}
+      {booking && (
+        <CustomerSupportWidget
+          bookingId={booking.id}
+          propertyName={booking.property?.name}
+        />
+      )}
     </div>
   );
 }

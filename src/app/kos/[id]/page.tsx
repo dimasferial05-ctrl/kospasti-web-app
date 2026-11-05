@@ -33,6 +33,7 @@ import { WishlistButton } from "@/components/features/WishlistButton";
 import { ReviewSection } from "@/components/features/ReviewSection";
 import { useFocusTrap } from "@/hooks/useFocusTrap";
 import { formatWhatsAppNumber } from "@/lib/whatsapp";
+import { CustomerSupportWidget } from "@/components/support/CustomerSupportWidget";
 import { generateLodgingJsonLd } from "@/lib/seo";
 
 interface PropertyMediaItem {
@@ -1834,6 +1835,13 @@ export default function PropertyDetailPage() {
             </div>
           </div>
         </div>
+      )}
+          {/* Floating Customer Support WhatsApp Widget */}
+      {property && (
+        <CustomerSupportWidget
+          propertyName={property.name}
+          propertyId={property.id}
+        />
       )}
     </div>
   );

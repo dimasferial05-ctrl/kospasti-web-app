@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { sendWhatsAppMessage } from "@/lib/whatsapp";
+import { sendBookingDecisionEmail } from "@/lib/email";
 
 export async function POST(request: Request) {
   try {
@@ -38,6 +39,7 @@ export async function POST(request: Request) {
           include: {
             property: true,
             room_type: true,
+            user: true,
           },
         },
       },
@@ -194,6 +196,24 @@ export async function POST(request: Request) {
           message: rejectMessage,
         });
       }
+    }
+
+    // Send fallback decision email to registered user
+    const recipientEmail = booking.user?.email;
+    if (recipientEmail) {
+      await sendBookingDecisionEmail({
+        bookingId: booking.id,
+        studentName,
+        studentEmail: recipientEmail,
+        propertyName,
+        propertyAddress: property.address || undefined,
+        roomTypeName: roomType?.name || "Standar",
+        moveInDate: booking.move_in_date,
+        action,
+        ownerName,
+        ownerWhatsapp: magicLink.owner?.whatsapp_number || undefined,
+        reason,
+      }).catch((err) => console.error("Gagal kirim email keputusan booking:", err));
     }
 
     return NextResponse.json(
