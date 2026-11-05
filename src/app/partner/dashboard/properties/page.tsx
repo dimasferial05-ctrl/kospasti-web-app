@@ -187,7 +187,7 @@ export default function PartnerPropertiesPage() {
       rules: prop.rules || "",
       rental_terms: prop.rental_terms || "",
       youtube_url: prop.youtube_url || "",
-      image_url: prop.image_url && !prop.image_url.startsWith("/uploads/") ? prop.image_url : "",
+      image_url: prop.image_url && !prop.image_url.startsWith("/uploads/") && !prop.image_url.includes("images.unsplash.com") ? prop.image_url : "",
       is_pet_friendly: Boolean(prop.is_pet_friendly),
       is_24_hours: Boolean(prop.is_24_hours),
     });

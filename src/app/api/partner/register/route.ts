@@ -2,37 +2,85 @@ import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
 import { isValidPartnerPassword, PARTNER_PASSWORD_ERROR_MESSAGE } from "@/lib/auth";
+import { saveUploadedFiles, detectMediaType, UploadedMediaResult } from "@/lib/upload";
 
 export async function POST(request: Request) {
   try {
-    const body = await request.json().catch(() => null);
+    let name = "";
+    let email = "";
+    let password = "";
+    let whatsapp_number = "";
+    let propertyName = "";
+    let address = "";
+    let latitude: unknown = null;
+    let longitude: unknown = null;
+    let gender_type = "";
+    let price_per_month: unknown = null;
+    let available_rooms: unknown = null;
+    let facilities: unknown = "";
+    let rules: unknown = "";
+    let image_url: string | null = null;
+    let is_pet_friendly = false;
+    let is_24_hours = true;
+    const mediaFiles: File[] = [];
+    const directMediaUrls: { url: string; type: "IMAGE" | "VIDEO" }[] = [];
 
-    if (!body) {
-      return NextResponse.json(
-        { success: false, error: "Payload pendaftaran tidak valid." },
-        { status: 400 }
-      );
+    const contentType = request.headers.get("content-type") || "";
+    if (contentType.includes("multipart/form-data") || contentType.includes("form-data")) {
+      const formData = await request.formData();
+      name = String(formData.get("name") || "").trim();
+      email = String(formData.get("email") || "").trim();
+      password = String(formData.get("password") || "");
+      whatsapp_number = String(formData.get("whatsapp_number") || "").trim();
+      propertyName = String(formData.get("propertyName") || "").trim();
+      address = String(formData.get("address") || "").trim();
+      latitude = formData.get("latitude");
+      longitude = formData.get("longitude");
+      gender_type = String(formData.get("gender_type") || "").trim();
+      price_per_month = formData.get("price_per_month");
+      available_rooms = formData.get("available_rooms");
+      facilities = formData.get("facilities");
+      rules = formData.get("rules");
+      image_url = formData.get("image_url") ? String(formData.get("image_url")).trim() : null;
+      is_pet_friendly = formData.get("is_pet_friendly") === "true";
+      is_24_hours = formData.get("is_24_hours") !== "false";
+
+      const rawFiles = [...formData.getAll("media"), ...formData.getAll("files")];
+      for (const item of rawFiles) {
+        if (item && typeof item === "object" && "arrayBuffer" in item && (item as File).size > 0) {
+          mediaFiles.push(item as File);
+        } else if (typeof item === "string" && item.trim()) {
+          directMediaUrls.push({
+            url: item.trim(),
+            type: detectMediaType(undefined, item.trim()),
+          });
+        }
+      }
+    } else {
+      const body = await request.json().catch(() => null);
+      if (!body) {
+        return NextResponse.json(
+          { success: false, error: "Payload pendaftaran tidak valid." },
+          { status: 400 }
+        );
+      }
+      name = String(body.name || "").trim();
+      email = String(body.email || "").trim();
+      password = String(body.password || "");
+      whatsapp_number = String(body.whatsapp_number || "").trim();
+      propertyName = String(body.propertyName || "").trim();
+      address = String(body.address || "").trim();
+      latitude = body.latitude;
+      longitude = body.longitude;
+      gender_type = String(body.gender_type || "").trim();
+      price_per_month = body.price_per_month;
+      available_rooms = body.available_rooms;
+      facilities = body.facilities;
+      rules = body.rules;
+      image_url = body.image_url ? String(body.image_url).trim() : null;
+      is_pet_friendly = Boolean(body.is_pet_friendly);
+      is_24_hours = body.is_24_hours !== false;
     }
-
-    const {
-      name,
-      email,
-      password,
-      whatsapp_number,
-      // Property data
-      propertyName,
-      address,
-      latitude,
-      longitude,
-      gender_type,
-      price_per_month,
-      available_rooms,
-      facilities,
-      rules,
-      image_url,
-      is_pet_friendly,
-      is_24_hours,
-    } = body;
 
     // 1. Validasi Akun Mitra
     if (!name || typeof name !== "string" || !name.trim()) {
@@ -119,7 +167,20 @@ export async function POST(request: Request) {
       );
     }
 
-    // 3. Periksa apakah Email atau WhatsApp sudah terdaftar di tabel Owner
+    // 3. Validasi Keberadaan Berkas Foto Awal (Sebelum Upload)
+    const hasCandidateImage =
+      mediaFiles.some((f) => detectMediaType(f.type, f.name) === "IMAGE") ||
+      directMediaUrls.some((m) => m.type === "IMAGE") ||
+      Boolean(image_url && !image_url.includes("images.unsplash.com"));
+
+    if (!hasCandidateImage) {
+      return NextResponse.json(
+        { success: false, error: "Wajib mengunggah minimal 1 foto kamar atau kos untuk verifikasi properti." },
+        { status: 400 }
+      );
+    }
+
+    // 4. Periksa apakah Email atau WhatsApp sudah terdaftar di tabel Owner (sebelum upload ke Supabase Storage)
     const existingEmail = await prisma.owner.findUnique({
       where: { email: cleanEmail },
     });
@@ -143,10 +204,36 @@ export async function POST(request: Request) {
       );
     }
 
-    // 4. Hash Password
+    // 5. Pengunggahan Media ke Supabase Storage
+    const uploadedMediaList: UploadedMediaResult[] = [...directMediaUrls];
+
+    if (mediaFiles.length > 0) {
+      const saved = await saveUploadedFiles(mediaFiles, "properties");
+      uploadedMediaList.push(...saved);
+    }
+
+    if (image_url && !image_url.includes("images.unsplash.com")) {
+      if (!uploadedMediaList.some((m) => m.url === image_url)) {
+        uploadedMediaList.push({
+          url: image_url,
+          type: detectMediaType(undefined, image_url),
+        });
+      }
+    }
+
+    const firstImage = uploadedMediaList.find((m) => m.type === "IMAGE");
+    if (!firstImage) {
+      return NextResponse.json(
+        { success: false, error: "Wajib mengunggah minimal 1 foto kamar atau kos untuk verifikasi properti." },
+        { status: 400 }
+      );
+    }
+    const mainThumbnailUrl = firstImage.url;
+
+    // 5. Hash Password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // 5. Simpan data Owner dan Properti Perdana dalam transaksi
+    // 6. Simpan data Owner, Properti, dan PropertyMedia dalam transaksi
     const latNum = latitude !== undefined && latitude !== null && latitude !== "" ? Number(latitude) : null;
     const lngNum = longitude !== undefined && longitude !== null && longitude !== "" ? Number(longitude) : null;
 
@@ -169,14 +256,24 @@ export async function POST(request: Request) {
           gender_type: cleanGender,
           price_per_month: priceNum,
           available_rooms: roomsNum,
-          facilities: typeof facilities === "string" ? facilities.trim() : Array.isArray(facilities) ? facilities.join(", ") : "Kasur, Lemari, WiFi",
-          rules: rules?.trim?.() || "Tertib dan menjaga kebersihan",
-          image_url: image_url?.trim?.() || "https://images.unsplash.com/photo-1555854877-bab0e564b8d5?auto=format&fit=crop&w=800&q=80",
+          facilities: typeof facilities === "string" ? facilities.trim() : Array.isArray(facilities) ? (facilities as string[]).join(", ") : "Kasur, Lemari, WiFi",
+          rules: typeof rules === "string" && rules.trim() ? rules.trim() : "Tertib dan menjaga kebersihan",
+          image_url: mainThumbnailUrl,
           is_pet_friendly: Boolean(is_pet_friendly),
           is_24_hours: Boolean(is_24_hours),
           owner_id: owner.id,
         },
       });
+
+      if (uploadedMediaList.length > 0) {
+        await tx.propertyMedia.createMany({
+          data: uploadedMediaList.map((m) => ({
+            property_id: property.id,
+            url: m.url,
+            type: m.type,
+          })),
+        });
+      }
 
       return { owner, property };
     });

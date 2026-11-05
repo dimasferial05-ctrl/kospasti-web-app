@@ -140,7 +140,7 @@ export async function POST(request: NextRequest) {
     const firstImageUrl =
       mediaToCreate.find((m) => m.type === "IMAGE")?.url ||
       mediaToCreate[0]?.url ||
-      (image_url ? String(image_url).trim() : "https://images.unsplash.com/photo-1555854877-bab0e564b8d5?auto=format&fit=crop&w=800&q=80");
+      (image_url ? String(image_url).trim() : null);
 
     let parsedLatitude: number | null = null;
     if (latitude !== undefined && latitude !== null && String(latitude).trim() !== "") {
@@ -217,3 +217,4 @@ export async function POST(request: NextRequest) {
     );
   }
 }
+

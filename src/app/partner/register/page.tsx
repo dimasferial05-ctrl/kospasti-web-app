@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -21,6 +21,10 @@ import {
   Eye,
   EyeOff,
   ShieldCheck,
+  Upload,
+  X,
+  Video,
+  Image as ImageIcon,
 } from "lucide-react";
 import LocationPicker from "@/components/map/LocationPicker";
 
@@ -50,7 +54,6 @@ export default function PartnerRegisterPage() {
     available_rooms: "5",
     facilities: "WiFi, Kasur, Lemari, Kamar Mandi Dalam, AC",
     rules: "Menjaga kebersihan dan ketertiban bersama.",
-    image_url: "https://images.unsplash.com/photo-1555854877-bab0e564b8d5?auto=format&fit=crop&w=800&q=80",
   });
 
   const [showPassword, setShowPassword] = useState(false);
@@ -63,6 +66,59 @@ export default function PartnerRegisterPage() {
     "AC",
   ]);
   const [customFacility, setCustomFacility] = useState("");
+  const [selectedMediaFiles, setSelectedMediaFiles] = useState<File[]>([]);
+  const [mediaPreviews, setMediaPreviews] = useState<{ url: string; type: "IMAGE" | "VIDEO"; name: string }[]>([]);
+
+  const handleMediaChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setErrorMsg(null);
+    const files = Array.from(e.target.files || []);
+    if (!files.length) return;
+
+    const validNewFiles: File[] = [];
+    const newPreviews: { url: string; type: "IMAGE" | "VIDEO"; name: string }[] = [];
+
+    for (const file of files) {
+      if (file.size > 10 * 1024 * 1024) {
+        setErrorMsg(`File "${file.name}" melebihi batas maksimal 10 MB.`);
+        continue;
+      }
+      validNewFiles.push(file);
+      const isVideo = file.type.startsWith("video/") || /\.(mp4|webm|mov|mkv)$/i.test(file.name);
+      newPreviews.push({
+        url: URL.createObjectURL(file),
+        type: isVideo ? "VIDEO" : "IMAGE",
+        name: file.name,
+      });
+    }
+
+    setSelectedMediaFiles((prev) => [...prev, ...validNewFiles]);
+    setMediaPreviews((prev) => [...prev, ...newPreviews]);
+    e.target.value = "";
+  };
+
+  const handleRemoveMedia = (index: number) => {
+    setSelectedMediaFiles((prev) => prev.filter((_, i) => i !== index));
+    setMediaPreviews((prev) => {
+      const item = prev[index];
+      if (item && item.url) {
+        URL.revokeObjectURL(item.url);
+      }
+      return prev.filter((_, i) => i !== index);
+    });
+  };
+
+  const previewsRef = useRef(mediaPreviews);
+  previewsRef.current = mediaPreviews;
+  useEffect(() => {
+    return () => {
+      previewsRef.current.forEach((item) => {
+        if (item.url) {
+          URL.revokeObjectURL(item.url);
+        }
+      });
+    };
+  }, []);
+
 
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -160,6 +216,11 @@ export default function PartnerRegisterPage() {
       setErrorMsg("Jumlah kamar harus berupa angka yang valid.");
       return false;
     }
+    const hasImage = mediaPreviews.some((p) => p.type === "IMAGE");
+    if (!hasImage) {
+      setErrorMsg("Wajib mengunggah minimal 1 foto kamar atau kos untuk verifikasi admin.");
+      return false;
+    }
     return true;
   };
 
@@ -184,23 +245,41 @@ export default function PartnerRegisterPage() {
       setIsLoading(true);
       setErrorMsg(null);
 
-      const res = await fetch("/api/partner/register", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          ...formData,
-          whatsapp_number: formData.whatsapp_number.replace(/\D/g, ""),
-          price_per_month: Number(formData.price_per_month),
-          available_rooms: Number(formData.available_rooms),
-          latitude: formData.latitude ? Number(formData.latitude) : null,
-          longitude: formData.longitude ? Number(formData.longitude) : null,
-        }),
+      const data = new FormData();
+      data.append("name", formData.name.trim());
+      data.append("email", formData.email.trim());
+      data.append("password", formData.password);
+      data.append("whatsapp_number", formData.whatsapp_number.replace(/\D/g, ""));
+      data.append("propertyName", formData.propertyName.trim());
+      data.append("address", formData.address.trim());
+      data.append("gender_type", formData.gender_type);
+      data.append("price_per_month", String(Number(formData.price_per_month)));
+      data.append("available_rooms", String(Number(formData.available_rooms)));
+      data.append("facilities", formData.facilities);
+      data.append("rules", formData.rules);
+      data.append("is_pet_friendly", String(formData.is_pet_friendly));
+      data.append("is_24_hours", String(formData.is_24_hours));
+
+      if (formData.latitude) {
+        data.append("latitude", String(formData.latitude));
+      }
+      if (formData.longitude) {
+        data.append("longitude", String(formData.longitude));
+      }
+
+      selectedMediaFiles.forEach((file) => {
+        data.append("media", file);
       });
 
-      const data = await res.json();
+      const res = await fetch("/api/partner/register", {
+        method: "POST",
+        body: data,
+      });
 
-      if (!res.ok || !data.success) {
-        setErrorMsg(data.error || "Gagal melakukan pendaftaran mitra.");
+      const resData = await res.json();
+
+      if (!res.ok || !resData.success) {
+        setErrorMsg(resData.error || "Gagal melakukan pendaftaran mitra.");
         return;
       }
 
@@ -661,21 +740,85 @@ export default function PartnerRegisterPage() {
                   </div>
                 </div>
 
-                {/* URL Foto Properti */}
+                {/* Upload Foto & Video Properti */}
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
-                    URL Foto Utama Properti
-                  </label>
-                  <input
-                    type="url"
-                    placeholder="https://images.unsplash.com/..."
-                    value={formData.image_url}
-                    onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-800/80 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 text-sm font-medium focus:ring-2 focus:ring-emerald-500 focus:outline-none transition-all"
-                  />
-                  <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1">
-                    Bisa diedit dan ditambahkan galeri foto lebih lengkap di Dashboard setelah akun dibuat.
+                  <div className="flex items-center justify-between mb-1.5">
+                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
+                      Foto &amp; Video Properti Kos *
+                    </label>
+                    <span className="text-[11px] text-emerald-600 dark:text-emerald-400 font-semibold">
+                      Wajib Min. 1 Foto
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400 mb-2.5">
+                    Unggah minimal 1 foto kamar atau tampak depan kos. Foto asli diperlukan agar Admin dapat memverifikasi dan menyetujui kos Anda.
                   </p>
+
+                  <div className="border-2 border-dashed border-slate-300 dark:border-slate-700 hover:border-emerald-500 dark:hover:border-emerald-500 transition-colors rounded-2xl p-5 text-center bg-slate-50/50 dark:bg-slate-900/50">
+                    <input
+                      type="file"
+                      id="partner-register-media"
+                      multiple
+                      accept="image/*,video/mp4,video/webm"
+                      onChange={handleMediaChange}
+                      className="hidden"
+                    />
+                    <label
+                      htmlFor="partner-register-media"
+                      className="cursor-pointer flex flex-col items-center justify-center gap-2"
+                    >
+                      <div className="w-10 h-10 rounded-full bg-emerald-100 dark:bg-emerald-950/60 flex items-center justify-center text-emerald-600 dark:text-emerald-400">
+                        <Upload className="w-5 h-5" />
+                      </div>
+                      <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400 hover:underline">
+                        Klik untuk memilih foto / video dari perangkat
+                      </span>
+                      <span className="text-[11px] text-slate-400">
+                        Mendukung JPG, PNG, WEBP, MP4 (Maks. 10 MB per berkas)
+                      </span>
+                    </label>
+                  </div>
+
+                  {/* Previews Grid */}
+                  {selectedMediaFiles.length > 0 && (
+                    <div className="mt-3.5 space-y-2">
+                      <div className="flex items-center justify-between text-xs font-semibold text-slate-600 dark:text-slate-300">
+                        <span>Berkas Terpilih ({selectedMediaFiles.length})</span>
+                        <span className="text-[10px] text-emerald-600 dark:text-emerald-400">Foto #1 otomatis menjadi foto sampul</span>
+                      </div>
+                      <div className="grid grid-cols-3 sm:grid-cols-4 gap-2.5">
+                        {mediaPreviews.map((preview, idx) => (
+                          <div
+                            key={idx}
+                            className="relative group rounded-xl overflow-hidden aspect-video bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700"
+                          >
+                            {preview.type === "VIDEO" ? (
+                              <div className="w-full h-full flex flex-col items-center justify-center text-slate-500 p-1">
+                                <Video className="w-5 h-5 text-emerald-600 mb-1" />
+                                <span className="text-[9px] truncate max-w-full px-1">{preview.name}</span>
+                              </div>
+                            ) : (
+                              // eslint-disable-next-line @next/next/no-img-element
+                              <img src={preview.url} alt={preview.name} className="w-full h-full object-cover" />
+                            )}
+                            {idx === 0 && (
+                              <span className="absolute bottom-1 left-1 bg-emerald-600 text-white text-[9px] font-bold px-1.5 py-0.5 rounded shadow">
+                                Utama
+                              </span>
+                            )}
+                            <button
+                              type="button"
+                              onClick={() => handleRemoveMedia(idx)}
+                              className="absolute top-1 right-1 bg-rose-600 hover:bg-rose-700 text-white p-1 rounded-full opacity-90 hover:opacity-100 transition-opacity cursor-pointer"
+                              title="Hapus berkas ini"
+                            >
+                              <X className="w-3 h-3" />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             )}
@@ -790,6 +933,37 @@ export default function PartnerRegisterPage() {
                     </p>
                   </div>
                 </div>
+                  {/* Media Summary */}
+                  <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/60 space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-bold text-emerald-800 dark:text-emerald-400 uppercase tracking-wider">
+                        4. Foto &amp; Media Properti
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => setCurrentStep(3)}
+                        className="text-xs text-emerald-600 dark:text-emerald-400 font-semibold hover:underline"
+                      >
+                        Ubah
+                      </button>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      {mediaPreviews.length > 0 && mediaPreviews[0].type === "IMAGE" && (
+                        <div className="w-14 h-14 rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700 shrink-0">
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img src={mediaPreviews[0].url} alt="Cover" className="w-full h-full object-cover" />
+                        </div>
+                      )}
+                      <div className="text-xs">
+                        <p className="font-bold text-slate-800 dark:text-slate-200">
+                          {selectedMediaFiles.length} berkas media terunggah
+                        </p>
+                        <p className="text-slate-500 dark:text-slate-400 text-[11px]">
+                          Foto pertama akan dijadikan foto sampul utama yang ditinjau oleh Admin.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
 
                 <div className="p-3.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-xs text-emerald-800 dark:text-emerald-300 flex items-center gap-2">
                   <ShieldCheck className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />

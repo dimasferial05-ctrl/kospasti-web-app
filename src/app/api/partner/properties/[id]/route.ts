@@ -177,7 +177,14 @@ export async function PATCH(
     if (rules !== undefined) updateData.rules = rules ? String(rules).trim() : null;
     if (rental_terms !== undefined) updateData.rental_terms = rental_terms ? String(rental_terms).trim() : null;
     if (youtube_url !== undefined) updateData.youtube_url = youtube_url ? String(youtube_url).trim() : null;
-    if (image_url !== undefined) updateData.image_url = image_url ? String(image_url).trim() : null;
+
+    if (image_url !== undefined) {
+      if (image_url && !image_url.includes("images.unsplash.com")) {
+        updateData.image_url = String(image_url).trim();
+      } else if (!image_url) {
+        updateData.image_url = null;
+      }
+    }
 
     if (existing.status === "REJECTED") {
       updateData.status = "PENDING_REVIEW";
@@ -188,7 +195,13 @@ export async function PATCH(
       updateData.media = {
         create: newMediaToCreate,
       };
-      if (image_url === undefined && !existing.image_url) {
+
+      const isLegacyDummyThumbnail =
+        !existing.image_url ||
+        existing.image_url.includes("images.unsplash.com") ||
+        !existing.media.some((m) => m.url === existing.image_url);
+
+      if ((image_url === undefined || (image_url && image_url.includes("images.unsplash.com"))) && isLegacyDummyThumbnail) {
         updateData.image_url =
           newMediaToCreate.find((m) => m.type === "IMAGE")?.url || newMediaToCreate[0]?.url;
       }
