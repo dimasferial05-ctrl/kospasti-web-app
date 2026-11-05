@@ -22,11 +22,11 @@ export function buildSupportWhatsAppUrl(params: {
   bookingId?: string;
   customMessage?: string;
 }): string {
-  // Nomor resmi CS KosPasti: 0813-1513-2327 (internasional: 6281315132327)
+  // Default CS phone fallback jika env variable tidak tersedia
   const rawPhone =
     params.phone ||
     process.env.NEXT_PUBLIC_CS_WHATSAPP_NUMBER ||
-    "6281315132327";
+    "6281234567890";
   let phone = rawPhone.replace(/\D/g, "");
 
   if (phone.startsWith("0")) {
@@ -80,7 +80,7 @@ export function CustomerSupportWidget({
         rel="noopener noreferrer"
         aria-label="Hubungi Customer Support KosPasti via WhatsApp"
         className="group inline-flex items-center gap-2 px-3.5 py-2.5 sm:px-4 sm:py-2.5 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800/90 text-slate-800 dark:text-slate-100 border border-slate-200/90 dark:border-slate-800 rounded-full shadow-soft hover:shadow-float active:scale-95 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:ring-offset-2 cursor-pointer"
-        title="Hubungi CS WhatsApp KosPasti (0813-1513-2327)"
+        title="Hubungi CS WhatsApp KosPasti"
       >
         <span className="w-7 h-7 rounded-full bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
           <MessageCircle className="w-4 h-4 fill-emerald-600/20" />

@@ -76,7 +76,7 @@ function formatDateIndo(dateInput: string | Date): string {
 export function generateBookingReceiptHtml(data: BookingReceiptEmailData): string {
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
   const formattedMoveIn = formatDateIndo(data.moveInDate);
-  const csWhatsapp = (process.env.NEXT_PUBLIC_CS_WHATSAPP_NUMBER || "6281315132327").replace(/\D/g, "");
+  const csWhatsapp = (process.env.NEXT_PUBLIC_CS_WHATSAPP_NUMBER || "6281234567890").replace(/\D/g, "");
 
   return `
 <!DOCTYPE html>
@@ -188,7 +188,7 @@ export function generateBookingReceiptHtml(data: BookingReceiptEmailData): strin
 export function generateBookingDecisionHtml(data: BookingDecisionEmailData): string {
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
   const formattedMoveIn = formatDateIndo(data.moveInDate);
-  const csWhatsapp = (process.env.NEXT_PUBLIC_CS_WHATSAPP_NUMBER || "6281315132327").replace(/\D/g, "");
+  const csWhatsapp = (process.env.NEXT_PUBLIC_CS_WHATSAPP_NUMBER || "6281234567890").replace(/\D/g, "");
   const isAccepted = data.action === "ACCEPT";
 
   const themeColor = isAccepted ? "#059669" : "#dc2626";
