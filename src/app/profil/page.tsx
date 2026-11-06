@@ -1225,6 +1225,19 @@ function ProfileContent() {
                                   </Link>
                                 )}
 
+                                {["ACCEPTED", "APPROVED", "PAID", "COMPLETED", "PAYOUT_PENDING", "PAYOUT_PAID"].includes(booking.status?.toUpperCase()) && (
+                                  <Link
+                                    href={`/receipt/${booking.id}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    data-testid={`receipt-btn-${booking.id}`}
+                                    className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/60 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 border border-emerald-200 dark:border-emerald-800 rounded-xl transition-all active:scale-95 cursor-pointer"
+                                  >
+                                    <FileText className="w-3.5 h-3.5" />
+                                    <span>Kuitansi Resmi</span>
+                                  </Link>
+                                )}
+
                                 {canCancel && (
                                   <button
                                     type="button"

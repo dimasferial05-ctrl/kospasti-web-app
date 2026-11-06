@@ -30,6 +30,12 @@ export async function GET(
             price_per_month: true,
             image_url: true,
             gender_type: true,
+            owner: {
+              select: {
+                name: true,
+                whatsapp_number: true,
+              },
+            },
           },
         },
         room_type: {
@@ -38,6 +44,11 @@ export async function GET(
             name: true,
             price_per_month: true,
             image_url: true,
+          },
+        },
+        user: {
+          select: {
+            email: true,
           },
         },
       },
@@ -65,6 +76,7 @@ export async function GET(
           id: booking.id,
           studentName: booking.student_name,
           studentWhatsapp: booking.student_whatsapp,
+          studentEmail: booking.user?.email || null,
           moveInDate: booking.move_in_date,
           status: booking.status,
           createdAt: booking.created_at,

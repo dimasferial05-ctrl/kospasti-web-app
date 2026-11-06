@@ -1,7 +1,8 @@
 "use client";
 
+import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
-import { CheckCircle2, ShieldCheck, ArrowLeft, Receipt } from "lucide-react";
+import { CheckCircle2, ShieldCheck, ArrowLeft, Receipt, Printer } from "lucide-react";
 
 export default function PaymentSuccessPage() {
   const router = useRouter();
@@ -69,11 +70,21 @@ export default function PaymentSuccessPage() {
             </div>
           </div>
 
+          {/* Tombol Aksi Kuitansi Resmi & Voucher */}
+          <Link
+            href={`/receipt/${bookingId}`}
+            data-testid="view-receipt-button"
+            className="w-full bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white py-3.5 rounded-xl font-bold mt-6 transition-all flex items-center justify-center gap-2 shadow-soft hover:shadow-float text-sm cursor-pointer"
+          >
+            <Printer className="w-4 h-4" />
+            <span>Lihat &amp; Cetak Kuitansi Resmi</span>
+          </Link>
+
           {/* Tombol Navigasi */}
           <button
             type="button"
             onClick={() => router.push("/")}
-            className="w-full bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-100 py-3.5 rounded-xl font-semibold mt-6 transition-colors flex items-center justify-center gap-2 cursor-pointer text-sm"
+            className="w-full bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-100 py-3 rounded-xl font-semibold mt-3 transition-colors flex items-center justify-center gap-2 cursor-pointer text-sm"
           >
             <ArrowLeft className="w-4 h-4" />
             <span>Kembali ke Beranda</span>
