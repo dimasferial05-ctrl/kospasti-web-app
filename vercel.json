@@ -2,7 +2,7 @@
   "crons": [
     {
       "path": "/api/cron/booking-lifecycle",
-      "schedule": "0 * * * *"
+      "schedule": "0 1 * * *"
     },
     {
       "path": "/api/cron/monthly-update",

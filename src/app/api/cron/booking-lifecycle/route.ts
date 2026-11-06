@@ -28,10 +28,10 @@ async function executeBookingLifecycleRoutine(request: Request) {
 
     // =========================================================================
     // SUB-ROUTINE 1: Pengingat H-1 Masuk Kos (Automated Reminder)
-    // Jendela waktu: move_in_date antara sekarang s.d. 36 jam ke depan
+    // Jendela waktu: move_in_date antara sekarang s.d. 48 jam ke depan (kompatibel cron harian)
     // =========================================================================
     const reminderWindowStart = now;
-    const reminderWindowEnd = new Date(now.getTime() + 36 * 60 * 60 * 1000);
+    const reminderWindowEnd = new Date(now.getTime() + 48 * 60 * 60 * 1000);
 
     const reminderBookings = await prisma.booking.findMany({
       where: {
