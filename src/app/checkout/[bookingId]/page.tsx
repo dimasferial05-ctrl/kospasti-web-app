@@ -76,6 +76,7 @@ export default function CheckoutPage() {
   const [fetchError, setFetchError] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [paymentError, setPaymentError] = useState<string | null>(null);
+  const [isAgreedToTerms, setIsAgreedToTerms] = useState<boolean>(false);
 
   useEffect(() => {
     if (!bookingId) {
@@ -369,12 +370,57 @@ export default function CheckoutPage() {
                 </div>
               )}
 
+              {/* Persetujuan Syarat & Ketentuan, Privasi, serta Refund */}
+              <div className="mb-5 text-left bg-slate-50 dark:bg-slate-800/40 border border-slate-200/80 dark:border-slate-800 rounded-xl p-3 sm:p-3.5">
+                <label className="flex items-start gap-2.5 cursor-pointer select-none">
+                  <input
+                    type="checkbox"
+                    id="terms-checkbox"
+                    data-testid="terms-checkbox"
+                    checked={isAgreedToTerms}
+                    onChange={(e) => setIsAgreedToTerms(e.target.checked)}
+                    className="mt-0.5 w-4 h-4 rounded border-slate-300 dark:border-slate-600 text-emerald-600 focus:ring-emerald-500 focus:ring-offset-0 cursor-pointer shrink-0"
+                  />
+                  <span className="text-[11px] sm:text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
+                    Saya telah membaca dan menyetujui{" "}
+                    <a
+                      href="/syarat-ketentuan"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="font-semibold text-emerald-600 dark:text-emerald-400 hover:underline inline-flex items-center gap-0.5"
+                    >
+                      Syarat &amp; Ketentuan
+                    </a>
+                    ,{" "}
+                    <a
+                      href="/kebijakan-privasi"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="font-semibold text-emerald-600 dark:text-emerald-400 hover:underline inline-flex items-center gap-0.5"
+                    >
+                      Kebijakan Privasi
+                    </a>
+                    , serta{" "}
+                    <a
+                      href="/kebijakan-refund"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="font-semibold text-emerald-600 dark:text-emerald-400 hover:underline inline-flex items-center gap-0.5"
+                    >
+                      Kebijakan Refund &amp; Escrow
+                    </a>{" "}
+                    KosPasti.
+                  </span>
+                </label>
+              </div>
+
               {/* Tombol Simulasi Pembayaran */}
               <button
                 type="button"
                 onClick={handleSimulatePayment}
-                disabled={isProcessing}
-                className="w-full py-3.5 px-4 bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white font-bold rounded-xl transition-all shadow-md shadow-emerald-500/20 disabled:opacity-75 disabled:cursor-not-allowed flex items-center justify-center gap-2 cursor-pointer"
+                disabled={isProcessing || !isAgreedToTerms}
+                data-testid="pay-button"
+                className="w-full py-3.5 px-4 bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white font-bold rounded-xl transition-all shadow-md shadow-emerald-500/20 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 cursor-pointer"
               >
                 {isProcessing ? (
                   <>

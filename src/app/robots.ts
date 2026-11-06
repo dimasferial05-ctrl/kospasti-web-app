@@ -7,7 +7,16 @@ export default function robots(): MetadataRoute.Robots {
     rules: [
       {
         userAgent: "*",
-        allow: ["/", "/search", "/kos/", "/map", "/bantuan"],
+        allow: [
+          "/",
+          "/search",
+          "/kos/",
+          "/map",
+          "/bantuan",
+          "/syarat-ketentuan",
+          "/kebijakan-privasi",
+          "/kebijakan-refund",
+        ],
         disallow: [
           "/admin/",
           "/admin/*",
