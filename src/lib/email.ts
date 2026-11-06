@@ -46,6 +46,26 @@ export interface BookingDecisionEmailData {
   reason?: string;
 }
 
+export interface MoveInReminderEmailData {
+  bookingId: string;
+  studentName: string;
+  studentEmail: string;
+  propertyName: string;
+  propertyAddress?: string;
+  roomTypeName?: string;
+  ownerName?: string;
+  ownerWhatsapp?: string;
+  moveInDate: string | Date;
+}
+
+export interface ReviewPromptEmailData {
+  bookingId: string;
+  studentName: string;
+  studentEmail: string;
+  propertyName: string;
+  propertyId: string;
+}
+
 function formatRupiah(amount: number): string {
   return new Intl.NumberFormat("id-ID", {
     style: "currency",
@@ -386,6 +406,7 @@ export async function sendBookingReceiptEmail(
   });
 }
 
+
 /**
  * Helper spesifik: Kirim email pembaruan status konfirmasi pemilik kos
  */
@@ -410,3 +431,198 @@ export async function sendBookingDecisionEmail(
   });
 }
 
+
+
+
+/**
+ * Menghasilkan HTML pengingat H-1 masuk kos untuk mahasiswa
+ */
+export function generateMoveInReminderHtml(data: MoveInReminderEmailData): string {
+  const baseUrl = (process.env.NEXT_PUBLIC_APP_URL || "https://kospasti.id").replace(/\/+$/, "");
+  const formattedMoveIn = formatDateIndo(data.moveInDate);
+  const receiptUrl = `${baseUrl}/receipt/${data.bookingId}`;
+
+  return `
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pengingat H-1 Masuk Kos - ${escapeHtml(data.propertyName)}</title>
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #f8fafc; color: #1e293b; margin: 0; padding: 0; line-height: 1.6; }
+    .container { max-width: 600px; margin: 24px auto; background-color: #ffffff; border-radius: 16px; overflow: hidden; border: 1px solid #e2e8f0; }
+    .header { background-color: #059669; color: #ffffff; padding: 28px 24px; text-align: center; }
+    .header h1 { margin: 0; font-size: 22px; font-weight: 800; letter-spacing: -0.5px; }
+    .badge { display: inline-block; background-color: #ecfdf5; color: #047857; font-size: 11px; font-weight: 700; padding: 4px 12px; border-radius: 9999px; text-transform: uppercase; margin-top: 10px; }
+    .content { padding: 24px; }
+    .greeting { font-size: 15px; margin-bottom: 16px; }
+    .card { background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 18px; margin-bottom: 20px; }
+    .row { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px dashed #e2e8f0; font-size: 13px; }
+    .row:last-child { border-bottom: none; }
+    .row-label { color: #64748b; }
+    .row-val { font-weight: 600; text-align: right; color: #0f172a; }
+    .checklist { background-color: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 12px; padding: 16px; margin: 20px 0; font-size: 12px; color: #166534; }
+    .checklist li { margin-bottom: 6px; }
+    .btn-container { text-align: center; margin: 24px 0; }
+    .btn { display: inline-block; background-color: #059669; color: #ffffff !important; text-decoration: none; font-weight: 700; font-size: 14px; padding: 12px 28px; border-radius: 10px; }
+    .footer { background-color: #f1f5f9; padding: 20px 24px; text-align: center; font-size: 12px; color: #64748b; border-top: 1px solid #e2e8f0; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>KosPasti</h1>
+      <p style="margin: 6px 0 0; font-size: 13px; opacity: 0.9;">Pengingat Jadwal Masuk Kos</p>
+      <div class="badge">Besok Hari Pertama Check-in! 🏡</div>
+    </div>
+    <div class="content">
+      <p class="greeting">Halo <strong>${escapeHtml(data.studentName)}</strong>,</p>
+      <p style="font-size: 13px; color: #475569;">
+        Besok adalah jadwal kamu mulai menempati kamar di <strong>${escapeHtml(data.propertyName)}</strong>. Pastikan persiapan kedatanganmu berjalan lancar!
+      </p>
+
+      <div class="card">
+        <div style="font-size: 13px; font-weight: 700; text-transform: uppercase; color: #64748b; margin-bottom: 10px;">
+          Rincian Kedatangan
+        </div>
+        <div class="row">
+          <span class="row-label">Nama Properti:</span>
+          <span class="row-val">${escapeHtml(data.propertyName)}</span>
+        </div>
+        ${data.roomTypeName ? `
+        <div class="row">
+          <span class="row-label">Tipe Kamar:</span>
+          <span class="row-val">${escapeHtml(data.roomTypeName)}</span>
+        </div>` : ""}
+        ${data.propertyAddress ? `
+        <div class="row">
+          <span class="row-label">Alamat Lengkap:</span>
+          <span class="row-val">${escapeHtml(data.propertyAddress)}</span>
+        </div>` : ""}
+        <div class="row">
+          <span class="row-label">Tanggal Masuk:</span>
+          <span class="row-val" style="color: #059669; font-weight: 700;">${formattedMoveIn}</span>
+        </div>
+        ${data.ownerName ? `
+        <div class="row">
+          <span class="row-label">Pemilik/Pengelola:</span>
+          <span class="row-val">${escapeHtml(data.ownerName)} ${data.ownerWhatsapp ? `(${escapeHtml(data.ownerWhatsapp)})` : ""}</span>
+        </div>` : ""}
+      </div>
+
+      <div class="checklist">
+        <strong>📋 Hal yang Perlu Disiapkan Besok:</strong>
+        <ul style="margin: 8px 0 0; padding-left: 18px;">
+          <li>Bawa kartu identitas resmi (KTP atau Kartu Tanda Mahasiswa).</li>
+          <li>Hubungi Ibu/Bapak Kos via WhatsApp sebelum tiba untuk konfirmasi perkiraan jam sampai.</li>
+          <li>Tunjukkan Kuitansi/Voucher Booking resmi KosPasti saat serah terima kunci.</li>
+          <li>Periksa kondisi kamar dan nikmati perlindungan garansi escrow 12 jam KosPasti.</li>
+        </ul>
+      </div>
+
+      <div class="btn-container">
+        <a href="${receiptUrl}" class="btn" target="_blank">Lihat &amp; Cetak Kuitansi Voucher</a>
+      </div>
+    </div>
+    <div class="footer">
+      <p style="margin: 0;">KosPasti - Platform Sewa Kos Terpercaya &bull; Butuh bantuan? Hubungi CS kami di WhatsApp.</p>
+    </div>
+  </div>
+</body>
+</html>
+  `;
+}
+
+/**
+ * Menghasilkan HTML ajakan ulasan hari ke-2 untuk mahasiswa
+ */
+export function generateReviewPromptHtml(data: ReviewPromptEmailData): string {
+  const baseUrl = (process.env.NEXT_PUBLIC_APP_URL || "https://kospasti.id").replace(/\/+$/, "");
+  const reviewUrl = `${baseUrl}/kos/${data.propertyId}?review=true`;
+
+  return `
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bagikan Pengalaman Tinggalmu di ${escapeHtml(data.propertyName)}</title>
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #f8fafc; color: #1e293b; margin: 0; padding: 0; line-height: 1.6; }
+    .container { max-width: 600px; margin: 24px auto; background-color: #ffffff; border-radius: 16px; overflow: hidden; border: 1px solid #e2e8f0; }
+    .header { background-color: #059669; color: #ffffff; padding: 28px 24px; text-align: center; }
+    .header h1 { margin: 0; font-size: 22px; font-weight: 800; }
+    .content { padding: 24px; }
+    .greeting { font-size: 15px; margin-bottom: 16px; }
+    .stars { font-size: 28px; color: #f59e0b; text-align: center; margin: 16px 0; letter-spacing: 4px; }
+    .btn-container { text-align: center; margin: 24px 0; }
+    .btn { display: inline-block; background-color: #059669; color: #ffffff !important; text-decoration: none; font-weight: 700; font-size: 14px; padding: 12px 28px; border-radius: 10px; }
+    .footer { background-color: #f1f5f9; padding: 20px 24px; text-align: center; font-size: 12px; color: #64748b; border-top: 1px solid #e2e8f0; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>KosPasti</h1>
+      <p style="margin: 6px 0 0; font-size: 13px; opacity: 0.9;">Gimana Pengalaman Tinggalmu?</p>
+    </div>
+    <div class="content">
+      <p class="greeting">Halo <strong>${escapeHtml(data.studentName)}</strong>,</p>
+      <p style="font-size: 13px; color: #475569;">
+        Sudah 2 hari nih kamu menempati kamar di <strong>${escapeHtml(data.propertyName)}</strong>! 🎉
+      </p>
+      <p style="font-size: 13px; color: #475569;">
+        Bagikan ulasan dan rating bintang jujurmu untuk membantu calon mahasiswa lainnya menemukan kamar kos yang nyaman dan tepat.
+      </p>
+
+      <div class="stars">⭐⭐⭐⭐⭐</div>
+
+      <div class="btn-container">
+        <a href="${reviewUrl}" class="btn" target="_blank">Tulis Ulasan &amp; Beri Rating</a>
+      </div>
+    </div>
+    <div class="footer">
+      <p style="margin: 0;">KosPasti - Platform Sewa Kos Terpercaya Indonesia</p>
+    </div>
+  </div>
+</body>
+</html>
+  `;
+}
+
+/**
+ * Helper spesifik: Kirim email pengingat H-1 masuk kos
+ */
+export async function sendMoveInReminderEmail(
+  data: MoveInReminderEmailData
+): Promise<SendEmailResult> {
+  const subject = `Pengingat H-1: Besok Jadwal Masuk Kos di ${data.propertyName} 🏡`;
+  const html = generateMoveInReminderHtml(data);
+  const text = `Halo ${data.studentName}, besok adalah jadwal masuk kos kamu di ${data.propertyName}. Siapkan dokumen KTP dan kontak pemilik kos untuk serah terima kunci.`;
+
+  return sendEmail({
+    to: data.studentEmail,
+    subject,
+    html,
+    text,
+  });
+}
+
+/**
+ * Helper spesifik: Kirim email ajakan ulasan di hari ke-2
+ */
+export async function sendReviewPromptEmail(
+  data: ReviewPromptEmailData
+): Promise<SendEmailResult> {
+  const subject = `Gimana Pengalamanmu di ${data.propertyName}? Bagikan Ulasanmu ⭐`;
+  const html = generateReviewPromptHtml(data);
+  const text = `Halo ${data.studentName}, sudah 2 hari kamu tinggal di ${data.propertyName}. Bagikan ulasan jujurmu di KosPasti!`;
+
+  return sendEmail({
+    to: data.studentEmail,
+    subject,
+    html,
+    text,
+  });
+}

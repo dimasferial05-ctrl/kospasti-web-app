@@ -122,6 +122,8 @@ model Booking {
   refunded_at            DateTime?
   amount                 Int         @default(0)
   checkin_confirmed_at   DateTime?
+  reminder_sent_at       DateTime?
+  review_prompted_at     DateTime?
   magic_links            MagicLink[]
   review                 Review?
   payout                 Payout?

@@ -1,8 +1,9 @@
 import { prisma } from "@/lib/prisma";
+import { notifyEscrowReleased } from "@/lib/notifications";
 
 /**
  * Lazy evaluation processor untuk grace period payout (12 jam setelah check-in dikonfirmasi).
- * Dijalankan secara otomatis saat panel admin payout diakses.
+ * Dijalankan secara otomatis saat panel admin payout diakses atau via cron job booking lifecycle.
  */
 export async function processReadyPayouts(): Promise<number> {
   const twelveHoursAgo = new Date(Date.now() - 12 * 60 * 60 * 1000);
@@ -49,6 +50,21 @@ export async function processReadyPayouts(): Promise<number> {
         }),
       ]);
       processedCount++;
+
+      // Beritahu mitra bahwa dana escrow telah dilepaskan dan siap dicairkan
+      try {
+        if (booking.property?.owner) {
+          await notifyEscrowReleased({
+            ownerName: booking.property.owner.name,
+            ownerWhatsapp: booking.property.owner.whatsapp_number,
+            tenantName: booking.student_name,
+            propertyName: booking.property.name,
+            amount: payoutAmount,
+          });
+        }
+      } catch (notifyErr) {
+        console.error(`[PAYOUT PROCESSOR] Gagal kirim notifikasi escrow ke owner ${booking.property?.owner_id}:`, notifyErr);
+      }
     } catch (itemErr) {
       console.error(`[PAYOUT PROCESSOR] Gagal memproses booking ${booking.id}:`, itemErr);
     }
@@ -56,3 +72,4 @@ export async function processReadyPayouts(): Promise<number> {
 
   return processedCount;
 }
+
