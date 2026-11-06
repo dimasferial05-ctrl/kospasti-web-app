@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
-import Link from "next/link";
 import { ThemeImage } from "@/components/ui/ThemeImage";
 import {
   Printer,
@@ -12,13 +11,9 @@ import {
   Calendar,
   User,
   Home,
-  Phone,
-  Mail,
-  MapPin,
   QrCode,
   Loader2,
   AlertCircle,
-  Clock,
   Receipt,
 } from "lucide-react";
 
@@ -138,6 +133,16 @@ export default function BookingReceiptPage() {
     };
   }, [bookingId]);
 
+  // Set document title to format default PDF download name
+  useEffect(() => {
+    if (booking) {
+      const receiptNo = `KP-INV-${new Date(booking.createdAt).getFullYear()}${String(
+        new Date(booking.createdAt).getMonth() + 1
+      ).padStart(2, "0")}-${booking.id.slice(0, 8).toUpperCase()}`;
+      document.title = `Kuitansi-KosPasti-${receiptNo}`;
+    }
+  }, [booking]);
+
   const handlePrint = () => {
     if (typeof window !== "undefined") {
       window.print();
@@ -183,7 +188,26 @@ export default function BookingReceiptPage() {
   ).padStart(2, "0")}-${booking.id.slice(0, 8).toUpperCase()}`;
 
   return (
-    <div className="min-h-screen bg-slate-100 dark:bg-slate-950 text-slate-800 dark:text-slate-100 py-6 sm:py-10 px-4 print:p-0 print:bg-white print:text-black">
+    <div className="min-h-screen bg-slate-100 dark:bg-slate-950 text-slate-800 dark:text-slate-100 py-6 sm:py-10 px-4 print:p-0 print:m-0 print:bg-white print:text-black">
+      {/* Inline Print Styles to cleanly isolate receipt */}
+      <style jsx global>{`
+        @media print {
+          header,
+          nav,
+          .mobile-bottom-nav,
+          button,
+          .print\\:hidden {
+            display: none !important;
+          }
+          body {
+            background-color: #ffffff !important;
+            color: #000000 !important;
+            margin: 0 !important;
+            padding: 0 !important;
+          }
+        }
+      `}</style>
+
       {/* Top Action Bar (Screen Only) */}
       <div className="max-w-3xl mx-auto mb-6 flex items-center justify-between gap-3 print:hidden">
         <button
@@ -431,8 +455,27 @@ export default function BookingReceiptPage() {
         {/* QR Code Verification & Handover Instructions */}
         <div className="py-6 border-b border-slate-200 dark:border-slate-800 print:border-slate-300 flex flex-col sm:flex-row items-center gap-6">
           <div className="p-3 bg-white border-2 border-dashed border-slate-300 rounded-xl flex flex-col items-center justify-center shrink-0">
-            <QrCode className="w-24 h-24 text-slate-800" />
-            <span className="text-[9px] font-mono text-slate-400 mt-1 uppercase font-bold">
+            {/* Scannable Dynamic QR Code with Fallback */}
+            <div className="w-24 h-24 relative flex items-center justify-center overflow-hidden">
+              <img
+                src={`https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(
+                  `https://kospasti.id/receipt/${booking.id}`
+                )}&margin=2`}
+                alt={`QR Verifikasi ${booking.id}`}
+                width={96}
+                height={96}
+                className="w-24 h-24 object-contain"
+                onError={(e) => {
+                  e.currentTarget.style.display = "none";
+                  const fallbackEl = document.getElementById("qr-fallback-icon");
+                  if (fallbackEl) fallbackEl.style.display = "block";
+                }}
+              />
+              <div id="qr-fallback-icon" style={{ display: "none" }}>
+                <QrCode className="w-24 h-24 text-slate-800" />
+              </div>
+            </div>
+            <span className="text-[9px] font-mono text-slate-500 mt-1 uppercase font-bold tracking-wider">
               {booking.id.slice(0, 12)}
             </span>
           </div>
@@ -471,4 +514,3 @@ export default function BookingReceiptPage() {
     </div>
   );
 }
-

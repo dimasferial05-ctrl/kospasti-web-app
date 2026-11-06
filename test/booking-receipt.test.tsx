@@ -33,7 +33,7 @@ describe("E-Receipt Resmi & Voucher Booking Siap Cetak (#372)", () => {
       expect(firstLine).toMatch(/^["']use client["'];?$/);
     });
 
-    it("memuat komponen stempel digital LUNAS ESCROW DIJAMIN dan fungsi window.print", () => {
+    it("memuat komponen stempel digital LUNAS ESCROW DIJAMIN, dynamic QR code, penamaan document.title, dan fungsi window.print", () => {
       const filePath = path.resolve(
         __dirname,
         "../src/app/receipt/[bookingId]/page.tsx"
@@ -46,6 +46,8 @@ describe("E-Receipt Resmi & Voucher Booking Siap Cetak (#372)", () => {
       expect(content).toContain("window.print()");
       expect(content).toContain("Cetak / Simpan PDF");
       expect(content).toContain("print:hidden");
+      expect(content).toContain("document.title =");
+      expect(content).toContain("api.qrserver.com");
       expect(content).toContain("QrCode");
     });
 
@@ -111,6 +113,18 @@ describe("E-Receipt Resmi & Voucher Booking Siap Cetak (#372)", () => {
 
       expect(disallowed).toContain("/receipt/");
       expect(disallowed).toContain("/receipt/*");
+    });
+  });
+
+  describe("6. Isolasi Cetak pada Navigasi Situs (Header & BottomNav)", () => {
+    it("memastikan Header dan BottomNav disembunyikan saat mencetak dokumen", () => {
+      const headerPath = path.resolve(__dirname, "../src/components/layout/Header.tsx");
+      const bottomNavPath = path.resolve(__dirname, "../src/components/layout/BottomNav.tsx");
+      const headerContent = fs.readFileSync(headerPath, "utf-8");
+      const bottomNavContent = fs.readFileSync(bottomNavPath, "utf-8");
+
+      expect(headerContent).toContain("print:hidden");
+      expect(bottomNavContent).toContain("print:hidden");
     });
   });
 });

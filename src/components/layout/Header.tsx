@@ -240,7 +240,7 @@ export function Header({ isLoggedIn: initialIsLoggedIn = false }: HeaderProps) {
   return (
     <>
       <header
-        className={`sticky top-0 z-50 w-full bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200/80 dark:border-slate-800 shadow-soft transition-all duration-300 ${
+        className={`sticky top-0 z-50 w-full bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200/80 dark:border-slate-800 shadow-soft transition-all duration-300 print:hidden ${
           isNavbarVisible ? "translate-y-0" : "-translate-y-full"
         }`}
       >
