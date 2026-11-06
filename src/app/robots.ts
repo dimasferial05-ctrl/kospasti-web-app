@@ -33,6 +33,8 @@ export default function robots(): MetadataRoute.Robots {
           "/update/",
           "/booking/",
           "/success/",
+          "/receipt/",
+          "/receipt/*",
         ],
       },
     ],
