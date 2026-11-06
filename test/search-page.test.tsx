@@ -9,7 +9,9 @@ import SearchPage from "../src/app/search/page";
 vi.mock("next/navigation", () => ({
   useRouter: () => ({
     push: vi.fn(),
+    replace: vi.fn(),
   }),
+  useSearchParams: () => new URLSearchParams(),
 }));
 
 describe("Search Page Component (/search)", () => {

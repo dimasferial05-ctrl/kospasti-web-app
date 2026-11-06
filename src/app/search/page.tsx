@@ -6,6 +6,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { KosPropertyCard } from "@/components/features/KosPropertyCard";
 import { KosPropertyCardSkeleton } from "@/components/features/KosPropertyCardSkeleton";
 import { SmartSearchBar } from "@/components/features/SmartSearchBar";
+import { FacetedSearchFilter } from "@/components/features/FacetedSearchFilter";
 import { AlertCircle, SearchX, MapPin, X } from "lucide-react";
 
 interface PropertyItem {
@@ -40,8 +41,17 @@ interface PropertyItem {
 
 function SearchPageContent() {
   const router = useRouter();
-  const searchParams = useSearchParams();
+  const searchParams = typeof useSearchParams === "function" ? useSearchParams() : null;
   const queryParam = searchParams?.get("q") || "";
+  const facilitiesParam = searchParams?.get("facilities") || "";
+
+  const selectedFacilities = useMemo(() => {
+    if (!facilitiesParam.trim()) return [];
+    return facilitiesParam
+      .split(",")
+      .map((f) => f.trim())
+      .filter(Boolean);
+  }, [facilitiesParam]);
 
   const [properties, setProperties] = useState<PropertyItem[]>([]);
   const [savedPropertyIds, setSavedPropertyIds] = useState<Set<string>>(new Set());
@@ -53,8 +63,16 @@ function SearchPageContent() {
 
     async function loadProperties() {
       try {
+        setIsLoading(true);
+        const params = new URLSearchParams();
+        if (facilitiesParam.trim()) {
+          params.set("facilities", facilitiesParam.trim());
+        }
+        const queryString = params.toString();
+        const apiUrl = queryString ? `/api/properties?${queryString}` : "/api/properties";
+
         const [resProperties, resWishlist] = await Promise.all([
-          fetch("/api/properties"),
+          fetch(apiUrl),
           fetch("/api/user/wishlist?idsOnly=true").catch(() => null),
         ]);
 
@@ -91,12 +109,27 @@ function SearchPageContent() {
     return () => {
       isMounted = false;
     };
-  }, []);
+  }, [facilitiesParam]);
 
   const handleSearch = (prompt: string) => {
     if (prompt.trim()) {
       router.push(`/map?q=${encodeURIComponent(prompt.trim())}`);
     }
+  };
+
+  const handleFacilitiesChange = (newFacilities: string[]) => {
+    const params = new URLSearchParams(searchParams ? searchParams.toString() : "");
+    if (newFacilities.length > 0) {
+      params.set("facilities", newFacilities.join(","));
+    } else {
+      params.delete("facilities");
+    }
+    const queryString = params.toString();
+    router.replace(queryString ? `/search?${queryString}` : "/search", { scroll: false });
+  };
+
+  const handleResetAll = () => {
+    router.replace("/search", { scroll: false });
   };
 
   const filteredProperties = useMemo(() => {
@@ -150,6 +183,14 @@ function SearchPageContent() {
         </div>
       </section>
 
+      {/* Faceted Filter Section */}
+      <section className="w-full">
+        <FacetedSearchFilter
+          selectedFacilities={selectedFacilities}
+          onChange={handleFacilitiesChange}
+        />
+      </section>
+
       {/* Property List Section */}
       <section className="flex flex-col gap-6">
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3 border-b border-slate-200/80 dark:border-slate-800 pb-5">
@@ -160,24 +201,53 @@ function SearchPageContent() {
                   <span>
                     Hasil Pencarian untuk &ldquo;{queryParam}&rdquo;
                   </span>
+                ) : selectedFacilities.length > 0 ? (
+                  <span>
+                    Kos dengan Fasilitas Terpilih ({selectedFacilities.length})
+                  </span>
                 ) : (
                   "Rekomendasi Kos Terbaru"
                 )}
               </h2>
-              {queryParam.trim() && (
-                <Link
-                  href="/search"
-                  className="inline-flex items-center gap-1 text-xs bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 px-2 py-0.5 rounded-full transition-colors"
-                  title="Hapus filter pencarian"
+              {(queryParam.trim() || selectedFacilities.length > 0) && (
+                <button
+                  type="button"
+                  onClick={handleResetAll}
+                  className="inline-flex items-center gap-1 text-xs bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 px-2 py-0.5 rounded-full transition-colors cursor-pointer"
+                  title="Hapus semua filter pencarian"
                 >
                   <span>Reset filter</span>
                   <X className="w-3 h-3" />
-                </Link>
+                </button>
               )}
             </div>
+
+            {/* Badges of selected facilities */}
+            {selectedFacilities.length > 0 && (
+              <div className="flex items-center gap-1.5 flex-wrap mt-2">
+                <span className="text-[11px] text-slate-400 dark:text-slate-500 font-medium mr-1">
+                  Filter fasilitas:
+                </span>
+                {selectedFacilities.map((fac) => (
+                  <button
+                    key={fac}
+                    type="button"
+                    onClick={() => handleFacilitiesChange(selectedFacilities.filter((f) => f !== fac))}
+                    className="inline-flex items-center gap-1 text-[11px] font-semibold bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-300 px-2.5 py-0.5 rounded-full hover:bg-emerald-100 dark:hover:bg-emerald-900/60 transition-colors cursor-pointer"
+                    title={`Hapus filter ${fac}`}
+                  >
+                    <span>{fac}</span>
+                    <X className="w-3 h-3 text-emerald-500" />
+                  </button>
+                ))}
+              </div>
+            )}
+
             <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
               {queryParam.trim()
                 ? `Menampilkan ${filteredProperties.length} properti kos yang sesuai dengan kriteria wilayah atau nama "${queryParam}".`
+                : selectedFacilities.length > 0
+                ? `Menampilkan ${filteredProperties.length} properti kos yang memenuhi seluruh fasilitas pilihan Anda.`
                 : "Pilihan kamar kos terverifikasi dan siap huni di berbagai lokasi strategis."}
             </p>
           </div>
@@ -224,13 +294,14 @@ function SearchPageContent() {
                 : "Maaf, tidak ada kos yang sesuai dengan kriteria pencarian atau filter Anda. Saat ini belum ada listing kos yang terdaftar di sistem."}
             </p>
             <div className="mt-5 flex flex-wrap items-center justify-center gap-3">
-              {queryParam.trim() ? (
-                <Link
-                  href="/search"
-                  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold shadow-soft hover:shadow-float active:scale-95 transition-all duration-200"
+              {queryParam.trim() || selectedFacilities.length > 0 ? (
+                <button
+                  type="button"
+                  onClick={handleResetAll}
+                  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold shadow-soft hover:shadow-float active:scale-95 transition-all duration-200 cursor-pointer"
                 >
-                  <span>Tampilkan Semua Kos</span>
-                </Link>
+                  <span>Reset Semua Filter</span>
+                </button>
               ) : (
                 <Link
                   href="/map"
