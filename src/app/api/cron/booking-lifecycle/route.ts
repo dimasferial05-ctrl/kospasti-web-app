@@ -33,9 +33,11 @@ async function executeBookingLifecycleRoutine(request: Request) {
     const reminderWindowStart = now;
     const reminderWindowEnd = new Date(now.getTime() + 48 * 60 * 60 * 1000);
 
+    const ACTIVE_BOOKING_STATUSES = ["APPROVED", "ACCEPTED", "PAID", "SUCCESS", "CONFIRMED"];
+
     const reminderBookings = await prisma.booking.findMany({
       where: {
-        status: { in: ["APPROVED", "ACCEPTED", "PAID"] },
+        status: { in: ACTIVE_BOOKING_STATUSES },
         reminder_sent_at: null,
         move_in_date: {
           gte: reminderWindowStart,
@@ -102,7 +104,7 @@ async function executeBookingLifecycleRoutine(request: Request) {
 
     const overdueCheckinBookings = await prisma.booking.findMany({
       where: {
-        status: { in: ["APPROVED", "ACCEPTED", "PAID"] },
+        status: { in: ACTIVE_BOOKING_STATUSES },
         move_in_date: { lte: twelveHoursAgo },
         checkin_confirmed_at: null,
       },

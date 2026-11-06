@@ -63,14 +63,15 @@ export async function notifyMoveInReminder(params: {
   tenantWhatsapp: string;
   propertyName: string;
   propertyAddress?: string | null;
-  moveInDate: Date;
+  moveInDate: Date | string;
   ownerName?: string | null;
   ownerWhatsapp?: string | null;
   bookingId: string;
 }) {
   const baseUrl = (process.env.NEXT_PUBLIC_APP_URL || "https://kospasti.id").replace(/\/+$/, "");
   const receiptUrl = `${baseUrl}/receipt/${params.bookingId}`;
-  const moveInDateFormatted = params.moveInDate.toLocaleDateString("id-ID", {
+  const moveInDateObj = typeof params.moveInDate === "string" ? new Date(params.moveInDate) : params.moveInDate;
+  const moveInDateFormatted = moveInDateObj.toLocaleDateString("id-ID", {
     weekday: "long",
     year: "numeric",
     month: "long",
