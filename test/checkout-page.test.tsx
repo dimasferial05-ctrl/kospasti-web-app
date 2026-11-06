@@ -79,8 +79,8 @@ describe("Checkout Page Component (/checkout/[bookingId])", () => {
     expect(content).toContain("fetch(`/api/bookings/${bookingId}/pay`");
     expect(content).toContain("router.push(`/success/${bookingId}`)");
 
-    // Tombol dinamis & disabled saat processing
-    expect(content).toContain("disabled={isProcessing}");
+    // Tombol dinamis & disabled saat processing atau persetujuan belum dicentang
+    expect(content).toMatch(/disabled=\{isProcessing(\s*\|\|\s*!isAgreedToTerms)?\}/);
     expect(content).toContain("Memproses...");
   });
 

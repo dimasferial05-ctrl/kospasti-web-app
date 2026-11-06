@@ -117,13 +117,18 @@ export function LandingFooter() {
                 </Link>
               </li>
               <li>
-                <Link href="/bantuan?tab=user" className="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">
+                <Link href="/syarat-ketentuan" className="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">
                   Syarat &amp; Ketentuan
                 </Link>
               </li>
               <li>
-                <Link href="/bantuan?tab=user" className="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">
+                <Link href="/kebijakan-privasi" className="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">
                   Kebijakan Privasi
+                </Link>
+              </li>
+              <li>
+                <Link href="/kebijakan-refund" className="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">
+                  Kebijakan Refund &amp; Escrow
                 </Link>
               </li>
             </ul>
