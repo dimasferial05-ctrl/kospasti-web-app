@@ -387,6 +387,7 @@ export default function CheckoutPage() {
                       href="/syarat-ketentuan"
                       target="_blank"
                       rel="noopener noreferrer"
+                      onClick={(e) => e.stopPropagation()}
                       className="font-semibold text-emerald-600 dark:text-emerald-400 hover:underline inline-flex items-center gap-0.5"
                     >
                       Syarat &amp; Ketentuan
@@ -396,6 +397,7 @@ export default function CheckoutPage() {
                       href="/kebijakan-privasi"
                       target="_blank"
                       rel="noopener noreferrer"
+                      onClick={(e) => e.stopPropagation()}
                       className="font-semibold text-emerald-600 dark:text-emerald-400 hover:underline inline-flex items-center gap-0.5"
                     >
                       Kebijakan Privasi
@@ -405,6 +407,7 @@ export default function CheckoutPage() {
                       href="/kebijakan-refund"
                       target="_blank"
                       rel="noopener noreferrer"
+                      onClick={(e) => e.stopPropagation()}
                       className="font-semibold text-emerald-600 dark:text-emerald-400 hover:underline inline-flex items-center gap-0.5"
                     >
                       Kebijakan Refund &amp; Escrow
@@ -431,6 +434,13 @@ export default function CheckoutPage() {
                   <span>Simulasikan Pembayaran Berhasil</span>
                 )}
               </button>
+
+              {/* Petunjuk Lembut jika Belum Dicentang */}
+              {!isAgreedToTerms && !isProcessing && (
+                <p className="mt-2.5 text-[11px] text-slate-400 dark:text-slate-500 text-center animate-in fade-in duration-200">
+                  Centang persetujuan di atas untuk melanjutkan pembayaran.
+                </p>
+              )}
             </div>
           </div>
         </div>

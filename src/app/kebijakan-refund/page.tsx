@@ -8,11 +8,8 @@ import {
   ShieldCheck,
   CheckCircle2,
   Clock,
-  AlertOctagon,
   CreditCard,
-  FileQuestion,
   HelpCircle,
-  Banknote,
 } from "lucide-react";
 
 export const metadata: Metadata = {

@@ -150,7 +150,7 @@ describe("Halaman Legalitas Resmi & Persetujuan Transaksi Checkout (#370)", () =
   });
 
   describe("7. Checkbox Persetujuan Legalitas pada Halaman Checkout (/checkout/[bookingId])", () => {
-    it("merender checkbox persetujuan dan tautan ke halaman legal terkait", () => {
+    it("merender checkbox persetujuan dan tautan ke halaman legal terkait dengan proteksi event bubbling", () => {
       const html = renderToStaticMarkup(<CheckoutPage />);
 
       expect(html).toContain("terms-checkbox");
@@ -158,9 +158,10 @@ describe("Halaman Legalitas Resmi & Persetujuan Transaksi Checkout (#370)", () =
       expect(html).toContain('href="/kebijakan-privasi"');
       expect(html).toContain('href="/kebijakan-refund"');
       expect(html).toContain("Saya telah membaca dan menyetujui");
+      expect(html).toContain("Centang persetujuan di atas untuk melanjutkan pembayaran.");
     });
 
-    it("memastikan tombol pembayaran secara default disabled jika checkbox belum dicentang", () => {
+    it("memastikan tombol pembayaran secara default disabled jika checkbox belum dicentang serta mencegah event bubbling link", () => {
       const filePath = path.resolve(
         __dirname,
         "../src/app/checkout/[bookingId]/page.tsx"
@@ -170,6 +171,7 @@ describe("Halaman Legalitas Resmi & Persetujuan Transaksi Checkout (#370)", () =
       expect(content).toContain("isAgreedToTerms");
       expect(content).toContain("setIsAgreedToTerms");
       expect(content).toContain("disabled={isProcessing || !isAgreedToTerms}");
+      expect(content).toContain("e.stopPropagation()");
     });
   });
 });

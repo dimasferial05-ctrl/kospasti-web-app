@@ -4,13 +4,9 @@ import Link from "next/link";
 import { LegalNavTabs } from "@/components/legal/LegalNavTabs";
 import { LandingFooter } from "@/components/landing/LandingFooter";
 import {
-  FileText,
   ShieldCheck,
   CheckCircle2,
-  AlertTriangle,
   Scale,
-  Clock,
-  ArrowRight,
   HelpCircle,
 } from "lucide-react";
 

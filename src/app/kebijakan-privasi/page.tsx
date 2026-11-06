@@ -9,8 +9,6 @@ import {
   Eye,
   Database,
   UserCheck,
-  FileCheck,
-  AlertCircle,
   Mail,
   HelpCircle,
 } from "lucide-react";
