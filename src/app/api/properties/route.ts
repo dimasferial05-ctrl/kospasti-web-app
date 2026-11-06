@@ -3,6 +3,154 @@ import { prisma } from "@/lib/prisma";
 import { Prisma } from "@prisma/client";
 import { findPropertiesWithinRadius } from "@/lib/propertyGeospatial";
 
+function buildFacilityCondition(facility: string): Prisma.PropertyWhereInput {
+  const normalized = facility.trim().toLowerCase();
+
+  if (normalized === "kamar mandi dalam" || normalized === "kamar-mandi-dalam") {
+    return {
+      OR: [
+        { facilities: { contains: "kamar mandi dalam", mode: "insensitive" } },
+        { room_types: { some: { facilities: { contains: "kamar mandi dalam", mode: "insensitive" } } } },
+        { room_types: { some: { specifications: { contains: "kamar mandi dalam", mode: "insensitive" } } } },
+      ],
+    };
+  }
+
+  if (normalized === "kamar mandi luar" || normalized === "kamar-mandi-luar") {
+    return {
+      OR: [
+        { facilities: { contains: "kamar mandi luar", mode: "insensitive" } },
+        { room_types: { some: { facilities: { contains: "kamar mandi luar", mode: "insensitive" } } } },
+        { room_types: { some: { specifications: { contains: "kamar mandi luar", mode: "insensitive" } } } },
+      ],
+    };
+  }
+
+  if (normalized === "ac") {
+    return {
+      OR: [
+        { facilities: { contains: "ac", mode: "insensitive" } },
+        { room_types: { some: { facilities: { contains: "ac", mode: "insensitive" } } } },
+        { room_types: { some: { specifications: { contains: "ac", mode: "insensitive" } } } },
+      ],
+    };
+  }
+
+  if (normalized === "kipas angin" || normalized === "kipas" || normalized === "kipas-angin") {
+    return {
+      OR: [
+        { facilities: { contains: "kipas", mode: "insensitive" } },
+        { room_types: { some: { facilities: { contains: "kipas", mode: "insensitive" } } } },
+        { room_types: { some: { specifications: { contains: "kipas", mode: "insensitive" } } } },
+      ],
+    };
+  }
+
+  if (
+    normalized === "wifi" ||
+    normalized === "wifi cepat" ||
+    normalized === "wi-fi" ||
+    normalized === "internet"
+  ) {
+    return {
+      OR: [
+        { facilities: { contains: "wifi", mode: "insensitive" } },
+        { facilities: { contains: "internet", mode: "insensitive" } },
+        { room_types: { some: { facilities: { contains: "wifi", mode: "insensitive" } } } },
+        { room_types: { some: { facilities: { contains: "internet", mode: "insensitive" } } } },
+      ],
+    };
+  }
+
+  if (
+    normalized === "termasuk listrik" ||
+    normalized === "listrik gratis" ||
+    normalized === "termasuk-listrik"
+  ) {
+    return {
+      OR: [
+        { rental_terms: { contains: "listrik", mode: "insensitive" } },
+        { facilities: { contains: "termasuk listrik", mode: "insensitive" } },
+        { facilities: { contains: "listrik gratis", mode: "insensitive" } },
+        { room_types: { some: { specifications: { contains: "termasuk listrik", mode: "insensitive" } } } },
+        { room_types: { some: { specifications: { contains: "listrik gratis", mode: "insensitive" } } } },
+      ],
+    };
+  }
+
+  if (
+    normalized === "token listrik" ||
+    normalized === "token sendiri" ||
+    normalized === "listrik token" ||
+    normalized === "token-listrik"
+  ) {
+    return {
+      OR: [
+        { rental_terms: { contains: "token", mode: "insensitive" } },
+        { facilities: { contains: "token", mode: "insensitive" } },
+        { room_types: { some: { specifications: { contains: "token", mode: "insensitive" } } } },
+      ],
+    };
+  }
+
+  if (normalized === "parkir mobil" || normalized === "parkir-mobil") {
+    return {
+      OR: [
+        { facilities: { contains: "parkir mobil", mode: "insensitive" } },
+        { facilities: { contains: "mobil", mode: "insensitive" } },
+      ],
+    };
+  }
+
+  if (normalized === "parkir motor" || normalized === "parkir-motor") {
+    return {
+      OR: [
+        { facilities: { contains: "parkir motor", mode: "insensitive" } },
+        { facilities: { contains: "motor", mode: "insensitive" } },
+        { facilities: { contains: "parkir", mode: "insensitive" } },
+      ],
+    };
+  }
+
+  if (
+    normalized === "bebas jam malam" ||
+    normalized === "akses 24 jam" ||
+    normalized === "24 jam" ||
+    normalized === "bebas-jam-malam"
+  ) {
+    return {
+      OR: [
+        { is_24_hours: true },
+        { facilities: { contains: "24 jam", mode: "insensitive" } },
+        { facilities: { contains: "bebas jam malam", mode: "insensitive" } },
+      ],
+    };
+  }
+
+  if (
+    normalized === "pet friendly" ||
+    normalized === "boleh bawa hewan" ||
+    normalized === "hewan" ||
+    normalized === "pet-friendly"
+  ) {
+    return {
+      OR: [
+        { is_pet_friendly: true },
+        { facilities: { contains: "pet friendly", mode: "insensitive" } },
+        { facilities: { contains: "hewan", mode: "insensitive" } },
+      ],
+    };
+  }
+
+  // Fallback umum: cocokkan ke facilities atau room_types.facilities
+  return {
+    OR: [
+      { facilities: { contains: facility.trim(), mode: "insensitive" } },
+      { room_types: { some: { facilities: { contains: facility.trim(), mode: "insensitive" } } } },
+    ],
+  };
+}
+
 export async function GET(request: Request) {
   try {
     const url = request ? new URL(request.url) : new URL("http://localhost/api/properties");
@@ -82,6 +230,24 @@ export async function GET(request: Request) {
 
     if (is24Hours === "true") {
       whereClause.is_24_hours = true;
+    }
+
+    // Filter Fasilitas Spesifik (Faceted Search)
+    const facilitiesRaw = searchParams.getAll("facilities");
+    const requestedFacilities = facilitiesRaw
+      .flatMap((f) => f.split(","))
+      .map((f) => f.trim())
+      .filter(Boolean);
+
+    if (requestedFacilities.length > 0) {
+      const facilityConditions = requestedFacilities.map(buildFacilityCondition);
+      if (!whereClause.AND) {
+        whereClause.AND = facilityConditions;
+      } else if (Array.isArray(whereClause.AND)) {
+        whereClause.AND.push(...facilityConditions);
+      } else {
+        whereClause.AND = [whereClause.AND, ...facilityConditions];
+      }
     }
 
     type RawPropertyItem = Prisma.PropertyGetPayload<{
