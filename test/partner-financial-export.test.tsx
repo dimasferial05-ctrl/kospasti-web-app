@@ -5,6 +5,7 @@ import {
   escapeCSV,
   formatRupiah,
   formatDateIndo,
+  formatPhoneNumber,
   mapBookingToReportItem,
   filterFinancialReportItems,
   calculateFinancialSummary,
@@ -17,19 +18,27 @@ import { PrintableFinancialStatement } from "@/components/partner/PrintableFinan
 describe("Partner Financial Report & Export - Issue #384", () => {
   describe("Keamanan & Sanitasi CSV (DDE Injection)", () => {
     it("menambahkan single quote jika nilai diawali dengan formula (=, +, -, @)", () => {
-      expect(escapeCSV("=1+1")).toBe("\"'=1+1\"");
-      expect(escapeCSV("+cmd|' /C calc'!A0")).toBe("\"'+cmd|' /C calc'!A0\"");
-      expect(escapeCSV("-5000")).toBe("\"'-5000\"");
-      expect(escapeCSV("@SUM(A1:A10)")).toBe("\"'@SUM(A1:A10)\"");
+      expect(escapeCSV("=1+1")).toBe("'=1+1");
+      expect(escapeCSV("+cmd|' /C calc'!A0")).toBe("'+cmd|' /C calc'!A0");
+      expect(escapeCSV("-5000")).toBe("'-5000");
+      expect(escapeCSV("@SUM(A1:A10)")).toBe("'@SUM(A1:A10)");
     });
 
-    it("mengganti tanda petik ganda dengan double quotes", () => {
+    it("mengganti tanda petik ganda dengan double quotes jika mengandung delimiter atau petik", () => {
       expect(escapeCSV('Kos "Graha" Asri')).toBe('"Kos ""Graha"" Asri"');
+      expect(escapeCSV("Jl. Ahmad Yani, No 10")).toBe('"Jl. Ahmad Yani, No 10"');
     });
 
-    it("menangani nilai null dan undefined secara aman", () => {
-      expect(escapeCSV(null)).toBe('""');
-      expect(escapeCSV(undefined)).toBe('""');
+    it("menangani nilai null dan undefined secara aman tanpa tanda petik literal", () => {
+      expect(escapeCSV(null)).toBe("");
+      expect(escapeCSV(undefined)).toBe("");
+      expect(escapeCSV("")).toBe("");
+    });
+
+    it("memformat nomor telepon WhatsApp agar tidak rusak menjadi scientific notation", () => {
+      expect(formatPhoneNumber("081315132327")).toBe("0813-1513-2327");
+      expect(formatPhoneNumber("6281234567890")).toBe("+62 812-3456-7890");
+      expect(formatPhoneNumber("-")).toBe("-");
     });
   });
 
@@ -257,12 +266,12 @@ describe("Partner Financial Report & Export - Issue #384", () => {
       expect(summary.total_pending_payout).toBe(1500000);
     });
 
-    it("menghasilkan teks CSV yang memuat BOM UTF-8, metadata, dan data transaksi", () => {
+    it("menghasilkan teks CSV yang memuat BOM UTF-8, directive sep=, dan data transaksi", () => {
       const items: FinancialReportItem[] = [
         {
           id: "bk-101",
           student_name: "Dimas Ferial",
-          student_whatsapp: "081234567890",
+          student_whatsapp: "081315132327",
           property_name: "Kos Graha Subang Asri",
           room_type_name: "Kamar AC",
           move_in_date: "2026-11-01",
@@ -277,18 +286,37 @@ describe("Partner Financial Report & Export - Issue #384", () => {
       ];
 
       const summary = calculateFinancialSummary(items, "Bulan Ini", "Semua Kos");
-      const csv = generateFinancialCSV(items, summary);
+      const csv = generateFinancialCSV(items, summary, { delimiter: "," });
 
-      // Pastikan ada UTF-8 BOM
+      // Pastikan ada UTF-8 BOM dan directive sep=,
       expect(csv.startsWith("\uFEFF")).toBe(true);
+      expect(csv).toContain("sep=,");
 
-      // Pastikan memuat header penting
-      expect(csv).toContain("REKAPITULASI LAPORAN KEUANGAN & RESERVASI MITRA");
-      expect(csv).toContain("Periode Laporan");
-      expect(csv).toContain("Dimas Ferial");
-      expect(csv).toContain("Kos Graha Subang Asri");
-      expect(csv).toContain("SUDAH CAIR");
-      expect(csv).toContain("TOTAL OMZET KOTOR");
+      // Pastikan header kolom berada di baris awal
+      expect(csv).toContain("No,ID Booking,Nama Mahasiswa,No WhatsApp,Nama Kos");
+
+      // Pastikan format nomor WhatsApp rapi
+      expect(csv).toContain("0813-1513-2327");
+
+      // Pastikan nilai finansial berupa angka murni (tanpa Rp) agar bisa di-sum di Excel
+      expect(csv).toContain("1200000");
+
+      // Pastikan memuat ringkasan dan metadata di bagian bawah
+      expect(csv).toContain("TOTAL OMZET & PENDAPATAN");
+      expect(csv).toContain("INFORMASI REKAPITULASI LAPORAN");
+      expect(csv).toContain("Periode Laporan,Bulan Ini");
+
+      // Pastikan tidak ada karakter literal '""' bertumpuk
+      expect(csv).not.toContain('""');
+    });
+
+    it("mendukung delimiter titik koma (;) dengan directive sep=;", () => {
+      const items: FinancialReportItem[] = [];
+      const summary = calculateFinancialSummary(items, "Bulan Ini", "Semua Kos");
+      const csv = generateFinancialCSV(items, summary, { delimiter: ";" });
+
+      expect(csv).toContain("sep=;");
+      expect(csv).toContain("No;ID Booking;Nama Mahasiswa;No WhatsApp");
     });
   });
 

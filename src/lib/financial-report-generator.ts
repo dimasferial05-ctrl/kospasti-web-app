@@ -81,20 +81,49 @@ export function formatDateIndo(dateStr?: string | null): string {
 }
 
 /**
- * Mencegah CSV / Excel Formula Injection (DDE Injection)
- * Menambahkan single quote (') jika diawali dengan karakter formula (=, +, -, @)
+ * Format nomor WhatsApp menjadi format teks rapi dengan tanda hubung
+ * Mencegah Excel mengubahnya menjadi notasi ilmiah (8.13E+11) dan menghilangkan tanda petik (') yang merusak tampilan
  */
-export function escapeCSV(value: string | number | null | undefined): string {
-  if (value === null || value === undefined) return '""';
+export function formatPhoneNumber(phone?: string | null): string {
+  if (!phone) return "-";
+  const cleaned = phone.replace(/\D/g, "");
+  if (cleaned.startsWith("08") && cleaned.length >= 10) {
+    return `${cleaned.slice(0, 4)}-${cleaned.slice(4, 8)}-${cleaned.slice(8)}`;
+  }
+  if (cleaned.startsWith("628") && cleaned.length >= 11) {
+    return `+62 ${cleaned.slice(2, 5)}-${cleaned.slice(5, 9)}-${cleaned.slice(9)}`;
+  }
+  return phone;
+}
+
+/**
+ * Mencegah CSV / Excel Formula Injection (DDE Injection)
+ * Menambahkan single quote (') hanya jika diawali dengan karakter formula (=, +, -, @)
+ * Membungkus dengan tanda petik ganda hanya jika mengandung delimiter, tanda petik, atau newline
+ */
+export function escapeCSV(
+  value: string | number | null | undefined,
+  delimiter: string = ","
+): string {
+  if (value === null || value === undefined) return "";
   let stringValue = String(value).trim();
+  if (stringValue === "") return "";
 
   // Mencegah DDE Formula Injection
   if (/^[=+\-@]/.test(stringValue)) {
     stringValue = "'" + stringValue;
   }
 
-  stringValue = stringValue.replace(/"/g, '""');
-  return `"${stringValue}"`;
+  if (
+    stringValue.includes(delimiter) ||
+    stringValue.includes('"') ||
+    stringValue.includes("\n") ||
+    stringValue.includes("\r")
+  ) {
+    stringValue = `"${stringValue.replace(/"/g, '""')}"`;
+  }
+
+  return stringValue;
 }
 
 /**
@@ -271,22 +300,32 @@ export function calculateFinancialSummary(
   };
 }
 
+export interface FinancialCSVOptions {
+  delimiter?: "," | ";";
+  includeSepHeader?: boolean;
+}
+
 /**
- * Menghasilkan teks CSV yang siap diimpor ke Excel dengan UTF-8 BOM
+ * Menghasilkan teks CSV yang siap diimpor ke Excel dengan UTF-8 BOM,
+ * directive sep= untuk kompatibilitas otomatis locale Windows Excel,
+ * serta pemformatan angka dan nomor telepon yang rapi tanpa tanda petik yang mengganggu.
  */
 export function generateFinancialCSV(
   items: FinancialReportItem[],
-  summary: FinancialReportSummary
+  summary: FinancialReportSummary,
+  options: FinancialCSVOptions = {}
 ): string {
-  const metadataRows = [
-    `"REKAPITULASI LAPORAN KEUANGAN & RESERVASI MITRA - KOSPASTI"`,
-    `"Periode Laporan";${escapeCSV(summary.period_label)}`,
-    `"Properti Kos";${escapeCSV(summary.property_label)}`,
-    `"Nama Pemilik Kos";${escapeCSV(summary.owner_name || "-")}`,
-    `"Tanggal Cetak";${escapeCSV(summary.generated_at)}`,
-    `""`, // Baris kosong pemisah
-  ];
+  const delimiter = options.delimiter || ",";
+  const includeSepHeader = options.includeSepHeader !== false;
 
+  const lines: string[] = [];
+
+  // Directive sep= untuk memberi tahu Excel pembatas kolom yang digunakan
+  if (includeSepHeader) {
+    lines.push(`sep=${delimiter}`);
+  }
+
+  // Baris Header Kolom Tabel Utama
   const headers = [
     "No",
     "ID Booking",
@@ -296,16 +335,18 @@ export function generateFinancialCSV(
     "Tipe Kamar",
     "Tgl Booking",
     "Tgl Masuk",
-    "Total Bayar (IDR)",
-    "Potongan Admin (IDR)",
-    "Pendapatan Bersih (IDR)",
+    "Total Bayar (Rp)",
+    "Potongan Admin (Rp)",
+    "Pendapatan Bersih (Rp)",
     "Status Reservasi",
     "Status Pencairan",
     "Rekening Tujuan Pencairan",
   ];
+  lines.push(headers.map((h) => escapeCSV(h, delimiter)).join(delimiter));
 
-  const dataRows = items.map((item, idx) => {
-    const rawWa = item.student_whatsapp ? `'${item.student_whatsapp}` : "-";
+  // Baris Data Transaksi
+  items.forEach((item, idx) => {
+    const formattedWa = formatPhoneNumber(item.student_whatsapp);
     const payoutLabel =
       item.payout_status === "PAID"
         ? "SUDAH CAIR"
@@ -313,58 +354,111 @@ export function generateFinancialCSV(
         ? "MENUNGGU PENCAIRAN"
         : "BELUM CAIR";
 
-    return [
-      escapeCSV(idx + 1),
-      escapeCSV(item.id),
-      escapeCSV(item.student_name),
-      escapeCSV(rawWa),
-      escapeCSV(item.property_name),
-      escapeCSV(item.room_type_name),
-      escapeCSV(formatDateIndo(item.created_at)),
-      escapeCSV(formatDateIndo(item.move_in_date)),
-      escapeCSV(formatRupiah(item.gross_amount)),
-      escapeCSV(formatRupiah(item.admin_fee)),
-      escapeCSV(formatRupiah(item.net_amount)),
-      escapeCSV(item.booking_status),
-      escapeCSV(payoutLabel),
-      escapeCSV(item.payout_destination || "-"),
-    ].join(";");
+    const row = [
+      escapeCSV(idx + 1, delimiter),
+      escapeCSV(item.id, delimiter),
+      escapeCSV(item.student_name, delimiter),
+      escapeCSV(formattedWa, delimiter),
+      escapeCSV(item.property_name, delimiter),
+      escapeCSV(item.room_type_name, delimiter),
+      escapeCSV(formatDateIndo(item.created_at), delimiter),
+      escapeCSV(formatDateIndo(item.move_in_date), delimiter),
+      // Angka numerik murni agar Excel dapat melakukan kalkulasi/sum langsung
+      String(Math.max(0, Math.round(item.gross_amount))),
+      String(Math.max(0, Math.round(item.admin_fee))),
+      String(Math.max(0, Math.round(item.net_amount))),
+      escapeCSV(item.booking_status, delimiter),
+      escapeCSV(payoutLabel, delimiter),
+      escapeCSV(item.payout_destination || "-", delimiter),
+    ];
+    lines.push(row.join(delimiter));
   });
 
-  const emptySeparator = Array(headers.length - 2).fill('""');
-  const summaryRows = [
-    `""`, // Baris kosong pemisah
-    [
-      escapeCSV("TOTAL OMZET KOTOR"),
-      ...emptySeparator,
-      escapeCSV(formatRupiah(summary.total_gross_revenue)),
-    ].join(";"),
-    [
-      escapeCSV("TOTAL POTONGAN ADMIN"),
-      ...emptySeparator,
-      escapeCSV(formatRupiah(summary.total_admin_fee)),
-    ].join(";"),
-    [
-      escapeCSV("TOTAL PENDAPATAN BERSIH MITRA"),
-      ...emptySeparator,
-      escapeCSV(formatRupiah(summary.total_net_revenue)),
-    ].join(";"),
-    [
-      escapeCSV("TOTAL SUDAH CAIR KE REKENING"),
-      ...emptySeparator,
-      escapeCSV(formatRupiah(summary.total_paid_payout)),
-    ].join(";"),
-    [
-      escapeCSV("TOTAL MENUNGGU PENCAIRAN"),
-      ...emptySeparator,
-      escapeCSV(formatRupiah(summary.total_pending_payout)),
-    ].join(";"),
-  ];
+  // Baris Ringkasan Finansial (Summary Rows)
+  // Kolom 1..8: Label & sel kosong (7 sel)
+  // Kolom 9: Total Bayar
+  // Kolom 10: Total Admin
+  // Kolom 11: Total Pendapatan Bersih
+  // Kolom 12..14: sel kosong (3 sel)
+  lines.push(""); // Baris kosong pemisah
 
-  // Tambahkan \uFEFF (UTF-8 BOM) di awal string
-  return (
-    "\uFEFF" +
-    [...metadataRows, headers.join(";"), ...dataRows, ...summaryRows].join("\n")
+  const emptyCols1to8 = Array(7).fill("");
+  const emptyCols12to14 = Array(3).fill("");
+
+  // Total Keseluruhan
+  const totalRow = [
+    escapeCSV("TOTAL OMZET & PENDAPATAN", delimiter),
+    ...emptyCols1to8,
+    String(summary.total_gross_revenue),
+    String(summary.total_admin_fee),
+    String(summary.total_net_revenue),
+    ...emptyCols12to14,
+  ];
+  lines.push(totalRow.join(delimiter));
+
+  // Total Sudah Cair
+  const paidRow = [
+    escapeCSV("TOTAL SUDAH DICAIRKAN", delimiter),
+    ...emptyCols1to8,
+    "",
+    "",
+    String(summary.total_paid_payout),
+    ...emptyCols12to14,
+  ];
+  lines.push(paidRow.join(delimiter));
+
+  // Total Menunggu Pencairan
+  const pendingRow = [
+    escapeCSV("TOTAL MENUNGGU PENCAIRAN", delimiter),
+    ...emptyCols1to8,
+    "",
+    "",
+    String(summary.total_pending_payout),
+    ...emptyCols12to14,
+  ];
+  lines.push(pendingRow.join(delimiter));
+
+  // Bagian Informasi Laporan & Catatan di bawah tabel
+  lines.push("");
+  lines.push(escapeCSV("INFORMASI REKAPITULASI LAPORAN", delimiter));
+  lines.push(
+    [
+      escapeCSV("Judul Laporan", delimiter),
+      escapeCSV("Rekapitulasi Keuangan & Reservasi Mitra - KosPasti", delimiter),
+    ].join(delimiter)
   );
+  lines.push(
+    [
+      escapeCSV("Periode Laporan", delimiter),
+      escapeCSV(summary.period_label, delimiter),
+    ].join(delimiter)
+  );
+  lines.push(
+    [
+      escapeCSV("Properti Kos", delimiter),
+      escapeCSV(summary.property_label, delimiter),
+    ].join(delimiter)
+  );
+  lines.push(
+    [
+      escapeCSV("Nama Pemilik Kos", delimiter),
+      escapeCSV(summary.owner_name || "-", delimiter),
+    ].join(delimiter)
+  );
+  lines.push(
+    [
+      escapeCSV("Tanggal Unduh", delimiter),
+      escapeCSV(summary.generated_at, delimiter),
+    ].join(delimiter)
+  );
+  lines.push(
+    [
+      escapeCSV("Total Transaksi", delimiter),
+      escapeCSV(`${summary.total_transactions} Transaksi`, delimiter),
+    ].join(delimiter)
+  );
+
+  // Return dengan UTF-8 BOM (\uFEFF) dan newline CRLF (\r\n) agar kompatibel sempurna dengan Excel
+  return "\uFEFF" + lines.join("\r\n");
 }
 

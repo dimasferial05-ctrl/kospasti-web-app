@@ -44,6 +44,7 @@ export function ExportFinancialModal({
   const [selectedPeriod, setSelectedPeriod] =
     useState<ReportPeriodFilter>("THIS_MONTH");
   const [selectedPropertyId, setSelectedPropertyId] = useState<string>("ALL");
+  const [csvDelimiter, setCsvDelimiter] = useState<"," | ";">(",");
   const [showPrintPreview, setShowPrintPreview] = useState<boolean>(false);
   const [isExporting, setIsExporting] = useState<boolean>(false);
 
@@ -102,7 +103,10 @@ export function ExportFinancialModal({
   const handleDownloadCSV = () => {
     setIsExporting(true);
     try {
-      const csvContent = generateFinancialCSV(filteredItems, reportSummary);
+      const csvContent = generateFinancialCSV(filteredItems, reportSummary, {
+        delimiter: csvDelimiter,
+        includeSepHeader: true,
+      });
       const blob = new Blob([csvContent], {
         type: "text/csv;charset=utf-8;",
       });
@@ -227,6 +231,41 @@ export function ExportFinancialModal({
                 <p className="font-black text-emerald-600 dark:text-emerald-400 text-sm">
                   {formatRupiah(reportSummary.total_gross_revenue)}
                 </p>
+              </div>
+            </div>
+
+            {/* Pengaturan Pemisah Kolom CSV */}
+            <div className="space-y-1.5">
+              <label className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                Pemisah Kolom Spreadsheet (.csv)
+              </label>
+              <div className="grid grid-cols-2 gap-2 text-xs">
+                <button
+                  type="button"
+                  onClick={() => setCsvDelimiter(",")}
+                  className={`py-2 px-3 rounded-xl border text-left transition cursor-pointer flex items-center justify-between ${
+                    csvDelimiter === ","
+                      ? "border-emerald-600 bg-emerald-50/50 dark:bg-emerald-950/30 text-emerald-900 dark:text-emerald-200 font-bold shadow-xs"
+                      : "border-slate-200 dark:border-slate-700 bg-slate-50/60 dark:bg-slate-800/40 text-slate-600 dark:text-slate-300 hover:bg-slate-100"
+                  }`}
+                >
+                  <span>Koma ( , )</span>
+                  <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold">
+                    Standar
+                  </span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setCsvDelimiter(";")}
+                  className={`py-2 px-3 rounded-xl border text-left transition cursor-pointer flex items-center justify-between ${
+                    csvDelimiter === ";"
+                      ? "border-emerald-600 bg-emerald-50/50 dark:bg-emerald-950/30 text-emerald-900 dark:text-emerald-200 font-bold shadow-xs"
+                      : "border-slate-200 dark:border-slate-700 bg-slate-50/60 dark:bg-slate-800/40 text-slate-600 dark:text-slate-300 hover:bg-slate-100"
+                  }`}
+                >
+                  <span>Titik Koma ( ; )</span>
+                  <span className="text-[10px] text-slate-400">Regional</span>
+                </button>
               </div>
             </div>
 
