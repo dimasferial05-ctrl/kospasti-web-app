@@ -70,14 +70,15 @@ function parseStructuredFeatures(
     combined.includes("km dalam") ||
     combined.includes("k.mandi dalam");
 
+  // Gunakan regex word boundary agar tidak salah cocok dengan kata seperti "kaca", "membaca", dll.
   const hasAC =
-    combined.includes("ac") && !combined.includes("non-ac") && !combined.includes("tanpa ac");
+    /\bac\b/i.test(combined) && !/\b(non[- ]?ac|tanpa[- ]?ac)\b/i.test(combined);
 
   const hasWifi =
     combined.includes("wifi") || combined.includes("wi-fi") || combined.includes("internet");
 
   const hasBed =
-    combined.includes("kasur") || combined.includes("springbed") || combined.includes("bed");
+    combined.includes("kasur") || combined.includes("springbed") || /\bbed\b/i.test(combined);
 
   const hasWardrobe = combined.includes("lemari");
 
@@ -93,16 +94,30 @@ function parseStructuredFeatures(
 
   const hasCarParking = combined.includes("parkir mobil") || combined.includes("mobil");
 
+  // Hanya cocokkan fasilitas laundry / mesin cuci pakaian (hindari salah cocok dari "cuci piring" atau "cuci tangan")
   const hasLaundry =
-    combined.includes("mesin cuci") || combined.includes("laundry") || combined.includes("cuci");
+    combined.includes("mesin cuci") ||
+    combined.includes("laundry") ||
+    combined.includes("cuci baju") ||
+    combined.includes("cuci pakaian");
+
+  // Periksa frase negasi terlebih dahulu agar "belum termasuk listrik" tidak salah terdeteksi sebagai termasuk listrik
+  const isElectricityExcluded =
+    combined.includes("belum termasuk listrik") ||
+    combined.includes("tidak termasuk listrik") ||
+    combined.includes("di luar listrik") ||
+    combined.includes("token") ||
+    combined.includes("bayar sendiri") ||
+    combined.includes("listrik mandiri") ||
+    combined.includes("non-listrik");
 
   const isElectricityIncluded =
-    combined.includes("termasuk listrik") ||
-    combined.includes("listrik gratis") ||
-    (combined.includes("listrik") &&
-      !combined.includes("token") &&
-      !combined.includes("bayar sendiri") &&
-      !combined.includes("di luar"));
+    !isElectricityExcluded &&
+    (combined.includes("termasuk listrik") ||
+      combined.includes("listrik gratis") ||
+      combined.includes("free listrik") ||
+      combined.includes("sudah listrik") ||
+      (combined.includes("listrik") && !combined.includes("di luar")));
 
   const hasCurfew =
     !is24Hours &&
@@ -127,7 +142,7 @@ function parseStructuredFeatures(
   };
 }
 
-// Daftar kampus terkenal dari kamus koordinat untuk dicari yang terdekat
+// Daftar kampus terkenal & sekolah tinggi dari kamus koordinat untuk dicari yang terdekat
 const CAMPUS_KEYS = Object.keys(COMMON_LOCATION_COORDINATES).filter((key) => {
   const lower = key.toLowerCase();
   return (
@@ -142,7 +157,13 @@ const CAMPUS_KEYS = Object.keys(COMMON_LOCATION_COORDINATES).filter((key) => {
     lower.includes("telkom") ||
     lower.includes("uin") ||
     lower.includes("unpar") ||
-    lower.includes("politeknik")
+    lower.includes("politeknik") ||
+    lower.includes("stie") ||
+    lower.includes("stmi") ||
+    lower.includes("stik") ||
+    lower.includes("akper") ||
+    lower.includes("stei") ||
+    lower.includes("institut")
   );
 });
 
@@ -343,3 +364,4 @@ export async function GET(request: Request) {
     );
   }
 }
+

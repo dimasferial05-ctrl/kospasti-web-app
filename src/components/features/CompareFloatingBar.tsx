@@ -113,3 +113,4 @@ export function CompareFloatingBar() {
 }
 
 export default CompareFloatingBar;
+

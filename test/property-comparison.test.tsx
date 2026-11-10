@@ -156,6 +156,51 @@ describe("Side-by-Side Property Comparison - Issue #382", () => {
       expect(kos2.structured_features.has_curfew).toBe(true);
       expect(kos2.is_pet_friendly).toBe(true);
     });
+
+    it("menangani edge-case parsing: 'belum termasuk listrik', 'cermin kaca', dan 'cuci piring'", async () => {
+      vi.spyOn(prisma.property, "findMany").mockResolvedValueOnce([
+        {
+          id: "kos-edge-case",
+          name: "Kos Anggrek Subang",
+          gender_type: "Putri",
+          price_per_month: 800000,
+          available_rooms: 1,
+          facilities: "Kasur, Lemari, Cermin Kaca, Tempat Cuci Piring",
+          rules: "Dilarang berisik",
+          rental_terms: "Harga sewa belum termasuk listrik bulanan",
+          is_24_hours: true,
+          is_pet_friendly: false,
+          image_url: null,
+          address: "Dekat STIESA Subang",
+          latitude: -6.565,
+          longitude: 107.766,
+          status: "PUBLISHED",
+          owner: { name: "Ibu Nur", whatsapp_number: "0812345670", avatar_url: null },
+          media: [],
+          room_types: [],
+          reviews: [],
+        },
+      ] as any);
+
+      const req = new NextRequest(
+        "http://localhost:3000/api/properties/compare?ids=kos-edge-case"
+      );
+      const res = await getCompareProperties(req);
+      const data = await res.json();
+
+      expect(res.status).toBe(200);
+      const kos = data.data[0];
+
+      // Verifikasi false positive dicegah:
+      expect(kos.structured_features.is_electricity_included).toBe(false); // Dari "belum termasuk listrik"
+      expect(kos.structured_features.has_ac).toBe(false); // Dari "Cermin Kaca"
+      expect(kos.structured_features.has_laundry).toBe(false); // Dari "Cuci Piring"
+      expect(kos.structured_features.has_bed).toBe(true); // Dari "Kasur"
+
+      // Verifikasi pengenalan kampus / sekolah tinggi Subang (STIESA)
+      expect(kos.nearest_campus).toBeDefined();
+      expect(kos.nearest_campus?.name).toContain("STIESA SUBANG");
+    });
   });
 
   describe("UI Components: CompareButton & CompareFloatingBar", () => {

@@ -153,3 +153,4 @@ export function useCompare() {
     clearCompare,
   };
 }
+

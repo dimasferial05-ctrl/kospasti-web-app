@@ -74,7 +74,7 @@ export function CompareButton({
           ) : (
             <Scale className={`${iconSizes} ${isSelected ? "text-white" : "text-slate-600 dark:text-slate-300"}`} />
           )}
-          <span>{isSelected ? "Sedang Dibandingkan" : "Bandingkan"}</span>
+          <span className="hidden sm:inline">{isSelected ? "Sedang Dibandingkan" : "Bandingkan"}</span>
         </button>
 
         {feedbackMessage && (
@@ -123,3 +123,4 @@ export function CompareButton({
 }
 
 export default CompareButton;
+
