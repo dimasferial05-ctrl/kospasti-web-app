@@ -18,13 +18,23 @@ import {
   Footprints,
   RotateCcw,
   Compass,
+  GraduationCap,
 } from "lucide-react";
 
-interface PropertyLocationMapProps {
+export interface DestinationTarget {
+  name: string;
+  latitude: number;
+  longitude: number;
+  category?: string;
+  distanceKm?: number;
+}
+
+export interface PropertyLocationMapProps {
   propertyName: string;
   address?: string | null;
   latitude?: number | null;
   longitude?: number | null;
+  selectedDestination?: DestinationTarget | null;
 }
 
 interface UserLocation {
@@ -146,6 +156,7 @@ export default function PropertyLocationMap({
   address,
   latitude,
   longitude,
+  selectedDestination,
 }: PropertyLocationMapProps) {
   const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "";
 
@@ -181,7 +192,7 @@ export default function PropertyLocationMap({
 
   // Hitung rute via backend modern API Routes
   const fetchRouteData = useCallback(
-    async (userLoc: UserLocation, mode: TravelMode) => {
+    async (targetLoc: { lat: number; lng: number }, mode: TravelMode) => {
       if (!hasValidCoordinates) return;
       setIsCalculatingRoute(true);
       setLocationError(null);
@@ -191,7 +202,7 @@ export default function PropertyLocationMap({
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            origin: userLoc,
+            origin: targetLoc,
             destination: kosCoords,
             travelMode: mode,
           }),
@@ -216,11 +227,11 @@ export default function PropertyLocationMap({
             setPolylinePoints(data.data.coordinates);
           } else {
             // Fallback straight line
-            setPolylinePoints([userLoc, kosCoords]);
+            setPolylinePoints([targetLoc, kosCoords]);
           }
         } else {
           // Fallback manual straight line
-          setPolylinePoints([userLoc, kosCoords]);
+          setPolylinePoints([targetLoc, kosCoords]);
           setRouteInfo({
             distance: "Terhitung",
             duration: "Lihat Google Maps",
@@ -229,13 +240,24 @@ export default function PropertyLocationMap({
         }
       } catch (err) {
         console.warn("Gagal menghitung rute:", err);
-        setPolylinePoints([userLoc, kosCoords]);
+        setPolylinePoints([targetLoc, kosCoords]);
       } finally {
         setIsCalculatingRoute(false);
       }
     },
     [hasValidCoordinates, kosCoords]
   );
+
+  // Otomatis kalkulasi rute saat destinasi kampus berubah (jika belum ada lokasi GPS pengguna)
+  useEffect(() => {
+    if (selectedDestination && hasValidCoordinates && !userLocation) {
+      const destCoords = {
+        lat: selectedDestination.latitude,
+        lng: selectedDestination.longitude,
+      };
+      fetchRouteData(destCoords, travelMode);
+    }
+  }, [selectedDestination, hasValidCoordinates, userLocation, fetchRouteData, travelMode]);
 
   // Ambil geolokasi pengguna
   const handleGetLocationAndRoute = useCallback(() => {
@@ -289,6 +311,14 @@ export default function PropertyLocationMap({
     setTravelMode(newMode);
     if (userLocation) {
       fetchRouteData(userLocation, newMode);
+    } else if (selectedDestination) {
+      fetchRouteData(
+        {
+          lat: selectedDestination.latitude,
+          lng: selectedDestination.longitude,
+        },
+        newMode
+      );
     }
   };
 
@@ -303,6 +333,8 @@ export default function PropertyLocationMap({
   const googleMapsUrl = hasValidCoordinates
     ? userLocation
       ? `https://www.google.com/maps/dir/?api=1&origin=${userLocation.lat},${userLocation.lng}&destination=${latitude},${longitude}&travelmode=${travelMode.toLowerCase()}`
+      : selectedDestination
+      ? `https://www.google.com/maps/dir/?api=1&origin=${latitude},${longitude}&destination=${selectedDestination.latitude},${selectedDestination.longitude}&travelmode=${travelMode.toLowerCase()}`
       : `https://www.google.com/maps/dir/?api=1&destination=${latitude},${longitude}`
     : address
     ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
@@ -350,24 +382,59 @@ export default function PropertyLocationMap({
           <div className="bg-slate-50 border border-slate-200/80 rounded-xl p-3 flex flex-wrap items-center justify-between gap-2.5">
             <div className="flex items-center gap-2 flex-wrap">
               {!userLocation ? (
-                <button
-                  type="button"
-                  onClick={handleGetLocationAndRoute}
-                  disabled={isLocating}
-                  className="inline-flex items-center gap-2 px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 disabled:bg-emerald-400 text-white rounded-lg text-xs font-semibold shadow-xs transition active:scale-95 cursor-pointer"
-                >
-                  {isLocating ? (
-                    <>
-                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                      <span>Mendeteksi Lokasi...</span>
-                    </>
-                  ) : (
-                    <>
-                      <Navigation className="w-3.5 h-3.5" />
-                      <span>Cek Jarak & Rute dari Lokasi Saya</span>
-                    </>
+                <div className="flex items-center gap-2 flex-wrap">
+                  {selectedDestination && (
+                    <div className="flex items-center bg-white border border-slate-200 rounded-lg p-0.5 shadow-2xs">
+                      <button
+                        type="button"
+                        onClick={() => handleModeChange("DRIVING")}
+                        disabled={isCalculatingRoute}
+                        className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-medium transition ${
+                          travelMode === "DRIVING"
+                            ? "bg-emerald-600 text-white shadow-2xs"
+                            : "text-slate-600 hover:text-slate-900"
+                        }`}
+                        title="Mode Berkendara (Mobil / Motor)"
+                      >
+                        <Car className="w-3.5 h-3.5" />
+                        <span>Berkendara</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleModeChange("WALKING")}
+                        disabled={isCalculatingRoute}
+                        className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-medium transition ${
+                          travelMode === "WALKING"
+                            ? "bg-emerald-600 text-white shadow-2xs"
+                            : "text-slate-600 hover:text-slate-900"
+                        }`}
+                        title="Mode Jalan Kaki"
+                      >
+                        <Footprints className="w-3.5 h-3.5" />
+                        <span>Jalan Kaki</span>
+                      </button>
+                    </div>
                   )}
-                </button>
+
+                  <button
+                    type="button"
+                    onClick={handleGetLocationAndRoute}
+                    disabled={isLocating}
+                    className="inline-flex items-center gap-2 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 disabled:bg-emerald-400 text-white rounded-lg text-xs font-semibold shadow-xs transition active:scale-95 cursor-pointer"
+                  >
+                    {isLocating ? (
+                      <>
+                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                        <span>Mendeteksi Lokasi...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Navigation className="w-3.5 h-3.5" />
+                        <span>Cek Jarak &amp; Rute dari Lokasi Saya</span>
+                      </>
+                    )}
+                  </button>
+                </div>
               ) : (
                 <div className="flex items-center gap-2 flex-wrap">
                   {/* Mode Selector */}
@@ -491,6 +558,26 @@ export default function PropertyLocationMap({
                         Posisi Anda
                       </div>
                       <div className="w-4 h-4 rounded-full bg-emerald-500 border-2 border-white shadow-md ring-2 ring-emerald-500/30" />
+                    </div>
+                  </AdvancedMarker>
+                )}
+
+                {/* Marker Destinasi Terpilih (Kampus / Tempat Sekitar) */}
+                {selectedDestination && !userLocation && (
+                  <AdvancedMarker
+                    position={{
+                      lat: selectedDestination.latitude,
+                      lng: selectedDestination.longitude,
+                    }}
+                    title={selectedDestination.name}
+                  >
+                    <div className="flex flex-col items-center group cursor-pointer">
+                      <div className="px-2 py-0.5 bg-blue-700 text-white text-[10px] font-bold rounded shadow mb-1 whitespace-nowrap border border-blue-600">
+                        🎓 {selectedDestination.name}
+                      </div>
+                      <div className="w-7 h-7 rounded-full bg-blue-600 border-2 border-white text-white flex items-center justify-center shadow-lg">
+                        <GraduationCap className="w-3.5 h-3.5 fill-white" />
+                      </div>
                     </div>
                   </AdvancedMarker>
                 )}

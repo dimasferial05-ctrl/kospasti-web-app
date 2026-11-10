@@ -36,6 +36,7 @@ export interface KosPropertyCardProps {
   isSaved?: boolean;
   distance?: number | null;
   distanceTargetName?: string | null;
+  commuteTime?: string | null;
   onWishlistToggle?: (isSaved: boolean) => void;
 }
 
@@ -58,6 +59,7 @@ export function KosPropertyCard({
   isSaved = false,
   distance,
   distanceTargetName,
+  commuteTime,
   onWishlistToggle,
 }: KosPropertyCardProps) {
   const isMultiType =
@@ -112,6 +114,19 @@ export function KosPropertyCard({
     e.stopPropagation();
     setActiveSlideIndex((prev) => (prev === slides.length - 1 ? 0 : prev + 1));
   };
+
+  // Estimasi durasi tempuh jalan kaki atau berkendara
+  const estimatedCommute = React.useMemo(() => {
+    if (commuteTime) return commuteTime;
+    if (typeof distance !== "number") return null;
+    if (distance <= 1.5) {
+      const mins = Math.max(1, Math.round(distance * 13.33));
+      return `🚶 ${mins} mnt`;
+    } else {
+      const mins = Math.max(1, Math.round(distance * 2.14 + 1));
+      return `🛵 ${mins} mnt`;
+    }
+  }, [commuteTime, distance]);
 
   // Format mata uang Rupiah
   const formattedPrice = isMultiType
@@ -320,10 +335,17 @@ export function KosPropertyCard({
             {typeof distance === "number" && (
               <span
                 className="inline-flex items-center gap-1 font-bold text-emerald-800 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/60 px-2.5 py-0.5 rounded-full text-[10px] border border-emerald-200/80 dark:border-emerald-800 shadow-2xs"
-                title={distanceTargetName ? `Jarak ${distance} km dari ${distanceTargetName}` : `Jarak ${distance} km ke lokasi tujuan`}
+                title={
+                  distanceTargetName
+                    ? `Jarak ${distance} km (${estimatedCommute}) dari ${distanceTargetName}`
+                    : `Jarak ${distance} km (${estimatedCommute}) ke lokasi tujuan`
+                }
               >
                 <MapPin className="w-3 h-3 text-emerald-600 dark:text-emerald-400" />
-                <span>{distance} km{distanceTargetName ? ` dari ${distanceTargetName}` : ""}</span>
+                <span>
+                  {estimatedCommute ? `${estimatedCommute} (${distance} km)` : `${distance} km`}
+                  {distanceTargetName ? ` dari ${distanceTargetName}` : ""}
+                </span>
               </span>
             )}
             {is24Hours && (
