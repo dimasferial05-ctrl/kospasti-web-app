@@ -6,7 +6,6 @@ import {
   Footprints,
   Car,
   MapPin,
-  CheckCircle2,
   Navigation,
   Loader2,
   Building2,
@@ -245,13 +244,6 @@ export function CampusCommuteEstimator({
                     {selectedLocation.distanceKm} km
                   </span>
                 </div>
-
-                {selectedLocation.isWalkable && (
-                  <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200/80 px-2.5 py-0.5 rounded-full self-start sm:self-auto">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-                    Bisa Jalan Kaki
-                  </span>
-                )}
               </div>
 
               {/* Grid 2 Kartu Komputasi: Jalan Kaki & Motor */}

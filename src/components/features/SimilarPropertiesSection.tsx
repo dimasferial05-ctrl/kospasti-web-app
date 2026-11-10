@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Sparkles, AlertTriangle, ArrowRight } from "lucide-react";
+import { AlertTriangle, ArrowRight } from "lucide-react";
 import Link from "next/link";
 import KosPropertyCard from "@/components/features/KosPropertyCard";
 import { KosPropertyCardSkeleton } from "@/components/features/KosPropertyCardSkeleton";
@@ -124,10 +124,6 @@ export function SimilarPropertiesSection({
       {/* Header Bagian */}
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3">
         <div>
-          <div className="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60 px-3 py-1 rounded-full border border-emerald-200/80 dark:border-emerald-800 mb-2">
-            <Sparkles className="w-3.5 h-3.5" />
-            <span>Rekomendasi Pilihan</span>
-          </div>
           <h3 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-slate-100 tracking-tight">
             Kos Serupa di Sekitar Area Ini
           </h3>

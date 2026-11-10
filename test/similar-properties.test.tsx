@@ -210,7 +210,6 @@ describe("Similar Kos Recommendations - Issue #380", () => {
 
       // Awal render menampilkan skeleton loading state sebelum fetch selesai
       expect(html).toContain("Kos Serupa di Sekitar Area Ini");
-      expect(html).toContain("Rekomendasi Pilihan");
     });
 
     it("menampilkan alert kamar penuh di dalam SimilarPropertiesSection saat isFullyBooked bernilai true", () => {
