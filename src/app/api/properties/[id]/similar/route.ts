@@ -58,6 +58,9 @@ export async function GET(
         id: { not: id },
         status: "PUBLISHED",
       },
+      orderBy: {
+        updated_at: "desc",
+      },
       include: {
         owner: {
           select: {
@@ -188,8 +191,13 @@ export async function GET(
       };
     });
 
+    // Filter kandidat yang bukan properti acuan (defense-in-depth)
+    const validCandidates = scoredCandidates.filter(
+      (item) => item.property.id !== id && item.score > 0
+    );
+
     // Urutkan berdasarkan: Score DESC -> Sisa Kamar DESC -> Jarak ASC
-    scoredCandidates.sort((a, b) => {
+    validCandidates.sort((a, b) => {
       if (b.score !== a.score) return b.score - a.score;
       if (b.totalRooms !== a.totalRooms) return b.totalRooms - a.totalRooms;
       if (a.distanceKm !== null && b.distanceKm !== null) {
@@ -198,7 +206,7 @@ export async function GET(
       return 0;
     });
 
-    const finalProperties = scoredCandidates
+    const finalProperties = validCandidates
       .slice(0, limit)
       .map((item) => item.property);
 

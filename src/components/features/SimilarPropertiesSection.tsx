@@ -175,6 +175,7 @@ export function SimilarPropertiesSection({
               averageRating={item.average_rating}
               totalReviews={item.total_reviews}
               distance={item.distance_km}
+              distanceTargetName="kos ini"
               roomTypes={item.room_types}
               roomTypesCount={item.room_types?.length}
               hasMultipleRoomTypes={Boolean(item.room_types && item.room_types.length > 1)}

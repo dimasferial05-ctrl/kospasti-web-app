@@ -121,6 +121,55 @@ describe("Similar Kos Recommendations - Issue #380", () => {
       expect(first).toHaveProperty("distance_km");
       expect(typeof first.distance_km).toBe("number");
     });
+
+    it("mengabaikan kandidat yang memiliki skor 0 (tidak ada kriteria yang cocok sama sekali)", async () => {
+      const targetPropertyId = "target-kos-putri";
+
+      vi.spyOn(prisma.property, "findUnique").mockResolvedValueOnce({
+        id: targetPropertyId,
+        name: "Kos Putri Subang",
+        gender_type: "Putri",
+        price_per_month: 800000,
+        available_rooms: 0,
+        latitude: -6.568,
+        longitude: 107.761,
+        status: "PUBLISHED",
+        room_types: [],
+      } as any);
+
+      // Kandidat: Putra, harga 4.000.000 (jauh di luar batas), kamar 0, lokasi di luar radius 10 km
+      vi.spyOn(prisma.property, "findMany").mockResolvedValueOnce([
+        {
+          id: "incompatible-kos",
+          name: "Kos Putra Bandung Jauh",
+          gender_type: "Putra",
+          price_per_month: 4000000,
+          available_rooms: 0,
+          facilities: "None",
+          image_url: null,
+          latitude: -6.917, // ~40+ km dari Subang
+          longitude: 107.619,
+          status: "PUBLISHED",
+          updated_at: new Date(),
+          owner: null,
+          media: [],
+          room_types: [],
+          reviews: [],
+        },
+      ] as any);
+
+      const req = new NextRequest("http://localhost:3000/api/properties/target-kos-putri/similar");
+      const res = await getSimilarProperties(req, {
+        params: Promise.resolve({ id: targetPropertyId }),
+      });
+      const data = await res.json();
+
+      expect(res.status).toBe(200);
+      expect(data.success).toBe(true);
+      // Kandidat dengan skor 0 harus disaring keluar sehingga data kosong
+      expect(data.data).toEqual([]);
+      expect(data.total).toBe(0);
+    });
   });
 
   describe("UI Component: SimilarPropertiesSection", () => {
