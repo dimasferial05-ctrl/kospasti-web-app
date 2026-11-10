@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import {
   GraduationCap,
   Footprints,
@@ -48,6 +48,16 @@ export function CampusCommuteEstimator({
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<"kampus" | "all">("kampus");
 
+  const onSelectDestinationRef = useRef(onSelectDestination);
+  useEffect(() => {
+    onSelectDestinationRef.current = onSelectDestination;
+  }, [onSelectDestination]);
+
+  // Notifikasi perubahan destinasi ke komponen induk secara pasif (setelah render selesai)
+  useEffect(() => {
+    onSelectDestinationRef.current?.(selectedLocation);
+  }, [selectedLocation]);
+
   const hasCoords =
     typeof propertyLat === "number" &&
     typeof propertyLng === "number" &&
@@ -77,18 +87,15 @@ export function CampusCommuteEstimator({
         if (res.ok && result.success && Array.isArray(result.data)) {
           setLocations(result.data);
           if (result.data.length > 0) {
-            // Default pilih destinasi terdekat jika belum ada yang dipilih
+            // Default pilih destinasi terdekat jika belum ada yang dipilih (state updater murni tanpa side-effect)
             setSelectedLocation((prev) => {
               if (prev && result.data.some((l: CommuteLocation) => l.id === prev.id)) {
                 return prev;
               }
-              const first = result.data[0];
-              onSelectDestination?.(first);
-              return first;
+              return result.data[0];
             });
           } else {
             setSelectedLocation(null);
-            onSelectDestination?.(null);
           }
         } else {
           setError(result.error || "Gagal memuat lokasi sekitar");
@@ -100,7 +107,7 @@ export function CampusCommuteEstimator({
         setIsLoading(false);
       }
     },
-    [hasCoords, propertyLat, propertyLng, onSelectDestination]
+    [hasCoords, propertyLat, propertyLng]
   );
 
   useEffect(() => {
@@ -111,7 +118,6 @@ export function CampusCommuteEstimator({
 
   const handleSelectLocation = (loc: CommuteLocation) => {
     setSelectedLocation(loc);
-    onSelectDestination?.(loc);
   };
 
   const handleScrollToMap = () => {
@@ -315,3 +321,4 @@ export function CampusCommuteEstimator({
 }
 
 export default CampusCommuteEstimator;
+
