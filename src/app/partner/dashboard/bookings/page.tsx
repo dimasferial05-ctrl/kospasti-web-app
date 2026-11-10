@@ -23,6 +23,7 @@ import {
 } from "lucide-react";
 import { HelpTooltip } from "@/components/ui/Tooltip";
 import { formatFinancialBookingsToCSV } from "@/lib/csv-export";
+import { ExportFinancialModal } from "@/components/partner/ExportFinancialModal";
 
 interface Booking {
   id: string;
@@ -68,6 +69,7 @@ export default function PartnerBookingsPage() {
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [confirmCheckinBooking, setConfirmCheckinBooking] = useState<Booking | null>(null);
   const [checkinLoading, setCheckinLoading] = useState(false);
+  const [isExportModalOpen, setIsExportModalOpen] = useState(false);
 
 
 
@@ -416,13 +418,13 @@ export default function PartnerBookingsPage() {
 
           <button
             type="button"
-            onClick={handleExportFinancialCSV}
+            onClick={() => setIsExportModalOpen(true)}
             disabled={bookings.length === 0}
             className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed text-white text-xs font-bold shadow-soft hover:shadow-float transition-all duration-200 cursor-pointer shrink-0"
-            title="Unduh rekapitulasi data pesanan dan rincian keuangan ke format CSV/Excel"
+            title="Unduh rekapitulasi data pesanan dan rincian keuangan ke format CSV/Excel atau PDF siap cetak"
           >
             <Download className="w-3.5 h-3.5" />
-            <span className="hidden sm:inline">Ekspor CSV</span>
+            <span className="hidden sm:inline">Unduh Laporan Keuangan</span>
           </button>
         </div>
       </div>
@@ -807,6 +809,12 @@ export default function PartnerBookingsPage() {
         </div>
       )}
 
+      {/* Modal Ekspor Laporan Keuangan Mitra */}
+      <ExportFinancialModal
+        isOpen={isExportModalOpen}
+        onClose={() => setIsExportModalOpen(false)}
+        bookings={bookings}
+      />
     </div>
   );
 }
