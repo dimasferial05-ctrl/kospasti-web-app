@@ -135,10 +135,10 @@ describe("Campus Commute & Distance Estimator - Issue #378", () => {
       );
 
       // Jarak 0.8 km * 13.3 = ~11 menit
-      expect(html).toContain("🚶 11 mnt (0.8 km) dari UPI Subang");
+      expect(html).toContain("11 mnt (0.8 km) dari UPI Subang");
     });
 
-    it("menampilkan badge estimasi berkendara motor ketika distance > 1.5 km", () => {
+    it("menampilkan badge estimasi berkendara ketika distance > 1.5 km", () => {
       const html = renderToStaticMarkup(
         <KosPropertyCard
           name="Kos Sukamaju"
@@ -154,7 +154,7 @@ describe("Campus Commute & Distance Estimator - Issue #378", () => {
       );
 
       // Jarak 3.5 km * 2.14 + 1 = ~8 menit
-      expect(html).toContain("🛵 8 mnt (3.5 km) dari Polsub Cibogo");
+      expect(html).toContain("8 mnt (3.5 km) dari Polsub Cibogo");
     });
   });
 });

@@ -117,14 +117,14 @@ export function KosPropertyCard({
 
   // Estimasi durasi tempuh jalan kaki atau berkendara
   const estimatedCommute = React.useMemo(() => {
-    if (commuteTime) return commuteTime;
+    if (commuteTime) return commuteTime.replace(/^[^\w\d]+/, "").trim();
     if (typeof distance !== "number") return null;
     if (distance <= 1.5) {
       const mins = Math.max(1, Math.round(distance * 13.33));
-      return `🚶 ${mins} mnt`;
+      return `${mins} mnt`;
     } else {
       const mins = Math.max(1, Math.round(distance * 2.14 + 1));
-      return `🛵 ${mins} mnt`;
+      return `${mins} mnt`;
     }
   }, [commuteTime, distance]);
 
