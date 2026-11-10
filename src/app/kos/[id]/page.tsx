@@ -29,6 +29,7 @@ import {
   Share2,
 } from "lucide-react";
 import PropertyLocationMap from "@/components/map/PropertyLocationMap";
+import { CampusCommuteEstimator, CommuteLocation } from "@/components/features/CampusCommuteEstimator";
 import { WishlistButton } from "@/components/features/WishlistButton";
 import { ReviewSection } from "@/components/features/ReviewSection";
 import { useFocusTrap } from "@/hooks/useFocusTrap";
@@ -118,6 +119,7 @@ export default function PropertyDetailPage() {
   const [isCopied, setIsCopied] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [selectedDestination, setSelectedDestination] = useState<CommuteLocation | null>(null);
 
   // Media Tab: "PHOTO" atau "VIDEO"
   const [mediaMode, setMediaMode] = useState<"PHOTO" | "VIDEO">("PHOTO");
@@ -1397,14 +1399,25 @@ export default function PropertyDetailPage() {
             )}
           </div>
 
-          {/* Card 7: Lokasi & Rute Google Maps */}
+          {/* Card 7A: Estimasi Waktu Tempuh ke Kampus & Sekitar */}
+          <CampusCommuteEstimator
+            propertyName={property.name}
+            propertyLat={property.latitude}
+            propertyLng={property.longitude}
+            onSelectDestination={setSelectedDestination}
+          />
+
+          {/* Card 7B: Lokasi & Rute Google Maps */}
           <div id="section-lokasi">
-            <PropertyLocationMap
-              propertyName={property.name}
-              address={property.address}
-              latitude={property.latitude}
-              longitude={property.longitude}
-            />
+            <div id="property-map-section">
+              <PropertyLocationMap
+                propertyName={property.name}
+                address={property.address}
+                latitude={property.latitude}
+                longitude={property.longitude}
+                selectedDestination={selectedDestination}
+              />
+            </div>
           </div>
 
           {/* Card 8: Info Pemilik / Pengelola */}
