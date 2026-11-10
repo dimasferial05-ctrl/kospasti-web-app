@@ -22,7 +22,6 @@ import {
   Download,
 } from "lucide-react";
 import { HelpTooltip } from "@/components/ui/Tooltip";
-import { formatFinancialBookingsToCSV } from "@/lib/csv-export";
 import { ExportFinancialModal } from "@/components/partner/ExportFinancialModal";
 
 interface Booking {
@@ -127,50 +126,6 @@ export default function PartnerBookingsPage() {
     } finally {
       setActionLoadingId(null);
     }
-  };
-
-
-
-  const handleExportFinancialCSV = () => {
-    if (bookings.length === 0) {
-      setErrorMsg("Belum ada data riwayat transaksi untuk diekspor.");
-      return;
-    }
-    if (filteredBookings.length === 0) {
-      setErrorMsg("Tidak ada data pesanan yang sesuai dengan filter saat ini untuk diekspor.");
-      return;
-    }
-    const exportData = filteredBookings.map((b) => ({
-      id: b.id,
-      student_name: b.student_name,
-      student_whatsapp: b.student_whatsapp,
-      whatsapp_number: b.student_whatsapp,
-      move_in_date: b.move_in_date,
-      status: b.status,
-      created_at: b.created_at,
-      amount: b.room_type?.price_per_month ?? b.property.price_per_month ?? 0,
-      cancellation_reason: b.cancellation_reason,
-      refund_note: b.refund_note,
-      property: {
-        name: b.property.name,
-      },
-      room_type: b.room_type
-        ? { name: b.room_type.name, price_per_month: b.room_type.price_per_month }
-        : null,
-    }));
-    const csvContent = formatFinancialBookingsToCSV(exportData);
-    const blob = new Blob(["\uFEFF" + csvContent], { type: "text/csv;charset=utf-8;" });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.setAttribute(
-      "download",
-      `Laporan_Keuangan_Mitra_${new Date().toISOString().split("T")[0]}.csv`
-    );
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
   };
 
   const filteredBookings = bookings.filter((b) => {
