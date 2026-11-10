@@ -32,6 +32,7 @@ import PropertyLocationMap from "@/components/map/PropertyLocationMap";
 import { CampusCommuteEstimator, CommuteLocation } from "@/components/features/CampusCommuteEstimator";
 import { WishlistButton } from "@/components/features/WishlistButton";
 import { ReviewSection } from "@/components/features/ReviewSection";
+import { SimilarPropertiesSection } from "@/components/features/SimilarPropertiesSection";
 import { useFocusTrap } from "@/hooks/useFocusTrap";
 import { formatWhatsAppNumber } from "@/lib/whatsapp";
 import { buildSupportWhatsAppUrl } from "@/components/support/CustomerSupportWidget";
@@ -359,10 +360,17 @@ export default function PropertyDetailPage() {
   useEffect(() => {
     const handleScroll = () => {
       const hero = document.getElementById("section-media");
+      const similarSection = document.getElementById("section-similar-kos");
       if (hero) {
-        const rect = hero.getBoundingClientRect();
-        // Muncul bila bagian bawah foto properti sudah melewati batas atas navbar
-        setShowSubNav(rect.bottom < 54);
+        const heroRect = hero.getBoundingClientRect();
+        const isPastHero = heroRect.bottom < 54;
+        let isBeforeSimilar = true;
+        if (similarSection) {
+          const similarRect = similarSection.getBoundingClientRect();
+          // Sembunyikan subnav saat user mulai masuk ke area rekomendasi kos serupa
+          isBeforeSimilar = similarRect.top > 140;
+        }
+        setShowSubNav(isPastHero && isBeforeSimilar);
       }
 
       // Scrollspy: Deteksi section aktif sesuai posisi scroll
@@ -636,7 +644,7 @@ export default function PropertyDetailPage() {
         />
       )}
       {/* Top Header Bar */}
-      <div className="sticky top-0 z-30 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border-b border-slate-200/80 dark:border-slate-800 py-3">
+      <div className="sticky top-0 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-slate-200/80 dark:border-slate-800 py-3">
         <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 flex items-center justify-between gap-3">
           <div className="flex items-center gap-3 min-w-0">
             <button
@@ -690,7 +698,7 @@ export default function PropertyDetailPage() {
 
       {/* Sticky In-Page Navigation Bar (Smooth slide-in saat scroll ke bawah melewati foto properti) */}
       <div
-        className={`sticky top-[53px] z-20 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-slate-200/90 dark:border-slate-800 shadow-xs transition-all duration-300 ease-in-out w-full min-w-0 ${
+        className={`sticky top-[53px] z-30 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-slate-200/90 dark:border-slate-800 shadow-xs transition-all duration-300 ease-in-out w-full min-w-0 ${
           showSubNav
             ? "max-h-20 opacity-100 translate-y-0 pointer-events-auto"
             : "max-h-0 opacity-0 -translate-y-3 pointer-events-none border-transparent overflow-hidden"
@@ -1503,7 +1511,7 @@ export default function PropertyDetailPage() {
         {/* KOLOM KANAN (KARTU AMANKAN KAMAR STICKY DI BAWAH FOTO PROPERTI)          */}
         {/* ========================================================================= */}
         <div className="w-full lg:w-[380px] shrink-0">
-          <div className="fixed bottom-0 left-0 w-full bg-white dark:bg-slate-900 border-t border-slate-200/80 dark:border-slate-800 p-4 pb-[max(1rem,env(safe-area-inset-bottom))] flex justify-between items-center z-[60] lg:static lg:block lg:p-6 lg:border lg:border-slate-200/60 dark:lg:border-slate-800 lg:rounded-2xl lg:shadow-soft lg:sticky lg:top-32">
+          <div className="fixed bottom-0 left-0 w-full bg-white dark:bg-slate-900 border-t border-slate-200/80 dark:border-slate-800 p-4 pb-[max(1rem,env(safe-area-inset-bottom))] flex justify-between items-center z-[60] lg:z-10 lg:static lg:block lg:p-6 lg:border lg:border-slate-200/60 dark:lg:border-slate-800 lg:rounded-2xl lg:shadow-soft lg:sticky lg:top-32">
             <div className="max-w-7xl mx-auto lg:max-w-none w-full px-2 sm:px-4 lg:px-0 flex justify-between lg:flex-col lg:gap-4 items-center lg:items-start">
               <div className="lg:w-full">
                 <p className="text-[10px] lg:text-xs text-slate-400 font-semibold uppercase tracking-wider">
@@ -1590,6 +1598,17 @@ export default function PropertyDetailPage() {
             </div>
           </div>
         </div>
+      </div>
+
+      {/* ========================================================================= */}
+      {/* 2.5. REKOMENDASI KOS SERUPA DI SEKITAR AREA INI */}
+      {/* ========================================================================= */}
+      <div id="section-similar-kos" className="mt-12 pt-10 border-t border-slate-200/80 dark:border-slate-800">
+        <SimilarPropertiesSection
+          currentPropertyId={property.id}
+          propertyName={property.name}
+          isFullyBooked={property.available_rooms === 0}
+        />
       </div>
 
       {/* ========================================================================= */}
