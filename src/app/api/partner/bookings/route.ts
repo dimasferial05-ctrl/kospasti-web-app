@@ -55,6 +55,16 @@ export async function GET() {
             whatsapp: true,
           },
         },
+        payout: {
+          select: {
+            id: true,
+            amount: true,
+            status: true,
+            payout_method_snapshot: true,
+            processed_at: true,
+            notes: true,
+          },
+        },
       },
       orderBy: { created_at: "desc" },
     });

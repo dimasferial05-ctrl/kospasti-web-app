@@ -14,8 +14,10 @@ import {
   ShieldCheck,
   CreditCard,
   RefreshCw,
+  Download,
 } from "lucide-react";
 import Link from "next/link";
+import { ExportFinancialModal } from "@/components/partner/ExportFinancialModal";
 
 interface PayoutRecord {
   id: string;
@@ -42,8 +44,10 @@ interface PayoutRecord {
 
 export default function PartnerPayoutsPage() {
   const [payouts, setPayouts] = useState<PayoutRecord[]>([]);
+  const [allBookings, setAllBookings] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [isExportModalOpen, setIsExportModalOpen] = useState(false);
 
   const fetchPayouts = async () => {
     try {
@@ -51,6 +55,17 @@ export default function PartnerPayoutsPage() {
       const data = await res.json();
       if (data.success && Array.isArray(data.data)) {
         setPayouts(data.data);
+      }
+
+      // Ambil seluruh data booking untuk kelengkapan ekspor finansial
+      try {
+        const bRes = await fetch("/api/partner/bookings");
+        const bData = await bRes.json();
+        if (bData.success && Array.isArray(bData.bookings)) {
+          setAllBookings(bData.bookings);
+        }
+      } catch {
+        // Fallback memakai data booking dari payout
       }
     } catch (err) {
       console.error("Gagal memuat daftar payout:", err);
@@ -109,11 +124,19 @@ export default function PartnerPayoutsPage() {
           </p>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 flex-wrap">
+          <button
+            type="button"
+            onClick={() => setIsExportModalOpen(true)}
+            className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold border border-emerald-600/40 bg-emerald-50 dark:bg-emerald-950/40 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 transition-colors shadow-2xs cursor-pointer active:scale-95"
+          >
+            <Download className="w-3.5 h-3.5" />
+            <span>Unduh Laporan Keuangan</span>
+          </button>
           <button
             onClick={handleRefresh}
             disabled={isRefreshing}
-            className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 transition-colors shadow-sm"
+            className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 transition-colors shadow-sm cursor-pointer"
           >
             <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? "animate-spin" : ""}`} />
             Refresh
@@ -282,6 +305,27 @@ export default function PartnerPayoutsPage() {
           </div>
         )}
       </div>
+
+      {/* Modal Ekspor Laporan Finansial */}
+      <ExportFinancialModal
+        isOpen={isExportModalOpen}
+        onClose={() => setIsExportModalOpen(false)}
+        bookings={
+          allBookings.length > 0
+            ? allBookings
+            : payouts.map((p) => ({
+                id: p.booking_id,
+                student_name: p.booking?.student_name,
+                student_whatsapp: p.booking?.student_whatsapp,
+                move_in_date: p.booking?.move_in_date,
+                created_at: p.created_at,
+                amount: p.amount,
+                status: p.status === "PAYOUT_PAID" ? "COMPLETED" : "PAYOUT_PENDING",
+                property: p.booking?.property,
+                payout: p,
+              }))
+        }
+      />
     </div>
   );
 }

@@ -22,7 +22,7 @@ import {
   Download,
 } from "lucide-react";
 import { HelpTooltip } from "@/components/ui/Tooltip";
-import { formatFinancialBookingsToCSV } from "@/lib/csv-export";
+import { ExportFinancialModal } from "@/components/partner/ExportFinancialModal";
 
 interface Booking {
   id: string;
@@ -68,6 +68,7 @@ export default function PartnerBookingsPage() {
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [confirmCheckinBooking, setConfirmCheckinBooking] = useState<Booking | null>(null);
   const [checkinLoading, setCheckinLoading] = useState(false);
+  const [isExportModalOpen, setIsExportModalOpen] = useState(false);
 
 
 
@@ -125,50 +126,6 @@ export default function PartnerBookingsPage() {
     } finally {
       setActionLoadingId(null);
     }
-  };
-
-
-
-  const handleExportFinancialCSV = () => {
-    if (bookings.length === 0) {
-      setErrorMsg("Belum ada data riwayat transaksi untuk diekspor.");
-      return;
-    }
-    if (filteredBookings.length === 0) {
-      setErrorMsg("Tidak ada data pesanan yang sesuai dengan filter saat ini untuk diekspor.");
-      return;
-    }
-    const exportData = filteredBookings.map((b) => ({
-      id: b.id,
-      student_name: b.student_name,
-      student_whatsapp: b.student_whatsapp,
-      whatsapp_number: b.student_whatsapp,
-      move_in_date: b.move_in_date,
-      status: b.status,
-      created_at: b.created_at,
-      amount: b.room_type?.price_per_month ?? b.property.price_per_month ?? 0,
-      cancellation_reason: b.cancellation_reason,
-      refund_note: b.refund_note,
-      property: {
-        name: b.property.name,
-      },
-      room_type: b.room_type
-        ? { name: b.room_type.name, price_per_month: b.room_type.price_per_month }
-        : null,
-    }));
-    const csvContent = formatFinancialBookingsToCSV(exportData);
-    const blob = new Blob(["\uFEFF" + csvContent], { type: "text/csv;charset=utf-8;" });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.setAttribute(
-      "download",
-      `Laporan_Keuangan_Mitra_${new Date().toISOString().split("T")[0]}.csv`
-    );
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
   };
 
   const filteredBookings = bookings.filter((b) => {
@@ -416,13 +373,13 @@ export default function PartnerBookingsPage() {
 
           <button
             type="button"
-            onClick={handleExportFinancialCSV}
+            onClick={() => setIsExportModalOpen(true)}
             disabled={bookings.length === 0}
             className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed text-white text-xs font-bold shadow-soft hover:shadow-float transition-all duration-200 cursor-pointer shrink-0"
-            title="Unduh rekapitulasi data pesanan dan rincian keuangan ke format CSV/Excel"
+            title="Unduh rekapitulasi data pesanan dan rincian keuangan ke format CSV/Excel atau PDF siap cetak"
           >
             <Download className="w-3.5 h-3.5" />
-            <span className="hidden sm:inline">Ekspor CSV</span>
+            <span className="hidden sm:inline">Unduh Laporan Keuangan</span>
           </button>
         </div>
       </div>
@@ -807,6 +764,12 @@ export default function PartnerBookingsPage() {
         </div>
       )}
 
+      {/* Modal Ekspor Laporan Keuangan Mitra */}
+      <ExportFinancialModal
+        isOpen={isExportModalOpen}
+        onClose={() => setIsExportModalOpen(false)}
+        bookings={bookings}
+      />
     </div>
   );
 }
