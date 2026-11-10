@@ -32,6 +32,7 @@ import PropertyLocationMap from "@/components/map/PropertyLocationMap";
 import { CampusCommuteEstimator, CommuteLocation } from "@/components/features/CampusCommuteEstimator";
 import { WishlistButton } from "@/components/features/WishlistButton";
 import { ReviewSection } from "@/components/features/ReviewSection";
+import { SimilarPropertiesSection } from "@/components/features/SimilarPropertiesSection";
 import { useFocusTrap } from "@/hooks/useFocusTrap";
 import { formatWhatsAppNumber } from "@/lib/whatsapp";
 import { buildSupportWhatsAppUrl } from "@/components/support/CustomerSupportWidget";
@@ -1590,6 +1591,17 @@ export default function PropertyDetailPage() {
             </div>
           </div>
         </div>
+      </div>
+
+      {/* ========================================================================= */}
+      {/* 2.5. REKOMENDASI KOS SERUPA DI SEKITAR AREA INI */}
+      {/* ========================================================================= */}
+      <div className="mt-12 pt-10 border-t border-slate-200/80 dark:border-slate-800">
+        <SimilarPropertiesSection
+          currentPropertyId={property.id}
+          propertyName={property.name}
+          isFullyBooked={property.available_rooms === 0}
+        />
       </div>
 
       {/* ========================================================================= */}
