@@ -29,6 +29,7 @@ import {
   Monitor,
   Download,
   MonitorSmartphone,
+  Scale,
 } from "lucide-react";
 import { useTheme } from "next-themes";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
@@ -514,6 +515,21 @@ export function Header({ isLoggedIn: initialIsLoggedIn = false }: HeaderProps) {
                         </Link>
 
                         <Link
+                          href="/compare"
+                          onClick={() => setIsDropdownOpen(false)}
+                          className={`flex items-center justify-between px-3 py-2 rounded-xl text-sm font-medium transition-colors ${
+                            pathname === "/compare"
+                              ? "bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 font-semibold"
+                              : "text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white"
+                          }`}
+                        >
+                          <div className="flex items-center gap-3">
+                            <Scale className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                            <span>Bandingkan Kos</span>
+                          </div>
+                        </Link>
+
+                        <Link
                           href="/bantuan"
                           onClick={() => setIsDropdownOpen(false)}
                           className={`flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium transition-colors ${
@@ -749,6 +765,18 @@ export function Header({ isLoggedIn: initialIsLoggedIn = false }: HeaderProps) {
                 >
                   <MapPin className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
                   <span>Peta Kos</span>
+                </Link>
+                <Link
+                  href="/compare"
+                  onClick={() => setIsMobileDrawerOpen(false)}
+                  className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold transition-colors ${
+                    pathname === "/compare"
+                      ? "bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300"
+                      : "text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800"
+                  }`}
+                >
+                  <Scale className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                  <span>Bandingkan Kos</span>
                 </Link>
                 <Link
                   href="/bantuan"

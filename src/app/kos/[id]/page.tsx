@@ -31,6 +31,7 @@ import {
 import PropertyLocationMap from "@/components/map/PropertyLocationMap";
 import { CampusCommuteEstimator, CommuteLocation } from "@/components/features/CampusCommuteEstimator";
 import { WishlistButton } from "@/components/features/WishlistButton";
+import { CompareButton } from "@/components/features/CompareButton";
 import { ReviewSection } from "@/components/features/ReviewSection";
 import { SimilarPropertiesSection } from "@/components/features/SimilarPropertiesSection";
 import { useFocusTrap } from "@/hooks/useFocusTrap";
@@ -685,6 +686,17 @@ export default function PropertyDetailPage() {
                 </>
               )}
             </button>
+            <CompareButton
+              property={{
+                id: property.id,
+                name: property.name,
+                price: property.price_per_month,
+                gender_type: property.gender_type,
+                image_url: property.image_url,
+                available_rooms: property.available_rooms,
+              }}
+              variant="button"
+            />
             <WishlistButton
               propertyId={property.id}
               initialIsSaved={isSaved}
