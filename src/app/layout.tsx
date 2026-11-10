@@ -4,6 +4,7 @@ import { cookies } from "next/headers";
 import { Header } from "@/components/layout/Header";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { ProfileCompletionModal } from "@/components/features/ProfileCompletionModal";
+import { CompareFloatingBar } from "@/components/features/CompareFloatingBar";
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
 import { PwaUpdater } from "@/components/pwa/PwaUpdater";
 import { NetworkStatusNotifier } from "@/components/pwa/NetworkStatusNotifier";
@@ -55,6 +56,7 @@ export default async function RootLayout({
           <NetworkStatusNotifier />
           <Header isLoggedIn={isLoggedIn} />
           <ProfileCompletionModal />
+          <CompareFloatingBar />
           <div className={`flex-1 flex flex-col ${isLoggedIn ? "pb-20 md:pb-0" : ""}`}>
             {children}
           </div>

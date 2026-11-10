@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Home, User, Clock, ChevronLeft, ChevronRight, Star, MapPin } from "lucide-react";
 import { WishlistButton } from "@/components/features/WishlistButton";
+import { CompareButton } from "@/components/features/CompareButton";
 
 export interface RoomTypeItem {
   id?: string;
@@ -280,9 +281,20 @@ export function KosPropertyCard({
           </div>
         )}
 
-        {/* Wishlist Button (Standalone button, z-20) */}
+        {/* Action Buttons: Compare & Wishlist (Standalone buttons, z-20) */}
         {id && (
-          <div className="absolute top-3 right-3 z-20">
+          <div className="absolute top-3 right-3 z-20 flex items-center gap-1.5">
+            <CompareButton
+              property={{
+                id,
+                name,
+                price,
+                gender_type: genderType,
+                image_url: imageUrl,
+                available_rooms: availableRooms,
+              }}
+              size="sm"
+            />
             <WishlistButton
               propertyId={id}
               initialIsSaved={isSaved}
