@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { verifyOwnerToken } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { createInAppNotification } from "@/lib/notifications";
 
 interface RouteProps {
   params: Promise<{ id: string }>;
@@ -117,6 +118,17 @@ export async function PATCH(request: NextRequest, props: RouteProps) {
         },
       },
     });
+
+    // Buat notifikasi In-App ke mahasiswa bahwa ulasannya dibalas oleh pemilik kos
+    if (review.user_id) {
+      await createInAppNotification({
+        userId: review.user_id,
+        title: "Pemilik Kos Membalas Ulasan Anda",
+        message: `Pengelola ${updatedReview.property.name} baru saja membalas ulasan Anda: "${reply.length > 80 ? reply.slice(0, 77) + "..." : reply}"`,
+        type: "REVIEW_REPLY",
+        link: `/kos/${updatedReview.property.id}#reviews`,
+      });
+    }
 
     return NextResponse.json({
       success: true,

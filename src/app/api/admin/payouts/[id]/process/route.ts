@@ -98,13 +98,14 @@ export async function POST(
       }),
     ]);
 
-    // Kirim notifikasi WA ke mitra
+    // Kirim notifikasi WA & In-App ke mitra
     await notifyPayoutProcessed({
       ownerName: payout.owner.name,
       ownerWhatsapp: payout.owner.whatsapp_number,
       amount: payout.amount,
       bankName: payoutMethod.bank_name,
       accountNumber: payoutMethod.account_number,
+      ownerId: payout.owner_id,
     });
 
     return NextResponse.json(

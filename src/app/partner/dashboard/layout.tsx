@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { Sidebar, SidebarBody, SidebarLink, type Links } from "@/components/ui/sidebar";
 import { SidebarThemeToggle } from "@/components/ui/SidebarThemeToggle";
+import { NotificationBell } from "@/components/notifications/NotificationBell";
 import { motion } from "motion/react";
 
 interface PartnerInfo {
@@ -274,6 +275,19 @@ export default function PartnerDashboardLayout({
 
       {/* Main Content */}
       <main className="flex-1 overflow-y-auto p-4 md:p-8 bg-slate-50/70 dark:bg-slate-950">
+        <div className="flex items-center justify-end mb-4">
+          <div className="flex items-center gap-3">
+            {partner && (
+              <span className="hidden sm:inline-flex items-center gap-1.5 text-xs font-medium text-slate-500 dark:text-slate-400">
+                Portal Mitra:
+                <strong className="text-slate-800 dark:text-slate-200 font-bold">
+                  {partner.name}
+                </strong>
+              </span>
+            )}
+            <NotificationBell audience="OWNER" />
+          </div>
+        </div>
         {children}
       </main>
     </div>

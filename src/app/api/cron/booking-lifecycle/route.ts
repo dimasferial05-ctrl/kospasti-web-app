@@ -56,7 +56,7 @@ async function executeBookingLifecycleRoutine(request: Request) {
     let remindersSent = 0;
     for (const booking of reminderBookings) {
       try {
-        // Kirim WhatsApp ke mahasiswa
+        // Kirim WhatsApp & Notifikasi In-App ke mahasiswa
         await notifyMoveInReminder({
           tenantName: booking.student_name,
           tenantWhatsapp: booking.student_whatsapp,
@@ -66,6 +66,7 @@ async function executeBookingLifecycleRoutine(request: Request) {
           ownerName: booking.property.owner?.name,
           ownerWhatsapp: booking.property.owner?.whatsapp_number,
           bookingId: booking.id,
+          userId: booking.user_id,
         });
 
         // Kirim Email jika mahasiswa memiliki alamat email terdaftar
@@ -131,6 +132,8 @@ async function executeBookingLifecycleRoutine(request: Request) {
           tenantWhatsapp: booking.student_whatsapp,
           propertyName: booking.property.name,
           checkinTime: now,
+          userId: booking.user_id,
+          bookingId: booking.id,
         });
       } catch (err) {
         console.error(`[CRON LIFECYCLE] Gagal auto check-in booking ${booking.id}:`, err);
@@ -162,13 +165,14 @@ async function executeBookingLifecycleRoutine(request: Request) {
     let reviewPromptsSent = 0;
     for (const booking of reviewPromptBookings) {
       try {
-        // Kirim WhatsApp ajakan ulasan
+        // Kirim WhatsApp & Notifikasi In-App ajakan ulasan
         await notifyReviewPrompt({
           tenantName: booking.student_name,
           tenantWhatsapp: booking.student_whatsapp,
           propertyName: booking.property.name,
           propertyId: booking.property_id,
           bookingId: booking.id,
+          userId: booking.user_id,
         });
 
         // Kirim Email ajakan ulasan jika ada email mahasiswa

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { prisma } from "@/lib/prisma";
 import { verifyUserToken } from "@/lib/auth";
+import { createInAppNotification } from "@/lib/notifications";
 
 async function authenticateUser(request?: NextRequest) {
   const cookieStore = await cookies();
@@ -246,8 +247,25 @@ export async function POST(
             avatar: true,
           },
         },
+        property: {
+          select: {
+            name: true,
+            owner_id: true,
+          },
+        },
       },
     });
+
+    // Kirim notifikasi ke mitra pemilik kos bahwa propertinya mendapat ulasan baru
+    if (newReview.property?.owner_id) {
+      await createInAppNotification({
+        ownerId: newReview.property.owner_id,
+        title: `Ulasan Baru (${newReview.rating}/5 Bintang)`,
+        message: `${newReview.user?.name || "Seorang penyewa"} baru saja mengulas ${newReview.property.name}${newReview.comment ? `: "${newReview.comment.slice(0, 70)}"` : "."}`,
+        type: "REVIEW_REPLY",
+        link: "/partner/dashboard/reviews",
+      });
+    }
 
     return NextResponse.json(
       {

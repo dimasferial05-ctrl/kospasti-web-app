@@ -91,12 +91,14 @@ export async function POST(
       },
     });
 
-    // Kirim notifikasi WA ke penyewa
+    // Kirim notifikasi WA & In-App ke penyewa
     await notifyCheckinConfirmed({
       tenantName: booking.student_name,
       tenantWhatsapp: booking.student_whatsapp,
       propertyName: booking.property.name,
       checkinTime: now,
+      userId: booking.user_id,
+      bookingId: booking.id,
     });
 
     return NextResponse.json(

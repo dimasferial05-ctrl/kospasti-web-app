@@ -23,6 +23,7 @@ model Owner {
   magic_links     MagicLink[]
   payout_method   PayoutMethod?
   payouts         Payout[]
+  notifications   Notification[]
 }
 
 model Property {
@@ -147,6 +148,7 @@ model User {
   bookings         Booking[]
   saved_properties SavedProperty[]
   reviews          Review[]
+  notifications    Notification[]
 }
 
 model SavedProperty {
@@ -234,4 +236,24 @@ model Location {
   @@index([category])
   @@index([subdistrict])
 }
+
+model Notification {
+  id         String    @id @default(uuid())
+  user_id    String?
+  user       User?     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  owner_id   String?
+  owner      Owner?    @relation(fields: [owner_id], references: [id], onDelete: Cascade)
+  title      String
+  message    String
+  type       String    // "BOOKING_STATUS" | "PAYMENT_SUCCESS" | "CHECKIN_REMINDER" | "REVIEW_REPLY" | "PAYOUT_UPDATE" | "SYSTEM"
+  link       String?
+  is_read    Boolean   @default(false)
+  read_at    DateTime?
+  created_at DateTime  @default(now())
+
+  @@index([user_id, is_read])
+  @@index([owner_id, is_read])
+  @@index([created_at])
+}
+
 
