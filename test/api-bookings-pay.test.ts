@@ -2,6 +2,12 @@ import { describe, it, expect, beforeEach, vi } from "vitest";
 import { POST } from "../src/app/api/bookings/[id]/pay/route";
 import { prisma } from "../src/lib/prisma";
 import { clearDatabase } from "./helpers";
+import * as nextHeaders from "next/headers";
+import { signUserToken } from "../src/lib/auth";
+
+vi.mock("next/headers", () => ({
+  cookies: vi.fn(),
+}));
 
 describe("POST /api/bookings/[id]/pay", () => {
   beforeEach(async () => {
@@ -9,6 +15,28 @@ describe("POST /api/bookings/[id]/pay", () => {
     vi.restoreAllMocks();
     delete process.env.FONNTE_TOKEN;
     delete process.env.WHATSAPP_TOKEN;
+
+    const user = await prisma.user.create({
+      data: {
+        name: "Ahmad Dahlan",
+        email: "pay-tester@example.com",
+        password: "hashedpassword123",
+        whatsapp: "089876543210",
+      },
+    });
+
+    const validUserToken = await signUserToken({
+      userId: user.id,
+      email: user.email,
+      name: user.name,
+      whatsapp: user.whatsapp,
+    });
+
+    (nextHeaders.cookies as unknown as ReturnType<typeof vi.fn>).mockResolvedValue({
+      get: vi.fn().mockImplementation((name: string) =>
+        name === "user_token" ? { value: validUserToken } : undefined
+      ),
+    });
   });
 
   describe("Skenario Sukses", () => {
