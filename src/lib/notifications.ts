@@ -7,6 +7,7 @@ export type NotificationType =
   | "CHECKIN_REMINDER"
   | "REVIEW_REPLY"
   | "PAYOUT_UPDATE"
+  | "VISIT_SCHEDULE"
   | "SYSTEM";
 
 export interface CreateInAppNotificationParams {
@@ -273,4 +274,169 @@ export async function notifyEscrowReleased(params: {
   } catch (err) {
     console.error("[NOTIFICATION ERROR] Gagal mengirim pesan WA pelepasan escrow:", err);
   }
+}
+
+export async function notifyVisitRequested(params: {
+  visitId: string;
+  propertyId: string;
+  propertyName: string;
+  ownerId: string;
+  ownerName: string;
+  ownerWhatsapp?: string | null;
+  userId?: string | null;
+  studentName: string;
+  studentWhatsapp: string;
+  visitDateFormatted: string;
+  visitTimeSlot: string;
+  notes?: string | null;
+  verificationUrl: string;
+}) {
+  const tasks: Promise<unknown>[] = [];
+
+  tasks.push(
+    createInAppNotification({
+      ownerId: params.ownerId,
+      title: "Permintaan Survei Lokasi Baru",
+      message: `${params.studentName} mengajukan survei kos di ${params.propertyName} pada ${params.visitDateFormatted} (${params.visitTimeSlot}).`,
+      type: "VISIT_SCHEDULE",
+      link: "/partner/dashboard/visits",
+    })
+  );
+
+  if (params.userId) {
+    tasks.push(
+      createInAppNotification({
+        userId: params.userId,
+        title: "Jadwal Survei Diajukan",
+        message: `Permintaan survei lokasi di ${params.propertyName} (${params.visitDateFormatted}, ${params.visitTimeSlot}) telah dikirim ke pemilik kos.`,
+        type: "VISIT_SCHEDULE",
+        link: "/profil?tab=visits",
+      })
+    );
+  }
+
+  if (params.ownerWhatsapp) {
+    const ownerMessage = [
+      `Halo Bapak/Ibu *${params.ownerName}*,`,
+      ``,
+      `Ada calon penyewa yang ingin *Survei Lokasi Kos* di *${params.propertyName}*:`,
+      `Nama: *${params.studentName}*`,
+      `WhatsApp: ${params.studentWhatsapp}`,
+      `Tanggal: *${params.visitDateFormatted}*`,
+      `Jam Kunjungan: *${params.visitTimeSlot}*`,
+      params.notes ? `Catatan: ${params.notes}` : ``,
+      ``,
+      `Klik tautan satu-klik berikut (tanpa perlu login) untuk *Terima*, *Tolak*, atau *Jadwalkan Ulang*:`,
+      `${params.verificationUrl}`,
+      ``,
+      `_Tautan ini berlaku selama 48 jam._`,
+    ]
+      .filter(Boolean)
+      .join("\n");
+
+    tasks.push(
+      sendWhatsAppMessage({
+        to: params.ownerWhatsapp,
+        message: ownerMessage,
+      }).catch((err) => {
+        console.error("[NOTIFICATION ERROR] Gagal mengirim WA pengajuan survei:", err);
+      })
+    );
+  }
+
+  await Promise.all(tasks);
+}
+
+export async function notifyVisitDecision(params: {
+  action: "ACCEPT" | "REJECT" | "RESCHEDULE";
+  propertyId: string;
+  propertyName: string;
+  propertyAddress?: string | null;
+  ownerName: string;
+  ownerWhatsapp?: string | null;
+  userId?: string | null;
+  studentName: string;
+  studentWhatsapp: string;
+  visitDateFormatted: string;
+  visitTimeSlot: string;
+  rescheduleDateFormatted?: string | null;
+  rescheduleTimeSlot?: string | null;
+  note?: string | null;
+}) {
+  const tasks: Promise<unknown>[] = [];
+
+  let inAppTitle = "Pembaruan Jadwal Survei";
+  let inAppMessage = "";
+  let waLines: string[] = [];
+
+  if (params.action === "ACCEPT") {
+    inAppTitle = "Jadwal Survei Disetujui";
+    inAppMessage = `Pemilik ${params.propertyName} (${params.ownerName}) menyetujui jadwal survei Anda pada ${params.visitDateFormatted} pukul ${params.visitTimeSlot}.`;
+    waLines = [
+      `Halo *${params.studentName}*,`,
+      ``,
+      `Kabar baik! Jadwal survei lokasi Anda di *${params.propertyName}* telah *DISETUJUI* oleh pemilik kos (*${params.ownerName}*).`,
+      ``,
+      `Detail Kunjungan:`,
+      `Tanggal: *${params.visitDateFormatted}*`,
+      `Jam: *${params.visitTimeSlot}*`,
+      `Alamat: ${params.propertyAddress || "Lihat detail lokasi di halaman KosPasti"}`,
+      params.ownerWhatsapp ? `Kontak Pengelola: ${params.ownerWhatsapp}` : ``,
+      params.note ? `Catatan Pemilik: ${params.note}` : ``,
+      ``,
+      `Jika ingin langsung mengamankan kamar setelah survei, gunakan tombol *Amankan Kamar* di KosPasti untuk perlindungan Escrow 12 jam!`,
+    ];
+  } else if (params.action === "RESCHEDULE") {
+    inAppTitle = "Pemilik Mengusulkan Jadwal Survei Baru";
+    inAppMessage = `Pemilik ${params.propertyName} mengusulkan jadwal ulang survei ke ${params.rescheduleDateFormatted || params.visitDateFormatted} (${params.rescheduleTimeSlot || params.visitTimeSlot}).`;
+    waLines = [
+      `Halo *${params.studentName}*,`,
+      ``,
+      `Pemilik *${params.propertyName}* (*${params.ownerName}*) mengusulkan *JADWAL ULANG* untuk survei lokasi Anda.`,
+      ``,
+      `Usulan Jadwal Baru:`,
+      `Tanggal: *${params.rescheduleDateFormatted || params.visitDateFormatted}*`,
+      `Jam: *${params.rescheduleTimeSlot || params.visitTimeSlot}*`,
+      params.note ? `Catatan Pemilik: ${params.note}` : ``,
+      params.ownerWhatsapp ? `Hubungi Pengelola via WA: ${params.ownerWhatsapp}` : ``,
+      ``,
+      `Anda juga dapat mengajukan jadwal lain di halaman KosPasti jika waktu tersebut belum sesuai.`,
+    ];
+  } else {
+    inAppTitle = "Jadwal Survei Belum Dapat Dipenuhi";
+    inAppMessage = `Mohon maaf, pengajuan survei di ${params.propertyName} pada ${params.visitDateFormatted} ditolak.${params.note ? ` Alasan: ${params.note}` : ""}`;
+    waLines = [
+      `Halo *${params.studentName}*,`,
+      ``,
+      `Mohon maaf, jadwal survei lokasi Anda di *${params.propertyName}* pada ${params.visitDateFormatted} (${params.visitTimeSlot}) belum dapat disetujui oleh pemilik kos (*${params.ownerName}*).`,
+      params.note ? `Alasan: ${params.note}` : ``,
+      ``,
+      `Anda dapat mencoba memilih hari lain atau jelajahi kos nyaman lainnya di KosPasti.`,
+    ];
+  }
+
+  if (params.userId) {
+    tasks.push(
+      createInAppNotification({
+        userId: params.userId,
+        title: inAppTitle,
+        message: inAppMessage,
+        type: "VISIT_SCHEDULE",
+        link: "/profil?tab=visits",
+      })
+    );
+  }
+
+  if (params.studentWhatsapp) {
+    tasks.push(
+      sendWhatsAppMessage({
+        to: params.studentWhatsapp,
+        message: waLines.filter(Boolean).join("\n"),
+      }).catch((err) => {
+        console.error("[NOTIFICATION ERROR] Gagal mengirim WA keputusan survei:", err);
+      })
+    );
+  }
+
+  await Promise.all(tasks);
 }

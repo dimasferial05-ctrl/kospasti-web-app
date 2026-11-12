@@ -7,6 +7,7 @@ import {
   BellOff,
   CheckCheck,
   CalendarCheck,
+  CalendarClock,
   CreditCard,
   Clock,
   MessageSquare,
@@ -206,6 +207,12 @@ export function NotificationBell({
         return (
           <div className="w-8 h-8 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200/80 dark:border-emerald-800/80 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
             <Wallet className="w-4 h-4" />
+          </div>
+        );
+      case "VISIT_SCHEDULE":
+        return (
+          <div className="w-8 h-8 rounded-xl bg-teal-50 dark:bg-teal-950/60 border border-teal-200/80 dark:border-teal-800/80 text-teal-600 dark:text-teal-400 flex items-center justify-center shrink-0">
+            <CalendarClock className="w-4 h-4" />
           </div>
         );
       default:

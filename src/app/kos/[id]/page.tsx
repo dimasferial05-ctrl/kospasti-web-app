@@ -27,6 +27,7 @@ import {
   BadgeCheck,
   MessageCircle,
   Share2,
+  CalendarClock,
 } from "lucide-react";
 import PropertyLocationMap from "@/components/map/PropertyLocationMap";
 import { CampusCommuteEstimator, CommuteLocation } from "@/components/features/CampusCommuteEstimator";
@@ -34,6 +35,7 @@ import { WishlistButton } from "@/components/features/WishlistButton";
 import { CompareButton } from "@/components/features/CompareButton";
 import { ReviewSection } from "@/components/features/ReviewSection";
 import { SimilarPropertiesSection } from "@/components/features/SimilarPropertiesSection";
+import { ScheduleVisitModal } from "@/components/features/ScheduleVisitModal";
 import { useFocusTrap } from "@/hooks/useFocusTrap";
 import { formatWhatsAppNumber } from "@/lib/whatsapp";
 import { buildSupportWhatsAppUrl } from "@/components/support/CustomerSupportWidget";
@@ -138,6 +140,7 @@ export default function PropertyDetailPage() {
 
   // Booking Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isVisitModalOpen, setIsVisitModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isCheckingAuth, setIsCheckingAuth] = useState(false);
   const [bookingError, setBookingError] = useState<string | null>(null);
@@ -1560,6 +1563,17 @@ export default function PropertyDetailPage() {
 
                 <button
                   type="button"
+                  onClick={() => setIsVisitModalOpen(true)}
+                  className="lg:hidden p-2.5 sm:px-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-100 text-xs font-bold transition-all duration-200 active:scale-95 shrink-0 flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs"
+                  title="Jadwalkan Survei Lokasi"
+                  aria-label="Jadwalkan Survei Lokasi"
+                >
+                  <CalendarClock className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                  <span className="hidden sm:inline">Survei</span>
+                </button>
+
+                <button
+                  type="button"
                   disabled={isFull || isCheckingAuth}
                   onClick={() => handleOpenBookingModal()}
                   className={`px-5 sm:px-6 py-2.5 lg:py-3.5 w-full rounded-xl font-bold text-white transition-all duration-200 cursor-pointer shadow-sm ${
@@ -1575,6 +1589,16 @@ export default function PropertyDetailPage() {
                     : "Amankan Kamar"}
                 </button>
               </div>
+
+              {/* Tombol Sekunder Desktop: Jadwalkan Survei Lokasi */}
+              <button
+                type="button"
+                onClick={() => setIsVisitModalOpen(true)}
+                className="hidden lg:flex w-full py-2.5 px-4 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-100 text-sm font-bold items-center justify-center gap-2 transition-all duration-200 active:scale-95 cursor-pointer shadow-2xs focus:outline-none focus:ring-2 focus:ring-emerald-500/40"
+              >
+                <CalendarClock className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                <span>Jadwalkan Survei Lokasi</span>
+              </button>
 
               {/* Jaminan KosPasti */}
               <div className="hidden lg:flex flex-col gap-2 pt-3 border-t border-slate-100 dark:border-slate-800 text-[11px] text-slate-500 dark:text-slate-400 w-full">
@@ -1930,7 +1954,18 @@ export default function PropertyDetailPage() {
           </div>
         </div>
       )}
-    
+
+      {/* ========================================================================= */}
+      {/* 6. MODAL JADWALKAN SURVEI LOKASI                                         */}
+      {/* ========================================================================= */}
+      <ScheduleVisitModal
+        isOpen={isVisitModalOpen}
+        onClose={() => setIsVisitModalOpen(false)}
+        propertyId={property.id}
+        propertyName={property.name}
+        propertyAddress={property.address}
+      />
+
     </div>
   );
 }

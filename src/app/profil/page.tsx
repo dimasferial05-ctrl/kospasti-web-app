@@ -16,6 +16,7 @@ import {
   CheckCircle2,
   AlertCircle,
   Calendar,
+  CalendarClock,
   MapPin,
   Building,
   ArrowRight,
@@ -31,6 +32,11 @@ import {
 } from "lucide-react";
 import { useTheme } from "next-themes";
 import { HelpTooltip } from "@/components/ui/Tooltip";
+import {
+  VISIT_STATUS_LABELS,
+  VisitStatus,
+  formatVisitDateId,
+} from "@/lib/visit-schedule";
 
 interface UserProfile {
   id: string;
@@ -72,15 +78,43 @@ interface BookingItem {
   property: BookingProperty;
 }
 
+interface VisitScheduleItem {
+  id: string;
+  student_name: string;
+  student_whatsapp: string;
+  visit_date: string;
+  visit_time_slot: string;
+  notes: string | null;
+  status: string;
+  reschedule_date: string | null;
+  reschedule_time_slot: string | null;
+  reschedule_note: string | null;
+  cancellation_reason: string | null;
+  created_at: string;
+  property: {
+    id: string;
+    name: string;
+    address: string | null;
+    image_url: string | null;
+    price_per_month: number;
+    owner?: {
+      name: string;
+      whatsapp_number: string;
+    };
+  };
+}
+
 function ProfileContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const queryTab = searchParams.get("tab") === "bookings" ? "bookings" : "profile";
-  const [manualTab, setManualTab] = useState<"profile" | "bookings" | null>(null);
+  const rawTab = searchParams.get("tab");
+  const queryTab: "profile" | "bookings" | "visits" =
+    rawTab === "bookings" ? "bookings" : rawTab === "visits" ? "visits" : "profile";
+  const [manualTab, setManualTab] = useState<"profile" | "bookings" | "visits" | null>(null);
   const activeTab = manualTab ?? queryTab;
-  const setActiveTab = (tab: "profile" | "bookings") => setManualTab(tab);
+  const setActiveTab = (tab: "profile" | "bookings" | "visits") => setManualTab(tab);
 
   const { theme, setTheme } = useTheme();
   const themeMounted = useSyncExternalStore(
@@ -110,6 +144,11 @@ function ProfileContent() {
   const [bookings, setBookings] = useState<BookingItem[]>([]);
   const [isLoadingBookings, setIsLoadingBookings] = useState(false);
   const [bookingsLoaded, setBookingsLoaded] = useState(false);
+
+  // Visit Schedules State
+  const [visits, setVisits] = useState<VisitScheduleItem[]>([]);
+  const [isLoadingVisits, setIsLoadingVisits] = useState(false);
+  const [visitsLoaded, setVisitsLoaded] = useState(false);
 
   // Cancellation Modal State
   const [cancellingBooking, setCancellingBooking] = useState<BookingItem | null>(null);
@@ -216,6 +255,39 @@ function ProfileContent() {
       isMounted = false;
     };
   }, [activeTab, bookingsLoaded, router]);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    async function fetchVisits() {
+      if (visitsLoaded) return;
+      try {
+        setIsLoadingVisits(true);
+        const res = await fetch("/api/visits?audience=USER");
+        if (res.status === 401) {
+          router.push("/login");
+          return;
+        }
+        const data = await res.json();
+        if (isMounted && data.success && Array.isArray(data.visits)) {
+          setVisits(data.visits);
+          setVisitsLoaded(true);
+        }
+      } catch (error) {
+        console.error("Gagal mengambil jadwal survei:", error);
+      } finally {
+        if (isMounted) setIsLoadingVisits(false);
+      }
+    }
+
+    if (activeTab === "visits") {
+      fetchVisits();
+    }
+
+    return () => {
+      isMounted = false;
+    };
+  }, [activeTab, visitsLoaded, router]);
 
   // Handle Avatar Selection
   const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -638,6 +710,23 @@ function ProfileContent() {
               >
                 <History className="w-4 h-4" />
                 <span>Riwayat Pesanan</span>
+              </button>
+
+              <button
+                type="button"
+                role="tab"
+                id="tab-visits"
+                aria-selected={activeTab === "visits"}
+                aria-controls="panel-visits"
+                onClick={() => setActiveTab("visits")}
+                className={`flex-1 lg:flex-none flex items-center justify-center lg:justify-start gap-2.5 px-4 py-3 rounded-xl text-sm font-semibold transition-colors cursor-pointer whitespace-nowrap focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 ${
+                  activeTab === "visits"
+                    ? "bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800"
+                    : "text-slate-650 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white"
+                }`}
+              >
+                <CalendarClock className="w-4 h-4" />
+                <span>Jadwal Survei</span>
               </button>
 
               <hr className="my-1 border-slate-100 dark:border-slate-800 hidden lg:block" />
@@ -1695,6 +1784,145 @@ function ProfileContent() {
                     </div>
                   </form>
                 </div>
+              </div>
+            )}
+
+            {/* TAB 3: JADWAL SURVEI LOKASI */}
+            {activeTab === "visits" && (
+              <div
+                role="tabpanel"
+                id="panel-visits"
+                aria-labelledby="tab-visits"
+                tabIndex={0}
+                className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 sm:p-8 shadow-sm focus:outline-none"
+              >
+                <div className="border-b border-slate-100 dark:border-slate-800 pb-4 mb-6">
+                  <h2 className="text-lg font-bold text-slate-900 dark:text-white">
+                    Jadwal Survei Lokasi Kos
+                  </h2>
+                  <p className="text-sm text-slate-500 dark:text-slate-400">
+                    Pantau status persetujuan survei lokasi dari pemilik kos sebelum melakukan booking.
+                  </p>
+                </div>
+
+                {isLoadingVisits ? (
+                  <div className="py-12 flex flex-col items-center justify-center text-slate-500 dark:text-slate-400">
+                    <Loader2 className="w-7 h-7 animate-spin text-emerald-600 mb-2" />
+                    <p className="text-sm">Memuat jadwal survei...</p>
+                  </div>
+                ) : visits.length === 0 ? (
+                  <div className="py-12 px-4 text-center border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-2xl">
+                    <div className="w-14 h-14 bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-500 rounded-full flex items-center justify-center mx-auto mb-3">
+                      <CalendarClock className="w-7 h-7" />
+                    </div>
+                    <h3 className="text-base font-bold text-slate-800 dark:text-slate-200">
+                      Belum Ada Jadwal Survei
+                    </h3>
+                    <p className="text-sm text-slate-500 dark:text-slate-400 max-w-sm mx-auto mt-1 mb-5">
+                      Anda dapat menjadwalkan survei langsung dari halaman detail kos pilihan Anda.
+                    </p>
+                    <Link
+                      href="/search"
+                      className="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-semibold text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl shadow-sm transition-colors"
+                    >
+                      <span>Cari Kos Sekarang</span>
+                      <ArrowRight className="w-4 h-4" />
+                    </Link>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {visits.map((visit) => {
+                      const statusLabel =
+                        VISIT_STATUS_LABELS[visit.status as VisitStatus] || visit.status;
+                      return (
+                        <div
+                          key={visit.id}
+                          className="border border-slate-200 dark:border-slate-800 rounded-2xl p-4 sm:p-5 bg-white dark:bg-slate-900/60 flex flex-col gap-3"
+                        >
+                          <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
+                            <div className="space-y-1">
+                              <Link
+                                href={`/kos/${visit.property.id}`}
+                                className="font-bold text-slate-900 dark:text-white text-base hover:text-emerald-600 transition-colors"
+                              >
+                                {visit.property.name}
+                              </Link>
+                              {visit.property.address && (
+                                <p className="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-1">
+                                  <MapPin className="w-3.5 h-3.5 shrink-0" />
+                                  <span>{visit.property.address}</span>
+                                </p>
+                              )}
+                              <div className="flex flex-wrap items-center gap-3 text-xs text-slate-600 dark:text-slate-300 pt-1">
+                                <span className="flex items-center gap-1 font-semibold">
+                                  <Calendar className="w-3.5 h-3.5 text-emerald-600" />
+                                  <span>{formatVisitDateId(visit.visit_date)}</span>
+                                </span>
+                                <span className="flex items-center gap-1">
+                                  <Clock className="w-3.5 h-3.5 text-slate-400" />
+                                  <span>{visit.visit_time_slot} WIB</span>
+                                </span>
+                              </div>
+                            </div>
+
+                            <span
+                              className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-bold shrink-0 self-start border ${
+                                visit.status === "ACCEPTED"
+                                  ? "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/60 dark:text-emerald-300 dark:border-emerald-800"
+                                  : visit.status === "RESCHEDULED"
+                                  ? "bg-sky-50 text-sky-700 border-sky-200 dark:bg-sky-950/60 dark:text-sky-300 dark:border-sky-800"
+                                  : visit.status === "REJECTED" || visit.status === "CANCELLED"
+                                  ? "bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-950/60 dark:text-rose-300 dark:border-rose-800"
+                                  : "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/60 dark:text-amber-300 dark:border-amber-800"
+                              }`}
+                            >
+                              {statusLabel}
+                            </span>
+                          </div>
+
+                          {visit.status === "RESCHEDULED" && visit.reschedule_date && (
+                            <div className="p-3 rounded-xl bg-sky-50 dark:bg-sky-950/40 border border-sky-200 dark:border-sky-800 text-xs text-sky-900 dark:text-sky-200">
+                              <p className="font-bold">Usulan Jadwal Baru dari Pemilik:</p>
+                              <p className="mt-0.5">
+                                {formatVisitDateId(visit.reschedule_date)} ({visit.reschedule_time_slot} WIB)
+                              </p>
+                              {visit.reschedule_note && (
+                                <p className="mt-1 italic">&quot;{visit.reschedule_note}&quot;</p>
+                              )}
+                            </div>
+                          )}
+
+                          {visit.status === "REJECTED" && visit.cancellation_reason && (
+                            <div className="p-3 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 text-xs text-rose-800 dark:text-rose-200">
+                              <strong>Catatan Pemilik:</strong> {visit.cancellation_reason}
+                            </div>
+                          )}
+
+                          <div className="flex flex-wrap items-center justify-end gap-2 pt-2 border-t border-slate-100 dark:border-slate-800">
+                            {visit.property.owner?.whatsapp_number && (
+                              <a
+                                href={`https://wa.me/${visit.property.owner.whatsapp_number.replace(/\D/g, "")}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
+                              >
+                                <Phone className="w-3.5 h-3.5 text-emerald-600" />
+                                <span>Chat Pemilik</span>
+                              </a>
+                            )}
+                            <Link
+                              href={`/kos/${visit.property.id}`}
+                              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition-colors"
+                            >
+                              <span>Lihat Kos / Booking</span>
+                              <ArrowRight className="w-3.5 h-3.5" />
+                            </Link>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
             )}
           </main>

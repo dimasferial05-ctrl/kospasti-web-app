@@ -240,4 +240,16 @@ body:has(#kos-detail-page) nav[aria-label="Mobile Navigation Bar"] {
   display: none !important;
 }
 
+/* Mencegah halaman di belakang <dialog> ikut ter-scroll (Modern Web Guidance) */
+dialog:modal {
+  overscroll-behavior: contain;
+}
+
+dialog::backdrop {
+  overflow: hidden;
+  overscroll-behavior: contain;
+  background-color: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(2px);
+}
+
 
