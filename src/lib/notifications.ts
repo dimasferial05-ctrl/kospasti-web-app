@@ -440,3 +440,70 @@ export async function notifyVisitDecision(params: {
 
   await Promise.all(tasks);
 }
+
+export async function notifyVisitRescheduledByStudent(params: {
+  propertyName: string;
+  ownerId: string;
+  ownerName: string;
+  ownerWhatsapp?: string | null;
+  userId?: string | null;
+  studentName: string;
+  studentWhatsapp: string;
+  newVisitDateFormatted: string;
+  newVisitTimeSlot: string;
+  note?: string | null;
+  verificationUrl: string;
+}) {
+  const tasks: Promise<unknown>[] = [];
+
+  tasks.push(
+    createInAppNotification({
+      ownerId: params.ownerId,
+      title: "Perubahan Jadwal Survei dari Calon Penyewa",
+      message: `${params.studentName} mengubah jadwal survei di ${params.propertyName} menjadi ${params.newVisitDateFormatted} (${params.newVisitTimeSlot}). Mohon konfirmasi ulang.`,
+      type: "VISIT_SCHEDULE",
+      link: "/partner/dashboard/visits",
+    })
+  );
+
+  if (params.userId) {
+    tasks.push(
+      createInAppNotification({
+        userId: params.userId,
+        title: "Perubahan Jadwal Survei Dikirim",
+        message: `Usulan jadwal baru di ${params.propertyName} (${params.newVisitDateFormatted}, ${params.newVisitTimeSlot}) telah dikirim ke pemilik kos.`,
+        type: "VISIT_SCHEDULE",
+        link: "/profil?tab=visits",
+      })
+    );
+  }
+
+  if (params.ownerWhatsapp) {
+    const ownerMessage = [
+      `Halo Bapak/Ibu *${params.ownerName}*,`,
+      ``,
+      `Calon penyewa *${params.studentName}* (${params.studentWhatsapp}) mengajukan *PERUBAHAN JADWAL SURVEI* di *${params.propertyName}*:`,
+      `Tanggal Baru: *${params.newVisitDateFormatted}*`,
+      `Jam Kunjungan Baru: *${params.newVisitTimeSlot}*`,
+      params.note ? `Alasan / Catatan: ${params.note}` : ``,
+      ``,
+      `Silakan konfirmasi ulang (*Terima*, *Tolak*, atau *Jadwalkan Ulang*) melalui tautan berikut:`,
+      `${params.verificationUrl}`,
+      ``,
+      `_Tautan berlaku selama 48 jam._`,
+    ]
+      .filter(Boolean)
+      .join("\n");
+
+    tasks.push(
+      sendWhatsAppMessage({
+        to: params.ownerWhatsapp,
+        message: ownerMessage,
+      }).catch((err) => {
+        console.error("[NOTIFICATION ERROR] Gagal mengirim WA ubah jadwal survei:", err);
+      })
+    );
+  }
+
+  await Promise.all(tasks);
+}

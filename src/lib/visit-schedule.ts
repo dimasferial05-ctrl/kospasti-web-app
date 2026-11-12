@@ -28,6 +28,27 @@ export const VISIT_STATUS_LABELS: Record<VisitStatus, string> = {
   COMPLETED: "Survei Selesai",
 };
 
+export const MAX_STUDENT_VISIT_RESCHEDULES = 1;
+
+export const STUDENT_RESCHEDULABLE_VISIT_STATUSES: ReadonlyArray<VisitStatus> = [
+  "PENDING",
+  "ACCEPTED",
+  "RESCHEDULED",
+];
+
+/**
+ * Mengecek apakah jadwal survei masih dapat dijadwalkan ulang oleh calon penyewa.
+ */
+export function canStudentRescheduleVisit(
+  status: string,
+  studentRescheduleCount = 0
+): boolean {
+  return (
+    STUDENT_RESCHEDULABLE_VISIT_STATUSES.includes(status as VisitStatus) &&
+    studentRescheduleCount < MAX_STUDENT_VISIT_RESCHEDULES
+  );
+}
+
 export const INDONESIAN_WA_REGEX = /^(?:\+62|62|0)8[0-9]{8,11}$/;
 
 /**

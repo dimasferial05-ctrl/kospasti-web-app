@@ -272,10 +272,11 @@ model VisitSchedule {
   visit_time_slot      String
   notes                String?
   status               String      @default("PENDING") // "PENDING" | "ACCEPTED" | "REJECTED" | "RESCHEDULED" | "CANCELLED" | "COMPLETED"
-  reschedule_date      DateTime?
-  reschedule_time_slot String?
-  reschedule_note      String?
-  cancellation_reason  String?
+  reschedule_date          DateTime?
+  reschedule_time_slot     String?
+  reschedule_note          String?
+  student_reschedule_count Int         @default(0)
+  cancellation_reason      String?
   created_at           DateTime    @default(now())
   updated_at           DateTime    @updatedAt
   magic_links          MagicLink[]

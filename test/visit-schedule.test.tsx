@@ -65,6 +65,7 @@ vi.mock("@/lib/prisma", () => ({
 import {
   isValidIndonesianWhatsApp,
   getIndonesianWhatsAppVariants,
+  canStudentRescheduleVisit,
   parseVisitDateInput,
   isPastVisitDate,
   getTodayWibDateString,
@@ -74,6 +75,7 @@ import { POST as createVisit, GET as listVisits } from "@/app/api/visits/route";
 import { GET as validateVisitToken } from "@/app/api/magic-link/visit/validate/route";
 import { POST as decideVisitToken } from "@/app/api/magic-link/visit/decision/route";
 import { PATCH as partnerPatchVisit } from "@/app/api/partner/visits/[id]/route";
+import { PATCH as studentRescheduleVisit } from "@/app/api/user/visits/[id]/route";
 import { ScheduleVisitModal } from "@/components/features/ScheduleVisitModal";
 
 describe("Schedule a Visit / Janji Survei Lokasi - Issue #388", () => {
@@ -592,6 +594,151 @@ describe("Schedule a Visit / Janji Survei Lokasi - Issue #388", () => {
       expect(res.status).toBe(200);
       const json = await res.json();
       expect(json.status).toBe("ACCEPTED");
+    });
+  });
+
+  describe("4B. PATCH /api/user/visits/[id] (Reschedule Sisi Penyewa maks 1x)", () => {
+    it("menentukan kelayakan ubah jadwal penyewa berdasarkan status dan kuota 1x", () => {
+      expect(canStudentRescheduleVisit("PENDING", 0)).toBe(true);
+      expect(canStudentRescheduleVisit("ACCEPTED", 0)).toBe(true);
+      expect(canStudentRescheduleVisit("RESCHEDULED", 0)).toBe(true);
+      expect(canStudentRescheduleVisit("ACCEPTED", 1)).toBe(false);
+      expect(canStudentRescheduleVisit("COMPLETED", 0)).toBe(false);
+      expect(canStudentRescheduleVisit("REJECTED", 0)).toBe(false);
+    });
+
+    it("menolak ubah jadwal tanpa sesi login dan menolak jika kuota 1x sudah terpakai", async () => {
+      const unauth = await studentRescheduleVisit(
+        new Request("http://localhost/api/user/visits/v1", {
+          method: "PATCH",
+          body: JSON.stringify({
+            visitDate: "2099-12-24",
+            visitTimeSlot: "15:00 - 17:00",
+          }),
+        }),
+        { params: Promise.resolve({ id: "v1" }) }
+      );
+      expect(unauth.status).toBe(401);
+
+      const userToken = await signUserToken({
+        userId: "user-1",
+        email: "dimas@example.com",
+        name: "Dimas",
+      });
+      mockCookies.set("user_token", { value: userToken });
+
+      mockVisitFindFirst.mockResolvedValueOnce({
+        id: "v1",
+        user_id: "user-1",
+        status: "PENDING",
+        student_reschedule_count: 1,
+        visit_date: parseVisitDateInput("2099-12-20"),
+        visit_time_slot: "13:00 - 15:00",
+        property: {
+          id: "prop-1",
+          name: "Kos Melati",
+          owner_id: "owner-1",
+          owner: { id: "owner-1", name: "Ibu Sari", whatsapp_number: "081987654321" },
+        },
+      });
+
+      const cappedRes = await studentRescheduleVisit(
+        new Request("http://localhost/api/user/visits/v1", {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            visitDate: "2099-12-24",
+            visitTimeSlot: "15:00 - 17:00",
+          }),
+        }),
+        { params: Promise.resolve({ id: "v1" }) }
+      );
+      expect(cappedRes.status).toBe(409);
+      const cappedJson = await cappedRes.json();
+      expect(cappedJson.code).toBe("RESCHEDULE_LIMIT_REACHED");
+    });
+
+    it("memperbarui jadwal survei penyewa, menonaktifkan Magic Link lama, dan menerbitkan Magic Link baru", async () => {
+      const userToken = await signUserToken({
+        userId: "user-1",
+        email: "dimas@example.com",
+        name: "Dimas",
+      });
+      mockCookies.set("user_token", { value: userToken });
+
+      mockVisitFindFirst.mockResolvedValueOnce({
+        id: "v1",
+        user_id: "user-1",
+        status: "ACCEPTED",
+        student_name: "Dimas Ferial",
+        student_whatsapp: "081234567890",
+        student_reschedule_count: 0,
+        visit_date: parseVisitDateInput("2099-12-20"),
+        visit_time_slot: "13:00 - 15:00",
+        notes: null,
+        reschedule_date: null,
+        reschedule_time_slot: null,
+        property: {
+          id: "prop-1",
+          name: "Kos Melati Asri",
+          owner_id: "owner-1",
+          owner: { id: "owner-1", name: "Ibu Sari", whatsapp_number: "081987654321" },
+        },
+      });
+
+      mockTransaction.mockImplementationOnce(async (cb) => {
+        const tx = {
+          magicLink: {
+            updateMany: mockMagicLinkUpdateMany.mockResolvedValueOnce({ count: 1 }),
+            create: mockMagicLinkCreate.mockResolvedValueOnce({ id: "ml-new" }),
+          },
+          visitSchedule: {
+            update: mockVisitUpdate.mockResolvedValueOnce({
+              id: "v1",
+              status: "PENDING",
+              visit_date: parseVisitDateInput("2099-12-24"),
+              visit_time_slot: "15:00 - 17:00",
+              student_reschedule_count: 1,
+            }),
+          },
+        };
+        return cb(tx);
+      });
+
+      const res = await studentRescheduleVisit(
+        new Request("http://localhost/api/user/visits/v1", {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            visitDate: "2099-12-24",
+            visitTimeSlot: "15:00 - 17:00",
+            notes: "Ada jadwal kuliah pengganti.",
+          }),
+        }),
+        { params: Promise.resolve({ id: "v1" }) }
+      );
+
+      expect(res.status).toBe(200);
+      const json = await res.json();
+      expect(json.success).toBe(true);
+      expect(json.visit.status).toBe("PENDING");
+      expect(json.visit.student_reschedule_count).toBe(1);
+      expect(mockMagicLinkUpdateMany).toHaveBeenCalledTimes(1);
+      expect(mockMagicLinkCreate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            type: "VISIT_VERIFICATION",
+            visit_id: "v1",
+          }),
+        })
+      );
+      expect(mockNotificationCreate).toHaveBeenCalledTimes(2);
+      expect(mockSendWhatsAppMessage).toHaveBeenCalledWith(
+        expect.objectContaining({
+          to: "081987654321",
+          message: expect.stringContaining("/survey/verify/"),
+        })
+      );
     });
   });
 

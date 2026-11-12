@@ -34,9 +34,15 @@ import { useTheme } from "next-themes";
 import { HelpTooltip } from "@/components/ui/Tooltip";
 import {
   VISIT_STATUS_LABELS,
+  VISIT_TIME_SLOTS,
+  MAX_STUDENT_VISIT_RESCHEDULES,
+  canStudentRescheduleVisit,
+  getTodayWibDateString,
+  getMaxVisitWibDateString,
   VisitStatus,
   formatVisitDateId,
 } from "@/lib/visit-schedule";
+import { saveLocalScheduledVisit } from "@/components/features/ScheduleVisitModal";
 
 interface UserProfile {
   id: string;
@@ -89,6 +95,7 @@ interface VisitScheduleItem {
   reschedule_date: string | null;
   reschedule_time_slot: string | null;
   reschedule_note: string | null;
+  student_reschedule_count?: number;
   cancellation_reason: string | null;
   created_at: string;
   property: {
@@ -149,6 +156,102 @@ function ProfileContent() {
   const [visits, setVisits] = useState<VisitScheduleItem[]>([]);
   const [isLoadingVisits, setIsLoadingVisits] = useState(false);
   const [visitsLoaded, setVisitsLoaded] = useState(false);
+
+  // Student Visit Reschedule Modal State
+  const visitRescheduleDialogRef = useRef<HTMLDialogElement>(null);
+  const [visitMinDate] = useState(() => getTodayWibDateString());
+  const [visitMaxDate] = useState(() => getMaxVisitWibDateString(30));
+  const [reschedulingVisit, setReschedulingVisit] = useState<VisitScheduleItem | null>(null);
+  const [visitRescheduleDate, setVisitRescheduleDate] = useState("");
+  const [visitRescheduleSlot, setVisitRescheduleSlot] = useState<string>(
+    VISIT_TIME_SLOTS[2].value
+  );
+  const [visitRescheduleNote, setVisitRescheduleNote] = useState("");
+  const [isSubmittingVisitReschedule, setIsSubmittingVisitReschedule] = useState(false);
+  const [visitRescheduleError, setVisitRescheduleError] = useState<string | null>(null);
+  const [visitRescheduleSuccess, setVisitRescheduleSuccess] = useState<string | null>(null);
+
+  const openStudentRescheduleModal = (visit: VisitScheduleItem) => {
+    const rawCurrentDate = visit.reschedule_date || visit.visit_date;
+    const formattedYmd = rawCurrentDate
+      ? getTodayWibDateString(new Date(rawCurrentDate))
+      : visitMinDate;
+    setVisitRescheduleDate(formattedYmd >= visitMinDate ? formattedYmd : visitMinDate);
+    setVisitRescheduleSlot(
+      visit.reschedule_time_slot || visit.visit_time_slot || VISIT_TIME_SLOTS[2].value
+    );
+    setVisitRescheduleNote(visit.notes || "");
+    setVisitRescheduleError(null);
+    setVisitRescheduleSuccess(null);
+    setReschedulingVisit(visit);
+  };
+
+  useEffect(() => {
+    const dialog = visitRescheduleDialogRef.current;
+    if (!dialog) return;
+    if (reschedulingVisit) {
+      if (!dialog.open) dialog.showModal();
+    } else if (dialog.open) {
+      dialog.close();
+    }
+  }, [reschedulingVisit]);
+
+  const handleSubmitStudentReschedule = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!reschedulingVisit || isSubmittingVisitReschedule) return;
+
+    if (!visitRescheduleDate || visitRescheduleDate < visitMinDate) {
+      setVisitRescheduleError("Tanggal survei baru tidak boleh lebih awal dari hari ini.");
+      return;
+    }
+
+    try {
+      setIsSubmittingVisitReschedule(true);
+      setVisitRescheduleError(null);
+
+      const res = await fetch(`/api/user/visits/${reschedulingVisit.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          visitDate: visitRescheduleDate,
+          visitTimeSlot: visitRescheduleSlot,
+          notes: visitRescheduleNote.trim(),
+        }),
+      });
+
+      const json = await res.json().catch(() => null);
+      if (!res.ok || !json?.success) {
+        setVisitRescheduleError(
+          json?.error || "Gagal mengirim perubahan jadwal survei."
+        );
+        return;
+      }
+
+      if (json.visit) {
+        setVisits((prev) =>
+          prev.map((item) =>
+            item.id === reschedulingVisit.id ? { ...item, ...json.visit } : item
+          )
+        );
+        saveLocalScheduledVisit(reschedulingVisit.property.id, {
+          id: json.visit.id,
+          status: json.visit.status,
+          visit_date: json.visit.visit_date,
+          visit_time_slot: json.visit.visit_time_slot,
+        });
+      }
+
+      setVisitRescheduleSuccess(
+        json.message ||
+          "Permintaan perubahan jadwal survei berhasil dikirim ke pemilik kos."
+      );
+      setReschedulingVisit(null);
+    } catch {
+      setVisitRescheduleError("Terjadi kesalahan koneksi saat menyimpan jadwal baru.");
+    } finally {
+      setIsSubmittingVisitReschedule(false);
+    }
+  };
 
   // Cancellation Modal State
   const [cancellingBooking, setCancellingBooking] = useState<BookingItem | null>(null);
@@ -1805,6 +1908,26 @@ function ProfileContent() {
                   </p>
                 </div>
 
+                {visitRescheduleSuccess && (
+                  <div
+                    role="status"
+                    className="mb-5 p-3.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-200 text-xs font-medium flex items-start justify-between gap-3"
+                  >
+                    <div className="flex items-start gap-2">
+                      <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
+                      <span>{visitRescheduleSuccess}</span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setVisitRescheduleSuccess(null)}
+                      aria-label="Tutup notifikasi sukses ubah jadwal"
+                      className="text-emerald-600 hover:text-emerald-800 p-0.5 cursor-pointer"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+                )}
+
                 {isLoadingVisits ? (
                   <div className="py-12 flex flex-col items-center justify-center text-slate-500 dark:text-slate-400">
                     <Loader2 className="w-7 h-7 animate-spin text-emerald-600 mb-2" />
@@ -1898,25 +2021,46 @@ function ProfileContent() {
                             </div>
                           )}
 
-                          <div className="flex flex-wrap items-center justify-end gap-2 pt-2 border-t border-slate-100 dark:border-slate-800">
-                            {visit.property.owner?.whatsapp_number && (
-                              <a
-                                href={`https://wa.me/${visit.property.owner.whatsapp_number.replace(/\D/g, "")}`}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
+                          <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-slate-100 dark:border-slate-800">
+                            <div className="text-[11px] font-medium text-slate-500 dark:text-slate-400">
+                              {(visit.student_reschedule_count ?? 0) >= MAX_STUDENT_VISIT_RESCHEDULES &&
+                                ["PENDING", "ACCEPTED", "RESCHEDULED"].includes(visit.status) && (
+                                  <span>Kuota ubah jadwal (1x) sudah digunakan</span>
+                                )}
+                            </div>
+                            <div className="flex flex-wrap items-center justify-end gap-2">
+                              {canStudentRescheduleVisit(
+                                visit.status,
+                                visit.student_reschedule_count ?? 0
+                              ) && (
+                                <button
+                                  type="button"
+                                  onClick={() => openStudentRescheduleModal(visit)}
+                                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-xs font-semibold text-slate-800 dark:text-slate-100 transition-colors cursor-pointer"
+                                >
+                                  <CalendarClock className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+                                  <span>Ubah Jadwal</span>
+                                </button>
+                              )}
+                              {visit.property.owner?.whatsapp_number && (
+                                <a
+                                  href={`https://wa.me/${visit.property.owner.whatsapp_number.replace(/\D/g, "")}`}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
+                                >
+                                  <Phone className="w-3.5 h-3.5 text-emerald-600" />
+                                  <span>Chat Pemilik</span>
+                                </a>
+                              )}
+                              <Link
+                                href={`/kos/${visit.property.id}`}
+                                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition-colors"
                               >
-                                <Phone className="w-3.5 h-3.5 text-emerald-600" />
-                                <span>Chat Pemilik</span>
-                              </a>
-                            )}
-                            <Link
-                              href={`/kos/${visit.property.id}`}
-                              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition-colors"
-                            >
-                              <span>Lihat Kos / Booking</span>
-                              <ArrowRight className="w-3.5 h-3.5" />
-                            </Link>
+                                <span>Lihat Kos / Booking</span>
+                                <ArrowRight className="w-3.5 h-3.5" />
+                              </Link>
+                            </div>
                           </div>
                         </div>
                       );
@@ -1928,6 +2072,166 @@ function ProfileContent() {
           </main>
         </div>
       </div>
+
+      {/* Modal Ubah Jadwal Survei (Penyewa, maks 1x) */}
+      <dialog
+        ref={visitRescheduleDialogRef}
+        closedby="any"
+        aria-labelledby="student-visit-reschedule-title"
+        onClose={() => {
+          setReschedulingVisit(null);
+          setVisitRescheduleError(null);
+        }}
+        className="m-auto w-[calc(100%-1.5rem)] max-w-md rounded-2xl sm:rounded-3xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 p-0 text-slate-900 dark:text-slate-100 shadow-float backdrop:bg-slate-900/60"
+      >
+        {reschedulingVisit && (
+          <div className="p-5 sm:p-6">
+            <div className="flex items-start justify-between gap-3 pb-3 border-b border-slate-100 dark:border-slate-800">
+              <div className="flex items-start gap-2.5">
+                <div className="w-9 h-9 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
+                  <CalendarClock className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3
+                    id="student-visit-reschedule-title"
+                    className="text-base font-extrabold text-slate-900 dark:text-white"
+                  >
+                    Ubah Jadwal Survei
+                  </h3>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                    {reschedulingVisit.property.name}
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setReschedulingVisit(null)}
+                aria-label="Tutup modal ubah jadwal survei"
+                className="p-1.5 rounded-xl text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <form onSubmit={handleSubmitStudentReschedule} className="mt-4 space-y-4">
+              <p className="text-[11px] font-medium text-amber-800 dark:text-amber-200 bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 rounded-xl px-3 py-2">
+                Perubahan jadwal hanya dapat dilakukan 1x dan akan dikirim ulang ke pemilik kos untuk dikonfirmasi.
+              </p>
+
+              {visitRescheduleError && (
+                <div
+                  role="alert"
+                  className="p-3 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 text-rose-800 dark:text-rose-200 text-xs font-medium flex items-start gap-2"
+                >
+                  <AlertCircle className="w-4 h-4 text-rose-600 dark:text-rose-400 shrink-0 mt-0.5" />
+                  <span>{visitRescheduleError}</span>
+                </div>
+              )}
+
+              <div>
+                <label
+                  htmlFor="student-reschedule-date"
+                  className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5"
+                >
+                  Tanggal Kunjungan Baru
+                </label>
+                <input
+                  id="student-reschedule-date"
+                  name="visitDate"
+                  type="date"
+                  min={visitMinDate}
+                  max={visitMaxDate}
+                  value={visitRescheduleDate}
+                  onChange={(e) => {
+                    setVisitRescheduleDate(e.target.value);
+                    if (visitRescheduleError) setVisitRescheduleError(null);
+                  }}
+                  required
+                  className="w-full px-3.5 py-2.5 text-sm rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
+                />
+              </div>
+
+              <fieldset>
+                <legend className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
+                  Perkiraan Jam Kunjungan (WIB)
+                </legend>
+                <div className="grid grid-cols-2 gap-2">
+                  {VISIT_TIME_SLOTS.map((slot) => {
+                    const checked = visitRescheduleSlot === slot.value;
+                    const radioId = `resched-slot-${slot.value.replace(/\s+/g, "")}`;
+                    return (
+                      <label
+                        key={slot.value}
+                        htmlFor={radioId}
+                        className={`flex items-center gap-2 px-3 py-2 rounded-xl border text-xs font-semibold cursor-pointer transition-all ${
+                          checked
+                            ? "bg-emerald-50 dark:bg-emerald-950/60 border-emerald-500 text-emerald-800 dark:text-emerald-200"
+                            : "bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300"
+                        }`}
+                      >
+                        <input
+                          id={radioId}
+                          type="radio"
+                          name="rescheduleTimeSlot"
+                          value={slot.value}
+                          checked={checked}
+                          onChange={(e) => setVisitRescheduleSlot(e.target.value)}
+                          className="accent-emerald-600 shrink-0"
+                        />
+                        <span className="truncate">{slot.value}</span>
+                      </label>
+                    );
+                  })}
+                </div>
+              </fieldset>
+
+              <div>
+                <label
+                  htmlFor="student-reschedule-note"
+                  className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5"
+                >
+                  Alasan / Catatan (Opsional)
+                </label>
+                <textarea
+                  id="student-reschedule-note"
+                  name="notes"
+                  rows={2}
+                  maxLength={500}
+                  placeholder="Contoh: Ada jadwal kuliah pengganti, mohon geser ke hari berikutnya."
+                  value={visitRescheduleNote}
+                  onChange={(e) => setVisitRescheduleNote(e.target.value)}
+                  className="w-full px-3.5 py-2.5 text-sm rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
+                />
+              </div>
+
+              <div className="flex gap-2.5 pt-1">
+                <button
+                  type="button"
+                  onClick={() => setReschedulingVisit(null)}
+                  disabled={isSubmittingVisitReschedule}
+                  className="w-1/2 py-2.5 px-4 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-semibold text-sm cursor-pointer"
+                >
+                  Batal
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSubmittingVisitReschedule}
+                  className="w-1/2 py-2.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-70"
+                >
+                  {isSubmittingVisitReschedule ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      <span>Mengirim...</span>
+                    </>
+                  ) : (
+                    <span>Kirim Jadwal Baru</span>
+                  )}
+                </button>
+              </div>
+            </form>
+          </div>
+        )}
+      </dialog>
     </div>
   );
 }
