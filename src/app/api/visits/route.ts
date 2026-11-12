@@ -6,6 +6,8 @@ import { verifyUserToken, verifyOwnerToken } from "@/lib/auth";
 import { notifyVisitRequested } from "@/lib/notifications";
 import {
   isValidIndonesianWhatsApp,
+  getIndonesianWhatsAppVariants,
+  getDuplicateVisitErrorMessage,
   parseVisitDateInput,
   isPastVisitDate,
   formatVisitDateId,
@@ -142,23 +144,39 @@ export async function POST(request: Request) {
       );
     }
 
-    // Cegah duplikasi pengajuan identik yang masih PENDING
-    const duplicatePending = await prisma.visitSchedule.findFirst({
+    const resolvedUserId = dbUser?.id || userPayload?.userId || null;
+    const whatsappVariants = getIndonesianWhatsAppVariants(resolvedWhatsapp);
+
+    const identityClauses: Array<Record<string, unknown>> = [
+      { student_whatsapp: { in: whatsappVariants } },
+    ];
+    if (resolvedUserId) {
+      identityClauses.push({ user_id: resolvedUserId });
+    }
+
+    // Anti-spam: maksimal 1 jadwal survei per calon penyewa (akun/WhatsApp) di properti kos yang sama
+    const existingVisitForProperty = await prisma.visitSchedule.findFirst({
       where: {
         property_id: property.id,
-        student_whatsapp: resolvedWhatsapp,
-        visit_date: parsedDate,
-        visit_time_slot: resolvedTimeSlot,
-        status: "PENDING",
+        status: { not: "CANCELLED" },
+        OR: identityClauses,
+      },
+      orderBy: { created_at: "desc" },
+      select: {
+        id: true,
+        status: true,
+        visit_date: true,
+        visit_time_slot: true,
       },
     });
 
-    if (duplicatePending) {
+    if (existingVisitForProperty) {
       return NextResponse.json(
         {
           success: false,
-          error:
-            "Anda sudah mengajukan jadwal survei pada tanggal dan jam yang sama dan sedang menunggu konfirmasi pemilik.",
+          code: "DUPLICATE_VISIT_FOR_PROPERTY",
+          error: getDuplicateVisitErrorMessage(existingVisitForProperty.status),
+          existingVisit: existingVisitForProperty,
         },
         { status: 409 }
       );
@@ -171,7 +189,7 @@ export async function POST(request: Request) {
       const visit = await tx.visitSchedule.create({
         data: {
           property_id: property.id,
-          user_id: dbUser?.id || userPayload?.userId || null,
+          user_id: resolvedUserId,
           student_name: resolvedName,
           student_whatsapp: resolvedWhatsapp,
           visit_date: parsedDate,
@@ -300,9 +318,12 @@ export async function GET(request: Request) {
       );
     }
 
+    const propertyIdParam = searchParams.get("propertyId")?.trim() || "";
+
     const visits = await prisma.visitSchedule.findMany({
       where: {
         user_id: userPayload.userId,
+        ...(propertyIdParam ? { property_id: propertyIdParam } : {}),
       },
       include: {
         property: {
@@ -324,7 +345,18 @@ export async function GET(request: Request) {
       orderBy: { created_at: "desc" },
     });
 
-    return NextResponse.json({ success: true, visits }, { status: 200 });
+    const existingVisit = propertyIdParam
+      ? visits.find((visit) => visit.status !== "CANCELLED") || null
+      : undefined;
+
+    return NextResponse.json(
+      {
+        success: true,
+        visits,
+        ...(propertyIdParam ? { existingVisit } : {}),
+      },
+      { status: 200 }
+    );
   } catch (error) {
     console.error("Gagal memuat daftar jadwal survei:", error);
     return NextResponse.json(

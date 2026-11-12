@@ -40,6 +40,47 @@ export function isValidIndonesianWhatsApp(phone: string): boolean {
 }
 
 /**
+ * Mengembalikan variasi penulisan nomor WhatsApp Indonesia (08..., 628..., +628...)
+ * agar pengecekan anti-spam mengenali nomor yang sama meski berbeda format awalan.
+ */
+export function getIndonesianWhatsAppVariants(phone: string): string[] {
+  const trimmed = phone.trim();
+  const digitsOnly = trimmed.replace(/\D/g, "");
+  if (!digitsOnly) return trimmed ? [trimmed] : [];
+
+  let normalized62 = digitsOnly;
+  if (digitsOnly.startsWith("0")) {
+    normalized62 = `62${digitsOnly.slice(1)}`;
+  } else if (digitsOnly.startsWith("8")) {
+    normalized62 = `62${digitsOnly}`;
+  }
+
+  const local08 = normalized62.startsWith("62")
+    ? `0${normalized62.slice(2)}`
+    : digitsOnly;
+
+  return Array.from(
+    new Set([trimmed, local08, normalized62, `+${normalized62}`].filter(Boolean))
+  );
+}
+
+/**
+ * Mengembalikan pesan error standar ketika pengguna mencoba mengajukan lebih dari
+ * satu jadwal survei pada properti kos yang sama.
+ */
+export function getDuplicateVisitErrorMessage(status: string): string {
+  switch (status) {
+    case "PENDING":
+      return "Anda sudah membuat jadwal survei untuk kos ini dan sedang menunggu konfirmasi pemilik. Maksimal 1 jadwal survei per kos.";
+    case "ACCEPTED":
+    case "RESCHEDULED":
+      return "Anda sudah memiliki jadwal survei aktif untuk kos ini. Silakan cek detail jadwal di halaman Profil.";
+    default:
+      return "Anda sudah pernah membuat jadwal survei untuk kos ini. Maksimal 1 jadwal survei per kos untuk mencegah spam.";
+  }
+}
+
+/**
  * Mengurai string tanggal ("YYYY-MM-DD" atau ISO string) tanpa pergeseran hari akibat zona waktu.
  * Tanggal kalender murni disimpan pada pukul 12:00 WIB (05:00 UTC) agar konsisten di WIB & UTC.
  */

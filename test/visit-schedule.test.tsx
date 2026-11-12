@@ -64,6 +64,7 @@ vi.mock("@/lib/prisma", () => ({
 
 import {
   isValidIndonesianWhatsApp,
+  getIndonesianWhatsAppVariants,
   parseVisitDateInput,
   isPastVisitDate,
   getTodayWibDateString,
@@ -104,6 +105,13 @@ describe("Schedule a Visit / Janji Survei Lokasi - Issue #388", () => {
       expect(parsedInvalid).toBeNull();
       expect(isPastVisitDate(parsedToday!, refNow)).toBe(false);
       expect(isPastVisitDate(parsedYesterday!, refNow)).toBe(true);
+    });
+
+    it("menghasilkan variasi format nomor WhatsApp Indonesia untuk pengecekan anti-spam", () => {
+      const variants = getIndonesianWhatsAppVariants("+6281234567890");
+      expect(variants).toContain("081234567890");
+      expect(variants).toContain("6281234567890");
+      expect(variants).toContain("+6281234567890");
     });
   });
 
@@ -305,6 +313,89 @@ describe("Schedule a Visit / Janji Survei Lokasi - Issue #388", () => {
       expect(ownerRes.status).toBe(200);
       const ownerJson = await ownerRes.json();
       expect(ownerJson.visits).toHaveLength(1);
+    });
+
+    it("menolak pengajuan ganda (409 DUPLICATE_VISIT_FOR_PROPERTY) di kos yang sama untuk mencegah spam", async () => {
+      mockPropertyFindUnique.mockResolvedValueOnce({
+        id: "prop-1",
+        name: "Kos Melati Asri",
+        owner_id: "owner-1",
+        status: "APPROVED",
+        owner: {
+          id: "owner-1",
+          name: "Ibu Sari",
+          whatsapp_number: "081987654321",
+        },
+      });
+
+      mockVisitFindFirst.mockResolvedValueOnce({
+        id: "visit-existing",
+        status: "ACCEPTED",
+        visit_date: parseVisitDateInput("2099-12-20"),
+        visit_time_slot: "13:00 - 15:00",
+      });
+
+      const req = new Request("http://localhost/api/visits", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          propertyId: "prop-1",
+          studentName: "Dimas Ferial",
+          studentWhatsapp: "+6281234567890",
+          visitDate: "2099-12-25",
+          visitTimeSlot: "09:00 - 11:00",
+        }),
+      });
+
+      const res = await createVisit(req);
+      expect(res.status).toBe(409);
+      const json = await res.json();
+      expect(json.success).toBe(false);
+      expect(json.code).toBe("DUPLICATE_VISIT_FOR_PROPERTY");
+      expect(json.existingVisit.id).toBe("visit-existing");
+      expect(mockTransaction).not.toHaveBeenCalled();
+
+      // Verifikasi query mencari status non-CANCELLED dengan variasi nomor WA
+      expect(mockVisitFindFirst).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: expect.objectContaining({
+            property_id: "prop-1",
+            status: { not: "CANCELLED" },
+            OR: expect.arrayContaining([
+              {
+                student_whatsapp: {
+                  in: expect.arrayContaining(["081234567890", "6281234567890", "+6281234567890"]),
+                },
+              },
+            ]),
+          }),
+        })
+      );
+    });
+
+    it("GET /api/visits?propertyId=... mengembalikan existingVisit untuk mahasiswa yang sudah login", async () => {
+      const token = await signUserToken({
+        userId: "user-1",
+        email: "dimas@example.com",
+        name: "Dimas Ferial",
+        whatsapp: "081234567890",
+      });
+      mockCookies.set("user_token", { value: token });
+      mockVisitFindMany.mockResolvedValueOnce([
+        {
+          id: "visit-existing",
+          status: "PENDING",
+          visit_date: parseVisitDateInput("2099-12-20"),
+          visit_time_slot: "13:00 - 15:00",
+        },
+      ]);
+
+      const res = await listVisits(
+        new Request("http://localhost/api/visits?propertyId=prop-1")
+      );
+      expect(res.status).toBe(200);
+      const json = await res.json();
+      expect(json.existingVisit?.id).toBe("visit-existing");
     });
   });
 
@@ -519,6 +610,28 @@ describe("Schedule a Visit / Janji Survei Lokasi - Issue #388", () => {
       expect(html).toContain("<dialog");
       expect(html).toContain("Jadwalkan Survei Lokasi");
       expect(html).toContain("visitTimeSlot");
+      expect(html).not.toMatch(/[\u{1F300}-\u{1F9FF}]/u);
+    });
+
+    it("merender tampilan terkunci (Jadwal Survei Sudah Terdaftar) jika existingVisit ada", () => {
+      const html = renderToStaticMarkup(
+        <ScheduleVisitModal
+          isOpen={false}
+          onClose={vi.fn()}
+          propertyId="prop-1"
+          propertyName="Kos Melati Asri"
+          propertyAddress="Jl. Darussalam No. 5"
+          existingVisit={{
+            id: "visit-1",
+            status: "PENDING",
+            visit_date: "2099-12-20T05:00:00.000Z",
+            visit_time_slot: "13:00 - 15:00",
+          }}
+        />
+      );
+
+      expect(html).toContain("Jadwal Survei Sudah Terdaftar");
+      expect(html).not.toContain("Kirim Permintaan Survei");
       expect(html).not.toMatch(/[\u{1F300}-\u{1F9FF}]/u);
     });
 
