@@ -14,7 +14,7 @@ export async function resolveNotificationActor(
   url: string
 ): Promise<NotificationActor | null> {
   const cookieStore = await cookies();
-  const { searchParams } = new URL(url);
+  const { searchParams } = new URL(url, "http://localhost");
   const audience =
     searchParams.get("audience")?.toUpperCase() === "OWNER" ? "OWNER" : "USER";
 

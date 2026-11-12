@@ -16,6 +16,7 @@ import {
   ArrowUpRight,
 } from "lucide-react";
 import { formatRelativeTime } from "@/lib/date-utils";
+import { isSafeRedirectPath } from "@/lib/auth";
 
 export interface InAppNotification {
   id: string;
@@ -150,7 +151,7 @@ export function NotificationBell({
     }
 
     setIsOpen(false);
-    if (notif.link) {
+    if (notif.link && isSafeRedirectPath(notif.link)) {
       router.push(notif.link);
     }
   };
