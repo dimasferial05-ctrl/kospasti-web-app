@@ -32,3 +32,33 @@ export function getWibDayRange(referenceDate: Date = new Date()): {
 
   return { startOfToday, endOfToday };
 }
+
+/**
+ * Mengubah timestamp menjadi label waktu relatif dalam Bahasa Indonesia
+ * Contoh: "Baru saja", "5 menit lalu", "2 jam lalu", "Kemarin", "3 hari lalu"
+ */
+export function formatRelativeTime(
+  dateInput: string | Date,
+  referenceDate: Date = new Date()
+): string {
+  const target = typeof dateInput === "string" ? new Date(dateInput) : dateInput;
+  if (isNaN(target.getTime())) return "-";
+
+  const diffMs = Math.max(0, referenceDate.getTime() - target.getTime());
+  const diffSec = Math.floor(diffMs / 1000);
+  const diffMin = Math.floor(diffSec / 60);
+  const diffHours = Math.floor(diffMin / 60);
+  const diffDays = Math.floor(diffHours / 24);
+
+  if (diffSec < 60) return "Baru saja";
+  if (diffMin < 60) return `${diffMin} menit lalu`;
+  if (diffHours < 24) return `${diffHours} jam lalu`;
+  if (diffDays === 1) return "Kemarin";
+  if (diffDays < 7) return `${diffDays} hari lalu`;
+
+  return target.toLocaleDateString("id-ID", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  });
+}

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { sendWhatsAppMessage } from "@/lib/whatsapp";
 import { sendBookingDecisionEmail } from "@/lib/email";
+import { createInAppNotification } from "@/lib/notifications";
 
 export async function POST(request: Request) {
   try {
@@ -152,6 +153,27 @@ export async function POST(request: Request) {
         },
         { status: 410 }
       );
+    }
+
+    // Buat Notifikasi In-App untuk Mahasiswa
+    if (booking.user_id) {
+      if (action === "ACCEPT") {
+        await createInAppNotification({
+          userId: booking.user_id,
+          title: "Pesanan Kos Disetujui!",
+          message: `Kabar gembira! Pemilik ${propertyName} (${ownerName}) menyetujui pesanan Anda untuk tanggal masuk ${moveInDateFormatted}.`,
+          type: "BOOKING_STATUS",
+          link: `/receipt/${booking.id}`,
+        });
+      } else {
+        await createInAppNotification({
+          userId: booking.user_id,
+          title: "Pesanan Kos Ditolak",
+          message: `Mohon maaf, pesanan Anda di ${propertyName} belum dapat disetujui.${reason ? ` Alasan: ${reason}` : ""}`,
+          type: "BOOKING_STATUS",
+          link: "/profil?tab=bookings",
+        });
+      }
     }
 
     // Send WhatsApp notification to student regarding owner's decision

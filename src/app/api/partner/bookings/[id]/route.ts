@@ -4,6 +4,7 @@ import { verifyOwnerToken } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { sendWhatsAppMessage } from "@/lib/whatsapp";
 import { sendBookingDecisionEmail } from "@/lib/email";
+import { createInAppNotification } from "@/lib/notifications";
 
 export async function PATCH(
   request: Request,
@@ -111,6 +112,27 @@ export async function PATCH(
 
       return updatedBooking;
     });
+
+    // Buat notifikasi In-App untuk Mahasiswa apabila status berubah menjadi APPROVED / REJECTED
+    if (existing.user_id && previousStatus !== status) {
+      if (status === "APPROVED") {
+        await createInAppNotification({
+          userId: existing.user_id,
+          title: "Pesanan Kos Disetujui!",
+          message: `Kabar gembira! Pemilik ${existing.property.name} menyetujui pesanan Anda. Cek kuitansi dan detail serah terima kunci Anda.`,
+          type: "BOOKING_STATUS",
+          link: `/receipt/${existing.id}`,
+        });
+      } else if (status === "REJECTED") {
+        await createInAppNotification({
+          userId: existing.user_id,
+          title: "Pesanan Kos Ditolak",
+          message: `Mohon maaf, pesanan Anda di ${existing.property.name} tidak dapat disetujui pemilik kos. Proses pengembalian dana akan segera ditindaklanjuti.`,
+          type: "BOOKING_STATUS",
+          link: "/profil?tab=bookings",
+        });
+      }
+    }
 
     // Send WhatsApp notification if status changed to APPROVED, REJECTED, or REFUNDED
     if (existing.student_whatsapp && previousStatus !== status) {

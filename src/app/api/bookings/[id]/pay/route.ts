@@ -5,6 +5,7 @@ import crypto from "crypto";
 import { sendWhatsAppMessage } from "@/lib/whatsapp";
 import { sendBookingReceiptEmail } from "@/lib/email";
 import { verifyUserToken } from "@/lib/auth";
+import { createInAppNotification } from "@/lib/notifications";
 
 export async function POST(
   request: Request,
@@ -119,6 +120,26 @@ export async function POST(
       month: "long",
       year: "numeric",
     });
+
+    // Catat Notifikasi In-App untuk Mahasiswa & Mitra Pemilik Kos
+    await Promise.all([
+      createInAppNotification({
+        userId: booking.user_id || payload.userId,
+        title: "Pembayaran Berhasil Diverifikasi",
+        message: `Pembayaran DP untuk ${propertyName} berhasil diverifikasi! Pesanan Anda menunggu konfirmasi pemilik kos.`,
+        type: "PAYMENT_SUCCESS",
+        link: `/receipt/${booking.id}`,
+      }),
+      owner?.id
+        ? createInAppNotification({
+            ownerId: owner.id,
+            title: "Pembayaran Masuk: Perlu Konfirmasi",
+            message: `${studentName} telah melunasi pembayaran DP untuk ${propertyName} (Masuk: ${moveInDateFormatted}). Harap segera terima atau tolak pesanan.`,
+            type: "PAYMENT_SUCCESS",
+            link: "/partner/dashboard/bookings",
+          })
+        : Promise.resolve(null),
+    ]);
 
     let verificationUrl = "";
 

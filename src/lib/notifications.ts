@@ -1,7 +1,54 @@
 import { sendWhatsAppMessage } from "@/lib/whatsapp";
+import { prisma } from "@/lib/prisma";
+
+export type NotificationType =
+  | "BOOKING_STATUS"
+  | "PAYMENT_SUCCESS"
+  | "CHECKIN_REMINDER"
+  | "REVIEW_REPLY"
+  | "PAYOUT_UPDATE"
+  | "SYSTEM";
+
+export interface CreateInAppNotificationParams {
+  userId?: string | null;
+  ownerId?: string | null;
+  title: string;
+  message: string;
+  type: NotificationType;
+  link?: string | null;
+}
 
 /**
- * Notifikasi WhatsApp untuk alur Check-in dan Payout Mitra
+ * Mencatat notifikasi In-App ke database agar selalu tampil pada Notification Bell
+ * baik untuk Mahasiswa (userId) maupun Mitra Pemilik Kos (ownerId),
+ * meskipun pengiriman pesan WhatsApp eksternal (Fonnte) gagal atau tertunda.
+ */
+export async function createInAppNotification(
+  params: CreateInAppNotificationParams
+) {
+  try {
+    if (!params.userId && !params.ownerId) {
+      return null;
+    }
+
+    return await prisma.notification.create({
+      data: {
+        user_id: params.userId || null,
+        owner_id: params.ownerId || null,
+        title: params.title,
+        message: params.message,
+        type: params.type,
+        link: params.link || null,
+      },
+    });
+  } catch (err) {
+    console.error("[IN-APP NOTIFICATION ERROR] Gagal membuat notifikasi:", err);
+    return null;
+  }
+}
+
+/**
+ * Notifikasi WhatsApp & In-App untuk alur Check-in dan Payout Mitra
  */
 
 export async function notifyCheckinConfirmed(params: {
@@ -9,6 +56,8 @@ export async function notifyCheckinConfirmed(params: {
   tenantWhatsapp: string;
   propertyName: string;
   checkinTime: Date;
+  userId?: string | null;
+  bookingId?: string;
 }) {
   const graceDeadline = new Date(params.checkinTime.getTime() + 12 * 60 * 60 * 1000);
   const message = [
@@ -20,6 +69,16 @@ export async function notifyCheckinConfirmed(params: {
 
   console.log(`[WA NOTIFICATION -> ${params.tenantWhatsapp}]`);
   console.log(message);
+
+  if (params.userId) {
+    await createInAppNotification({
+      userId: params.userId,
+      title: "Check-in Terkonfirmasi",
+      message: `Mitra telah mengonfirmasi check-in Anda di ${params.propertyName}. Garansi escrow melindungi Anda selama 12 jam ke depan.`,
+      type: "BOOKING_STATUS",
+      link: params.bookingId ? `/receipt/${params.bookingId}` : "/profil",
+    });
+  }
 
   try {
     if (params.tenantWhatsapp) {
@@ -36,6 +95,7 @@ export async function notifyPayoutProcessed(params: {
   amount: number;
   bankName: string;
   accountNumber: string;
+  ownerId?: string | null;
 }) {
   const message = [
     `[KosPasti] Halo ${params.ownerName}!`,
@@ -47,6 +107,16 @@ export async function notifyPayoutProcessed(params: {
 
   console.log(`[WA NOTIFICATION -> ${params.ownerWhatsapp}]`);
   console.log(message);
+
+  if (params.ownerId) {
+    await createInAppNotification({
+      ownerId: params.ownerId,
+      title: "Dana Payout Telah Dicairkan",
+      message: `Dana sebesar Rp ${params.amount.toLocaleString("id-ID")} sedang dicairkan ke rekening ${params.bankName} ${params.accountNumber}.`,
+      type: "PAYOUT_UPDATE",
+      link: "/partner/dashboard/payouts",
+    });
+  }
 
   try {
     if (params.ownerWhatsapp) {
@@ -67,6 +137,7 @@ export async function notifyMoveInReminder(params: {
   ownerName?: string | null;
   ownerWhatsapp?: string | null;
   bookingId: string;
+  userId?: string | null;
 }) {
   const baseUrl = (process.env.NEXT_PUBLIC_APP_URL || "https://kospasti.id").replace(/\/+$/, "");
   const receiptUrl = `${baseUrl}/receipt/${params.bookingId}`;
@@ -97,6 +168,16 @@ export async function notifyMoveInReminder(params: {
   console.log(`[WA NOTIFICATION -> ${params.tenantWhatsapp}]`);
   console.log(message);
 
+  if (params.userId) {
+    await createInAppNotification({
+      userId: params.userId,
+      title: "Pengingat Check-in H-1",
+      message: `Besok (${moveInDateFormatted}) adalah jadwal Anda mulai menempati kamar di ${params.propertyName}. Siapkan KTP dan kuitansi Anda.`,
+      type: "CHECKIN_REMINDER",
+      link: `/receipt/${params.bookingId}`,
+    });
+  }
+
   try {
     if (params.tenantWhatsapp) {
       await sendWhatsAppMessage({ to: params.tenantWhatsapp, message });
@@ -112,6 +193,7 @@ export async function notifyReviewPrompt(params: {
   propertyName: string;
   propertyId: string;
   bookingId: string;
+  userId?: string | null;
 }) {
   const baseUrl = (process.env.NEXT_PUBLIC_APP_URL || "https://kospasti.id").replace(/\/+$/, "");
   const reviewUrl = `${baseUrl}/kos/${params.propertyId}?review=true`;
@@ -129,6 +211,16 @@ export async function notifyReviewPrompt(params: {
   console.log(`[WA NOTIFICATION -> ${params.tenantWhatsapp}]`);
   console.log(message);
 
+  if (params.userId) {
+    await createInAppNotification({
+      userId: params.userId,
+      title: "Bagikan Pengalaman Kos Anda",
+      message: `Sudah 2 hari Anda menempati kamar di ${params.propertyName}. Yuk beri ulasan dan rating jujur Anda!`,
+      type: "SYSTEM",
+      link: `/kos/${params.propertyId}?review=true`,
+    });
+  }
+
   try {
     if (params.tenantWhatsapp) {
       await sendWhatsAppMessage({ to: params.tenantWhatsapp, message });
@@ -144,6 +236,7 @@ export async function notifyEscrowReleased(params: {
   tenantName: string;
   propertyName: string;
   amount: number;
+  ownerId?: string | null;
 }) {
   const formattedAmount = new Intl.NumberFormat("id-ID", {
     style: "currency",
@@ -162,6 +255,16 @@ export async function notifyEscrowReleased(params: {
 
   console.log(`[WA NOTIFICATION -> ${params.ownerWhatsapp}]`);
   console.log(message);
+
+  if (params.ownerId) {
+    await createInAppNotification({
+      ownerId: params.ownerId,
+      title: "Dana Escrow Siap Dicairkan",
+      message: `Masa garansi check-in ${params.tenantName} di ${params.propertyName} telah selesai. Dana ${formattedAmount} siap dicairkan ke rekening Anda.`,
+      type: "PAYOUT_UPDATE",
+      link: "/partner/dashboard/payouts",
+    });
+  }
 
   try {
     if (params.ownerWhatsapp) {

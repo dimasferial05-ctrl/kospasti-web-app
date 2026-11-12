@@ -60,6 +60,7 @@ export async function processReadyPayouts(): Promise<number> {
             tenantName: booking.student_name,
             propertyName: booking.property.name,
             amount: payoutAmount,
+            ownerId: booking.property.owner.id,
           });
         }
       } catch (notifyErr) {

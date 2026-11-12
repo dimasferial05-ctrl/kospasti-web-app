@@ -34,6 +34,7 @@ import {
 import { useTheme } from "next-themes";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
 import { usePwaInstall } from "@/hooks/usePwaInstall";
+import { NotificationBell } from "@/components/notifications/NotificationBell";
 
 interface AuthUserData {
   id: string;
@@ -390,12 +391,14 @@ export function Header({ isLoggedIn: initialIsLoggedIn = false }: HeaderProps) {
 
               {/* 3. Auth Actions: Logged In State */}
               {isLoggedIn ? (
-                <div
-                  className="relative"
-                  ref={dropdownRef}
-                  onMouseEnter={() => setIsDropdownOpen(true)}
-                  onMouseLeave={() => setIsDropdownOpen(false)}
-                >
+                <div className="flex items-center gap-2 sm:gap-2.5">
+                  <NotificationBell audience="USER" />
+                  <div
+                    className="relative"
+                    ref={dropdownRef}
+                    onMouseEnter={() => setIsDropdownOpen(true)}
+                    onMouseLeave={() => setIsDropdownOpen(false)}
+                  >
                   {/* Desktop Avatar Dropdown Trigger Button */}
                   <button
                     type="button"
@@ -632,6 +635,7 @@ export function Header({ isLoggedIn: initialIsLoggedIn = false }: HeaderProps) {
                       </div>
                     </div>
                   )}
+                  </div>
                 </div>
               ) : (
                 /* Auth Actions: Guest / Not Logged In State */

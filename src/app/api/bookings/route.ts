@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { prisma } from "@/lib/prisma";
 import { verifyUserToken } from "@/lib/auth";
+import { createInAppNotification } from "@/lib/notifications";
 
 export async function POST(request: Request) {
   try {
@@ -220,10 +221,38 @@ export async function POST(request: Request) {
           amount: bookingAmount,
           user_id: userPayload.userId,
         },
+        include: {
+          property: {
+            select: {
+              name: true,
+              owner_id: true,
+            },
+          },
+        },
       });
 
       return newBooking;
     });
+
+    // Catat notifikasi In-App untuk Mahasiswa & Mitra
+    await Promise.all([
+      createInAppNotification({
+        userId: userPayload.userId,
+        title: "Pesanan Kos Dibuat",
+        message: `Pesanan kamar di ${result.property?.name || "Kos pilihan Anda"} telah dibuat. Segera selesaikan pembayaran untuk mengamankan kamar.`,
+        type: "BOOKING_STATUS",
+        link: `/checkout/${result.id}`,
+      }),
+      result.property?.owner_id
+        ? createInAppNotification({
+            ownerId: result.property.owner_id,
+            title: "Pesanan Baru Masuk",
+            message: `${resolvedStudentName} baru saja memesan kamar di ${result.property.name}. Menunggu pembayaran penyewa.`,
+            type: "BOOKING_STATUS",
+            link: "/partner/dashboard/bookings",
+          })
+        : Promise.resolve(null),
+    ]);
 
     return NextResponse.json(
       {
