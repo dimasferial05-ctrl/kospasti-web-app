@@ -3,6 +3,12 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { ThemeImage } from "@/components/ui/ThemeImage";
+import { OfflineBanner } from "@/components/ui/OfflineBanner";
+import {
+  saveCachedReceipt,
+  getCachedReceipt,
+  useNetworkStatus,
+} from "@/lib/offline-storage";
 import {
   Printer,
   ArrowLeft,
@@ -93,18 +99,47 @@ export default function BookingReceiptPage() {
   const router = useRouter();
   const params = useParams();
   const bookingId = params?.bookingId as string;
+  const { isOnline } = useNetworkStatus();
 
   const [booking, setBooking] = useState<BookingReceiptDetail | null>(null);
   const [isLoading, setIsLoading] = useState(Boolean(bookingId));
   const [error, setError] = useState<string | null>(null);
+  const [isOfflineData, setIsOfflineData] = useState<boolean>(false);
+  const [lastSyncedAt, setLastSyncedAt] = useState<string | null>(null);
 
   useEffect(() => {
     if (!bookingId) return;
 
     let isMounted = true;
+
+    const applyCachedReceipt = () => {
+      const cached = getCachedReceipt<BookingReceiptDetail>(bookingId);
+      if (cached?.receipt) {
+        setBooking(cached.receipt);
+        setIsOfflineData(true);
+        setLastSyncedAt(cached.updatedAt);
+        setError(null);
+        return true;
+      }
+      return false;
+    };
+
     async function loadBooking() {
       setIsLoading(true);
       setError(null);
+
+      // Jika perangkat offline, langsung muat dari cache lokal
+      if (typeof navigator !== "undefined" && navigator.onLine === false) {
+        if (isMounted) {
+          const restored = applyCachedReceipt();
+          if (!restored) {
+            setError("Anda sedang offline dan kuitansi ini belum pernah disimpan di perangkat.");
+          }
+          setIsLoading(false);
+        }
+        return;
+      }
+
       try {
         const res = await fetch(`/api/bookings/${bookingId}`);
         const result = await res.json();
@@ -113,12 +148,18 @@ export default function BookingReceiptPage() {
         }
         if (isMounted) {
           setBooking(result.data);
+          saveCachedReceipt(bookingId, result.data);
+          setIsOfflineData(false);
+          setLastSyncedAt(null);
         }
       } catch (err: unknown) {
         if (isMounted) {
-          const msg =
-            err instanceof Error ? err.message : "Terjadi kesalahan saat memuat kuitansi";
-          setError(msg);
+          const restored = applyCachedReceipt();
+          if (!restored) {
+            const msg =
+              err instanceof Error ? err.message : "Terjadi kesalahan saat memuat kuitansi";
+            setError(msg);
+          }
         }
       } finally {
         if (isMounted) {
@@ -131,7 +172,7 @@ export default function BookingReceiptPage() {
     return () => {
       isMounted = false;
     };
-  }, [bookingId]);
+  }, [bookingId, isOnline]);
 
   // Set document title to format default PDF download name
   useEffect(() => {
@@ -231,6 +272,17 @@ export default function BookingReceiptPage() {
           </button>
         </div>
       </div>
+
+      {/* Offline Banner (Screen Only) */}
+      {(!isOnline || isOfflineData) && (
+        <div className="max-w-3xl mx-auto mb-5 print:hidden">
+          <OfflineBanner
+            title="Kuitansi Tersimpan (Mode Offline)"
+            message="Bukti pembayaran dan kode reservasi Anda tetap sah ditunjukkan ke pemilik kos meskipun tanpa koneksi internet."
+            lastSyncedAt={lastSyncedAt}
+          />
+        </div>
+      )}
 
       {/* Main Receipt Sheet (A4 Styled Document) */}
       <main

@@ -14,6 +14,15 @@ import {
   RefreshCw,
 } from "lucide-react";
 import { KosPropertyCard } from "@/components/features/KosPropertyCard";
+import { OfflineBanner } from "@/components/ui/OfflineBanner";
+import {
+  saveCachedWishlist,
+  getCachedWishlist,
+  saveCachedAuth,
+  getCachedAuth,
+  clearOfflineCaches,
+  useNetworkStatus,
+} from "@/lib/offline-storage";
 
 interface SavedPropertyItem {
   id: string;
@@ -50,10 +59,13 @@ interface SavedPropertyItem {
 
 export default function FavoritPage() {
   const router = useRouter();
+  const { isOnline } = useNetworkStatus();
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
   const [savedItems, setSavedItems] = useState<SavedPropertyItem[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [isOfflineData, setIsOfflineData] = useState<boolean>(false);
+  const [lastSyncedAt, setLastSyncedAt] = useState<string | null>(null);
 
   // Filter & Search states
   const [searchQuery, setSearchQuery] = useState<string>("");
@@ -62,9 +74,36 @@ export default function FavoritPage() {
   useEffect(() => {
     let isMounted = true;
 
+    const applyOfflineFallback = () => {
+      const cachedWishlist = getCachedWishlist<SavedPropertyItem>();
+      const cachedAuth = getCachedAuth<{ authenticated?: boolean }>();
+
+      if (cachedWishlist || cachedAuth?.auth?.authenticated) {
+        setIsAuthenticated(true);
+        setSavedItems(cachedWishlist?.items || []);
+        setIsOfflineData(true);
+        setLastSyncedAt(cachedWishlist?.updatedAt || cachedAuth?.updatedAt || null);
+        setError(null);
+        return true;
+      }
+      return false;
+    };
+
     async function loadWishlist() {
       setIsLoading(true);
       setError(null);
+
+      // Jika perangkat jelas dalam status offline, langsung muat dari cache lokal
+      if (typeof navigator !== "undefined" && navigator.onLine === false) {
+        if (isMounted) {
+          const restored = applyOfflineFallback();
+          if (!restored) {
+            setError("Anda sedang offline dan belum ada daftar kos favorit yang tersimpan di perangkat ini.");
+          }
+          setIsLoading(false);
+        }
+        return;
+      }
 
       try {
         // 1. Cek status autentikasi pengguna
@@ -73,13 +112,19 @@ export default function FavoritPage() {
 
         if (!isMounted) return;
 
-        if (!authRes.ok || !authData?.authenticated) {
+        if (authRes.status === 401 || (authRes.ok && !authData?.authenticated)) {
+          clearOfflineCaches();
           setIsAuthenticated(false);
           setIsLoading(false);
           return;
         }
 
+        if (!authRes.ok || !authData?.authenticated) {
+          throw new Error("Gagal memverifikasi sesi pengguna");
+        }
+
         setIsAuthenticated(true);
+        saveCachedAuth(authData);
 
         // 2. Ambil daftar kos yang difavoritkan
         const wishlistRes = await fetch("/api/user/wishlist");
@@ -89,13 +134,22 @@ export default function FavoritPage() {
 
         if (wishlistRes.ok && wishlistData?.success && Array.isArray(wishlistData.savedProperties)) {
           setSavedItems(wishlistData.savedProperties);
+          saveCachedWishlist(wishlistData.savedProperties);
+          setIsOfflineData(false);
+          setLastSyncedAt(null);
         } else {
-          setError(wishlistData?.error || "Gagal memuat daftar kos favorit.");
+          const restored = applyOfflineFallback();
+          if (!restored) {
+            setError(wishlistData?.error || "Gagal memuat daftar kos favorit.");
+          }
         }
       } catch (err) {
         if (isMounted) {
           console.error("Gagal memuat favorit:", err);
-          setError("Terjadi kesalahan saat memuat data favorit.");
+          const restored = applyOfflineFallback();
+          if (!restored) {
+            setError("Terjadi kesalahan saat memuat data favorit. Periksa koneksi internet Anda.");
+          }
         }
       } finally {
         if (isMounted) {
@@ -109,12 +163,16 @@ export default function FavoritPage() {
     return () => {
       isMounted = false;
     };
-  }, []);
+  }, [isOnline]);
 
   const handleWishlistToggle = (propertyId: string, isSaved: boolean) => {
     if (!isSaved) {
-      // Hapus dari list tampilan secara responsif
-      setSavedItems((prev) => prev.filter((item) => item.property.id !== propertyId));
+      // Hapus dari list tampilan secara responsif & perbarui cache lokal
+      setSavedItems((prev) => {
+        const updated = prev.filter((item) => item.property.id !== propertyId);
+        saveCachedWishlist(updated);
+        return updated;
+      });
     }
   };
 
@@ -315,6 +373,15 @@ export default function FavoritPage() {
             </Link>
           </div>
         </div>
+
+        {/* Offline Indicator Banner */}
+        {(!isOnline || isOfflineData) && (
+          <OfflineBanner
+            title="Mode Offline Aktif"
+            message={`Menampilkan ${savedItems.length} kos favorit yang tersimpan di perangkat Anda. Anda tetap dapat melihat alamat, harga, dan rincian kos tanpa sinyal.`}
+            lastSyncedAt={lastSyncedAt}
+          />
+        )}
 
         {/* Filter & Search Bar */}
         <div className="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-xs flex flex-col sm:flex-row items-center justify-between gap-4">
