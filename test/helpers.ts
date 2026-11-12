@@ -9,6 +9,7 @@ export async function clearDatabase() {
   }
 
   await prisma.notification.deleteMany();
+  await prisma.visitSchedule.deleteMany();
   await prisma.review.deleteMany();
   await prisma.booking.deleteMany();
   await prisma.magicLink.deleteMany();

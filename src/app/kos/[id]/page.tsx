@@ -27,6 +27,7 @@ import {
   BadgeCheck,
   MessageCircle,
   Share2,
+  CalendarClock,
 } from "lucide-react";
 import PropertyLocationMap from "@/components/map/PropertyLocationMap";
 import { CampusCommuteEstimator, CommuteLocation } from "@/components/features/CampusCommuteEstimator";
@@ -34,6 +35,12 @@ import { WishlistButton } from "@/components/features/WishlistButton";
 import { CompareButton } from "@/components/features/CompareButton";
 import { ReviewSection } from "@/components/features/ReviewSection";
 import { SimilarPropertiesSection } from "@/components/features/SimilarPropertiesSection";
+import {
+  ScheduleVisitModal,
+  getLocalScheduledVisit,
+  saveLocalScheduledVisit,
+  type ExistingVisitSummary,
+} from "@/components/features/ScheduleVisitModal";
 import { useFocusTrap } from "@/hooks/useFocusTrap";
 import { formatWhatsAppNumber } from "@/lib/whatsapp";
 import { buildSupportWhatsAppUrl } from "@/components/support/CustomerSupportWidget";
@@ -138,6 +145,8 @@ export default function PropertyDetailPage() {
 
   // Booking Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isVisitModalOpen, setIsVisitModalOpen] = useState(false);
+  const [existingVisit, setExistingVisit] = useState<ExistingVisitSummary | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isCheckingAuth, setIsCheckingAuth] = useState(false);
   const [bookingError, setBookingError] = useState<string | null>(null);
@@ -313,9 +322,10 @@ export default function PropertyDetailPage() {
       setIsLoading(true);
       setError(null);
       try {
-        const [resProperty, resWishlist] = await Promise.all([
+        const [resProperty, resWishlist, resVisit] = await Promise.all([
           fetch(`/api/properties/${id}`),
           fetch("/api/user/wishlist?idsOnly=true").catch(() => null),
+          fetch(`/api/visits?propertyId=${encodeURIComponent(id)}`).catch(() => null),
         ]);
 
         const json = await resProperty.json();
@@ -337,6 +347,19 @@ export default function PropertyDetailPage() {
               setIsSaved(wishlistJson.savedIds.includes(id));
             }
           }
+
+          let resolvedExistingVisit: ExistingVisitSummary | null = null;
+          if (resVisit && resVisit.ok) {
+            const visitJson = await resVisit.json().catch(() => null);
+            if (visitJson?.success && visitJson.existingVisit) {
+              resolvedExistingVisit = visitJson.existingVisit as ExistingVisitSummary;
+              saveLocalScheduledVisit(id, resolvedExistingVisit);
+            }
+          }
+          if (!resolvedExistingVisit) {
+            resolvedExistingVisit = getLocalScheduledVisit(id);
+          }
+          setExistingVisit(resolvedExistingVisit);
         }
       } catch (err) {
         if (isMounted) {
@@ -1560,6 +1583,35 @@ export default function PropertyDetailPage() {
 
                 <button
                   type="button"
+                  onClick={() => setIsVisitModalOpen(true)}
+                  className={`lg:hidden p-2.5 sm:px-3 rounded-xl border text-xs font-bold transition-all duration-200 active:scale-95 shrink-0 flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs ${
+                    existingVisit
+                      ? "border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300"
+                      : "border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-100"
+                  }`}
+                  title={
+                    existingVisit
+                      ? "Survei Sudah Dijadwalkan"
+                      : "Jadwalkan Survei Lokasi"
+                  }
+                  aria-label={
+                    existingVisit
+                      ? "Survei Sudah Dijadwalkan"
+                      : "Jadwalkan Survei Lokasi"
+                  }
+                >
+                  {existingVisit ? (
+                    <Check className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                  ) : (
+                    <CalendarClock className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                  )}
+                  <span className="hidden sm:inline">
+                    {existingVisit ? "Terjadwal" : "Survei"}
+                  </span>
+                </button>
+
+                <button
+                  type="button"
                   disabled={isFull || isCheckingAuth}
                   onClick={() => handleOpenBookingModal()}
                   className={`px-5 sm:px-6 py-2.5 lg:py-3.5 w-full rounded-xl font-bold text-white transition-all duration-200 cursor-pointer shadow-sm ${
@@ -1575,6 +1627,29 @@ export default function PropertyDetailPage() {
                     : "Amankan Kamar"}
                 </button>
               </div>
+
+              {/* Tombol Sekunder Desktop: Jadwalkan Survei Lokasi */}
+              <button
+                type="button"
+                onClick={() => setIsVisitModalOpen(true)}
+                className={`hidden lg:flex w-full py-2.5 px-4 rounded-xl border text-sm font-bold items-center justify-center gap-2 transition-all duration-200 active:scale-95 cursor-pointer shadow-2xs focus:outline-none focus:ring-2 focus:ring-emerald-500/40 ${
+                  existingVisit
+                    ? "border-emerald-200 dark:border-emerald-800 bg-emerald-50/70 dark:bg-emerald-950/40 hover:bg-emerald-100/70 dark:hover:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300"
+                    : "border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-100"
+                }`}
+              >
+                {existingVisit ? (
+                  <>
+                    <Check className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                    <span>Survei Sudah Dijadwalkan</span>
+                  </>
+                ) : (
+                  <>
+                    <CalendarClock className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                    <span>Jadwalkan Survei Lokasi</span>
+                  </>
+                )}
+              </button>
 
               {/* Jaminan KosPasti */}
               <div className="hidden lg:flex flex-col gap-2 pt-3 border-t border-slate-100 dark:border-slate-800 text-[11px] text-slate-500 dark:text-slate-400 w-full">
@@ -1930,7 +2005,20 @@ export default function PropertyDetailPage() {
           </div>
         </div>
       )}
-    
+
+      {/* ========================================================================= */}
+      {/* 6. MODAL JADWALKAN SURVEI LOKASI                                         */}
+      {/* ========================================================================= */}
+      <ScheduleVisitModal
+        isOpen={isVisitModalOpen}
+        onClose={() => setIsVisitModalOpen(false)}
+        propertyId={property.id}
+        propertyName={property.name}
+        propertyAddress={property.address}
+        existingVisit={existingVisit}
+        onVisitCreated={(visit) => setExistingVisit(visit)}
+      />
+
     </div>
   );
 }

@@ -54,6 +54,7 @@ model Property {
   media           PropertyMedia[]
   saved_by        SavedProperty[]
   reviews         Review[]
+  visits          VisitSchedule[]
 
   @@index([owner_id])
   @@index([status])
@@ -88,17 +89,19 @@ model PropertyMedia {
 }
 
 model MagicLink {
-  id         String   @id @default(uuid())
-  token      String   @unique
-  type       String   @default("ROOM_UPDATE") // "ROOM_UPDATE" | "BOOKING_VERIFICATION"
+  id         String         @id @default(uuid())
+  token      String         @unique
+  type       String         @default("ROOM_UPDATE") // "ROOM_UPDATE" | "BOOKING_VERIFICATION" | "VISIT_VERIFICATION"
   expires_at DateTime
-  is_used    Boolean  @default(false)
-  created_at DateTime @default(now())
-  updated_at DateTime @updatedAt
+  is_used    Boolean        @default(false)
+  created_at DateTime       @default(now())
+  updated_at DateTime       @updatedAt
   owner_id   String
-  owner      Owner    @relation(fields: [owner_id], references: [id], onDelete: Cascade)
+  owner      Owner          @relation(fields: [owner_id], references: [id], onDelete: Cascade)
   booking_id String?
-  booking    Booking? @relation(fields: [booking_id], references: [id], onDelete: Cascade)
+  booking    Booking?       @relation(fields: [booking_id], references: [id], onDelete: Cascade)
+  visit_id   String?
+  visit      VisitSchedule? @relation(fields: [visit_id], references: [id], onDelete: Cascade)
 }
 
 model Booking {
@@ -149,6 +152,7 @@ model User {
   saved_properties SavedProperty[]
   reviews          Review[]
   notifications    Notification[]
+  visits           VisitSchedule[]
 }
 
 model SavedProperty {
@@ -254,6 +258,33 @@ model Notification {
   @@index([user_id, is_read])
   @@index([owner_id, is_read])
   @@index([created_at])
+}
+
+model VisitSchedule {
+  id                   String      @id @default(uuid())
+  property_id          String
+  property             Property    @relation(fields: [property_id], references: [id], onDelete: Cascade)
+  user_id              String?
+  user                 User?       @relation(fields: [user_id], references: [id], onDelete: SetNull)
+  student_name         String
+  student_whatsapp     String
+  visit_date           DateTime
+  visit_time_slot      String
+  notes                String?
+  status               String      @default("PENDING") // "PENDING" | "ACCEPTED" | "REJECTED" | "RESCHEDULED" | "CANCELLED" | "COMPLETED"
+  reschedule_date          DateTime?
+  reschedule_time_slot     String?
+  reschedule_note          String?
+  student_reschedule_count Int         @default(0)
+  cancellation_reason      String?
+  created_at           DateTime    @default(now())
+  updated_at           DateTime    @updatedAt
+  magic_links          MagicLink[]
+
+  @@index([property_id])
+  @@index([user_id])
+  @@index([status])
+  @@index([visit_date])
 }
 
 

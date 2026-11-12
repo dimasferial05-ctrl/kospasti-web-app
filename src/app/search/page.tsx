@@ -39,6 +39,22 @@ interface PropertyItem {
   }>;
 }
 
+function SearchSkeletonGrid({ className = "" }: { className?: string }) {
+  return (
+    <div
+      role="status"
+      aria-label="Memuat daftar kos..."
+      aria-busy="true"
+      className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 ${className}`.trim()}
+    >
+      <span className="sr-only">Memuat daftar kos...</span>
+      {Array.from({ length: 8 }).map((_, idx) => (
+        <KosPropertyCardSkeleton key={idx} />
+      ))}
+    </div>
+  );
+}
+
 function SearchPageContent() {
   const router = useRouter();
   const searchParams = typeof useSearchParams === "function" ? useSearchParams() : null;
@@ -259,19 +275,7 @@ function SearchPageContent() {
           </Link>
         </div>
 
-        {isLoading && (
-          <div
-            role="status"
-            aria-label="Memuat daftar kos..."
-            aria-busy="true"
-            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
-          >
-            <span className="sr-only">Memuat daftar kos...</span>
-            {Array.from({ length: 8 }).map((_, idx) => (
-              <KosPropertyCardSkeleton key={idx} />
-            ))}
-          </div>
-        )}
+        {isLoading && <SearchSkeletonGrid />}
 
         {!isLoading && error && (
           <div className="p-4 bg-rose-50 dark:bg-rose-950/50 border border-rose-200 dark:border-rose-900 rounded-2xl text-rose-600 dark:text-rose-400 flex items-center gap-2.5 text-sm shadow-2xs">
@@ -370,11 +374,7 @@ export default function SearchPage() {
     <Suspense
       fallback={
         <main className="max-w-7xl mx-auto min-h-screen w-full px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 pt-24">
-            {Array.from({ length: 8 }).map((_, idx) => (
-              <KosPropertyCardSkeleton key={idx} />
-            ))}
-          </div>
+          <SearchSkeletonGrid className="pt-24" />
         </main>
       }
     >
