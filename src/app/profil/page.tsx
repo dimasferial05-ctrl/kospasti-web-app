@@ -43,6 +43,15 @@ import {
   formatVisitDateId,
 } from "@/lib/visit-schedule";
 import { saveLocalScheduledVisit } from "@/components/features/ScheduleVisitModal";
+import { OfflineBanner } from "@/components/ui/OfflineBanner";
+import {
+  saveCachedBookings,
+  getCachedBookings,
+  saveCachedUserProfile,
+  getCachedUserProfile,
+  clearOfflineCaches,
+  useNetworkStatus,
+} from "@/lib/offline-storage";
 
 interface UserProfile {
   id: string;
@@ -272,17 +281,42 @@ function ProfileContent() {
   const [disputeError, setDisputeError] = useState<string | null>(null);
   const [disputeSuccessMsg, setDisputeSuccessMsg] = useState<string | null>(null);
 
-  // Logout State
+  // Logout & Offline State
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const { isOnline } = useNetworkStatus();
+  const [isOfflineBookings, setIsOfflineBookings] = useState(false);
+  const [bookingsLastSyncedAt, setBookingsLastSyncedAt] = useState<string | null>(null);
 
   // 1. Fetch User Profile
   useEffect(() => {
     let isMounted = true;
 
+    const applyCachedProfile = () => {
+      const cached = getCachedUserProfile<UserProfile>();
+      if (cached?.profile) {
+        setUser(cached.profile);
+        setName(cached.profile.name || "");
+        setWhatsapp(cached.profile.whatsapp || "");
+        setBio(cached.profile.bio || "");
+        setAvatarPreview(cached.profile.avatar || null);
+        return true;
+      }
+      return false;
+    };
+
     async function fetchProfile() {
+      if (typeof navigator !== "undefined" && navigator.onLine === false) {
+        if (isMounted) {
+          applyCachedProfile();
+          setIsLoadingUser(false);
+        }
+        return;
+      }
+
       try {
         const res = await fetch("/api/user/profile");
         if (res.status === 401) {
+          clearOfflineCaches();
           router.push("/login");
           return;
         }
@@ -294,9 +328,13 @@ function ProfileContent() {
           setWhatsapp(data.user.whatsapp || "");
           setBio(data.user.bio || "");
           setAvatarPreview(data.user.avatar || null);
+          saveCachedUserProfile(data.user);
         }
       } catch (error) {
         console.error("Gagal mengambil data profil:", error);
+        if (isMounted) {
+          applyCachedProfile();
+        }
       } finally {
         if (isMounted) {
           setIsLoadingUser(false);
@@ -326,12 +364,34 @@ function ProfileContent() {
   useEffect(() => {
     let isMounted = true;
 
+    const applyCachedBookings = () => {
+      const cached = getCachedBookings<BookingItem>();
+      if (cached?.bookings) {
+        setBookings(cached.bookings);
+        setBookingsLoaded(true);
+        setIsOfflineBookings(true);
+        setBookingsLastSyncedAt(cached.updatedAt);
+        return true;
+      }
+      return false;
+    };
+
     async function fetchBookings() {
-      if (bookingsLoaded) return;
+      if (bookingsLoaded && isOnline && !isOfflineBookings) return;
+
+      if (typeof navigator !== "undefined" && navigator.onLine === false) {
+        if (isMounted) {
+          applyCachedBookings();
+          setIsLoadingBookings(false);
+        }
+        return;
+      }
+
       try {
         setIsLoadingBookings(true);
         const res = await fetch("/api/user/bookings");
         if (res.status === 401) {
+          clearOfflineCaches();
           router.push("/login");
           return;
         }
@@ -340,9 +400,15 @@ function ProfileContent() {
         if (isMounted && data.success && Array.isArray(data.bookings)) {
           setBookings(data.bookings);
           setBookingsLoaded(true);
+          setIsOfflineBookings(false);
+          setBookingsLastSyncedAt(null);
+          saveCachedBookings(data.bookings);
         }
       } catch (error) {
         console.error("Gagal mengambil riwayat pesanan:", error);
+        if (isMounted) {
+          applyCachedBookings();
+        }
       } finally {
         if (isMounted) {
           setIsLoadingBookings(false);
@@ -357,7 +423,7 @@ function ProfileContent() {
     return () => {
       isMounted = false;
     };
-  }, [activeTab, bookingsLoaded, router]);
+  }, [activeTab, bookingsLoaded, isOnline, isOfflineBookings, router]);
 
   useEffect(() => {
     let isMounted = true;
@@ -494,6 +560,7 @@ function ProfileContent() {
   const handleLogout = async () => {
     try {
       setIsLoggingOut(true);
+      clearOfflineCaches();
       await fetch("/api/logout", { method: "POST" });
       router.push("/login");
       router.refresh();
@@ -1297,6 +1364,15 @@ function ProfileContent() {
                     Daftar semua permohonan dan transaksi sewa kos yang pernah Anda buat.
                   </p>
                 </div>
+
+                {(!isOnline || isOfflineBookings) && (
+                  <OfflineBanner
+                    title="Mode Offline: Riwayat Pesanan Tersimpan"
+                    message="Anda dapat tetap membuka dan mencetak Bukti Sewa (E-Receipt) dari pesanan yang tersimpan di perangkat."
+                    lastSyncedAt={bookingsLastSyncedAt}
+                    className="mb-6"
+                  />
+                )}
 
                 {/* Banner Feedback Pembatalan */}
                 {cancelSuccessMsg && (
