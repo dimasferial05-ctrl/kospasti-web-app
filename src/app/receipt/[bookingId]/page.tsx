@@ -22,6 +22,7 @@ import {
   AlertCircle,
   Receipt,
 } from "lucide-react";
+import { TrustAura } from "@/components/ui/backgrounds";
 
 interface BookingReceiptDetail {
   id: string;
@@ -229,7 +230,10 @@ export default function BookingReceiptPage() {
   ).padStart(2, "0")}-${booking.id.slice(0, 8).toUpperCase()}`;
 
   return (
-    <div className="min-h-screen bg-slate-100 dark:bg-slate-950 text-slate-800 dark:text-slate-100 py-6 sm:py-10 px-4 print:p-0 print:m-0 print:bg-white print:text-black">
+    <div className="relative min-h-screen bg-slate-100 dark:bg-slate-950 text-slate-800 dark:text-slate-100 py-6 sm:py-10 px-4 print:p-0 print:m-0 print:bg-white print:text-black overflow-hidden">
+      {/* Background Escrow Trust Aura & Security Watermark (Screen only) */}
+      <TrustAura className="print:hidden" />
+
       {/* Inline Print Styles to cleanly isolate receipt */}
       <style jsx global>{`
         @media print {
@@ -250,7 +254,7 @@ export default function BookingReceiptPage() {
       `}</style>
 
       {/* Top Action Bar (Screen Only) */}
-      <div className="max-w-3xl mx-auto mb-6 flex items-center justify-between gap-3 print:hidden">
+      <div className="relative z-10 max-w-3xl mx-auto mb-6 flex items-center justify-between gap-3 print:hidden">
         <button
           type="button"
           onClick={() => router.back()}
@@ -287,7 +291,7 @@ export default function BookingReceiptPage() {
       {/* Main Receipt Sheet (A4 Styled Document) */}
       <main
         id="receipt-sheet"
-        className="max-w-3xl mx-auto bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-2xl shadow-xl p-6 sm:p-10 relative overflow-hidden print:border-none print:shadow-none print:p-0 print:m-0 print:max-w-none print:w-full print:bg-white print:text-black"
+        className="relative z-10 max-w-3xl mx-auto bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-2xl shadow-xl p-6 sm:p-10 overflow-hidden print:border-none print:shadow-none print:p-0 print:m-0 print:max-w-none print:w-full print:bg-white print:text-black"
         style={{ breakInside: "avoid" }}
       >
         {/* Header Section */}

@@ -8,6 +8,7 @@ import { KosPropertyCardSkeleton } from "@/components/features/KosPropertyCardSk
 import { SmartSearchBar } from "@/components/features/SmartSearchBar";
 import { FacetedSearchFilter } from "@/components/features/FacetedSearchFilter";
 import { AlertCircle, SearchX, MapPin, X } from "lucide-react";
+import { RadarEmptyPattern } from "@/components/ui/backgrounds";
 
 interface PropertyItem {
   id: string;
@@ -285,36 +286,41 @@ function SearchPageContent() {
         )}
 
         {!isLoading && !error && filteredProperties.length === 0 && (
-          <div className="flex flex-col items-center justify-center p-14 text-center bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 border-dashed shadow-soft">
-            <div className="w-16 h-16 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center mb-4">
-              <SearchX className="w-8 h-8 text-slate-300 dark:text-slate-600" />
-            </div>
-            <h3 className="text-base font-bold text-slate-800 dark:text-slate-200 mb-1">
-              Kos Tidak Ditemukan
-            </h3>
-            <p className="text-xs text-slate-500 dark:text-slate-400 max-w-sm leading-relaxed">
-              {queryParam.trim()
-                ? `Maaf, tidak ada kos yang sesuai dengan kata kunci "${queryParam}". Coba gunakan nama wilayah atau kriteria lain.`
-                : "Maaf, tidak ada kos yang sesuai dengan kriteria pencarian atau filter Anda. Saat ini belum ada listing kos yang terdaftar di sistem."}
-            </p>
-            <div className="mt-5 flex flex-wrap items-center justify-center gap-3">
-              {queryParam.trim() || selectedFacilities.length > 0 ? (
-                <button
-                  type="button"
-                  onClick={handleResetAll}
-                  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold shadow-soft hover:shadow-float active:scale-95 transition-all duration-200 cursor-pointer"
-                >
-                  <span>Reset Semua Filter</span>
-                </button>
-              ) : (
-                <Link
-                  href="/map"
-                  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold shadow-soft hover:shadow-float active:scale-95 transition-all duration-200"
-                >
-                  <MapPin className="w-3.5 h-3.5" />
-                  <span>Eksplor Lewat Peta</span>
-                </Link>
-              )}
+          <div className="relative overflow-hidden flex flex-col items-center justify-center p-14 text-center bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 border-dashed shadow-soft">
+            {/* Background Radar Search Pattern */}
+            <RadarEmptyPattern />
+
+            <div className="relative z-10 flex flex-col items-center">
+              <div className="w-16 h-16 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center mb-4">
+                <SearchX className="w-8 h-8 text-slate-300 dark:text-slate-600" />
+              </div>
+              <h3 className="text-base font-bold text-slate-800 dark:text-slate-200 mb-1">
+                Kos Tidak Ditemukan
+              </h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400 max-w-sm leading-relaxed">
+                {queryParam.trim()
+                  ? `Maaf, tidak ada kos yang sesuai dengan kata kunci "${queryParam}". Coba gunakan nama wilayah atau kriteria lain.`
+                  : "Maaf, tidak ada kos yang sesuai dengan kriteria pencarian atau filter Anda. Saat ini belum ada listing kos yang terdaftar di sistem."}
+              </p>
+              <div className="mt-5 flex flex-wrap items-center justify-center gap-3">
+                {queryParam.trim() || selectedFacilities.length > 0 ? (
+                  <button
+                    type="button"
+                    onClick={handleResetAll}
+                    className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold shadow-soft hover:shadow-float active:scale-95 transition-all duration-200 cursor-pointer"
+                  >
+                    <span>Reset Semua Filter</span>
+                  </button>
+                ) : (
+                  <Link
+                    href="/map"
+                    className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold shadow-soft hover:shadow-float active:scale-95 transition-all duration-200"
+                  >
+                    <MapPin className="w-3.5 h-3.5" />
+                    <span>Eksplor Lewat Peta</span>
+                  </Link>
+                )}
+              </div>
             </div>
           </div>
         )}

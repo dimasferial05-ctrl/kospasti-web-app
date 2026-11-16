@@ -5,6 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useSearchParams } from "next/navigation";
 import { AlertCircle, ArrowLeft, Building2, Loader2 } from "lucide-react";
+import { ArchitecturalGrid } from "@/components/ui/backgrounds";
 
 function LoginForm() {
   const searchParams = useSearchParams();
@@ -31,9 +32,12 @@ function LoginForm() {
   const errorMessage = getErrorMessage(errorParam);
 
   return (
-    <div className="min-h-[calc(100vh-64px)] flex items-center justify-center p-4 sm:p-6 bg-slate-50 dark:bg-slate-950">
+    <div className="relative min-h-[calc(100vh-64px)] flex items-center justify-center p-4 sm:p-6 bg-slate-50 dark:bg-slate-950 overflow-hidden">
+      {/* Background Architectural Blueprint */}
+      <ArchitecturalGrid />
+
       {/* Main Card Container */}
-      <div className="w-full max-w-md bg-white dark:bg-slate-900 p-6 sm:p-8 rounded-2xl sm:rounded-3xl shadow-soft-lg border border-slate-200/80 dark:border-slate-800 text-center">
+      <div className="relative z-10 w-full max-w-md bg-white dark:bg-slate-900 p-6 sm:p-8 rounded-2xl sm:rounded-3xl shadow-soft-lg border border-slate-200/80 dark:border-slate-800 text-center">
         {/* Brand Logo KosPasti */}
         <div className="flex justify-center mb-5">
           <Image
