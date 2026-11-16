@@ -6,6 +6,7 @@ import Image from "next/image";
 import MapViewer, { PropertyMapItem, SearchTargetLocation } from "@/components/map/MapViewer";
 import { SmartSearchBar } from "@/components/features/SmartSearchBar";
 import { MapPropertyCardSkeleton } from "@/components/features/MapPropertyCardSkeleton";
+import { RadarEmptyPattern } from "@/components/ui/backgrounds";
 import {
   MapPin,
   Home,
@@ -503,20 +504,25 @@ function MapSearchContent() {
                 ))}
               </div>
             ) : filteredProperties.length === 0 ? (
-              <div className="flex-1 flex flex-col items-center justify-center p-8 text-center bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/60 dark:border-slate-800 shadow-soft">
-                <Home className="w-12 h-12 text-slate-300 dark:text-slate-600 mb-3" />
-                <h3 className="font-bold text-slate-800 dark:text-slate-200 text-base mb-1">
-                  Kos Tidak Ditemukan
-                </h3>
-                <p className="text-xs text-slate-500 dark:text-slate-400 max-w-xs mb-4">
-                  Tidak ada kos yang cocok dengan kriteria pencarian Anda. Coba sesuaikan kata kunci atau filter.
-                </p>
-                <button
-                  onClick={handleResetFilters}
-                  className="px-4 py-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-xl text-xs font-bold shadow-soft hover:shadow-float active:scale-95 transition-all duration-200 cursor-pointer"
-                >
-                  Reset Semua Filter
-                </button>
+              <div className="relative overflow-hidden flex-1 flex flex-col items-center justify-center p-8 text-center bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/60 dark:border-slate-800 shadow-soft">
+                {/* Background Radar Search Pattern */}
+                <RadarEmptyPattern />
+
+                <div className="relative z-10 flex flex-col items-center">
+                  <Home className="w-12 h-12 text-slate-300 dark:text-slate-600 mb-3" />
+                  <h3 className="font-bold text-slate-800 dark:text-slate-200 text-base mb-1">
+                    Kos Tidak Ditemukan
+                  </h3>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 max-w-xs mb-4">
+                    Tidak ada kos yang cocok dengan kriteria pencarian Anda. Coba sesuaikan kata kunci atau filter.
+                  </p>
+                  <button
+                    onClick={handleResetFilters}
+                    className="px-4 py-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-xl text-xs font-bold shadow-soft hover:shadow-float active:scale-95 transition-all duration-200 cursor-pointer"
+                  >
+                    Reset Semua Filter
+                  </button>
+                </div>
               </div>
             ) : (
               <div className="flex-1 overflow-y-auto pr-1 space-y-3.5 max-h-[calc(100vh-280px)] scrollbar-thin">

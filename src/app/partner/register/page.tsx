@@ -27,6 +27,7 @@ import {
   Image as ImageIcon,
 } from "lucide-react";
 import LocationPicker from "@/components/map/LocationPicker";
+import { ArchitecturalGrid } from "@/components/ui/backgrounds";
 
 export default function PartnerRegisterPage() {
   const router = useRouter();
@@ -296,7 +297,9 @@ export default function PartnerRegisterPage() {
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col justify-center py-10 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
-      {/* Background Decor */}
+      {/* Background Architectural Blueprint */}
+      <ArchitecturalGrid />
+
       <div className="max-w-3xl mx-auto w-full relative z-10">
         {/* Back to Home Action */}
         <div className="mb-6 flex items-center justify-between">

@@ -6,6 +6,7 @@ import { MapPin } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import { SmartSearchBar } from "@/components/features/SmartSearchBar";
+import { TopographicGlow } from "@/components/ui/backgrounds";
 
 export function HeroSection() {
   const router = useRouter();
@@ -20,6 +21,9 @@ export function HeroSection() {
 
   return (
     <section className="relative w-full overflow-hidden bg-gradient-to-b from-emerald-50/50 via-slate-50/30 to-white dark:from-slate-950 dark:via-slate-950 dark:to-slate-900 pt-10 sm:pt-16 pb-0">
+      {/* Background Ambience & Topographic Lines */}
+      <TopographicGlow />
+
       <div className="relative z-30 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center flex flex-col items-center">
 
         {/* Big centered headline */}

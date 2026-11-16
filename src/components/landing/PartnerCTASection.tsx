@@ -10,6 +10,7 @@ import {
   Users,
   Wallet,
 } from "lucide-react";
+import { ArchitecturalGrid } from "@/components/ui/backgrounds";
 
 export function PartnerCTASection() {
   const pillars = [
@@ -36,8 +37,11 @@ export function PartnerCTASection() {
   ];
 
   return (
-    <section id="mitra" className="relative bg-slate-900 dark:bg-slate-950 text-white py-20 sm:py-28 border-y border-slate-800">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
+    <section id="mitra" className="relative bg-slate-900 dark:bg-slate-950 text-white py-20 sm:py-28 border-y border-slate-800 overflow-hidden">
+      {/* Background Architectural Blueprint in Dark Theme */}
+      <ArchitecturalGrid variant="dark" />
+
+      <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
         {/* Header Content with Motion */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}

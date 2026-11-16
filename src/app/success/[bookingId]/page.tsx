@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { CheckCircle2, ShieldCheck, ArrowLeft, Receipt, Printer } from "lucide-react";
+import { TrustAura } from "@/components/ui/backgrounds";
 
 export default function PaymentSuccessPage() {
   const router = useRouter();
@@ -10,8 +11,11 @@ export default function PaymentSuccessPage() {
   const bookingId = params?.bookingId as string;
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-950 p-4 sm:p-6 transition-colors duration-200">
-      <div className="bg-white dark:bg-slate-900 max-w-md w-full rounded-2xl shadow-xl shadow-slate-200/60 dark:shadow-none border border-slate-100 dark:border-slate-800 overflow-hidden">
+    <div className="relative min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-950 p-4 sm:p-6 transition-colors duration-200 overflow-hidden">
+      {/* Background Escrow Trust Aura & Security Watermark */}
+      <TrustAura />
+
+      <div className="relative z-10 bg-white dark:bg-slate-900 max-w-md w-full rounded-2xl shadow-xl shadow-slate-200/60 dark:shadow-none border border-slate-100 dark:border-slate-800 overflow-hidden">
         {/* Header Card Sukses */}
         <div className="bg-green-500 dark:bg-emerald-600 p-6 sm:p-8 text-center text-white flex flex-col items-center justify-center">
           <div className="bg-white/20 p-3 rounded-full mb-3 backdrop-blur-xs">
