@@ -41,7 +41,7 @@ describe("Meaningful Backgrounds (Anti-Slop Implementation)", () => {
     expect(html).toContain('aria-hidden="true"');
     expect(html).toContain("pointer-events-none");
     expect(html).toContain("<circle");
-    expect(html).toContain('stroke-dasharray="4 6"');
+    expect(html).toContain('stroke-dasharray="5 7"');
   });
 
   it("renders RadarEmptyPattern with concentric search radar rings and crosshairs", () => {
@@ -51,7 +51,7 @@ describe("Meaningful Backgrounds (Anti-Slop Implementation)", () => {
     expect(html).toContain("pointer-events-none");
     expect(html).toContain("<circle");
     expect(html).toContain("<line");
-    expect(html).toContain('stroke-dasharray="4 6"');
+    expect(html).toContain('stroke-dasharray="5 7"');
   });
 
   it("passes custom className properly across all background components", () => {
