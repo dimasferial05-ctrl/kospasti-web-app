@@ -7,10 +7,6 @@
     {
       "path": "/api/cron/monthly-update",
       "schedule": "0 9 1 * *"
-    },
-    {
-      "path": "/api/cron/payment-reminder",
-      "schedule": "*/30 * * * *"
     }
   ]
 }
