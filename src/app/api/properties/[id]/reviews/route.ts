@@ -1,8 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
+import path from "path";
 import { prisma } from "@/lib/prisma";
 import { verifyUserToken } from "@/lib/auth";
 import { createInAppNotification } from "@/lib/notifications";
+import { saveUploadedFiles } from "@/lib/upload";
 
 async function authenticateUser(request?: NextRequest) {
   const cookieStore = await cookies();
@@ -70,10 +72,43 @@ export async function GET(
     const distribution: Record<number, number> = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
 
     let ratingSum = 0;
+    let photoReviewsCount = 0;
+    const allPhotos: Array<{
+      url: string;
+      reviewId: string;
+      rating: number;
+      studentName: string;
+      createdAt: string;
+      comment?: string | null;
+    }> = [];
+
     for (const r of reviews) {
       ratingSum += r.rating;
       if (distribution[r.rating] !== undefined) {
         distribution[r.rating] += 1;
+      }
+
+      if (r.images) {
+        try {
+          const parsed = typeof r.images === "string" ? JSON.parse(r.images) : r.images;
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            photoReviewsCount++;
+            for (const imgUrl of parsed) {
+              if (typeof imgUrl === "string" && imgUrl.trim()) {
+                allPhotos.push({
+                  url: imgUrl.trim(),
+                  reviewId: r.id,
+                  rating: r.rating,
+                  studentName: r.user?.name || "Penyewa",
+                  createdAt: r.created_at.toISOString(),
+                  comment: r.comment,
+                });
+              }
+            }
+          }
+        } catch {
+          // ignore parsing error
+        }
       }
     }
 
@@ -87,7 +122,9 @@ export async function GET(
           totalReviews,
           averageRating,
           distribution,
+          photoReviewsCount,
         },
+        allPhotos,
       },
     });
   } catch (error) {
@@ -130,17 +167,109 @@ export async function POST(
         { status: 401 }
       );
     }
-    let body;
-    try {
-      body = await request.json();
-    } catch {
-      return NextResponse.json(
-        { success: false, error: "Format data request tidak valid" },
-        { status: 400 }
-      );
-    }
+    let rating: any;
+    let comment: any;
+    let booking_id: any;
+    let uploadedImages: string[] = [];
 
-    const { rating, comment, booking_id } = body || {};
+    const contentType = request.headers.get("content-type") || "";
+
+    if (contentType.includes("multipart/form-data")) {
+      try {
+        const formData = await request.formData();
+        rating = formData.get("rating");
+        comment = formData.get("comment");
+        booking_id = formData.get("booking_id");
+
+        const rawFiles = [
+          ...formData.getAll("images"),
+          ...formData.getAll("photos"),
+        ];
+
+        const filesToUpload: File[] = [];
+        for (const item of rawFiles) {
+          if (item && typeof item === "object" && "arrayBuffer" in item && (item as File).size > 0) {
+            filesToUpload.push(item as File);
+          }
+        }
+
+        // Batasi maksimal 3 foto kamar asli
+        if (filesToUpload.length > 3) {
+          return NextResponse.json(
+            { success: false, error: "Maksimal 3 foto ulasan yang dapat diunggah." },
+            { status: 400 }
+          );
+        }
+
+        // Validasi tipe file dan batas ukuran (maksimal 5MB)
+        for (const f of filesToUpload) {
+          const mime = (f.type || "").toLowerCase();
+          const ext = f.name ? path.extname(f.name).toLowerCase() : "";
+          const allowedExts = [".jpg", ".jpeg", ".png", ".webp"];
+          const isAllowedImage =
+            (mime.startsWith("image/") &&
+              (mime.includes("jpeg") ||
+                mime.includes("jpg") ||
+                mime.includes("png") ||
+                mime.includes("webp"))) ||
+            allowedExts.includes(ext);
+
+          if (!isAllowedImage) {
+            return NextResponse.json(
+              {
+                success: false,
+                error: `Format file '${f.name}' tidak didukung. Harap unggah foto berekstensi JPG, PNG, atau WEBP.`,
+              },
+              { status: 400 }
+            );
+          }
+
+          if (f.size > 5 * 1024 * 1024) {
+            return NextResponse.json(
+              { success: false, error: `Ukuran foto '${f.name}' melebihi batas maksimal 5MB.` },
+              { status: 400 }
+            );
+          }
+        }
+
+        if (filesToUpload.length > 0) {
+          const uploadResults = await saveUploadedFiles(filesToUpload, "reviews");
+          uploadedImages = uploadResults.map((r) => r.url);
+        }
+      } catch (err: any) {
+        console.error("Gagal memproses FormData ulasan:", err);
+        return NextResponse.json(
+          { success: false, error: err.message || "Gagal mengunggah foto ulasan" },
+          { status: 400 }
+        );
+      }
+    } else {
+      let body;
+      try {
+        body = await request.json();
+      } catch {
+        return NextResponse.json(
+          { success: false, error: "Format data request tidak valid" },
+          { status: 400 }
+        );
+      }
+
+      rating = body?.rating;
+      comment = body?.comment;
+      booking_id = body?.booking_id;
+
+      if (Array.isArray(body?.images)) {
+        if (body.images.length > 3) {
+          return NextResponse.json(
+            { success: false, error: "Maksimal 3 foto ulasan yang dapat diunggah." },
+            { status: 400 }
+          );
+        }
+        uploadedImages = body.images.filter(
+          (img: any) => typeof img === "string" && img.trim().length > 0
+        );
+      }
+    }
 
     // Validasi rating
     const parsedRating = Number(rating);
@@ -235,6 +364,7 @@ export async function POST(
       data: {
         rating: Math.round(parsedRating),
         comment: typeof comment === "string" ? comment.trim() : null,
+        images: uploadedImages.length > 0 ? JSON.stringify(uploadedImages) : null,
         property_id: propertyId,
         user_id: userId,
         booking_id: targetBooking.id,

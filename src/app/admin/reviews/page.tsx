@@ -14,12 +14,14 @@ import {
   Building,
   MessageSquare,
   RefreshCw,
+  Camera,
 } from "lucide-react";
 
 interface AdminReviewItem {
   id: string;
   rating: number;
   comment?: string | null;
+  images?: string | null;
   is_hidden: boolean;
   created_at: string;
   property?: {
@@ -405,6 +407,38 @@ export default function AdminReviewsPage() {
                         ) : (
                           <span className="text-slate-400 dark:text-slate-500 italic">Hanya memberi rating</span>
                         )}
+                        {(() => {
+                          let reviewImages: string[] = [];
+                          if (r.images) {
+                            try {
+                              const parsed = typeof r.images === "string" ? JSON.parse(r.images) : r.images;
+                              if (Array.isArray(parsed)) reviewImages = parsed;
+                            } catch {
+                              reviewImages = [];
+                            }
+                          }
+                          if (!reviewImages.length) return null;
+                          return (
+                            <div className="flex items-center gap-1.5 mt-2">
+                              {reviewImages.map((img, idx) => (
+                                <a
+                                  key={idx}
+                                  href={img}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="w-8 h-8 rounded-lg overflow-hidden border border-slate-200 dark:border-slate-700 block shrink-0 hover:opacity-80 transition-opacity"
+                                  title={`Foto ${idx + 1}`}
+                                >
+                                  <img src={img} alt={`Foto ${idx + 1}`} className="w-full h-full object-cover" />
+                                </a>
+                              ))}
+                              <span className="text-[10px] text-slate-400 font-medium ml-0.5 flex items-center gap-0.5">
+                                <Camera className="w-3 h-3 text-emerald-600" />
+                                {reviewImages.length}
+                              </span>
+                            </div>
+                          );
+                        })()}
                       </td>
 
                       <td className="py-3.5 px-4 whitespace-nowrap">

@@ -180,6 +180,7 @@ model Review {
   id          String   @id @default(uuid())
   rating      Int
   comment     String?
+  images      String?
   reply       String?
   replied_at  DateTime?
   is_hidden   Boolean  @default(false)

@@ -14,12 +14,14 @@ import {
   Trash2,
   Edit2,
   AlertCircle,
+  Camera,
 } from "lucide-react";
 
 export interface ReviewCardData {
   id: string;
   rating: number;
   comment?: string | null;
+  images?: string | null;
   reply?: string | null;
   replied_at?: string | null;
   created_at: string;
@@ -227,6 +229,48 @@ export function ReviewCard({ review, onReplyUpdated }: ReviewCardProps) {
           </p>
         )}
       </div>
+
+      {/* Review Photos if any */}
+      {(() => {
+        let reviewImages: string[] = [];
+        if (review.images) {
+          try {
+            const parsed =
+              typeof review.images === "string"
+                ? JSON.parse(review.images)
+                : review.images;
+            if (Array.isArray(parsed)) reviewImages = parsed;
+          } catch {
+            reviewImages = [];
+          }
+        }
+        if (!reviewImages.length) return null;
+
+        return (
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 flex items-center gap-1 w-full">
+              <Camera className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+              <span>Foto Kamar Asli ({reviewImages.length}):</span>
+            </span>
+            {reviewImages.map((imgUrl, imgIdx) => (
+              <a
+                key={imgIdx}
+                href={imgUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group relative w-16 h-16 rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700 hover:ring-2 hover:ring-emerald-500 transition-all"
+                title="Buka foto ukuran penuh"
+              >
+                <img
+                  src={imgUrl}
+                  alt={`Foto ulasan ${imgIdx + 1}`}
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                />
+              </a>
+            ))}
+          </div>
+        );
+      })()}
 
       {/* Partner Reply Section */}
       <div className="pt-1">
