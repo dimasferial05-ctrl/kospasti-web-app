@@ -26,12 +26,17 @@ import { TrustAura } from "@/components/ui/backgrounds";
 
 interface BookingReceiptDetail {
   id: string;
+  invoiceNumber?: string;
   studentName: string;
   studentWhatsapp: string;
   studentEmail: string | null;
   moveInDate: string;
   status: string;
   createdAt: string;
+  paidAt?: string | null;
+  paymentMethod?: string | null;
+  paymentGatewayRef?: string | null;
+  snapToken?: string | null;
   property: {
     id: string;
     name: string;
@@ -331,10 +336,10 @@ export default function BookingReceiptPage() {
             >
               <div className="text-sm tracking-widest font-black leading-tight">LUNAS</div>
               <div className="text-[8px] sm:text-[9px] font-bold tracking-tight text-emerald-600 print:text-emerald-700 mt-0.5">
-                ESCROW DIJAMIN 12 JAM
+                ESCROW DIJAMIN 12 JAM &bull; REKENING BERSAMA KOSPASTI
               </div>
               <div className="text-[7px] text-slate-400 print:text-slate-500 tracking-wider">
-                KOSPASTI OFFICIAL
+                KOSPASTI OFFICIAL &bull; ESCROW SECURED
               </div>
             </div>
           </div>
@@ -353,10 +358,10 @@ export default function BookingReceiptPage() {
             </div>
             <div className="text-left sm:text-right shrink-0">
               <div className="text-[11px] font-semibold text-slate-400 dark:text-slate-500 print:text-slate-500">
-                Nomor Kuitansi
+                Nomor Kuitansi / Invoice
               </div>
               <div className="font-mono text-xs sm:text-sm font-bold text-slate-900 dark:text-white print:text-black">
-                {receiptNo}
+                {booking.invoiceNumber || receiptNo}
               </div>
             </div>
           </div>
@@ -365,13 +370,13 @@ export default function BookingReceiptPage() {
             <div>
               <span className="text-slate-400 dark:text-slate-500 block text-[11px]">Waktu Bayar:</span>
               <span className="font-medium text-slate-800 dark:text-slate-200 print:text-black">
-                {formatDateTime(booking.createdAt)}
+                {formatDateTime(booking.paidAt || booking.createdAt)}
               </span>
             </div>
             <div>
               <span className="text-slate-400 dark:text-slate-500 block text-[11px]">Metode Bayar:</span>
               <span className="font-semibold text-slate-800 dark:text-slate-200 print:text-black">
-                QRIS (Instant Settlement)
+                {booking.paymentMethod?.toUpperCase() || "QRIS (MIDTRANS)"}
               </span>
             </div>
             <div>

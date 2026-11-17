@@ -327,9 +327,14 @@ export async function GET(request: Request) {
         prisma.property.count({ where: whereClause }),
         prisma.property.findMany({
           where: whereClause,
-          orderBy: {
-            updated_at: "desc",
-          },
+          orderBy: [
+            {
+              is_featured: "desc",
+            },
+            {
+              updated_at: "desc",
+            },
+          ],
           skip,
           take: limit,
           include: propertyInclude,

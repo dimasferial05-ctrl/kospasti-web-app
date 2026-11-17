@@ -39,6 +39,8 @@ model Property {
   longitude       Float?
   is_pet_friendly Boolean         @default(false)
   is_24_hours     Boolean         @default(false)
+  is_featured     Boolean         @default(false)
+  featured_until  DateTime?
   status          String          @default("PENDING_REVIEW")
   rejectionReason String?
   rules           String?
@@ -125,6 +127,11 @@ model Booking {
   refund_note            String?
   refunded_at            DateTime?
   amount                 Int         @default(0)
+  service_fee            Int         @default(5000)
+  payment_gateway_ref    String?
+  payment_method         String?
+  snap_token             String?
+  paid_at                DateTime?
   checkin_confirmed_at   DateTime?
   reminder_sent_at       DateTime?
   review_prompted_at     DateTime?
@@ -211,6 +218,9 @@ model Payout {
   owner_id               String
   owner                  Owner     @relation(fields: [owner_id], references: [id], onDelete: Cascade)
   amount                 Int       // Nominal yang dicairkan (dalam rupiah)
+  gross_amount           Int       @default(0) // Total nilai transaksi sewa awal
+  platform_fee           Int       @default(0) // Potongan komisi platform (misal 3%)
+  net_amount             Int       @default(0) // Nominal bersih yang ditransfer ke pemilik
   status                 String    @default("PAYOUT_PENDING")
   // Status valid: "PAYOUT_PENDING" | "PAYOUT_PAID" | "PAYOUT_FAILED"
   payout_method_snapshot String?   // JSON string: snapshot rekening saat payout diproses
