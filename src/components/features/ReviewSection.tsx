@@ -9,12 +9,26 @@ import {
   Loader2,
   Send,
   PenSquare,
+  Camera,
+  ImagePlus,
+  X,
+  Maximize2,
 } from "lucide-react";
+
+export interface ReviewPhotoItem {
+  url: string;
+  reviewId: string;
+  rating: number;
+  studentName: string;
+  createdAt: string;
+  comment?: string | null;
+}
 
 export interface ReviewItem {
   id: string;
   rating: number;
   comment?: string | null;
+  images?: string | null;
   reply?: string | null;
   replied_at?: string | null;
   created_at: string;
@@ -35,6 +49,7 @@ export interface ReviewStats {
   totalReviews: number;
   averageRating: number;
   distribution: Record<number, number>;
+  photoReviewsCount?: number;
 }
 
 interface ReviewSectionProps {
@@ -80,6 +95,7 @@ export function ReviewSection({ propertyId, propertyName }: ReviewSectionProps) 
     averageRating: 0,
     distribution: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 },
   });
+  const [allPhotos, setAllPhotos] = useState<ReviewPhotoItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   // Form State
@@ -91,9 +107,14 @@ export function ReviewSection({ propertyId, propertyName }: ReviewSectionProps) 
   const [selectedRating, setSelectedRating] = useState<number>(5);
   const [hoverRating, setHoverRating] = useState<number | null>(null);
   const [commentText, setCommentText] = useState<string>("");
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const [previewUrls, setPreviewUrls] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
   const [formSuccess, setFormSuccess] = useState<string | null>(null);
+
+  // Lightbox Modal State
+  const [selectedLightboxPhoto, setSelectedLightboxPhoto] = useState<ReviewPhotoItem | null>(null);
 
   const fetchReviews = useCallback(async () => {
     try {
@@ -109,6 +130,7 @@ export function ReviewSection({ propertyId, propertyName }: ReviewSectionProps) 
             distribution: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 },
           }
         );
+        setAllPhotos(data.data.allPhotos || []);
       }
     } catch (err) {
       console.error("Gagal memuat ulasan:", err);
@@ -138,6 +160,57 @@ export function ReviewSection({ propertyId, propertyName }: ReviewSectionProps) 
     checkEligibility();
   }, [fetchReviews, checkEligibility]);
 
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setSelectedLightboxPhoto(null);
+      }
+    };
+    if (selectedLightboxPhoto) {
+      window.addEventListener("keydown", handleKeyDown);
+    }
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [selectedLightboxPhoto]);
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    if (!files.length) return;
+
+    if (selectedFiles.length + files.length > 3) {
+      setFormError("Maksimal 3 foto kamar asli yang dapat diunggah.");
+      return;
+    }
+
+    const validFiles: File[] = [];
+    for (const f of files) {
+      if (!f.type.startsWith("image/")) {
+        setFormError(`File '${f.name}' bukan merupakan gambar yang valid.`);
+        return;
+      }
+      if (f.size > 5 * 1024 * 1024) {
+        setFormError(`Ukuran foto '${f.name}' melebihi batas 5MB.`);
+        return;
+      }
+      validFiles.push(f);
+    }
+
+    const updated = [...selectedFiles, ...validFiles].slice(0, 3);
+    setSelectedFiles(updated);
+
+    const urls = updated.map((file) => URL.createObjectURL(file));
+    setPreviewUrls(urls);
+    setFormError(null);
+  };
+
+  const removeFile = (index: number) => {
+    const updatedFiles = selectedFiles.filter((_, i) => i !== index);
+    setSelectedFiles(updatedFiles);
+    const urls = updatedFiles.map((file) => URL.createObjectURL(file));
+    setPreviewUrls(urls);
+  };
+
   const handleSubmitReview = async (e: React.FormEvent) => {
     e.preventDefault();
     setFormError(null);
@@ -150,16 +223,22 @@ export function ReviewSection({ propertyId, propertyName }: ReviewSectionProps) 
 
     try {
       setIsSubmitting(true);
+
+      const formData = new FormData();
+      formData.append("rating", String(selectedRating));
+      if (commentText.trim()) {
+        formData.append("comment", commentText.trim());
+      }
+      if (targetBookingId) {
+        formData.append("booking_id", targetBookingId);
+      }
+      for (const file of selectedFiles) {
+        formData.append("images", file);
+      }
+
       const res = await fetch(`/api/properties/${propertyId}/reviews`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          rating: selectedRating,
-          comment: commentText,
-          booking_id: targetBookingId || undefined,
-        }),
+        body: formData,
       });
 
       const data = await res.json();
@@ -171,6 +250,8 @@ export function ReviewSection({ propertyId, propertyName }: ReviewSectionProps) 
 
       setFormSuccess("Ulasan Anda berhasil dikirim dan dipublikasikan.");
       setCommentText("");
+      setSelectedFiles([]);
+      setPreviewUrls([]);
       setIsFormOpen(false);
       setIsEligible(false);
       fetchReviews();
@@ -310,6 +391,61 @@ export function ReviewSection({ propertyId, propertyName }: ReviewSectionProps) 
             />
           </div>
 
+          {/* Upload Foto Kamar Asli */}
+          <div className="mb-5 space-y-2">
+            <div className="flex items-center justify-between">
+              <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+                <Camera className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+                <span>Foto Kondisi Kamar Asli (Opsional, Maks. 3 Foto)</span>
+              </label>
+              <span className="text-[11px] text-slate-400 font-medium">
+                {selectedFiles.length}/3 foto
+              </span>
+            </div>
+            <p className="text-[11px] text-slate-500 dark:text-slate-400">
+              Bantu calon penghuni lain melihat kondisi nyata kamar, kamar mandi, atau fasilitas kos.
+            </p>
+
+            <div className="flex items-center gap-2.5 flex-wrap pt-1">
+              {/* Thumbnail Previews */}
+              {previewUrls.map((url, idx) => (
+                <div
+                  key={idx}
+                  className="relative w-20 h-20 rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700 group shadow-2xs"
+                >
+                  <img
+                    src={url}
+                    alt={`Preview foto ${idx + 1}`}
+                    className="w-full h-full object-cover"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => removeFile(idx)}
+                    className="absolute top-1 right-1 w-5 h-5 rounded-full bg-slate-900/80 hover:bg-rose-600 text-white flex items-center justify-center transition-colors cursor-pointer"
+                    aria-label={`Hapus foto ${idx + 1}`}
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                </div>
+              ))}
+
+              {/* Upload Trigger Button */}
+              {selectedFiles.length < 3 && (
+                <label className="w-20 h-20 rounded-xl border-2 border-dashed border-slate-200 dark:border-slate-700 hover:border-emerald-500 dark:hover:border-emerald-400 flex flex-col items-center justify-center gap-1 text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-400 transition-all cursor-pointer bg-slate-50/50 dark:bg-slate-900/50 active:scale-95">
+                  <ImagePlus className="w-5 h-5" />
+                  <span className="text-[10px] font-semibold">Tambah</span>
+                  <input
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp"
+                    multiple
+                    onChange={handleFileChange}
+                    className="hidden"
+                  />
+                </label>
+              )}
+            </div>
+          </div>
+
           <div className="flex items-center justify-end gap-2.5">
             <button
               type="button"
@@ -400,6 +536,46 @@ export function ReviewSection({ propertyId, propertyName }: ReviewSectionProps) 
         </div>
       </div>
 
+      {/* Community Photo Gallery */}
+      {allPhotos.length > 0 && (
+        <div className="my-6 p-4 sm:p-5 bg-slate-50/70 dark:bg-slate-800/60 rounded-2xl border border-slate-200/80 dark:border-slate-800">
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <Camera className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+              <h4 className="text-sm font-bold text-slate-900 dark:text-white tracking-tight">
+                Foto Asli dari Penghuni
+              </h4>
+              <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 bg-white dark:bg-slate-800 px-2 py-0.5 rounded-full border border-slate-200/60 dark:border-slate-700">
+                {allPhotos.length} foto
+              </span>
+            </div>
+          </div>
+          <div className="flex items-center gap-3 overflow-x-auto pb-2 scrollbar-thin">
+            {allPhotos.map((photo, pIdx) => (
+              <button
+                key={pIdx}
+                type="button"
+                onClick={() => setSelectedLightboxPhoto(photo)}
+                className="group relative flex-shrink-0 w-24 h-24 sm:w-28 sm:h-28 rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700 hover:ring-2 hover:ring-emerald-500 transition-all cursor-pointer focus:outline-none"
+                aria-label={`Lihat foto ulasan oleh ${photo.studentName}`}
+              >
+                <img
+                  src={photo.url}
+                  alt={`Foto ulasan ${photo.studentName}`}
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-slate-950/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-2">
+                  <div className="flex items-center gap-1 text-[10px] text-white font-medium">
+                    <Maximize2 className="w-3 h-3" />
+                    <span className="truncate">{photo.studentName}</span>
+                  </div>
+                </div>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Reviews List */}
       {isLoading ? (
         <div className="flex flex-col items-center justify-center py-12 text-slate-400">
@@ -461,6 +637,53 @@ export function ReviewSection({ propertyId, propertyName }: ReviewSectionProps) 
                   </p>
                 )}
 
+                {/* Review Photos Thumbnail Strip */}
+                {(() => {
+                  let reviewImages: string[] = [];
+                  if (rev.images) {
+                    try {
+                      const parsed =
+                        typeof rev.images === "string" ? JSON.parse(rev.images) : rev.images;
+                      if (Array.isArray(parsed)) reviewImages = parsed;
+                    } catch {
+                      reviewImages = [];
+                    }
+                  }
+                  if (!reviewImages.length) return null;
+
+                  return (
+                    <div className="flex items-center gap-2.5 mt-3 pl-12 flex-wrap">
+                      {reviewImages.map((imgUrl, imgIdx) => (
+                        <button
+                          key={imgIdx}
+                          type="button"
+                          onClick={() =>
+                            setSelectedLightboxPhoto({
+                              url: imgUrl,
+                              reviewId: rev.id,
+                              rating: rev.rating,
+                              studentName: rev.user?.name || "Penyewa",
+                              createdAt: rev.created_at,
+                              comment: rev.comment,
+                            })
+                          }
+                          className="group relative w-16 h-16 sm:w-20 sm:h-20 rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700 hover:ring-2 hover:ring-emerald-500 transition-all cursor-pointer focus:outline-none"
+                          aria-label={`Perbesar foto ulasan ${imgIdx + 1}`}
+                        >
+                          <img
+                            src={imgUrl}
+                            alt={`Foto ulasan kamar ${imgIdx + 1}`}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
+                          />
+                          <div className="absolute inset-0 bg-slate-950/20 group-hover:bg-slate-950/40 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100">
+                            <Maximize2 className="w-4 h-4 text-white" />
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  );
+                })()}
+
                 {rev.reply && (() => {
                   const ownerName = rev.property?.owner?.name || "Pemilik Kos";
                   const ownerInitial = (ownerName || "P").trim().charAt(0).toUpperCase() || "P";
@@ -519,6 +742,87 @@ export function ReviewSection({ propertyId, propertyName }: ReviewSectionProps) 
               </div>
             );
           })}
+        </div>
+      )}
+
+      {/* Lightbox Modal */}
+      {selectedLightboxPhoto && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm animate-in fade-in duration-200"
+          onClick={() => setSelectedLightboxPhoto(null)}
+        >
+          <div
+            className="relative max-w-3xl w-full bg-white dark:bg-slate-900 rounded-2xl overflow-hidden shadow-2xl border border-slate-200 dark:border-slate-800"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header / Close button */}
+            <div className="flex items-center justify-between px-4 py-3 border-b border-slate-100 dark:border-slate-800">
+              <div className="flex items-center gap-2">
+                <Camera className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                <span className="text-sm font-bold text-slate-900 dark:text-white">
+                  Foto Kamar Asli
+                </span>
+                <span className="inline-flex items-center gap-0.5 text-emerald-700 dark:text-emerald-400 text-xs font-medium bg-emerald-50 dark:bg-emerald-950/50 px-2 py-0.5 rounded-full border border-emerald-200/60 dark:border-emerald-800">
+                  <Check className="w-3 h-3" />
+                  Penghuni Terverifikasi
+                </span>
+              </div>
+              <button
+                type="button"
+                onClick={() => setSelectedLightboxPhoto(null)}
+                className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 flex items-center justify-center transition-colors cursor-pointer"
+                aria-label="Tutup foto"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Photo Container */}
+            <div className="relative w-full max-h-[65vh] min-h-[280px] bg-slate-950 flex items-center justify-center overflow-hidden">
+              <img
+                src={selectedLightboxPhoto.url}
+                alt="Foto ulasan kamar"
+                className="max-h-[65vh] w-auto max-w-full object-contain"
+              />
+            </div>
+
+            {/* Footer / Review Details */}
+            <div className="p-4 bg-slate-50 dark:bg-slate-900/90 border-t border-slate-100 dark:border-slate-800">
+              <div className="flex items-center justify-between gap-3 mb-1.5">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-bold text-slate-900 dark:text-white">
+                    {selectedLightboxPhoto.studentName}
+                  </span>
+                  <div className="flex items-center gap-0.5">
+                    {[1, 2, 3, 4, 5].map((s) => (
+                      <Star
+                        key={s}
+                        className={`w-3.5 h-3.5 ${
+                          s <= selectedLightboxPhoto.rating
+                            ? "text-amber-400 fill-amber-400"
+                            : "text-slate-300 dark:text-slate-700"
+                        }`}
+                      />
+                    ))}
+                  </div>
+                </div>
+                <span className="text-xs text-slate-400">
+                  {new Date(selectedLightboxPhoto.createdAt).toLocaleDateString("id-ID", {
+                    day: "numeric",
+                    month: "short",
+                    year: "numeric",
+                  })}
+                </span>
+              </div>
+              {selectedLightboxPhoto.comment && (
+                <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 line-clamp-2">
+                  &ldquo;{selectedLightboxPhoto.comment}&rdquo;
+                </p>
+              )}
+            </div>
+          </div>
         </div>
       )}
     </section>
