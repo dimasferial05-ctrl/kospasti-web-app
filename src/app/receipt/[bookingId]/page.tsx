@@ -264,11 +264,19 @@ export default function BookingReceiptPage() {
       <div className="relative z-10 max-w-3xl mx-auto mb-6 flex items-center justify-between gap-3 print:hidden">
         <button
           type="button"
-          onClick={() => router.back()}
+          onClick={() => {
+            if (isPaid) {
+              router.push("/profil?tab=bookings");
+            } else if (booking?.id) {
+              router.push(`/checkout/${booking.id}`);
+            } else {
+              router.back();
+            }
+          }}
           className="inline-flex items-center gap-2 px-4 py-2 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-200 text-xs sm:text-sm font-semibold rounded-xl shadow-xs transition-colors cursor-pointer"
         >
           <ArrowLeft className="w-4 h-4" />
-          <span>Kembali</span>
+          <span>{isPaid ? "Ke Riwayat Pesanan" : "Kembali ke Pembayaran"}</span>
         </button>
 
         <div className="flex items-center gap-2.5">
