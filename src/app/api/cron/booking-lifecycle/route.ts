@@ -7,6 +7,7 @@ import {
 } from "@/lib/notifications";
 import { sendMoveInReminderEmail, sendReviewPromptEmail } from "@/lib/email";
 import { processReadyPayouts } from "@/lib/payout-processor";
+import { runPaymentReminderProcess } from "@/lib/payment-reminder-processor";
 
 async function executeBookingLifecycleRoutine(request: Request) {
   try {
@@ -198,6 +199,22 @@ async function executeBookingLifecycleRoutine(request: Request) {
       }
     }
 
+    // =========================================================================
+    // SUB-ROUTINE 4: Pengingat Pembayaran Mahasiswa & Pembersihan Kedaluwarsa
+    // =========================================================================
+    let paymentRemindersSent = 0;
+    let expiredBookingsCancelled = 0;
+    try {
+      const paymentReminderResult = await runPaymentReminderProcess(now);
+      paymentRemindersSent = paymentReminderResult.remindersSent;
+      expiredBookingsCancelled = paymentReminderResult.expiredBookingsCancelled;
+    } catch (paymentCronErr) {
+      console.error(
+        "[CRON LIFECYCLE] Gagal mengeksekusi sub-routine payment reminder:",
+        paymentCronErr
+      );
+    }
+
     return NextResponse.json({
       success: true,
       timestamp: now.toISOString(),
@@ -206,6 +223,8 @@ async function executeBookingLifecycleRoutine(request: Request) {
         autoCheckins,
         escrowReleased,
         reviewPromptsSent,
+        paymentRemindersSent,
+        expiredBookingsCancelled,
       },
     });
   } catch (error) {

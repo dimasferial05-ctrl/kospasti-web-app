@@ -133,8 +133,9 @@ model Booking {
   snap_token             String?
   paid_at                DateTime?
   checkin_confirmed_at   DateTime?
-  reminder_sent_at       DateTime?
-  review_prompted_at     DateTime?
+  reminder_sent_at         DateTime?
+  review_prompted_at       DateTime?
+  payment_reminder_sent_at DateTime?
   magic_links            MagicLink[]
   review                 Review?
   payout                 Payout?

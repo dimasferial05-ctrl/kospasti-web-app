@@ -507,3 +507,78 @@ export async function notifyVisitRescheduledByStudent(params: {
 
   await Promise.all(tasks);
 }
+
+/**
+ * Notifikasi Pengingat Pembayaran Sewa Mahasiswa (Payment Reminder)
+ * Dikirim otomatis via cron jika pesanan PENDING belum dibayar dalam batas waktu 24 jam.
+ */
+export async function notifyPaymentReminder(params: {
+  tenantName: string;
+  tenantWhatsapp: string;
+  propertyName: string;
+  roomTypeName?: string | null;
+  amount: number;
+  bookingId: string;
+  createdAt: Date;
+  userId?: string | null;
+}) {
+  const baseUrl =
+    process.env.NEXT_PUBLIC_BASE_URL ||
+    process.env.APP_URL ||
+    (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3000");
+
+  const paymentUrl = `${baseUrl.replace(/\/$/, "")}/checkout/${params.bookingId}`;
+
+  const formattedAmount = new Intl.NumberFormat("id-ID", {
+    style: "currency",
+    currency: "IDR",
+    maximumFractionDigits: 0,
+  }).format(params.amount);
+
+  const roomInfo = params.roomTypeName ? ` (${params.roomTypeName})` : "";
+
+  // Pesan WhatsApp yang ramah, sopan, to-the-point, dan bebas emoji slop
+  const waMessage = [
+    `[KosPasti] Halo ${params.tenantName}!`,
+    ``,
+    `Pesanan kamar kos kamu di ${params.propertyName}${roomInfo} masih menunggu penyelesaian pembayaran sebesar ${formattedAmount}.`,
+    ``,
+    `Batas waktu pembayaran berlaku 24 jam sejak pesanan dibuat. Segera selesaikan pembayaran agar kamar kos pilihanmu tidak terlepas ke calon penyewa lain.`,
+    ``,
+    `Lanjutkan pembayaran melalui tautan berikut:`,
+    paymentUrl,
+    ``,
+    `Jika kamu sudah melakukan pembayaran, silakan abaikan pesan ini. Butuh bantuan? Hubungi customer support kami di support@kospasti.com.`,
+  ].join("\n");
+
+  const tasks: Promise<unknown>[] = [];
+
+  // 1. Notifikasi In-App untuk Mahasiswa
+  if (params.userId) {
+    tasks.push(
+      createInAppNotification({
+        userId: params.userId,
+        title: "Menunggu Pembayaran Sewa",
+        message: `Pesanan kamar kos Anda di ${params.propertyName} menunggu pembayaran (${formattedAmount}). Selesaikan sebelum batas waktu 24 jam berakhir.`,
+        type: "BOOKING_STATUS",
+        link: `/checkout/${params.bookingId}`,
+      })
+    );
+  }
+
+  // 2. Pesan WhatsApp melalui Fonnte / WhatsApp Service
+  if (params.tenantWhatsapp) {
+    console.log(`[PAYMENT REMINDER WA -> ${params.tenantWhatsapp}] Booking ID: ${params.bookingId}`);
+    tasks.push(
+      sendWhatsAppMessage({
+        to: params.tenantWhatsapp,
+        message: waMessage,
+      }).catch((err) => {
+        console.error("[NOTIFICATION ERROR] Gagal mengirim pesan WA payment reminder:", err);
+      })
+    );
+  }
+
+  await Promise.all(tasks);
+}
+
