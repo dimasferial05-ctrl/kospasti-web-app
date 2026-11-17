@@ -224,12 +224,14 @@ describe("Featured Properties System (Issue #396)", () => {
   });
 
   describe("UI Cleanliness & Components", () => {
-    it("FeaturedPropertiesSection merender judul rekomendasi tanpa emotikon slop", () => {
+    it("FeaturedPropertiesSection merender judul rekomendasi tanpa emotikon slop dan tanpa eyebrow pill redundan", () => {
       const html = renderToStaticMarkup(<FeaturedPropertiesSection />);
       expect(html).toContain("Kos Rekomendasi Pilihan KosPasti");
       // Tidak boleh ada emotikon AI-slop kasar seperti ⭐ atau 🌟 di teks statis
       expect(html).not.toContain("⭐");
       expect(html).not.toContain("🌟");
+      // Bebas eyebrow pill redundan sesuai panduan antislop-ui R-09
+      expect(html).not.toContain("Pilihan Terverifikasi");
     });
 
     it("KosPropertyCard merender badge Rekomendasi saat isFeatured bernilai true", () => {

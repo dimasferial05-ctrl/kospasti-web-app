@@ -7,7 +7,7 @@ import { KosPropertyCard } from "@/components/features/KosPropertyCard";
 import { KosPropertyCardSkeleton } from "@/components/features/KosPropertyCardSkeleton";
 import { SmartSearchBar } from "@/components/features/SmartSearchBar";
 import { FacetedSearchFilter } from "@/components/features/FacetedSearchFilter";
-import { AlertCircle, SearchX, MapPin, X, Sparkles } from "lucide-react";
+import { AlertCircle, SearchX, MapPin, X, Award } from "lucide-react";
 import { RadarEmptyPattern } from "@/components/ui/backgrounds";
 
 interface PropertyItem {
@@ -225,15 +225,15 @@ function SearchPageContent() {
             onClick={handleToggleFeatured}
             aria-pressed={isFeaturedFilter}
             data-testid="filter-featured-button"
-            className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold transition-all duration-200 cursor-pointer shadow-2xs active:scale-95 ${
+            className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold transition-all duration-200 cursor-pointer active:scale-95 ${
               isFeaturedFilter
-                ? "bg-amber-500 text-white border border-amber-600 shadow-sm"
-                : "bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:border-amber-400 hover:text-amber-600 dark:hover:text-amber-400"
+                ? "bg-amber-600 text-white border border-amber-700 shadow-xs"
+                : "bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:border-amber-400 hover:text-amber-700 dark:hover:text-amber-400"
             }`}
           >
-            <Sparkles
+            <Award
               className={`w-3.5 h-3.5 ${
-                isFeaturedFilter ? "fill-white text-white" : "text-amber-500"
+                isFeaturedFilter ? "text-white" : "text-amber-600 dark:text-amber-400"
               }`}
             />
             <span>Rekomendasi</span>
@@ -292,7 +292,7 @@ function SearchPageContent() {
                     className="inline-flex items-center gap-1 text-[11px] font-semibold bg-amber-50 dark:bg-amber-950/60 border border-amber-200 dark:border-amber-800 text-amber-800 dark:text-amber-300 px-2.5 py-0.5 rounded-full hover:bg-amber-100 dark:hover:bg-amber-900/60 transition-colors cursor-pointer"
                     title="Hapus filter rekomendasi"
                   >
-                    <Sparkles className="w-3 h-3 text-amber-500" />
+                    <Award className="w-3 h-3 text-amber-600 dark:text-amber-400" />
                     <span>Rekomendasi</span>
                     <X className="w-3 h-3 text-amber-600" />
                   </button>

@@ -19,7 +19,7 @@ import {
   Upload,
   Image as ImageIcon,
   Check,
-  Sparkles,
+  Award,
 } from "lucide-react";
 import LocationPicker from "@/components/map/LocationPicker";
 
@@ -923,8 +923,8 @@ export default function ManagePropertiesPage() {
                       <div className="flex items-center gap-2 flex-wrap">
                         <span className="font-bold text-slate-800 dark:text-white">{prop.name}</span>
                         {prop.is_featured && (
-                          <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-50 dark:bg-amber-950/40 text-amber-800 dark:text-amber-300 border border-amber-200 dark:border-amber-800/60 shadow-2xs">
-                            <Sparkles size={10} className="text-amber-500 fill-amber-500" />
+                          <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-50 dark:bg-amber-950/40 text-amber-800 dark:text-amber-300 border border-amber-200 dark:border-amber-800/60">
+                            <Award size={10} className="text-amber-600 dark:text-amber-400" />
                             <span>Unggulan</span>
                           </span>
                         )}
@@ -1067,7 +1067,7 @@ export default function ManagePropertiesPage() {
                           }`}
                           title={prop.is_featured ? "Kelola Status Rekomendasi (Aktif)" : "Jadikan Kos Rekomendasi"}
                         >
-                          <Sparkles size={12} className={prop.is_featured ? "text-amber-500 fill-amber-500" : "text-slate-400"} />
+                          <Award size={12} className={prop.is_featured ? "text-amber-600 dark:text-amber-400" : "text-slate-400"} />
                           <span>{prop.is_featured ? "Unggulan" : "Promote"}</span>
                         </button>
 
@@ -2061,8 +2061,8 @@ export default function ManagePropertiesPage() {
           <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 w-full max-w-md p-6 animate-in fade-in zoom-in-95 duration-150">
             <div className="flex items-center justify-between pb-4 border-b border-slate-100 dark:border-slate-800">
               <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-xl bg-amber-50 dark:bg-amber-950/50 text-amber-600 dark:text-amber-400 flex items-center justify-center">
-                  <Sparkles size={16} />
+                <div className="w-8 h-8 rounded-xl bg-amber-50 dark:bg-amber-950/50 text-amber-700 dark:text-amber-300 flex items-center justify-center">
+                  <Award size={16} />
                 </div>
                 <div>
                   <h3 className="font-bold text-slate-800 dark:text-white text-base">
@@ -2178,7 +2178,7 @@ export default function ManagePropertiesPage() {
                   </>
                 ) : (
                   <>
-                    <Sparkles size={13} />
+                    <Award size={13} />
                     <span>Simpan Status</span>
                   </>
                 )}
