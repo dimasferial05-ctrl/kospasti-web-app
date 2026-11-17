@@ -15,14 +15,20 @@ import {
   CreditCard,
   RefreshCw,
   Download,
+  Percent,
+  Receipt,
 } from "lucide-react";
 import Link from "next/link";
 import { ExportFinancialModal } from "@/components/partner/ExportFinancialModal";
+import { PayoutInvoiceModal } from "@/components/partner/PayoutInvoiceModal";
 
 interface PayoutRecord {
   id: string;
   booking_id: string;
   amount: number;
+  gross_amount?: number;
+  platform_fee?: number;
+  net_amount?: number;
   status: string;
   payout_method_snapshot: string | null;
   processed_at: string | null;
@@ -48,6 +54,7 @@ export default function PartnerPayoutsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
+  const [selectedInvoicePayout, setSelectedInvoicePayout] = useState<PayoutRecord | null>(null);
 
   const fetchPayouts = async () => {
     try {
@@ -103,13 +110,21 @@ export default function PartnerPayoutsPage() {
     });
   };
 
-  const totalPaid = payouts
-    .filter((p) => p.status === "PAYOUT_PAID")
-    .reduce((acc, curr) => acc + curr.amount, 0);
+  const getPayoutMetrics = (p: PayoutRecord) => {
+    const gross = p.gross_amount && p.gross_amount > 0 ? p.gross_amount : p.amount || 0;
+    const fee = p.platform_fee && p.platform_fee > 0 ? p.platform_fee : Math.round(gross * 0.03);
+    const net = p.net_amount && p.net_amount > 0 ? p.net_amount : Math.max(0, gross - fee);
+    return { gross, fee, net };
+  };
 
+  const totalGross = payouts.reduce((acc, curr) => acc + getPayoutMetrics(curr).gross, 0);
+  const totalPlatformFee = payouts.reduce((acc, curr) => acc + getPayoutMetrics(curr).fee, 0);
+  const totalNetPaid = payouts
+    .filter((p) => p.status === "PAYOUT_PAID")
+    .reduce((acc, curr) => acc + getPayoutMetrics(curr).net, 0);
   const totalPending = payouts
     .filter((p) => p.status === "PAYOUT_PENDING")
-    .reduce((acc, curr) => acc + curr.amount, 0);
+    .reduce((acc, curr) => acc + getPayoutMetrics(curr).net, 0);
 
   return (
     <div className="flex-1 p-6 md:p-10 max-w-7xl mx-auto space-y-8 overflow-y-auto w-full">
@@ -151,47 +166,77 @@ export default function PartnerPayoutsPage() {
         </div>
       </div>
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+      {/* 4 Financial Summary Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {/* Card 1: Nilai Sewa Masuk (Gross) */}
         <div className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm flex items-center justify-between">
           <div className="space-y-1">
-            <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-              Total Sudah Cair
+            <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+              Total Sewa (Gross)
             </span>
-            <p className="text-2xl font-black text-emerald-600 dark:text-emerald-400">
-              {formatRupiah(totalPaid)}
+            <p className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white">
+              {formatRupiah(totalGross)}
             </p>
+            <span className="text-[10px] text-slate-400 font-medium block">
+              Nilai transaksi bruto penyewa
+            </span>
+          </div>
+          <div className="p-3 rounded-2xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">
+            <Building2 className="w-5 h-5" />
+          </div>
+        </div>
+
+        {/* Card 2: Potongan Komisi Platform (3%) */}
+        <div className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm flex items-center justify-between">
+          <div className="space-y-1">
+            <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+              Komisi Platform (3%)
+            </span>
+            <p className="text-xl sm:text-2xl font-black text-indigo-600 dark:text-indigo-400">
+              {formatRupiah(totalPlatformFee)}
+            </p>
+            <span className="text-[10px] text-indigo-500 font-medium block">
+              Tarif komisi platform 3%
+            </span>
+          </div>
+          <div className="p-3 rounded-2xl bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400">
+            <Percent className="w-5 h-5" />
+          </div>
+        </div>
+
+        {/* Card 3: Total Dana Bersih Cair (Net Paid) */}
+        <div className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm flex items-center justify-between">
+          <div className="space-y-1">
+            <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+              Total Bersih Cair
+            </span>
+            <p className="text-xl sm:text-2xl font-black text-emerald-600 dark:text-emerald-400">
+              {formatRupiah(totalNetPaid)}
+            </p>
+            <span className="text-[10px] text-emerald-600/80 font-medium block">
+              Sudah masuk rekening mitra
+            </span>
           </div>
           <div className="p-3 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400">
-            <CheckCircle2 className="w-6 h-6" />
+            <CheckCircle2 className="w-5 h-5" />
           </div>
         </div>
 
+        {/* Card 4: Menunggu Pencairan (Pending Escrow) */}
         <div className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm flex items-center justify-between">
           <div className="space-y-1">
-            <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+            <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
               Menunggu Pencairan
             </span>
-            <p className="text-2xl font-black text-amber-600 dark:text-amber-400">
+            <p className="text-xl sm:text-2xl font-black text-amber-600 dark:text-amber-400">
               {formatRupiah(totalPending)}
             </p>
+            <span className="text-[10px] text-amber-600/80 font-medium block">
+              Ditahan di sistem Escrow
+            </span>
           </div>
           <div className="p-3 rounded-2xl bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400">
-            <Clock className="w-6 h-6" />
-          </div>
-        </div>
-
-        <div className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm flex items-center justify-between sm:col-span-2 lg:col-span-1">
-          <div className="space-y-1">
-            <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-              Total Transaksi Payout
-            </span>
-            <p className="text-2xl font-black text-slate-900 dark:text-white">
-              {payouts.length} Kali
-            </p>
-          </div>
-          <div className="p-3 rounded-2xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400">
-            <Wallet className="w-6 h-6" />
+            <Clock className="w-5 h-5" />
           </div>
         </div>
       </div>
@@ -219,18 +264,21 @@ export default function PartnerPayoutsPage() {
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm">
-              <thead className="bg-slate-50 dark:bg-slate-800/60 border-b border-slate-200 dark:border-slate-800 text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wider font-semibold">
+            <table className="w-full text-left text-sm min-w-[760px]">
+              <thead className="bg-slate-50 dark:bg-slate-800/60 border-b border-slate-200 dark:border-slate-800 text-[11px] text-slate-500 dark:text-slate-400 uppercase tracking-wider font-semibold">
                 <tr>
-                  <th className="py-3.5 px-6">Penyewa & Kos</th>
-                  <th className="py-3.5 px-6">Tanggal Check-In</th>
-                  <th className="py-3.5 px-6">Nominal Payout</th>
-                  <th className="py-3.5 px-6">Status</th>
-                  <th className="py-3.5 px-6">Tanggal Proses</th>
+                  <th className="py-3.5 px-6">Penyewa &amp; Kos</th>
+                  <th className="py-3.5 px-4">Tanggal Check-In</th>
+                  <th className="py-3.5 px-4 text-right">Nilai Sewa (Gross)</th>
+                  <th className="py-3.5 px-4 text-right">Komisi (3%)</th>
+                  <th className="py-3.5 px-4 text-right">Dana Bersih (Net)</th>
+                  <th className="py-3.5 px-4 text-center">Status</th>
+                  <th className="py-3.5 px-6 text-right">Aksi</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 dark:divide-slate-800 font-medium">
                 {payouts.map((p) => {
+                  const metrics = getPayoutMetrics(p);
                   let statusBadge = (
                     <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800/50">
                       <Clock className="w-3 h-3" />
@@ -270,7 +318,7 @@ export default function PartnerPayoutsPage() {
                         </div>
                       </td>
 
-                      <td className="py-4 px-6 text-xs text-slate-600 dark:text-slate-300">
+                      <td className="py-4 px-4 text-xs text-slate-600 dark:text-slate-300 whitespace-nowrap">
                         <div className="font-medium">
                           {formatDate(p.booking?.checkin_confirmed_at || p.booking?.move_in_date)}
                         </div>
@@ -279,23 +327,34 @@ export default function PartnerPayoutsPage() {
                         </span>
                       </td>
 
-                      <td className="py-4 px-6 font-bold text-slate-900 dark:text-white">
-                        {formatRupiah(p.amount)}
+                      <td className="py-4 px-4 text-right font-medium text-slate-700 dark:text-slate-300 text-xs whitespace-nowrap">
+                        {formatRupiah(metrics.gross)}
                       </td>
 
-                      <td className="py-4 px-6">{statusBadge}</td>
+                      <td className="py-4 px-4 text-right font-medium text-indigo-600 dark:text-indigo-400 text-xs whitespace-nowrap">
+                        - {formatRupiah(metrics.fee)}
+                      </td>
 
-                      <td className="py-4 px-6 text-xs text-slate-600 dark:text-slate-300">
-                        {p.processed_at ? (
-                          <div>
-                            <p className="font-medium text-emerald-600 dark:text-emerald-400">
-                              {formatDate(p.processed_at)}
-                            </p>
-                            <p className="text-[10px] text-slate-400">Oleh: {p.processed_by || "Admin"}</p>
-                          </div>
-                        ) : (
-                          <span className="text-slate-400 italic">Menunggu verifikasi admin</span>
-                        )}
+                      <td className="py-4 px-4 text-right font-extrabold text-emerald-600 dark:text-emerald-400 text-sm whitespace-nowrap">
+                        {formatRupiah(metrics.net)}
+                      </td>
+
+                      <td className="py-4 px-4 text-center whitespace-nowrap">
+                        {statusBadge}
+                      </td>
+
+                      <td className="py-4 px-6 text-right whitespace-nowrap">
+                        <div className="flex items-center justify-end gap-2">
+                          <button
+                            type="button"
+                            onClick={() => setSelectedInvoicePayout(p)}
+                            className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-semibold shadow-xs transition-all hover:-translate-y-px active:scale-95 cursor-pointer"
+                            title="Lihat Bukti Invoice Payout"
+                          >
+                            <Receipt className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+                            <span>Invoice</span>
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   );
@@ -325,6 +384,13 @@ export default function PartnerPayoutsPage() {
                 payout: p,
               }))
         }
+      />
+
+      {/* Modal Bukti Invoice Payout Individual */}
+      <PayoutInvoiceModal
+        isOpen={Boolean(selectedInvoicePayout)}
+        onClose={() => setSelectedInvoicePayout(null)}
+        payout={selectedInvoicePayout}
       />
     </div>
   );

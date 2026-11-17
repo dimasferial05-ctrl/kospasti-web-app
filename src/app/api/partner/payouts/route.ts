@@ -36,10 +36,33 @@ export async function GET() {
       orderBy: { created_at: "desc" },
     });
 
+    const normalizedPayouts = payouts.map((p) => {
+      let gross = p.gross_amount || 0;
+      let fee = p.platform_fee || 0;
+      let net = p.net_amount || 0;
+
+      // Fallback data legacy: jika gross_amount masih 0 namun amount ada
+      if (gross <= 0 && p.amount > 0) {
+        gross = p.amount;
+        fee = Math.round(gross * 0.03);
+        net = Math.max(0, gross - fee);
+      } else if (net <= 0 && gross > 0) {
+        fee = fee > 0 ? fee : Math.round(gross * 0.03);
+        net = Math.max(0, gross - fee);
+      }
+
+      return {
+        ...p,
+        gross_amount: gross,
+        platform_fee: fee,
+        net_amount: net,
+      };
+    });
+
     return NextResponse.json(
       {
         success: true,
-        data: payouts,
+        data: normalizedPayouts,
       },
       { status: 200 }
     );
