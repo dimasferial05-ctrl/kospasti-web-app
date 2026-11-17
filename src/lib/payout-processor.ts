@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { notifyEscrowReleased } from "@/lib/notifications";
+import { calculatePlatformCommission } from "@/lib/midtrans";
 
 /**
  * Lazy evaluation processor untuk grace period payout (12 jam setelah check-in dikonfirmasi).
@@ -27,17 +28,23 @@ export async function processReadyPayouts(): Promise<number> {
   let processedCount = 0;
   for (const booking of readyBookings) {
     try {
-      const payoutAmount =
+      const rawRent =
         booking.amount > 0
           ? booking.amount
           : booking.room_type?.price_per_month || booking.property?.price_per_month || 0;
+
+      const commission = calculatePlatformCommission(rawRent);
+      const payoutAmount = commission.netAmount;
 
       await prisma.$transaction([
         prisma.payout.create({
           data: {
             booking_id: booking.id,
             owner_id: booking.property.owner_id,
-            amount: payoutAmount,
+            amount: commission.netAmount,
+            gross_amount: commission.grossAmount,
+            platform_fee: commission.platformFee,
+            net_amount: commission.netAmount,
             status: "PAYOUT_PENDING",
           },
         }),
@@ -45,7 +52,7 @@ export async function processReadyPayouts(): Promise<number> {
           where: { id: booking.id },
           data: {
             status: "PAYOUT_PENDING",
-            ...(booking.amount === 0 && payoutAmount > 0 ? { amount: payoutAmount } : {}),
+            ...(booking.amount === 0 && rawRent > 0 ? { amount: rawRent } : {}),
           },
         }),
       ]);

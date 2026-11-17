@@ -135,9 +135,9 @@ export function mapBookingToReportItem(b: any): FinancialReportItem {
       ? b.amount
       : b.room_type?.price_per_month ?? b.property?.price_per_month ?? 0;
 
-  // Platform admin fee (saat ini platform tidak memotong sewa mitra)
-  const adminFee = 0;
-  const netAmount = Math.max(0, grossAmount - adminFee);
+  // Platform fee / komisi (menggunakan catatan payout jika tersedia)
+  const adminFee = b.payout?.platform_fee ?? 0;
+  const netAmount = b.payout?.net_amount ?? Math.max(0, grossAmount - adminFee);
 
   // Status Payout
   let payoutStatus: "PAID" | "PENDING" | "NONE" = "NONE";
