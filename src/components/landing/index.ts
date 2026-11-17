@@ -1,4 +1,5 @@
 export { HeroSection } from "./HeroSection";
+export { FeaturedPropertiesSection } from "./FeaturedPropertiesSection";
 export { RoleCardsSection } from "./RoleCardsSection";
 export { HowItWorksSection } from "./HowItWorksSection";
 export { FeaturesSection } from "./FeaturesSection";

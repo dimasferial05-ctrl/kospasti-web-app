@@ -1,6 +1,7 @@
 import React from "react";
 import {
   HeroSection,
+  FeaturedPropertiesSection,
   RoleCardsSection,
   HowItWorksSection,
   FeaturesSection,
@@ -22,6 +23,11 @@ export default function LandingPage() {
         {/* 1. Hero Section with Top Search & Architectural Image Banner */}
         <div id="beranda" className="scroll-mt-20">
           <HeroSection />
+        </div>
+
+        {/* 1.5. Featured Properties (Kos Rekomendasi Pilihan KosPasti) */}
+        <div id="rekomendasi" className="scroll-mt-20">
+          <FeaturedPropertiesSection />
         </div>
 
         {/* 2. Dual Audience Selector Cards (Pencari Kos vs Pemilik Kos) */}

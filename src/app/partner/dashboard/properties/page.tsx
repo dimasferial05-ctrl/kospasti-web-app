@@ -21,6 +21,7 @@ import {
   Clock,
   Home,
   AlertCircle,
+  Sparkles,
 } from "lucide-react";
 import LocationPicker from "@/components/map/LocationPicker";
 
@@ -60,6 +61,8 @@ interface Property {
   is_pet_friendly: boolean;
   is_24_hours: boolean;
   status: string;
+  is_featured?: boolean;
+  featured_until?: string | null;
   rejectionReason?: string | null;
   created_at: string;
   media?: PropertyMediaItem[];
@@ -117,6 +120,9 @@ export default function PartnerPropertiesPage() {
   const [modalMode, setModalMode] = useState<"NEW" | "EDIT" | null>(null);
   const [editingProperty, setEditingProperty] = useState<Property | null>(null);
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
+  const [promotingProperty, setPromotingProperty] = useState<Property | null>(null);
+  const [promoteDurationDays, setPromoteDurationDays] = useState<number>(30);
+  const [isPromoting, setIsPromoting] = useState<boolean>(false);
 
   // Form State
   const [formData, setFormData] = useState<PropertyFormData>(initialFormData);
@@ -533,6 +539,37 @@ export default function PartnerPropertiesPage() {
     }
   };
 
+  const handlePromoteProperty = async () => {
+    if (!promotingProperty) return;
+    setIsPromoting(true);
+    setActionError(null);
+    try {
+      const res = await fetch(`/api/partner/properties/${promotingProperty.id}/featured`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ durationDays: promoteDurationDays }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || "Gagal memproses promosi kos.");
+      }
+      setSuccessMsg(data.message || "Status Kos Rekomendasi berhasil diaktifkan!");
+      setTimeout(() => setSuccessMsg(null), 4000);
+      setProperties((prev) =>
+        prev.map((p) =>
+          p.id === promotingProperty.id
+            ? { ...p, is_featured: true, featured_until: data.data?.featured_until }
+            : p
+        )
+      );
+      setPromotingProperty(null);
+    } catch (err) {
+      setActionError(err instanceof Error ? err.message : "Terjadi kesalahan saat mempromosikan kos.");
+    } finally {
+      setIsPromoting(false);
+    }
+  };
+
   const handleDeleteProperty = async (id: string) => {
     try {
       setIsSaving(true);
@@ -670,8 +707,8 @@ export default function PartnerPropertiesPage() {
               {/* Content Body */}
               <div className="p-5 flex-1 flex flex-col justify-between space-y-4">
                 <div>
-                  {/* Status Approval Badge */}
-                  <div className="mb-2.5">
+                  {/* Status Approval Badge & Featured Badge */}
+                  <div className="mb-2.5 flex items-center gap-2 flex-wrap">
                     {prop.status === "PUBLISHED" ? (
                       <span className="inline-flex items-center gap-1.5 text-[11px] font-bold px-2.5 py-1 rounded-full bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/60">
                         <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
@@ -686,6 +723,23 @@ export default function PartnerPropertiesPage() {
                       <span className="inline-flex items-center gap-1.5 text-[11px] font-bold px-2.5 py-1 rounded-full bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800/60">
                         <span className="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
                         <span>Menunggu Persetujuan Admin</span>
+                      </span>
+                    )}
+
+                    {prop.is_featured && (
+                      <span className="inline-flex items-center gap-1.5 text-[11px] font-bold px-2.5 py-1 rounded-full bg-amber-50 dark:bg-amber-950/40 text-amber-800 dark:text-amber-300 border border-amber-200 dark:border-amber-800/60 shadow-2xs">
+                        <Sparkles className="w-3 h-3 text-amber-500 fill-amber-500" />
+                        <span>
+                          Rekomendasi Aktif
+                          {prop.featured_until &&
+                            ` (${Math.max(
+                              0,
+                              Math.ceil(
+                                (new Date(prop.featured_until).getTime() - Date.now()) /
+                                  (1000 * 60 * 60 * 24)
+                              )
+                            )}h)`}
+                        </span>
                       </span>
                     )}
                   </div>
@@ -774,6 +828,20 @@ export default function PartnerPropertiesPage() {
                       </button>
                     </div>
                   </div>
+
+                  {prop.status === "APPROVED" && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setPromotingProperty(prop);
+                        setPromoteDurationDays(30);
+                      }}
+                      className="w-full py-2 px-3 rounded-xl bg-amber-50 dark:bg-amber-950/40 hover:bg-amber-100 dark:hover:bg-amber-900/50 text-amber-800 dark:text-amber-300 font-bold text-xs flex items-center justify-center gap-1.5 transition-all hover:-translate-y-px active:scale-95 cursor-pointer border border-amber-200 dark:border-amber-800/80"
+                    >
+                      <Sparkles className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
+                      <span>{prop.is_featured ? "Perpanjang Rekomendasi" : "Promosikan Kos (Unggulan)"}</span>
+                    </button>
+                  )}
 
                   <div className="flex items-center gap-2">
                     <button
@@ -1467,6 +1535,116 @@ export default function PartnerPropertiesPage() {
                 className="flex-1 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs flex items-center justify-center gap-1.5 cursor-pointer"
               >
                 {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <span>Ya, Hapus</span>}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* PROMOTION / FEATURED MODAL */}
+      {promotingProperty && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-slate-900 rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-200 dark:border-slate-800 animate-in fade-in zoom-in-95 duration-150">
+            <div className="flex items-center justify-between pb-4 border-b border-slate-100 dark:border-slate-800">
+              <div className="flex items-center gap-2">
+                <div className="w-9 h-9 rounded-xl bg-amber-50 dark:bg-amber-950/50 text-amber-600 dark:text-amber-400 flex items-center justify-center">
+                  <Sparkles className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-base font-extrabold text-slate-900 dark:text-white">
+                    {promotingProperty.is_featured ? "Perpanjang Masa Unggulan" : "Jadikan Kos Rekomendasi"}
+                  </h3>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">
+                    {promotingProperty.name}
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setPromotingProperty(null)}
+                className="p-1.5 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-600"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="py-4 space-y-4">
+              <div className="p-3.5 rounded-2xl bg-amber-50/70 dark:bg-amber-950/30 border border-amber-200/80 dark:border-amber-800/50 text-xs text-amber-900 dark:text-amber-200 space-y-1.5">
+                <p className="font-semibold flex items-center gap-1.5">
+                  <Sparkles className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0" />
+                  Keuntungan Kos Rekomendasi:
+                </p>
+                <ul className="list-disc list-inside space-y-0.5 text-slate-600 dark:text-slate-300">
+                  <li>Tampil di section khusus &quot;Kos Rekomendasi Pilihan KosPasti&quot; di Beranda.</li>
+                  <li>Mendapat badge Rekomendasi di hasil pencarian.</li>
+                  <li>Dapat difilter langsung oleh pencari kos dengan quick filter Rekomendasi.</li>
+                </ul>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-2">
+                  Pilih Durasi Promosi:
+                </label>
+                <div className="grid grid-cols-3 gap-2">
+                  {[
+                    { days: 7, label: "7 Hari" },
+                    { days: 14, label: "14 Hari" },
+                    { days: 30, label: "30 Hari" },
+                  ].map((option) => (
+                    <button
+                      key={option.days}
+                      type="button"
+                      onClick={() => setPromoteDurationDays(option.days)}
+                      className={`py-2.5 px-3 rounded-xl border text-xs font-bold transition-all cursor-pointer ${
+                        promoteDurationDays === option.days
+                          ? "border-amber-500 bg-amber-50 text-amber-800 dark:bg-amber-950/60 dark:text-amber-200 ring-2 ring-amber-500/20"
+                          : "border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800"
+                      }`}
+                    >
+                      {option.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {promotingProperty.featured_until && (
+                <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                  Masa aktif saat ini berakhir pada:{" "}
+                  <span className="font-semibold text-slate-700 dark:text-slate-300">
+                    {new Date(promotingProperty.featured_until).toLocaleDateString("id-ID", {
+                      day: "numeric",
+                      month: "long",
+                      year: "numeric",
+                    })}
+                  </span>
+                  . Durasi baru akan ditambahkan dari hari ini.
+                </p>
+              )}
+            </div>
+
+            <div className="flex items-center gap-2 pt-2 border-t border-slate-100 dark:border-slate-800">
+              <button
+                type="button"
+                onClick={() => setPromotingProperty(null)}
+                disabled={isPromoting}
+                className="flex-1 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 font-bold text-xs hover:bg-slate-50 dark:hover:bg-slate-800 cursor-pointer"
+              >
+                Batal
+              </button>
+              <button
+                type="button"
+                onClick={handlePromoteProperty}
+                disabled={isPromoting}
+                className="flex-1 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs flex items-center justify-center gap-1.5 cursor-pointer shadow-xs disabled:opacity-50"
+              >
+                {isPromoting ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <>
+                    <Sparkles className="w-3.5 h-3.5" />
+                    <span>Aktifkan Promosi</span>
+                  </>
+                )}
               </button>
             </div>
           </div>
