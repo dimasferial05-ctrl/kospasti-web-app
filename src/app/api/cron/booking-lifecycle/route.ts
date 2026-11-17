@@ -7,7 +7,7 @@ import {
 } from "@/lib/notifications";
 import { sendMoveInReminderEmail, sendReviewPromptEmail } from "@/lib/email";
 import { processReadyPayouts } from "@/lib/payout-processor";
-import { runPaymentReminderProcess } from "@/app/api/cron/payment-reminder/route";
+import { runPaymentReminderProcess } from "@/lib/payment-reminder-processor";
 
 async function executeBookingLifecycleRoutine(request: Request) {
   try {
