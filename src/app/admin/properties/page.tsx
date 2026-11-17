@@ -19,6 +19,7 @@ import {
   Upload,
   Image as ImageIcon,
   Check,
+  Award,
 } from "lucide-react";
 import LocationPicker from "@/components/map/LocationPicker";
 
@@ -79,6 +80,8 @@ interface PropertyAdminItem {
   owner?: OwnerOption | null;
   status?: string;
   rejectionReason?: string | null;
+  is_featured?: boolean;
+  featured_until?: string | null;
 }
 
 interface PropertyFormData {
@@ -137,6 +140,71 @@ export default function ManagePropertiesPage() {
   const [rejectModalError, setRejectModalError] = useState<string | null>(null);
   const [isUpdatingStatusId, setIsUpdatingStatusId] = useState<string | null>(null);
   const [statusAlert, setStatusAlert] = useState<{ type: "success" | "error"; message: string } | null>(null);
+
+  // Featured / Rekomendasi Management States
+  const [featuredModalProperty, setFeaturedModalProperty] = useState<PropertyAdminItem | null>(null);
+  const [featuredActiveInput, setFeaturedActiveInput] = useState<boolean>(false);
+  const [featuredDurationDays, setFeaturedDurationDays] = useState<number>(30);
+  const [isUpdatingFeatured, setIsUpdatingFeatured] = useState<boolean>(false);
+  const [featuredModalError, setFeaturedModalError] = useState<string | null>(null);
+
+  const handleOpenFeaturedModal = (prop: PropertyAdminItem) => {
+    setFeaturedModalProperty(prop);
+    setFeaturedActiveInput(Boolean(prop.is_featured));
+    setFeaturedDurationDays(30);
+    setFeaturedModalError(null);
+  };
+
+  const handleSaveFeatured = async () => {
+    if (!featuredModalProperty) return;
+    try {
+      setIsUpdatingFeatured(true);
+      setFeaturedModalError(null);
+
+      let featuredUntilDate: string | null = null;
+      if (featuredActiveInput && featuredDurationDays > 0) {
+        const d = new Date();
+        d.setDate(d.getDate() + featuredDurationDays);
+        featuredUntilDate = d.toISOString();
+      }
+
+      const res = await fetch(`/api/admin/properties/${featuredModalProperty.id}/featured`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          is_featured: featuredActiveInput,
+          featured_until: featuredUntilDate,
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || "Gagal memperbarui status rekomendasi.");
+      }
+
+      setStatusAlert({
+        type: "success",
+        message: data.message || `Status rekomendasi "${featuredModalProperty.name}" berhasil diperbarui.`,
+      });
+
+      setProperties((prev) =>
+        prev.map((p) =>
+          p.id === featuredModalProperty.id
+            ? {
+                ...p,
+                is_featured: featuredActiveInput,
+                featured_until: featuredUntilDate,
+              }
+            : p
+        )
+      );
+      setFeaturedModalProperty(null);
+    } catch (err) {
+      setFeaturedModalError(err instanceof Error ? err.message : "Gagal memperbarui status rekomendasi.");
+    } finally {
+      setIsUpdatingFeatured(false);
+    }
+  };
 
   const handleApproveProperty = async (prop: PropertyAdminItem) => {
     try {
@@ -852,7 +920,15 @@ export default function ManagePropertiesPage() {
                 .map((prop) => (
                   <tr key={prop.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
                     <td className="p-4">
-                      <div className="font-bold text-slate-800 dark:text-white">{prop.name}</div>
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="font-bold text-slate-800 dark:text-white">{prop.name}</span>
+                        {prop.is_featured && (
+                          <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-50 dark:bg-amber-950/40 text-amber-800 dark:text-amber-300 border border-amber-200 dark:border-amber-800/60">
+                            <Award size={10} className="text-amber-600 dark:text-amber-400" />
+                            <span>Unggulan</span>
+                          </span>
+                        )}
+                      </div>
                       {(prop.is_24_hours || prop.is_pet_friendly) && (
                         <div className="flex items-center gap-1.5 flex-wrap mt-1">
                           {prop.is_24_hours && (
@@ -980,6 +1056,20 @@ export default function ManagePropertiesPage() {
                             </button>
                           </>
                         )}
+
+                        <button
+                          type="button"
+                          onClick={() => handleOpenFeaturedModal(prop)}
+                          className={`inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer border shadow-xs hover:-translate-y-px active:scale-95 ${
+                            prop.is_featured
+                              ? "bg-amber-50 dark:bg-amber-950/40 hover:bg-amber-100 text-amber-800 dark:text-amber-300 border-amber-300 dark:border-amber-700"
+                              : "bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700"
+                          }`}
+                          title={prop.is_featured ? "Kelola Status Rekomendasi (Aktif)" : "Jadikan Kos Rekomendasi"}
+                        >
+                          <Award size={12} className={prop.is_featured ? "text-amber-600 dark:text-amber-400" : "text-slate-400"} />
+                          <span>{prop.is_featured ? "Unggulan" : "Promote"}</span>
+                        </button>
 
                         <button
                           type="button"
@@ -1957,6 +2047,139 @@ export default function ManagePropertiesPage() {
                   <>
                     <X size={13} />
                     <span>Kirim Penolakan</span>
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL KELOLA STATUS FEATURED (ADMIN) */}
+      {featuredModalProperty && (
+        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 w-full max-w-md p-6 animate-in fade-in zoom-in-95 duration-150">
+            <div className="flex items-center justify-between pb-4 border-b border-slate-100 dark:border-slate-800">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-xl bg-amber-50 dark:bg-amber-950/50 text-amber-700 dark:text-amber-300 flex items-center justify-center">
+                  <Award size={16} />
+                </div>
+                <div>
+                  <h3 className="font-bold text-slate-800 dark:text-white text-base">
+                    Kelola Kos Rekomendasi
+                  </h3>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">
+                    {featuredModalProperty.name}
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setFeaturedModalProperty(null)}
+                className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1 rounded-lg"
+              >
+                <X size={16} />
+              </button>
+            </div>
+
+            <div className="py-4 space-y-4">
+              {featuredModalError && (
+                <div className="p-2.5 rounded-lg bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800/60 text-rose-700 dark:text-rose-300 text-xs font-medium flex items-center gap-1.5">
+                  <AlertCircle size={14} className="shrink-0 text-rose-600 dark:text-rose-400" />
+                  <span>{featuredModalError}</span>
+                </div>
+              )}
+
+              {/* Status Toggle Switch */}
+              <div className="flex items-center justify-between p-3 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700">
+                <div>
+                  <span className="text-xs font-bold text-slate-800 dark:text-white block">
+                    Status Featured / Rekomendasi
+                  </span>
+                  <span className="text-[11px] text-slate-500 dark:text-slate-400">
+                    {featuredActiveInput ? "Kos ditampilkan sebagai rekomendasi" : "Status rekomendasi nonaktif"}
+                  </span>
+                </div>
+                <label className="relative inline-flex items-center cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={featuredActiveInput}
+                    onChange={(e) => setFeaturedActiveInput(e.target.checked)}
+                    className="sr-only peer"
+                  />
+                  <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-slate-600 peer-checked:bg-amber-500"></div>
+                </label>
+              </div>
+
+              {/* Masa Berlaku (Jika Aktif) */}
+              {featuredActiveInput && (
+                <div className="space-y-2">
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
+                    Durasi Berlaku Rekomendasi:
+                  </label>
+                  <div className="grid grid-cols-3 gap-2">
+                    {[
+                      { days: 7, label: "7 Hari" },
+                      { days: 14, label: "14 Hari" },
+                      { days: 30, label: "30 Hari" },
+                      { days: 90, label: "90 Hari" },
+                      { days: 0, label: "Permanen" },
+                    ].map((opt) => (
+                      <button
+                        key={opt.days}
+                        type="button"
+                        onClick={() => setFeaturedDurationDays(opt.days)}
+                        className={`py-2 px-2.5 rounded-xl border text-xs font-bold transition-all cursor-pointer ${
+                          featuredDurationDays === opt.days
+                            ? "border-amber-500 bg-amber-50 text-amber-800 dark:bg-amber-950/60 dark:text-amber-200 ring-2 ring-amber-500/20"
+                            : "border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800"
+                        }`}
+                      >
+                        {opt.label}
+                      </button>
+                    ))}
+                  </div>
+
+                  {featuredModalProperty.featured_until && (
+                    <p className="text-[11px] text-slate-500 dark:text-slate-400 pt-1">
+                      Masa aktif saat ini: berakhir{" "}
+                      <span className="font-semibold text-slate-700 dark:text-slate-300">
+                        {new Date(featuredModalProperty.featured_until).toLocaleDateString("id-ID", {
+                          day: "numeric",
+                          month: "long",
+                          year: "numeric",
+                        })}
+                      </span>
+                    </p>
+                  )}
+                </div>
+              )}
+            </div>
+
+            <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-100 dark:border-slate-800">
+              <button
+                type="button"
+                onClick={() => setFeaturedModalProperty(null)}
+                disabled={isUpdatingFeatured}
+                className="px-4 py-2 text-xs font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors cursor-pointer"
+              >
+                Batal
+              </button>
+              <button
+                type="button"
+                onClick={handleSaveFeatured}
+                disabled={isUpdatingFeatured}
+                className="px-4 py-2 text-xs font-bold bg-amber-500 hover:bg-amber-600 text-white rounded-xl shadow-xs disabled:opacity-50 transition-all flex items-center gap-1.5 cursor-pointer"
+              >
+                {isUpdatingFeatured ? (
+                  <>
+                    <Loader2 size={13} className="animate-spin" />
+                    <span>Menyimpan...</span>
+                  </>
+                ) : (
+                  <>
+                    <Award size={13} />
+                    <span>Simpan Status</span>
                   </>
                 )}
               </button>

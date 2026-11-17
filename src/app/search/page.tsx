@@ -7,7 +7,7 @@ import { KosPropertyCard } from "@/components/features/KosPropertyCard";
 import { KosPropertyCardSkeleton } from "@/components/features/KosPropertyCardSkeleton";
 import { SmartSearchBar } from "@/components/features/SmartSearchBar";
 import { FacetedSearchFilter } from "@/components/features/FacetedSearchFilter";
-import { AlertCircle, SearchX, MapPin, X } from "lucide-react";
+import { AlertCircle, SearchX, MapPin, X, Award } from "lucide-react";
 import { RadarEmptyPattern } from "@/components/ui/backgrounds";
 
 interface PropertyItem {
@@ -61,6 +61,8 @@ function SearchPageContent() {
   const searchParams = typeof useSearchParams === "function" ? useSearchParams() : null;
   const queryParam = searchParams?.get("q") || "";
   const facilitiesParam = searchParams?.get("facilities") || "";
+  const featuredParam = searchParams?.get("featured") || searchParams?.get("is_featured") || "";
+  const isFeaturedFilter = featuredParam === "true";
 
   const selectedFacilities = useMemo(() => {
     if (!facilitiesParam.trim()) return [];
@@ -84,6 +86,9 @@ function SearchPageContent() {
         const params = new URLSearchParams();
         if (facilitiesParam.trim()) {
           params.set("facilities", facilitiesParam.trim());
+        }
+        if (isFeaturedFilter) {
+          params.set("featured", "true");
         }
         const queryString = params.toString();
         const apiUrl = queryString ? `/api/properties?${queryString}` : "/api/properties";
@@ -126,7 +131,7 @@ function SearchPageContent() {
     return () => {
       isMounted = false;
     };
-  }, [facilitiesParam]);
+  }, [facilitiesParam, featuredParam, isFeaturedFilter]);
 
   const handleSearch = (prompt: string) => {
     if (prompt.trim()) {
@@ -140,6 +145,18 @@ function SearchPageContent() {
       params.set("facilities", newFacilities.join(","));
     } else {
       params.delete("facilities");
+    }
+    const queryString = params.toString();
+    router.replace(queryString ? `/search?${queryString}` : "/search", { scroll: false });
+  };
+
+  const handleToggleFeatured = () => {
+    const params = new URLSearchParams(searchParams ? searchParams.toString() : "");
+    if (isFeaturedFilter) {
+      params.delete("featured");
+      params.delete("is_featured");
+    } else {
+      params.set("featured", "true");
     }
     const queryString = params.toString();
     router.replace(queryString ? `/search?${queryString}` : "/search", { scroll: false });
@@ -200,8 +217,29 @@ function SearchPageContent() {
         </div>
       </section>
 
-      {/* Faceted Filter Section */}
-      <section className="w-full">
+      {/* Quick Filter & Faceted Filter Section */}
+      <section className="w-full flex flex-col gap-3">
+        <div className="flex items-center gap-2 flex-wrap">
+          <button
+            type="button"
+            onClick={handleToggleFeatured}
+            aria-pressed={isFeaturedFilter}
+            data-testid="filter-featured-button"
+            className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold transition-all duration-200 cursor-pointer active:scale-95 ${
+              isFeaturedFilter
+                ? "bg-amber-600 text-white border border-amber-700 shadow-xs"
+                : "bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:border-amber-400 hover:text-amber-700 dark:hover:text-amber-400"
+            }`}
+          >
+            <Award
+              className={`w-3.5 h-3.5 ${
+                isFeaturedFilter ? "text-white" : "text-amber-600 dark:text-amber-400"
+              }`}
+            />
+            <span>Rekomendasi</span>
+          </button>
+        </div>
+
         <FacetedSearchFilter
           selectedFacilities={selectedFacilities}
           onChange={handleFacilitiesChange}
@@ -214,7 +252,9 @@ function SearchPageContent() {
           <div>
             <div className="flex items-center gap-2 flex-wrap">
               <h2 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white tracking-tight">
-                {queryParam.trim() ? (
+                {isFeaturedFilter ? (
+                  <span>Kos Rekomendasi Pilihan KosPasti</span>
+                ) : queryParam.trim() ? (
                   <span>
                     Hasil Pencarian untuk &ldquo;{queryParam}&rdquo;
                   </span>
@@ -226,7 +266,7 @@ function SearchPageContent() {
                   "Rekomendasi Kos Terbaru"
                 )}
               </h2>
-              {(queryParam.trim() || selectedFacilities.length > 0) && (
+              {(queryParam.trim() || selectedFacilities.length > 0 || isFeaturedFilter) && (
                 <button
                   type="button"
                   onClick={handleResetAll}
@@ -239,12 +279,24 @@ function SearchPageContent() {
               )}
             </div>
 
-            {/* Badges of selected facilities */}
-            {selectedFacilities.length > 0 && (
+            {/* Badges of selected filters */}
+            {(selectedFacilities.length > 0 || isFeaturedFilter) && (
               <div className="flex items-center gap-1.5 flex-wrap mt-2">
                 <span className="text-[11px] text-slate-400 dark:text-slate-500 font-medium mr-1">
-                  Filter fasilitas:
+                  Filter aktif:
                 </span>
+                {isFeaturedFilter && (
+                  <button
+                    type="button"
+                    onClick={handleToggleFeatured}
+                    className="inline-flex items-center gap-1 text-[11px] font-semibold bg-amber-50 dark:bg-amber-950/60 border border-amber-200 dark:border-amber-800 text-amber-800 dark:text-amber-300 px-2.5 py-0.5 rounded-full hover:bg-amber-100 dark:hover:bg-amber-900/60 transition-colors cursor-pointer"
+                    title="Hapus filter rekomendasi"
+                  >
+                    <Award className="w-3 h-3 text-amber-600 dark:text-amber-400" />
+                    <span>Rekomendasi</span>
+                    <X className="w-3 h-3 text-amber-600" />
+                  </button>
+                )}
                 {selectedFacilities.map((fac) => (
                   <button
                     key={fac}

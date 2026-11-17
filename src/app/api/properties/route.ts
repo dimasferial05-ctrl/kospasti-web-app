@@ -232,6 +232,25 @@ export async function GET(request: Request) {
       whereClause.is_24_hours = true;
     }
 
+    // Filter Kos Rekomendasi (Featured Listing)
+    const featuredParam = searchParams.get("featured") || searchParams.get("is_featured");
+    if (featuredParam === "true") {
+      whereClause.is_featured = true;
+      const featuredCondition = {
+        OR: [
+          { featured_until: null },
+          { featured_until: { gte: new Date() } },
+        ],
+      };
+      if (!whereClause.AND) {
+        whereClause.AND = [featuredCondition];
+      } else if (Array.isArray(whereClause.AND)) {
+        whereClause.AND.push(featuredCondition);
+      } else {
+        whereClause.AND = [whereClause.AND, featuredCondition];
+      }
+    }
+
     // Filter Fasilitas Spesifik (Faceted Search)
     const facilitiesRaw = searchParams.getAll("facilities");
     const requestedFacilities = facilitiesRaw
