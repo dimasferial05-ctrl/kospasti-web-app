@@ -233,33 +233,6 @@ export default function CheckoutPage() {
     }
   };
 
-  const handleSimulatePayment = async () => {
-    setPaymentError(null);
-    setIsProcessing(true);
-    try {
-      const res = await fetch(`/api/bookings/${bookingId}/pay`, {
-        method: "POST",
-      });
-
-      if (!res.ok) {
-        const errorData = await res.json().catch(() => null);
-        throw new Error(
-          errorData?.error || "Gagal mengonfirmasi pembayaran"
-        );
-      }
-
-      router.push(`/success/${bookingId}`);
-    } catch (error: unknown) {
-      console.error(error);
-      const errorMessage =
-        error instanceof Error
-          ? error.message
-          : "Terjadi kesalahan saat memproses pembayaran. Silakan coba lagi.";
-      setPaymentError(errorMessage);
-      setIsProcessing(false);
-    }
-  };
-
   const rentPrice = booking?.pricing?.rentPrice ?? 0;
   const adminFee = booking?.pricing?.adminFee ?? 5000;
   const totalPrice = booking?.pricing?.totalPrice ?? rentPrice + adminFee;
@@ -662,19 +635,6 @@ export default function CheckoutPage() {
                   </>
                 )}
               </button>
-
-              {/* Tombol Simulasi Pembayaran (Disimpan di area testing dev agar UI rapi) */}
-              <div className="mt-3 pt-3 border-t border-slate-100 dark:border-slate-800 text-center">
-                <button
-                  type="button"
-                  onClick={handleSimulatePayment}
-                  disabled={isProcessing || !isAgreedToTerms}
-                  data-testid="simulate-pay-button"
-                  className="text-[11px] text-slate-400 dark:text-slate-500 hover:text-emerald-600 dark:hover:text-emerald-400 underline transition-colors cursor-pointer"
-                >
-                  Simulasikan Pembayaran Berhasil (Dev Mode)
-                </button>
-              </div>
 
               {/* Petunjuk Lembut jika Belum Dicentang */}
               {!isAgreedToTerms && !isProcessing && (
