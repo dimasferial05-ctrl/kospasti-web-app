@@ -147,43 +147,54 @@ export function verifyMidtransSignature(
 ): boolean {
   try {
     const serverKey = getMidtransServerKey();
-    // Midtrans gross_amount pada signature bisa berupa format integer atau 2 desimal (misal 505000.00)
-    // 1. Coba hash pertama dengan nilai gross_amount persis apa adanya
-    const rawString = `${orderId}${statusCode}${grossAmount}${serverKey}`;
-    const calculatedSignature = crypto
-      .createHash("sha512")
-      .update(rawString)
-      .digest("hex");
+    const keysToTry = [serverKey];
 
+    // Tambahkan Signature Key sekunder jika dikonfigurasi di dashboard
     if (
-      calculatedSignature.length === signatureKey.length &&
-      crypto.timingSafeEqual(
-        Buffer.from(calculatedSignature, "utf-8"),
-        Buffer.from(signatureKey, "utf-8")
-      )
+      process.env.MIDTRANS_SIGNATURE_KEY &&
+      !keysToTry.includes(process.env.MIDTRANS_SIGNATURE_KEY)
     ) {
-      return true;
+      keysToTry.push(process.env.MIDTRANS_SIGNATURE_KEY);
     }
 
-    // 2. Coba alternatif format desimal (.00 atau integer) jika Midtrans mengirim format berbeda
-    const strAmount = String(grossAmount);
-    const altAmount = strAmount.includes(".")
-      ? strAmount.split(".")[0]
-      : `${strAmount}.00`;
-    const altRawString = `${orderId}${statusCode}${altAmount}${serverKey}`;
-    const altSignature = crypto
-      .createHash("sha512")
-      .update(altRawString)
-      .digest("hex");
+    for (const key of keysToTry) {
+      // 1. Coba hash pertama dengan nilai gross_amount apa adanya
+      const rawString = `${orderId}${statusCode}${grossAmount}${key}`;
+      const calculatedSignature = crypto
+        .createHash("sha512")
+        .update(rawString)
+        .digest("hex");
 
-    if (
-      altSignature.length === signatureKey.length &&
-      crypto.timingSafeEqual(
-        Buffer.from(altSignature, "utf-8"),
-        Buffer.from(signatureKey, "utf-8")
-      )
-    ) {
-      return true;
+      if (
+        calculatedSignature.length === signatureKey.length &&
+        crypto.timingSafeEqual(
+          Buffer.from(calculatedSignature, "utf-8"),
+          Buffer.from(signatureKey, "utf-8")
+        )
+      ) {
+        return true;
+      }
+
+      // 2. Coba alternatif format desimal (.00 atau integer)
+      const strAmount = String(grossAmount);
+      const altAmount = strAmount.includes(".")
+        ? strAmount.split(".")[0]
+        : `${strAmount}.00`;
+      const altRawString = `${orderId}${statusCode}${altAmount}${key}`;
+      const altSignature = crypto
+        .createHash("sha512")
+        .update(altRawString)
+        .digest("hex");
+
+      if (
+        altSignature.length === signatureKey.length &&
+        crypto.timingSafeEqual(
+          Buffer.from(altSignature, "utf-8"),
+          Buffer.from(signatureKey, "utf-8")
+        )
+      ) {
+        return true;
+      }
     }
 
     return false;

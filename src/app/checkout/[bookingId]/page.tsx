@@ -180,46 +180,41 @@ export default function CheckoutPage() {
 
       const data = await res.json().catch(() => null);
 
-      if (res.ok && data?.token && typeof window !== "undefined" && window.snap?.pay) {
-        window.snap.pay(data.token, {
-          onSuccess: () => {
-            router.push(`/receipt/${bookingId}`);
-          },
-          onPending: () => {
-            // Pengguna baru saja memilih metode bayar di Snap tapi belum transfer
-            setIsProcessing(false);
-            setIsPendingPayment(true);
-            setPendingNotice(
-              "Tagihan pembayaran sedang aktif di Midtrans. Selesaikan pembayaran Anda di e-Wallet / m-Banking, atau klik tombol di bawah untuk memeriksa status."
-            );
-          },
-          onError: (err) => {
-            console.error("Midtrans Snap error:", err);
-            setPaymentError("Pembayaran dibatalkan atau gagal diproses oleh gateway.");
-            setIsProcessing(false);
-          },
-          onClose: () => {
-            // Pengguna menutup popup Snap atau menekan kembali
-            setIsProcessing(false);
-          },
-        });
-        return;
-      }
-
-      // Jika script snap belum aktif atau request token gagal karena key belum terisi:
-      // Gunakan fallback simulasi pembayaran internal agar alur checkout tidak terputus
-      const fallbackRes = await fetch(`/api/bookings/${bookingId}/pay`, {
-        method: "POST",
-      });
-
-      if (!fallbackRes.ok) {
-        const errorData = await fallbackRes.json().catch(() => null);
+      if (!res.ok || !data?.token) {
         throw new Error(
-          errorData?.error || data?.error || "Gagal mengonfirmasi pembayaran"
+          data?.error ||
+            "Gagal mendapatkan sesi pembayaran Midtrans. Pastikan gateway aktif dan silakan coba lagi."
         );
       }
 
-      router.push(`/receipt/${bookingId}`);
+      if (typeof window === "undefined" || !window.snap?.pay) {
+        throw new Error(
+          "Modul Midtrans Snap sedang dimuat ke peramban. Mohon tunggu beberapa detik lalu klik tombol lagi."
+        );
+      }
+
+      window.snap.pay(data.token, {
+        onSuccess: () => {
+          router.push(`/receipt/${bookingId}`);
+        },
+        onPending: () => {
+          // Pengguna baru saja memilih metode bayar di Snap tapi belum transfer
+          setIsProcessing(false);
+          setIsPendingPayment(true);
+          setPendingNotice(
+            "Tagihan pembayaran sedang aktif di Midtrans. Selesaikan pembayaran Anda di e-Wallet / m-Banking, atau klik tombol di bawah untuk memeriksa status."
+          );
+        },
+        onError: (err) => {
+          console.error("Midtrans Snap error:", err);
+          setPaymentError("Pembayaran dibatalkan atau gagal diproses oleh gateway.");
+          setIsProcessing(false);
+        },
+        onClose: () => {
+          // Pengguna menutup popup Snap atau menekan kembali
+          setIsProcessing(false);
+        },
+      });
     } catch (error: unknown) {
       console.error(error);
       const errorMessage =
@@ -661,7 +656,7 @@ export default function CheckoutPage() {
             : "https://app.sandbox.midtrans.com/snap/snap.js"
         }
         data-client-key={process.env.NEXT_PUBLIC_MIDTRANS_CLIENT_KEY || ""}
-        strategy="lazyOnload"
+        strategy="afterInteractive"
       />
           {/* Floating Customer Support WhatsApp Widget */}
       {booking && (
