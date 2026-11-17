@@ -40,8 +40,8 @@ describe("Checkout Page Component (/checkout/[bookingId])", () => {
     // Booking Reference ID
     expect(html).toContain("booking-uuid-123");
 
-    // Tombol simulasi
-    expect(html).toContain("Simulasikan Pembayaran Berhasil");
+    // Tombol pembayaran resmi Midtrans
+    expect(html).toContain("Bayar DP Sekarang");
 
     // Panduan Pembayaran
     expect(html).toContain("Panduan Pembayaran:");
@@ -61,7 +61,7 @@ describe("Checkout Page Component (/checkout/[bookingId])", () => {
     expect(content).not.toContain("<img");
   });
 
-  it("memiliki logika status loading (isProcessing) dan redirect ke /success/[bookingId]", () => {
+  it("memiliki logika status loading (isProcessing) dan integrasi Midtrans Snap", () => {
     const filePath = path.resolve(
       __dirname,
       "../src/app/checkout/[bookingId]/page.tsx"
@@ -74,10 +74,10 @@ describe("Checkout Page Component (/checkout/[bookingId])", () => {
     expect(content).toContain("useRouter");
     expect(content).toContain("useParams");
 
-    // Logika handleSimulatePayment
-    expect(content).toContain("handleSimulatePayment");
-    expect(content).toContain("fetch(`/api/bookings/${bookingId}/pay`");
-    expect(content).toContain("router.push(`/success/${bookingId}`)");
+    // Logika handlePay & Snap Token
+    expect(content).toContain("handlePay");
+    expect(content).toContain("fetch(`/api/bookings/${bookingId}/snap-token`");
+    expect(content).toContain("window.snap.pay");
 
     // Tombol dinamis & disabled saat processing atau persetujuan belum dicentang
     expect(content).toMatch(/disabled=\{isProcessing(\s*\|\|\s*!isAgreedToTerms)?\}/);

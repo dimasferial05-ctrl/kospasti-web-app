@@ -35,6 +35,7 @@ export interface KosPropertyCardProps {
   averageRating?: number;
   totalReviews?: number;
   isSaved?: boolean;
+  isFeatured?: boolean;
   distance?: number | null;
   distanceTargetName?: string | null;
   commuteTime?: string | null;
@@ -58,6 +59,7 @@ export function KosPropertyCard({
   roomTypes,
   averageRating,
   isSaved = false,
+  isFeatured = false,
   distance,
   distanceTargetName,
   commuteTime,
@@ -229,9 +231,17 @@ export function KosPropertyCard({
           </div>
         )}
 
+        {/* Featured / Rekomendasi Badge (z-20) */}
+        {isFeatured && (
+          <div className="absolute top-3 left-3 z-20 bg-amber-500/90 dark:bg-amber-600/90 backdrop-blur-md text-white text-[10px] font-extrabold px-2.5 py-1 rounded-full border border-amber-300/40 shadow-xs flex items-center gap-1 uppercase tracking-wider">
+            <Star className="w-3 h-3 fill-white text-white" />
+            <span>Rekomendasi</span>
+          </div>
+        )}
+
         {/* Room Type Tag when cycling (Standalone, z-20) */}
         {slides.length > 1 && currentSlide && currentSlide.title !== "Utama" && (
-          <div className="absolute top-3 left-3 z-20 bg-slate-900/80 backdrop-blur-md text-white text-[11px] font-medium px-3 py-1 rounded-full border border-white/10 shadow-xs flex items-center transition-all duration-300">
+          <div className={`absolute ${isFeatured ? "top-10" : "top-3"} left-3 z-20 bg-slate-900/80 backdrop-blur-md text-white text-[11px] font-medium px-3 py-1 rounded-full border border-white/10 shadow-xs flex items-center transition-all duration-300`}>
             <span className="truncate max-w-[150px]">{currentSlide.title}</span>
           </div>
         )}

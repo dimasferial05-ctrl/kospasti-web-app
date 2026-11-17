@@ -26,12 +26,17 @@ import { TrustAura } from "@/components/ui/backgrounds";
 
 interface BookingReceiptDetail {
   id: string;
+  invoiceNumber?: string;
   studentName: string;
   studentWhatsapp: string;
   studentEmail: string | null;
   moveInDate: string;
   status: string;
   createdAt: string;
+  paidAt?: string | null;
+  paymentMethod?: string | null;
+  paymentGatewayRef?: string | null;
+  snapToken?: string | null;
   property: {
     id: string;
     name: string;
@@ -225,6 +230,8 @@ export default function BookingReceiptPage() {
     );
   }
 
+  const isPaid = booking.status === "PAID" || booking.status === "COMPLETED";
+
   const receiptNo = `KP-INV-${new Date(booking.createdAt).getFullYear()}${String(
     new Date(booking.createdAt).getMonth() + 1
   ).padStart(2, "0")}-${booking.id.slice(0, 8).toUpperCase()}`;
@@ -257,11 +264,19 @@ export default function BookingReceiptPage() {
       <div className="relative z-10 max-w-3xl mx-auto mb-6 flex items-center justify-between gap-3 print:hidden">
         <button
           type="button"
-          onClick={() => router.back()}
+          onClick={() => {
+            if (isPaid) {
+              router.push("/profil?tab=bookings");
+            } else if (booking?.id) {
+              router.push(`/checkout/${booking.id}`);
+            } else {
+              router.back();
+            }
+          }}
           className="inline-flex items-center gap-2 px-4 py-2 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-200 text-xs sm:text-sm font-semibold rounded-xl shadow-xs transition-colors cursor-pointer"
         >
           <ArrowLeft className="w-4 h-4" />
-          <span>Kembali</span>
+          <span>{isPaid ? "Ke Riwayat Pesanan" : "Kembali ke Pembayaran"}</span>
         </button>
 
         <div className="flex items-center gap-2.5">
@@ -276,6 +291,28 @@ export default function BookingReceiptPage() {
           </button>
         </div>
       </div>
+
+      {/* Warning Notice jika Status Belum Lunas (Screen Only) */}
+      {!isPaid && (
+        <div className="relative z-10 max-w-3xl mx-auto mb-5 p-4 rounded-xl bg-amber-50 dark:bg-amber-950/60 border border-amber-300 dark:border-amber-800 text-amber-900 dark:text-amber-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 print:hidden shadow-xs">
+          <div className="flex items-start gap-2.5">
+            <AlertCircle className="w-5 h-5 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+            <div>
+              <p className="font-bold text-sm">Pesanan Belum Lunas (Status: PENDING)</p>
+              <p className="text-xs text-amber-700 dark:text-amber-300 mt-0.5">
+                Pembayaran belum terverifikasi masuk. Silakan selesaikan pembayaran Anda di halaman checkout.
+              </p>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={() => router.push(`/checkout/${booking.id}`)}
+            className="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs rounded-lg shrink-0 transition-colors cursor-pointer"
+          >
+            Lanjutkan Pembayaran
+          </button>
+        </div>
+      )}
 
       {/* Offline Banner (Screen Only) */}
       {(!isOnline || isOfflineData) && (
@@ -323,20 +360,35 @@ export default function BookingReceiptPage() {
             </div>
           </div>
 
-          {/* Stempel Digital "LUNAS (ESCROW DIJAMIN)" */}
+          {/* Stempel Digital */}
           <div className="flex items-center self-end sm:self-auto">
-            <div
-              data-testid="digital-stamp"
-              className="border-2 border-dashed border-emerald-600 text-emerald-700 dark:text-emerald-400 print:border-emerald-700 print:text-emerald-800 bg-emerald-50/70 dark:bg-emerald-950/30 print:bg-transparent px-4 py-2 rounded-xl -rotate-6 select-none uppercase font-black text-center shadow-xs"
-            >
-              <div className="text-sm tracking-widest font-black leading-tight">LUNAS</div>
-              <div className="text-[8px] sm:text-[9px] font-bold tracking-tight text-emerald-600 print:text-emerald-700 mt-0.5">
-                ESCROW DIJAMIN 12 JAM
+            {isPaid ? (
+              <div
+                data-testid="digital-stamp"
+                className="border-2 border-dashed border-emerald-600 text-emerald-700 dark:text-emerald-400 print:border-emerald-700 print:text-emerald-800 bg-emerald-50/70 dark:bg-emerald-950/30 print:bg-transparent px-4 py-2 rounded-xl -rotate-6 select-none uppercase font-black text-center shadow-xs"
+              >
+                <div className="text-sm tracking-widest font-black leading-tight">LUNAS</div>
+                <div className="text-[8px] sm:text-[9px] font-bold tracking-tight text-emerald-600 print:text-emerald-700 mt-0.5">
+                  ESCROW DIJAMIN 12 JAM &bull; REKENING BERSAMA KOSPASTI
+                </div>
+                <div className="text-[7px] text-slate-400 print:text-slate-500 tracking-wider">
+                  KOSPASTI OFFICIAL &bull; ESCROW SECURED
+                </div>
               </div>
-              <div className="text-[7px] text-slate-400 print:text-slate-500 tracking-wider">
-                KOSPASTI OFFICIAL
+            ) : (
+              <div
+                data-testid="digital-stamp"
+                className="border-2 border-dashed border-amber-500 text-amber-700 dark:text-amber-400 print:border-amber-600 print:text-amber-800 bg-amber-50/70 dark:bg-amber-950/30 print:bg-transparent px-4 py-2 rounded-xl -rotate-6 select-none uppercase font-black text-center shadow-xs"
+              >
+                <div className="text-sm tracking-widest font-black leading-tight">BELUM LUNAS</div>
+                <div className="text-[8px] sm:text-[9px] font-bold tracking-tight text-amber-600 print:text-amber-700 mt-0.5">
+                  MENUNGGU PEMBAYARAN (PENDING)
+                </div>
+                <div className="text-[7px] text-slate-400 print:text-slate-500 tracking-wider">
+                  KOSPASTI OFFICIAL &bull; ESCROW DIJAMIN 12 JAM
+                </div>
               </div>
-            </div>
+            )}
           </div>
         </div>
 
@@ -345,18 +397,22 @@ export default function BookingReceiptPage() {
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
               <h1 className="text-lg sm:text-xl font-black text-slate-900 dark:text-white print:text-black tracking-tight uppercase">
-                Voucher Booking &amp; Bukti Pembayaran Resmi
+                {isPaid
+                  ? "Voucher Booking &amp; Bukti Pembayaran Resmi"
+                  : "Voucher Booking &amp; Bukti Pembayaran Resmi (Menunggu Pembayaran)"}
               </h1>
               <p className="text-xs text-slate-500 dark:text-slate-400 print:text-slate-600 mt-0.5">
-                Tunjukkan dokumen ini saat kedatangan untuk serah terima kunci kamar kos.
+                {isPaid
+                  ? "Tunjukkan dokumen ini saat kedatangan untuk serah terima kunci kamar kos."
+                  : "Selesaikan pembayaran Anda agar voucher resmi dan konfirmasi serah terima kunci diterbitkan."}
               </p>
             </div>
             <div className="text-left sm:text-right shrink-0">
               <div className="text-[11px] font-semibold text-slate-400 dark:text-slate-500 print:text-slate-500">
-                Nomor Kuitansi
+                Nomor Kuitansi / Invoice
               </div>
               <div className="font-mono text-xs sm:text-sm font-bold text-slate-900 dark:text-white print:text-black">
-                {receiptNo}
+                {booking.invoiceNumber || receiptNo}
               </div>
             </div>
           </div>
@@ -365,20 +421,22 @@ export default function BookingReceiptPage() {
             <div>
               <span className="text-slate-400 dark:text-slate-500 block text-[11px]">Waktu Bayar:</span>
               <span className="font-medium text-slate-800 dark:text-slate-200 print:text-black">
-                {formatDateTime(booking.createdAt)}
+                {isPaid
+                  ? formatDateTime(booking.paidAt || booking.createdAt)
+                  : "- (Belum Dibayar)"}
               </span>
             </div>
             <div>
               <span className="text-slate-400 dark:text-slate-500 block text-[11px]">Metode Bayar:</span>
               <span className="font-semibold text-slate-800 dark:text-slate-200 print:text-black">
-                QRIS (Instant Settlement)
+                {booking.paymentMethod?.toUpperCase() || (isPaid ? "QRIS (MIDTRANS)" : "Menunggu Pilihan")}
               </span>
             </div>
             <div>
               <span className="text-slate-400 dark:text-slate-500 block text-[11px]">Status Dana:</span>
-              <span className="inline-flex items-center gap-1 font-bold text-emerald-600 print:text-emerald-700">
+              <span className={`inline-flex items-center gap-1 font-bold ${isPaid ? "text-emerald-600 print:text-emerald-700" : "text-amber-600 print:text-amber-700"}`}>
                 <ShieldCheck className="w-3.5 h-3.5" />
-                <span>Escrow Diamankan</span>
+                <span>{isPaid ? "Escrow Diamankan" : "Menunggu Pembayaran"}</span>
               </span>
             </div>
             <div>

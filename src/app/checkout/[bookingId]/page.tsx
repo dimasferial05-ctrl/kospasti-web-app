@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
+import Script from "next/script";
 import { CustomerSupportWidget } from "@/components/support/CustomerSupportWidget";
 import {
   QrCode,
@@ -13,7 +14,27 @@ import {
   BedDouble,
   AlertCircle,
   X,
+  CreditCard,
+  Wallet,
+  Clock,
+  CheckCircle2,
 } from "lucide-react";
+
+declare global {
+  interface Window {
+    snap?: {
+      pay: (
+        token: string,
+        options?: {
+          onSuccess?: (result: unknown) => void;
+          onPending?: (result: unknown) => void;
+          onError?: (result: unknown) => void;
+          onClose?: () => void;
+        }
+      ) => void;
+    };
+  }
+}
 
 interface BookingDetail {
   id: string;
@@ -77,6 +98,9 @@ export default function CheckoutPage() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [paymentError, setPaymentError] = useState<string | null>(null);
   const [isAgreedToTerms, setIsAgreedToTerms] = useState<boolean>(false);
+  const [isPendingPayment, setIsPendingPayment] = useState<boolean>(false);
+  const [pendingNotice, setPendingNotice] = useState<string | null>(null);
+  const [isCheckingStatus, setIsCheckingStatus] = useState<boolean>(false);
 
   useEffect(() => {
     if (!bookingId) {
@@ -91,11 +115,17 @@ export default function CheckoutPage() {
       try {
         const res = await fetch(`/api/bookings/${bookingId}`);
         const result = await res.json();
-        if (!res.ok) {
-          throw new Error(result.error || "Gagal memuat detail pesanan");
-        }
-        if (isMounted) {
-          setBooking(result.data);
+        if (res.ok && result.data) {
+          if (
+            result.data.status === "PAID" ||
+            result.data.status === "COMPLETED"
+          ) {
+            router.replace(`/receipt/${bookingId}`);
+            return;
+          }
+          if (isMounted) {
+            setBooking(result.data);
+          }
         }
       } catch (err: unknown) {
         if (isMounted) {
@@ -120,22 +150,78 @@ export default function CheckoutPage() {
     };
   }, [bookingId]);
 
-  const handleSimulatePayment = async () => {
+  const handleCheckStatus = async () => {
+    setIsCheckingStatus(true);
     setPaymentError(null);
-    setIsProcessing(true);
     try {
-      const res = await fetch(`/api/bookings/${bookingId}/pay`, {
+      const res = await fetch(`/api/bookings/${bookingId}`);
+      const data = await res.json().catch(() => null);
+      if (res.ok && data?.data) {
+        if (data.data.status === "PAID" || data.data.status === "COMPLETED") {
+          router.push(`/receipt/${bookingId}`);
+          return;
+        } else {
+          setPendingNotice(
+            "Pembayaran belum terverifikasi dari gateway. Jika Anda telah selesai bayar di QRIS / Bank, mohon tunggu beberapa saat untuk pembaruan webhook atau klik 'Periksa Lagi'."
+          );
+        }
+      }
+    } catch (err) {
+      console.error("Gagal memeriksa status booking:", err);
+    } finally {
+      setIsCheckingStatus(false);
+    }
+  };
+
+  const handlePay = async () => {
+    if (!isAgreedToTerms) return;
+    setPaymentError(null);
+    setPendingNotice(null);
+    setIsProcessing(true);
+
+    try {
+      // Cek apakah snap popup tersedia di browser
+      const res = await fetch(`/api/bookings/${bookingId}/snap-token`, {
         method: "POST",
       });
 
-      if (!res.ok) {
-        const errorData = await res.json().catch(() => null);
+      const data = await res.json().catch(() => null);
+
+      if (!res.ok || !data?.token) {
         throw new Error(
-          errorData?.error || "Gagal mengonfirmasi pembayaran"
+          data?.error ||
+            "Gagal mendapatkan sesi pembayaran Midtrans. Pastikan gateway aktif dan silakan coba lagi."
         );
       }
 
-      router.push(`/success/${bookingId}`);
+      if (typeof window === "undefined" || !window.snap?.pay) {
+        throw new Error(
+          "Modul Midtrans Snap sedang dimuat ke peramban. Mohon tunggu beberapa detik lalu klik tombol lagi."
+        );
+      }
+
+      window.snap.pay(data.token, {
+        onSuccess: () => {
+          router.push(`/receipt/${bookingId}`);
+        },
+        onPending: () => {
+          // Pengguna baru saja memilih metode bayar di Snap tapi belum transfer
+          setIsProcessing(false);
+          setIsPendingPayment(true);
+          setPendingNotice(
+            "Tagihan pembayaran sedang aktif di Midtrans. Selesaikan pembayaran Anda di e-Wallet / m-Banking, atau klik tombol di bawah untuk memeriksa status."
+          );
+        },
+        onError: (err) => {
+          console.error("Midtrans Snap error:", err);
+          setPaymentError("Pembayaran dibatalkan atau gagal diproses oleh gateway.");
+          setIsProcessing(false);
+        },
+        onClose: () => {
+          // Pengguna menutup popup Snap atau menekan kembali
+          setIsProcessing(false);
+        },
+      });
     } catch (error: unknown) {
       console.error(error);
       const errorMessage =
@@ -150,6 +236,38 @@ export default function CheckoutPage() {
   const rentPrice = booking?.pricing?.rentPrice ?? 0;
   const adminFee = booking?.pricing?.adminFee ?? 5000;
   const totalPrice = booking?.pricing?.totalPrice ?? rentPrice + adminFee;
+
+  if (booking && (booking.status === "PAID" || booking.status === "COMPLETED")) {
+    return (
+      <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex items-center justify-center p-4">
+        <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-xl p-8 text-center max-w-md w-full border border-slate-100 dark:border-slate-800 animate-in fade-in zoom-in-95 duration-200">
+          <div className="w-16 h-16 bg-emerald-100 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 rounded-full flex items-center justify-center mx-auto mb-4">
+            <CheckCircle2 className="w-9 h-9" />
+          </div>
+          <h1 className="text-xl font-bold text-slate-900 dark:text-white">Pesanan Sudah Lunas</h1>
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-2 leading-relaxed">
+            Pembayaran untuk pesanan ini telah terverifikasi dan berstatus lunas. Anda tidak perlu melakukan pembayaran lagi.
+          </p>
+          <div className="mt-6 flex flex-col gap-2.5">
+            <button
+              type="button"
+              onClick={() => router.push(`/receipt/${bookingId}`)}
+              className="w-full py-2.5 px-4 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs sm:text-sm rounded-xl transition-colors cursor-pointer"
+            >
+              Buka Kuitansi Resmi &amp; Voucher
+            </button>
+            <button
+              type="button"
+              onClick={() => router.push("/profil?tab=bookings")}
+              className="w-full py-2.5 px-4 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-semibold text-xs sm:text-sm rounded-xl transition-colors cursor-pointer"
+            >
+              Ke Riwayat Pesanan
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex flex-col justify-center items-center p-4 sm:p-6 lg:p-12 transition-colors duration-200">
@@ -341,6 +459,9 @@ export default function CheckoutPage() {
                 <div className="mt-2 text-xs font-semibold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-100 dark:border-emerald-800/60 px-3 py-1 rounded-full">
                   Nominal: {formatRupiah(totalPrice)}
                 </div>
+                <p className="mt-3 text-[11px] text-slate-500 dark:text-slate-400 max-w-xs text-center">
+                  ⚡ Klik tombol <strong>Bayar DP Sekarang</strong> di bawah untuk membuka QRIS / Virtual Account resmi Midtrans.
+                </p>
               </div>
 
               {/* Banner Notifikasi Error Pembayaran */}
@@ -367,6 +488,60 @@ export default function CheckoutPage() {
                   >
                     <X className="w-4 h-4" />
                   </button>
+                </div>
+              )}
+
+              {/* Banner Status Menunggu Pembayaran Midtrans */}
+              {pendingNotice && (
+                <div
+                  role="status"
+                  className="mb-4 p-3.5 bg-amber-50 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-800 rounded-xl text-amber-900 dark:text-amber-200 text-xs sm:text-sm flex flex-col gap-2.5 animate-in fade-in duration-200 text-left"
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex items-start gap-2">
+                      <Clock className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+                      <div>
+                        <p className="font-bold">Menunggu Pembayaran</p>
+                        <p className="text-xs text-amber-800 dark:text-amber-300 mt-0.5 leading-relaxed">
+                          {pendingNotice}
+                        </p>
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setPendingNotice(null)}
+                      className="text-amber-600 hover:text-amber-800 dark:text-amber-400 dark:hover:text-amber-200 p-1 rounded-md cursor-pointer"
+                      aria-label="Tutup notifikasi"
+                    >
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+
+                  <div className="flex flex-wrap items-center gap-2 pt-1.5 border-t border-amber-200/60 dark:border-amber-800/60">
+                    <button
+                      type="button"
+                      onClick={handleCheckStatus}
+                      disabled={isCheckingStatus}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs rounded-lg transition-colors cursor-pointer"
+                    >
+                      {isCheckingStatus ? (
+                        <>
+                          <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                          <span>Mengecek...</span>
+                        </>
+                      ) : (
+                        <span>Periksa Status Pembayaran</span>
+                      )}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handlePay}
+                      disabled={isProcessing}
+                      className="inline-flex items-center gap-1 px-3 py-1.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 font-medium text-xs rounded-lg transition-colors cursor-pointer"
+                    >
+                      Ganti Metode Pembayaran
+                    </button>
+                  </div>
                 </div>
               )}
 
@@ -417,10 +592,33 @@ export default function CheckoutPage() {
                 </label>
               </div>
 
-              {/* Tombol Simulasi Pembayaran */}
+              {/* Metode Pembayaran yang Didukung Midtrans */}
+              <div className="mb-5 flex flex-wrap items-center justify-center gap-1.5 text-[10px] text-slate-500 dark:text-slate-400">
+                <span className="font-semibold text-slate-700 dark:text-slate-300 mr-1 flex items-center gap-1">
+                  <CreditCard className="w-3 h-3 text-emerald-600" />
+                  Kanal Resmi:
+                </span>
+                <span className="bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded font-mono font-bold text-slate-700 dark:text-slate-300">
+                  QRIS (GoPay/ShopeePay/OVO)
+                </span>
+                <span className="bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded font-bold text-slate-700 dark:text-slate-300">
+                  BCA VA
+                </span>
+                <span className="bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded font-bold text-slate-700 dark:text-slate-300">
+                  BRI VA
+                </span>
+                <span className="bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded font-bold text-slate-700 dark:text-slate-300">
+                  Mandiri VA
+                </span>
+                <span className="bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded font-bold text-slate-700 dark:text-slate-300">
+                  BNI VA
+                </span>
+              </div>
+
+              {/* Tombol Pembayaran Midtrans Snap */}
               <button
                 type="button"
-                onClick={handleSimulatePayment}
+                onClick={handlePay}
                 disabled={isProcessing || !isAgreedToTerms}
                 data-testid="pay-button"
                 className="w-full py-3.5 px-4 bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white font-bold rounded-xl transition-all shadow-md shadow-emerald-500/20 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 cursor-pointer"
@@ -431,7 +629,10 @@ export default function CheckoutPage() {
                     <span>Memproses...</span>
                   </>
                 ) : (
-                  <span>Simulasikan Pembayaran Berhasil</span>
+                  <>
+                    <Wallet className="w-4 h-4" />
+                    <span>Bayar DP Sekarang (QRIS &amp; VA Midtrans)</span>
+                  </>
                 )}
               </button>
 
@@ -447,9 +648,20 @@ export default function CheckoutPage() {
 
         {/* Footer Info */}
         <p className="text-center text-xs text-slate-400 dark:text-slate-500 mt-8">
-          KosPasti Instant Checkout &bull; Pembayaran Otomatis & Terverifikasi
+          KosPasti Instant Checkout &bull; Pembayaran Otomatis &amp; Terverifikasi Midtrans Snap
         </p>
       </div>
+
+      {/* Midtrans Snap Script Tag */}
+      <Script
+        src={
+          process.env.NEXT_PUBLIC_MIDTRANS_IS_PRODUCTION === "true"
+            ? "https://app.midtrans.com/snap/snap.js"
+            : "https://app.sandbox.midtrans.com/snap/snap.js"
+        }
+        data-client-key={process.env.NEXT_PUBLIC_MIDTRANS_CLIENT_KEY || ""}
+        strategy="afterInteractive"
+      />
           {/* Floating Customer Support WhatsApp Widget */}
       {booking && (
         <CustomerSupportWidget

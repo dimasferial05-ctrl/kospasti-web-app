@@ -65,26 +65,38 @@ export async function GET(
     }
 
     const rentPrice =
-      booking.room_type?.price_per_month ?? booking.property?.price_per_month ?? 0;
-    const adminFee = 5000;
+      booking.room_type?.price_per_month ?? booking.property?.price_per_month ?? booking.amount ?? 0;
+    const adminFee = booking.service_fee || 5000;
     const totalPrice = rentPrice + adminFee;
+
+    const invoiceDateStr = new Date(booking.created_at)
+      .toISOString()
+      .slice(0, 7)
+      .replace("-", "");
+    const invoiceNumber = `KP-INV-${invoiceDateStr}-${booking.id.slice(0, 6).toUpperCase()}`;
 
     return NextResponse.json(
       {
         success: true,
         data: {
           id: booking.id,
+          invoiceNumber,
           studentName: booking.student_name,
           studentWhatsapp: booking.student_whatsapp,
           studentEmail: booking.user?.email || null,
           moveInDate: booking.move_in_date,
           status: booking.status,
           createdAt: booking.created_at,
+          paidAt: booking.paid_at,
+          paymentMethod: booking.payment_method,
+          paymentGatewayRef: booking.payment_gateway_ref,
+          snapToken: booking.snap_token,
           property: booking.property,
           roomType: booking.room_type,
           pricing: {
             rentPrice,
             adminFee,
+            serviceFee: adminFee,
             totalPrice,
           },
         },
