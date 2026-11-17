@@ -73,12 +73,15 @@ export async function POST(request: Request) {
     });
 
     if (!booking) {
-      console.warn(
-        `[MIDTRANS WEBHOOK] Pesanan dengan ID ${cleanBookingId} (raw: ${order_id}) tidak ditemukan.`
+      console.log(
+        `[MIDTRANS WEBHOOK] Pesanan dengan ID ${cleanBookingId} (raw: ${order_id}) tidak ditemukan di database. Mengembalikan 200 OK untuk pengujian URL notifikasi Midtrans.`
       );
       return NextResponse.json(
-        { error: "Booking order not found" },
-        { status: 404 }
+        {
+          status: "OK",
+          message: "Notification acknowledged (test ping or order not found)",
+        },
+        { status: 200 }
       );
     }
 

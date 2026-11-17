@@ -148,21 +148,45 @@ export function verifyMidtransSignature(
   try {
     const serverKey = getMidtransServerKey();
     // Midtrans gross_amount pada signature bisa berupa format integer atau 2 desimal (misal 505000.00)
-    // Kita buat hash SHA512
+    // 1. Coba hash pertama dengan nilai gross_amount persis apa adanya
     const rawString = `${orderId}${statusCode}${grossAmount}${serverKey}`;
     const calculatedSignature = crypto
       .createHash("sha512")
       .update(rawString)
       .digest("hex");
 
-    if (calculatedSignature.length !== signatureKey.length) {
-      return false;
+    if (
+      calculatedSignature.length === signatureKey.length &&
+      crypto.timingSafeEqual(
+        Buffer.from(calculatedSignature, "utf-8"),
+        Buffer.from(signatureKey, "utf-8")
+      )
+    ) {
+      return true;
     }
 
-    return crypto.timingSafeEqual(
-      Buffer.from(calculatedSignature, "utf-8"),
-      Buffer.from(signatureKey, "utf-8")
-    );
+    // 2. Coba alternatif format desimal (.00 atau integer) jika Midtrans mengirim format berbeda
+    const strAmount = String(grossAmount);
+    const altAmount = strAmount.includes(".")
+      ? strAmount.split(".")[0]
+      : `${strAmount}.00`;
+    const altRawString = `${orderId}${statusCode}${altAmount}${serverKey}`;
+    const altSignature = crypto
+      .createHash("sha512")
+      .update(altRawString)
+      .digest("hex");
+
+    if (
+      altSignature.length === signatureKey.length &&
+      crypto.timingSafeEqual(
+        Buffer.from(altSignature, "utf-8"),
+        Buffer.from(signatureKey, "utf-8")
+      )
+    ) {
+      return true;
+    }
+
+    return false;
   } catch (error) {
     console.error("Kesalahan saat validasi signature Midtrans:", error);
     return false;
