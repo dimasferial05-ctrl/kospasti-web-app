@@ -16,6 +16,7 @@ import {
   X,
   CreditCard,
   Wallet,
+  Clock,
 } from "lucide-react";
 
 declare global {
@@ -96,6 +97,9 @@ export default function CheckoutPage() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [paymentError, setPaymentError] = useState<string | null>(null);
   const [isAgreedToTerms, setIsAgreedToTerms] = useState<boolean>(false);
+  const [isPendingPayment, setIsPendingPayment] = useState<boolean>(false);
+  const [pendingNotice, setPendingNotice] = useState<string | null>(null);
+  const [isCheckingStatus, setIsCheckingStatus] = useState<boolean>(false);
 
   useEffect(() => {
     if (!bookingId) {
@@ -139,9 +143,33 @@ export default function CheckoutPage() {
     };
   }, [bookingId]);
 
+  const handleCheckStatus = async () => {
+    setIsCheckingStatus(true);
+    setPaymentError(null);
+    try {
+      const res = await fetch(`/api/bookings/${bookingId}`);
+      const data = await res.json().catch(() => null);
+      if (res.ok && data?.data) {
+        if (data.data.status === "PAID" || data.data.status === "COMPLETED") {
+          router.push(`/receipt/${bookingId}`);
+          return;
+        } else {
+          setPendingNotice(
+            "Pembayaran belum terverifikasi dari gateway. Jika Anda telah selesai bayar di QRIS / Bank, mohon tunggu beberapa saat untuk pembaruan webhook atau klik 'Periksa Lagi'."
+          );
+        }
+      }
+    } catch (err) {
+      console.error("Gagal memeriksa status booking:", err);
+    } finally {
+      setIsCheckingStatus(false);
+    }
+  };
+
   const handlePay = async () => {
     if (!isAgreedToTerms) return;
     setPaymentError(null);
+    setPendingNotice(null);
     setIsProcessing(true);
 
     try {
@@ -158,7 +186,12 @@ export default function CheckoutPage() {
             router.push(`/receipt/${bookingId}`);
           },
           onPending: () => {
-            router.push(`/receipt/${bookingId}?status=pending`);
+            // Pengguna baru saja memilih metode bayar di Snap tapi belum transfer
+            setIsProcessing(false);
+            setIsPendingPayment(true);
+            setPendingNotice(
+              "Tagihan pembayaran sedang aktif di Midtrans. Selesaikan pembayaran Anda di e-Wallet / m-Banking, atau klik tombol di bawah untuk memeriksa status."
+            );
           },
           onError: (err) => {
             console.error("Midtrans Snap error:", err);
@@ -166,6 +199,7 @@ export default function CheckoutPage() {
             setIsProcessing(false);
           },
           onClose: () => {
+            // Pengguna menutup popup Snap atau menekan kembali
             setIsProcessing(false);
           },
         });
@@ -444,6 +478,60 @@ export default function CheckoutPage() {
                   >
                     <X className="w-4 h-4" />
                   </button>
+                </div>
+              )}
+
+              {/* Banner Status Menunggu Pembayaran Midtrans */}
+              {pendingNotice && (
+                <div
+                  role="status"
+                  className="mb-4 p-3.5 bg-amber-50 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-800 rounded-xl text-amber-900 dark:text-amber-200 text-xs sm:text-sm flex flex-col gap-2.5 animate-in fade-in duration-200 text-left"
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex items-start gap-2">
+                      <Clock className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+                      <div>
+                        <p className="font-bold">Menunggu Pembayaran</p>
+                        <p className="text-xs text-amber-800 dark:text-amber-300 mt-0.5 leading-relaxed">
+                          {pendingNotice}
+                        </p>
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setPendingNotice(null)}
+                      className="text-amber-600 hover:text-amber-800 dark:text-amber-400 dark:hover:text-amber-200 p-1 rounded-md cursor-pointer"
+                      aria-label="Tutup notifikasi"
+                    >
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+
+                  <div className="flex flex-wrap items-center gap-2 pt-1.5 border-t border-amber-200/60 dark:border-amber-800/60">
+                    <button
+                      type="button"
+                      onClick={handleCheckStatus}
+                      disabled={isCheckingStatus}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs rounded-lg transition-colors cursor-pointer"
+                    >
+                      {isCheckingStatus ? (
+                        <>
+                          <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                          <span>Mengecek...</span>
+                        </>
+                      ) : (
+                        <span>Periksa Status Pembayaran</span>
+                      )}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handlePay}
+                      disabled={isProcessing}
+                      className="inline-flex items-center gap-1 px-3 py-1.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 font-medium text-xs rounded-lg transition-colors cursor-pointer"
+                    >
+                      Ganti Metode Pembayaran
+                    </button>
+                  </div>
                 </div>
               )}
 

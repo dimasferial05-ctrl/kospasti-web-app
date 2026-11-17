@@ -112,9 +112,12 @@ export async function POST(
     const propertyName = booking.property?.name || "Kamar Kos";
     const roomName = booking.room_type?.name ? ` - ${booking.room_type.name}` : "";
 
+    // Buat order_id unik per sesi transaksi agar pengguna bisa mengganti metode pembayaran tanpa terkunci
+    const midtransOrderId = `${booking.id}__${Date.now().toString(36)}`;
+
     // Minta Snap Token resmi ke Midtrans
     const snapResult = await createSnapTransaction({
-      orderId: booking.id,
+      orderId: midtransOrderId,
       grossAmount,
       customerDetails: {
         first_name: booking.student_name || "Mahasiswa",

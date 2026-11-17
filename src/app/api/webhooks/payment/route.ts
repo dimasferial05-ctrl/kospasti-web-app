@@ -54,8 +54,13 @@ export async function POST(request: Request) {
     }
 
     // 2. Ambil data booking dari database beserta relasi terkait
+    const rawOrderId = String(order_id);
+    const cleanBookingId = rawOrderId.includes("__")
+      ? rawOrderId.split("__")[0]
+      : rawOrderId;
+
     const booking = await prisma.booking.findUnique({
-      where: { id: order_id },
+      where: { id: cleanBookingId },
       include: {
         property: {
           include: {
@@ -69,7 +74,7 @@ export async function POST(request: Request) {
 
     if (!booking) {
       console.warn(
-        `[MIDTRANS WEBHOOK] Pesanan dengan ID ${order_id} tidak ditemukan.`
+        `[MIDTRANS WEBHOOK] Pesanan dengan ID ${cleanBookingId} (raw: ${order_id}) tidak ditemukan.`
       );
       return NextResponse.json(
         { error: "Booking order not found" },
