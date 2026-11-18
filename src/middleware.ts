@@ -1,13 +1,13 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { isSafeRedirectPath } from "@/lib/auth";
+import { isValidAdminToken } from "@/lib/admin-auth";
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   const adminToken = request.cookies.get("admin_token")?.value;
-  const validAdminToken = process.env.ADMIN_TOKEN || "kospasti_admin_authenticated";
-  const isValidAdmin = adminToken === validAdminToken;
+  const isValidAdmin = isValidAdminToken(adminToken);
   const userToken = request.cookies.get("user_token")?.value;
   const partnerToken = request.cookies.get("partner_token")?.value;
 

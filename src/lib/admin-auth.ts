@@ -1,12 +1,32 @@
 import { NextRequest, NextResponse } from "next/server";
 
+/**
+ * Mengambil token autentikasi admin yang valid.
+ * Pada lingkungan produksi, process.env.ADMIN_TOKEN wajib dikonfigurasi.
+ */
 export function getValidAdminToken(): string {
-  return process.env.ADMIN_TOKEN || "kospasti_admin_authenticated";
+  const token = process.env.ADMIN_TOKEN;
+  if (!token) {
+    if (process.env.NODE_ENV === "production") {
+      throw new Error("FATAL: ADMIN_TOKEN wajib dikonfigurasi di environment variables pada mode produksi!");
+    }
+    return "kospasti_admin_authenticated";
+  }
+  return token;
 }
 
+/**
+ * Memvalidasi apakah token cookie admin yang dikirimkan cocok dengan token valid.
+ * Pada lingkungan produksi, jika ADMIN_TOKEN tidak dikonfigurasi, autentikasi otomatis ditolak (fail-closed).
+ */
 export function isValidAdminToken(token?: string | null): boolean {
-  if (!token) return false;
-  return token === getValidAdminToken();
+  if (!token || typeof token !== "string") return false;
+  try {
+    const validToken = getValidAdminToken();
+    return Boolean(validToken && token === validToken);
+  } catch {
+    return false;
+  }
 }
 
 export function isValidAdminRequest(request: NextRequest | Request): boolean {

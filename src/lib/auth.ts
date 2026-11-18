@@ -9,8 +9,25 @@ export interface UserTokenPayload extends JWTPayload {
   bio?: string | null;
 }
 
-const JWT_SECRET = process.env.JWT_SECRET || "kospasti-user-jwt-secret-key-min-32-chars-secure-2026";
-const secretKey = new TextEncoder().encode(JWT_SECRET);
+/**
+ * Mengambil kunci rahasia JWT dengan pengamanan ketat.
+ * Pada lingkungan produksi (NODE_ENV === "production"), wajib ada process.env.JWT_SECRET.
+ * Pada lingkungan dev/test, diperbolehkan fallback untuk kemudahan DX.
+ */
+export function getJwtSecret(): string {
+  const secret = process.env.JWT_SECRET;
+  if (!secret) {
+    if (process.env.NODE_ENV === "production") {
+      throw new Error("FATAL: JWT_SECRET wajib dikonfigurasi di environment variables pada mode produksi!");
+    }
+    return "kospasti-user-jwt-secret-key-min-32-chars-secure-2026";
+  }
+  return secret;
+}
+
+export function getJwtSecretKey(): Uint8Array {
+  return new TextEncoder().encode(getJwtSecret());
+}
 
 /**
  * Menandatangani token JWT untuk sesi pengguna (berlaku 7 hari).
@@ -34,7 +51,7 @@ export async function signUserToken(payload: {
     .setProtectedHeader({ alg: "HS256" })
     .setIssuedAt()
     .setExpirationTime("7d")
-    .sign(secretKey);
+    .sign(getJwtSecretKey());
 }
 
 /**
@@ -42,7 +59,7 @@ export async function signUserToken(payload: {
  */
 export async function verifyUserToken(token: string): Promise<UserTokenPayload | null> {
   try {
-    const { payload } = await jwtVerify(token, secretKey);
+    const { payload } = await jwtVerify(token, getJwtSecretKey());
     return payload as UserTokenPayload;
   } catch {
     return null;
@@ -76,7 +93,7 @@ export async function signOwnerToken(payload: {
     .setProtectedHeader({ alg: "HS256" })
     .setIssuedAt()
     .setExpirationTime("7d")
-    .sign(secretKey);
+    .sign(getJwtSecretKey());
 }
 
 /**
@@ -84,7 +101,7 @@ export async function signOwnerToken(payload: {
  */
 export async function verifyOwnerToken(token: string): Promise<OwnerTokenPayload | null> {
   try {
-    const { payload } = await jwtVerify(token, secretKey);
+    const { payload } = await jwtVerify(token, getJwtSecretKey());
     if ((payload as OwnerTokenPayload).role !== "OWNER") {
       return null;
     }
