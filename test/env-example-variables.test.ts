@@ -27,4 +27,12 @@ describe(".env.example Configuration Integrity Tests", () => {
     expect(content).toMatch(/^ADMIN_EMAIL=/m);
     expect(content).toMatch(/^ADMIN_PASSWORD=/m);
   });
+
+  it("6. DATABASE_URL harus menggunakan skema PostgreSQL yang valid sesuai prisma/schema.prisma (Issue #422)", () => {
+    expect(content).toMatch(/^DATABASE_URL=["']postgres(?:ql)?:\/\//m);
+  });
+
+  it("7. DATABASE_URL tidak boleh lagi menggunakan protokol SQLite legacy (file:) (Issue #422)", () => {
+    expect(content).not.toMatch(/^DATABASE_URL=["']file:/m);
+  });
 });
