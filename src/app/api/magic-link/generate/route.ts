@@ -22,7 +22,7 @@ export async function POST(request: Request) {
     }
 
     const clientIp = getClientIp(request);
-    const rateLimitResult = globalRateLimiter.check(clientIp, RATE_LIMIT_OPTIONS);
+    const rateLimitResult = await globalRateLimiter.check(clientIp, RATE_LIMIT_OPTIONS);
     if (!rateLimitResult.success) {
       return createRateLimitResponse(
         rateLimitResult,

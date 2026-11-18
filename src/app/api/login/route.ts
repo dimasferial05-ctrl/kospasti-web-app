@@ -24,7 +24,7 @@ export async function POST(request: Request) {
     const clientKey = getClientIdentifier(request, email);
 
     // 1. Periksa rate limit
-    const blockStatus = globalRateLimiter.isBlocked(clientKey, RATE_LIMIT_OPTIONS);
+    const blockStatus = await globalRateLimiter.isBlocked(clientKey, RATE_LIMIT_OPTIONS);
     if (blockStatus.blocked) {
       return NextResponse.json(
         {
@@ -42,7 +42,7 @@ export async function POST(request: Request) {
 
     // 2. Validasi input
     if (!email || !password) {
-      globalRateLimiter.recordFailure(clientKey, RATE_LIMIT_OPTIONS);
+      await globalRateLimiter.recordFailure(clientKey, RATE_LIMIT_OPTIONS);
       return NextResponse.json(
         {
           success: false,
@@ -58,7 +58,7 @@ export async function POST(request: Request) {
     });
 
     if (!user) {
-      globalRateLimiter.recordFailure(clientKey, RATE_LIMIT_OPTIONS);
+      await globalRateLimiter.recordFailure(clientKey, RATE_LIMIT_OPTIONS);
       return NextResponse.json(
         {
           success: false,
@@ -70,7 +70,7 @@ export async function POST(request: Request) {
 
     // 4. Verifikasi kecocokan password dengan hash di database
     if (!user.password) {
-      globalRateLimiter.recordFailure(clientKey, RATE_LIMIT_OPTIONS);
+      await globalRateLimiter.recordFailure(clientKey, RATE_LIMIT_OPTIONS);
       return NextResponse.json(
         {
           success: false,
@@ -82,7 +82,7 @@ export async function POST(request: Request) {
 
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
-      globalRateLimiter.recordFailure(clientKey, RATE_LIMIT_OPTIONS);
+      await globalRateLimiter.recordFailure(clientKey, RATE_LIMIT_OPTIONS);
       return NextResponse.json(
         {
           success: false,
@@ -93,7 +93,7 @@ export async function POST(request: Request) {
     }
 
     // 5. Login sukses: hapus riwayat percobaan gagal
-    globalRateLimiter.reset(clientKey, RATE_LIMIT_OPTIONS.prefix);
+    await globalRateLimiter.reset(clientKey, RATE_LIMIT_OPTIONS.prefix);
 
     const sessionToken = await signUserToken({
       userId: user.id,

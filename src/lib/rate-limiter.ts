@@ -1,4 +1,6 @@
 import { NextResponse } from "next/server";
+import { Redis } from "@upstash/redis";
+import { Ratelimit } from "@upstash/ratelimit";
 
 export interface RateLimitRecord {
   count: number;
@@ -164,6 +166,195 @@ export class MemoryRateLimiter {
 }
 
 /**
+ * DistributedRateLimiter:
+ * Menggunakan Upstash Redis via REST API (@upstash/redis & @upstash/ratelimit)
+ * untuk rate limiting terdistribusi di lingkungan serverless multi-instance.
+ * Jika kredensial Upstash belum dikonfigurasi, otomatis fallback ke MemoryRateLimiter.
+ */
+export class DistributedRateLimiter {
+  private memoryFallback = new MemoryRateLimiter();
+  private redisClient: Redis | null = null;
+  private ratelimitInstances = new Map<string, Ratelimit>();
+
+  constructor() {
+    this.initRedis();
+  }
+
+  private initRedis(): void {
+    const url = process.env.UPSTASH_REDIS_REST_URL?.trim();
+    const token = process.env.UPSTASH_REDIS_REST_TOKEN?.trim();
+
+    if (url && token) {
+      try {
+        this.redisClient = new Redis({ url, token });
+      } catch (error) {
+        console.warn(
+          "[RateLimiter] Gagal menginisialisasi Upstash Redis, beralih ke in-memory fallback:",
+          error
+        );
+        this.redisClient = null;
+      }
+    } else {
+      this.redisClient = null;
+    }
+  }
+
+  public isDistributed(): boolean {
+    return this.redisClient !== null;
+  }
+
+  /**
+   * Mengecek kuota request dan menambah counter.
+   */
+  public async check(
+    identifier: string,
+    options: RateLimitOptions
+  ): Promise<RateLimitResult> {
+    if (!this.redisClient) {
+      return this.memoryFallback.check(identifier, options);
+    }
+
+    try {
+      const prefix = options.prefix || "global";
+      const cacheKey = `${prefix}:${options.maxRequests}:${options.windowMs}`;
+
+      let limiter = this.ratelimitInstances.get(cacheKey);
+      if (!limiter) {
+        limiter = new Ratelimit({
+          redis: this.redisClient,
+          limiter: Ratelimit.slidingWindow(
+            options.maxRequests,
+            `${Math.ceil(options.windowMs / 1000)} s`
+          ),
+          prefix: `kospasti:${prefix}`,
+          analytics: false,
+        });
+        this.ratelimitInstances.set(cacheKey, limiter);
+      }
+
+      const result = await limiter.limit(identifier);
+      const now = Date.now();
+      const retryAfterSeconds = result.success
+        ? 0
+        : Math.max(1, Math.ceil((result.reset - now) / 1000));
+
+      return {
+        success: result.success,
+        limit: options.maxRequests,
+        remaining: result.remaining,
+        resetTime: result.reset,
+        retryAfterSeconds,
+      };
+    } catch (error) {
+      console.error("[RateLimiter] Redis check error, fallback ke in-memory:", error);
+      return this.memoryFallback.check(identifier, options);
+    }
+  }
+
+  /**
+   * Memeriksa apakah identifier sedang terblokir (untuk login brute-force guard).
+   */
+  public async isBlocked(
+    identifier: string,
+    options: RateLimitOptions
+  ): Promise<{ blocked: boolean; retryAfterSeconds: number; resetTime: number }> {
+    if (!this.redisClient) {
+      return this.memoryFallback.isBlocked(identifier, options);
+    }
+
+    try {
+      const prefix = options.prefix || "auth";
+      const key = `kospasti:${prefix}:fail:${identifier}`;
+      const record = await this.redisClient.get<{ count: number; resetTime: number }>(key);
+
+      if (!record) {
+        return { blocked: false, retryAfterSeconds: 0, resetTime: 0 };
+      }
+
+      const now = Date.now();
+      if (now >= record.resetTime) {
+        await this.redisClient.del(key);
+        return { blocked: false, retryAfterSeconds: 0, resetTime: 0 };
+      }
+
+      if (record.count >= options.maxRequests) {
+        const retryAfterSeconds = Math.max(1, Math.ceil((record.resetTime - now) / 1000));
+        return { blocked: true, retryAfterSeconds, resetTime: record.resetTime };
+      }
+
+      return { blocked: false, retryAfterSeconds: 0, resetTime: record.resetTime };
+    } catch (error) {
+      console.error("[RateLimiter] Redis isBlocked error, fallback ke in-memory:", error);
+      return this.memoryFallback.isBlocked(identifier, options);
+    }
+  }
+
+  /**
+   * Mencatat kegagalan percobaan login.
+   */
+  public async recordFailure(
+    identifier: string,
+    options: RateLimitOptions
+  ): Promise<RateLimitRecord> {
+    if (!this.redisClient) {
+      return this.memoryFallback.recordFailure(identifier, options);
+    }
+
+    try {
+      const prefix = options.prefix || "auth";
+      const key = `kospasti:${prefix}:fail:${identifier}`;
+      const now = Date.now();
+      const record = await this.redisClient.get<RateLimitRecord>(key);
+
+      if (!record || now >= record.resetTime) {
+        const newRecord: RateLimitRecord = { count: 1, resetTime: now + options.windowMs };
+        const ttlSeconds = Math.max(1, Math.ceil(options.windowMs / 1000));
+        await this.redisClient.set(key, newRecord, { ex: ttlSeconds });
+        return newRecord;
+      }
+
+      const updatedRecord: RateLimitRecord = {
+        count: record.count + 1,
+        resetTime: record.resetTime,
+      };
+      const remainingTtlSeconds = Math.max(1, Math.ceil((record.resetTime - now) / 1000));
+      await this.redisClient.set(key, updatedRecord, { ex: remainingTtlSeconds });
+      return updatedRecord;
+    } catch (error) {
+      console.error("[RateLimiter] Redis recordFailure error, fallback ke in-memory:", error);
+      return this.memoryFallback.recordFailure(identifier, options);
+    }
+  }
+
+  /**
+   * Menghapus catatan kegagalan saat login berhasil.
+   */
+  public async reset(identifier: string, prefix?: string): Promise<void> {
+    if (!this.redisClient) {
+      return this.memoryFallback.reset(identifier, prefix);
+    }
+
+    try {
+      const pfx = prefix || "auth";
+      const key = `kospasti:${pfx}:fail:${identifier}`;
+      await this.redisClient.del(key);
+    } catch (error) {
+      console.error("[RateLimiter] Redis reset error, fallback ke in-memory:", error);
+      this.memoryFallback.reset(identifier, prefix);
+    }
+  }
+
+  public clear(): void {
+    this.memoryFallback.clear();
+    this.ratelimitInstances.clear();
+  }
+
+  public getMemoryFallback(): MemoryRateLimiter {
+    return this.memoryFallback;
+  }
+}
+
+/**
  * Ekstraksi IP klien secara aman dari request headers.
  */
 export function getClientIp(request: Request): string {
@@ -221,8 +412,8 @@ export function createRateLimitResponse(
   );
 }
 
-// Instance global untuk penggunaan lintas route
-export const globalRateLimiter = new MemoryRateLimiter();
+// Instance global untuk penggunaan lintas route (Distributed dengan In-Memory Fallback)
+export const globalRateLimiter = new DistributedRateLimiter();
 
 // Objek helper untuk pengujian atau backwards compatibility
 export const userLoginAttempts = {
