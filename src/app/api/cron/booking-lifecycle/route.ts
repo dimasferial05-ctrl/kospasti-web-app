@@ -8,6 +8,7 @@ import {
 import { sendMoveInReminderEmail, sendReviewPromptEmail } from "@/lib/email";
 import { processReadyPayouts } from "@/lib/payout-processor";
 import { runPaymentReminderProcess } from "@/lib/payment-reminder-processor";
+import { PAID_CONFIRMED_STATUSES } from "@/lib/booking-statuses";
 
 async function executeBookingLifecycleRoutine(request: Request) {
   try {
@@ -34,11 +35,9 @@ async function executeBookingLifecycleRoutine(request: Request) {
     const reminderWindowStart = now;
     const reminderWindowEnd = new Date(now.getTime() + 48 * 60 * 60 * 1000);
 
-    const ACTIVE_BOOKING_STATUSES = ["APPROVED", "ACCEPTED", "PAID", "SUCCESS", "CONFIRMED"];
-
     const reminderBookings = await prisma.booking.findMany({
       where: {
-        status: { in: ACTIVE_BOOKING_STATUSES },
+        status: { in: PAID_CONFIRMED_STATUSES },
         reminder_sent_at: null,
         move_in_date: {
           gte: reminderWindowStart,
@@ -106,7 +105,7 @@ async function executeBookingLifecycleRoutine(request: Request) {
 
     const overdueCheckinBookings = await prisma.booking.findMany({
       where: {
-        status: { in: ACTIVE_BOOKING_STATUSES },
+        status: { in: PAID_CONFIRMED_STATUSES },
         move_in_date: { lte: twelveHoursAgo },
         checkin_confirmed_at: null,
       },
