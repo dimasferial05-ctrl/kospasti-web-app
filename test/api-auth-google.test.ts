@@ -2,15 +2,13 @@ import { describe, it, expect, beforeEach, vi, afterEach } from "vitest";
 import { GET as googleAuthGET } from "../src/app/api/auth/google/route";
 import { GET as googleCallbackGET } from "../src/app/api/auth/callback/google/route";
 import { prisma } from "../src/lib/prisma";
-import { clearDatabase } from "./helpers";
 import { NextRequest } from "next/server";
-import { verifyUserToken } from "../src/lib/auth";
+import { createOAuthState, parseOAuthState } from "../src/lib/auth";
 
 describe("Google OAuth API Endpoints", () => {
   const originalEnv = process.env;
 
-  beforeEach(async () => {
-    await clearDatabase();
+  beforeEach(() => {
     vi.restoreAllMocks();
     process.env = {
       ...originalEnv,
@@ -52,7 +50,14 @@ describe("Google OAuth API Endpoints", () => {
       expect(redirectUrl.searchParams.get("redirect_uri")).toBe("http://localhost:3000/api/auth/callback/google");
       expect(redirectUrl.searchParams.get("response_type")).toBe("code");
       expect(redirectUrl.searchParams.get("scope")).toBe("openid email profile");
-      expect(redirectUrl.searchParams.get("state")).toBe("/kos/123");
+
+      const { callbackUrl, nonce } = parseOAuthState(redirectUrl.searchParams.get("state"));
+      expect(callbackUrl).toBe("/kos/123");
+      expect(nonce).toBeTruthy();
+
+      const setCookie = response.headers.get("set-cookie");
+      expect(setCookie).toContain("oauth_state=");
+      expect(setCookie).toContain("HttpOnly");
     });
   });
 
@@ -76,6 +81,8 @@ describe("Google OAuth API Endpoints", () => {
     });
 
     it("berhasil membuat pengguna baru dan memasang cookie user_token saat pendaftaran via Google", async () => {
+      const { state, nonce } = createOAuthState("/kos/123");
+
       // Mock exchange code for token
       const mockFetch = vi.fn();
       global.fetch = mockFetch;
@@ -101,7 +108,31 @@ describe("Google OAuth API Endpoints", () => {
         return { ok: false };
       });
 
-      const request = new NextRequest("http://localhost:3000/api/auth/callback/google?code=valid-auth-code&state=/kos/123");
+      const mockCreatedUser = {
+        id: "user-id-999",
+        name: "Mahasiswa Baru",
+        email: "mahasiswa.baru@gmail.com",
+        google_id: "google-uid-999",
+        avatar: "https://lh3.googleusercontent.com/photo.jpg",
+        whatsapp: null,
+        bio: null,
+        password: null,
+        role: "USER",
+        created_at: new Date(),
+        updated_at: new Date(),
+      };
+
+      vi.spyOn(prisma.user, "findFirst").mockResolvedValueOnce(null);
+      const createSpy = vi.spyOn(prisma.user, "create").mockResolvedValueOnce(mockCreatedUser as never);
+
+      const request = new NextRequest(
+        `http://localhost:3000/api/auth/callback/google?code=valid-auth-code&state=${state}`,
+        {
+          headers: {
+            cookie: `oauth_state=${nonce}`,
+          },
+        }
+      );
       const response = await googleCallbackGET(request);
 
       expect(response.status).toBe(307);
@@ -113,27 +144,39 @@ describe("Google OAuth API Endpoints", () => {
       expect(cookieHeader).toContain("user_token=");
       expect(cookieHeader).toContain("HttpOnly");
 
-      // Verifikasi user tersimpan di database
-      const createdUser = await prisma.user.findUnique({
-        where: { email: "mahasiswa.baru@gmail.com" },
+      expect(createSpy).toHaveBeenCalledWith({
+        data: {
+          name: "Mahasiswa Baru",
+          email: "mahasiswa.baru@gmail.com",
+          google_id: "google-uid-999",
+          avatar: "https://lh3.googleusercontent.com/photo.jpg",
+        },
       });
-      expect(createdUser).toBeDefined();
-      expect(createdUser?.name).toBe("Mahasiswa Baru");
-      expect(createdUser?.google_id).toBe("google-uid-999");
-      expect(createdUser?.avatar).toBe("https://lh3.googleusercontent.com/photo.jpg");
-      expect(createdUser?.password).toBeNull();
     });
 
     it("berhasil login dan menautkan google_id pada pengguna yang sudah terdaftar sebelumnya", async () => {
-      // Buat user manual terlebih dahulu
-      const existingUser = await prisma.user.create({
-        data: {
-          name: "User Lama",
-          email: "user.lama@gmail.com",
-          password: "hashedpassword123",
-          whatsapp: "081234567890",
-        },
-      });
+      const { state, nonce } = createOAuthState("/");
+
+      const existingUser = {
+        id: "user-lama-123",
+        name: "User Lama",
+        email: "user.lama@gmail.com",
+        password: "hashedpassword123",
+        whatsapp: "081234567890",
+        avatar: null,
+        bio: null,
+        google_id: null,
+        role: "USER",
+        created_at: new Date(),
+        updated_at: new Date(),
+      };
+
+      vi.spyOn(prisma.user, "findFirst").mockResolvedValueOnce(existingUser as never);
+      const updateSpy = vi.spyOn(prisma.user, "update").mockResolvedValueOnce({
+        ...existingUser,
+        google_id: "google-uid-888",
+        avatar: "https://lh3.googleusercontent.com/photo-lama.jpg",
+      } as never);
 
       const mockFetch = vi.fn();
       global.fetch = mockFetch;
@@ -159,18 +202,25 @@ describe("Google OAuth API Endpoints", () => {
         return { ok: false };
       });
 
-      const request = new NextRequest("http://localhost:3000/api/auth/callback/google?code=valid-code-2");
+      const request = new NextRequest(
+        `http://localhost:3000/api/auth/callback/google?code=valid-code-2&state=${state}`,
+        {
+          headers: {
+            cookie: `oauth_state=${nonce}`,
+          },
+        }
+      );
       const response = await googleCallbackGET(request);
 
       expect(response.status).toBe(307);
 
-      // Verifikasi user diperbarui dengan google_id
-      const updatedUser = await prisma.user.findUnique({
-        where: { id: existingUser.id },
+      expect(updateSpy).toHaveBeenCalledWith({
+        where: { id: "user-lama-123" },
+        data: {
+          google_id: "google-uid-888",
+          avatar: "https://lh3.googleusercontent.com/photo-lama.jpg",
+        },
       });
-      expect(updatedUser?.google_id).toBe("google-uid-888");
-      expect(updatedUser?.avatar).toBe("https://lh3.googleusercontent.com/photo-lama.jpg");
-      expect(updatedUser?.whatsapp).toBe("081234567890"); // data WA lama tidak hilang
     });
   });
 });

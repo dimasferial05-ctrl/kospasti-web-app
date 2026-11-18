@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { NextRequest } from "next/server";
-import { isSafeRedirectPath } from "@/lib/auth";
+import { isSafeRedirectPath, createOAuthState, parseOAuthState } from "@/lib/auth";
 import { GET as googleCallbackGET } from "@/app/api/auth/callback/google/route";
 import { GET as googleInitGET } from "@/app/api/auth/google/route";
 import { middleware } from "@/middleware";
@@ -105,8 +105,14 @@ describe("Open Redirect Security & Protocol-Relative URL Protection (Issue #275)
     });
 
     it("Mengarahkan ke fallback '/' ketika state berisi '//attacker.com'", async () => {
+      const { state, nonce } = createOAuthState("//attacker.com");
       const req = new NextRequest(
-        "http://localhost:3000/api/auth/callback/google?code=valid_code&state=%2F%2Fattacker.com"
+        `http://localhost:3000/api/auth/callback/google?code=valid_code&state=${state}`,
+        {
+          headers: {
+            cookie: `oauth_state=${nonce}`,
+          },
+        }
       );
       const res = await googleCallbackGET(req);
 
@@ -117,8 +123,14 @@ describe("Open Redirect Security & Protocol-Relative URL Protection (Issue #275)
     });
 
     it("Mengarahkan ke fallback '/' ketika state berisi '/\\\\malicious.com'", async () => {
+      const { state, nonce } = createOAuthState("/\\malicious.com");
       const req = new NextRequest(
-        "http://localhost:3000/api/auth/callback/google?code=valid_code&state=%2F%5Cmalicious.com"
+        `http://localhost:3000/api/auth/callback/google?code=valid_code&state=${state}`,
+        {
+          headers: {
+            cookie: `oauth_state=${nonce}`,
+          },
+        }
       );
       const res = await googleCallbackGET(req);
 
@@ -128,8 +140,14 @@ describe("Open Redirect Security & Protocol-Relative URL Protection (Issue #275)
     });
 
     it("Mengarahkan ke fallback '/' ketika state berisi URL absolut eksternal", async () => {
+      const { state, nonce } = createOAuthState("https://evil.com");
       const req = new NextRequest(
-        "http://localhost:3000/api/auth/callback/google?code=valid_code&state=https%3A%2F%2Fevil.com"
+        `http://localhost:3000/api/auth/callback/google?code=valid_code&state=${state}`,
+        {
+          headers: {
+            cookie: `oauth_state=${nonce}`,
+          },
+        }
       );
       const res = await googleCallbackGET(req);
 
@@ -139,8 +157,14 @@ describe("Open Redirect Security & Protocol-Relative URL Protection (Issue #275)
     });
 
     it("Mengarahkan ke path internal yang sah jika state valid (misal '/profil')", async () => {
+      const { state, nonce } = createOAuthState("/profil");
       const req = new NextRequest(
-        "http://localhost:3000/api/auth/callback/google?code=valid_code&state=%2Fprofil"
+        `http://localhost:3000/api/auth/callback/google?code=valid_code&state=${state}`,
+        {
+          headers: {
+            cookie: `oauth_state=${nonce}`,
+          },
+        }
       );
       const res = await googleCallbackGET(req);
 
@@ -149,7 +173,7 @@ describe("Open Redirect Security & Protocol-Relative URL Protection (Issue #275)
       expect(location).toBe("http://localhost:3000/profil");
     });
 
-    it("Mengarahkan ke fallback '/' jika state bernilai null atau kosong", async () => {
+    it("Mengarahkan ke fallback '/login?error=invalid_state' jika state atau cookie oauth_state tidak valid atau kosong", async () => {
       const req = new NextRequest(
         "http://localhost:3000/api/auth/callback/google?code=valid_code"
       );
@@ -157,7 +181,7 @@ describe("Open Redirect Security & Protocol-Relative URL Protection (Issue #275)
 
       expect(res.status).toBe(307);
       const location = res.headers.get("location");
-      expect(location).toBe("http://localhost:3000/");
+      expect(location).toBe("http://localhost:3000/login?error=invalid_state");
     });
   });
 
@@ -229,7 +253,8 @@ describe("Open Redirect Security & Protocol-Relative URL Protection (Issue #275)
 
       const parsedUrl = new URL(location!);
       expect(parsedUrl.hostname).toBe("accounts.google.com");
-      expect(parsedUrl.searchParams.get("state")).toBe("/");
+      const { callbackUrl } = parseOAuthState(parsedUrl.searchParams.get("state"));
+      expect(callbackUrl).toBe("/");
     });
 
     it("Meneruskan callbackUrl internal yang sah ke parameter state Google OAuth", async () => {
@@ -243,7 +268,8 @@ describe("Open Redirect Security & Protocol-Relative URL Protection (Issue #275)
       expect(location).toBeDefined();
 
       const parsedUrl = new URL(location!);
-      expect(parsedUrl.searchParams.get("state")).toBe("/kos/room-123");
+      const { callbackUrl } = parseOAuthState(parsedUrl.searchParams.get("state"));
+      expect(callbackUrl).toBe("/kos/room-123");
     });
   });
 });

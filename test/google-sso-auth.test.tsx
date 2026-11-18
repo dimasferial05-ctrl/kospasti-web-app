@@ -6,6 +6,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { NextRequest } from "next/server";
 import { GET as googleCallbackGET } from "../src/app/api/auth/callback/google/route";
 import { prisma } from "../src/lib/prisma";
+import { createOAuthState } from "../src/lib/auth";
 import LoginPage from "../src/app/login/page";
 import RegisterPage from "../src/app/register/page";
 
@@ -140,7 +141,15 @@ describe("Google SSO Only Authentication & Simplified Flow (Issue #257)", () => 
         updated_at: new Date(),
       });
 
-      const request = new NextRequest("http://localhost:3000/api/auth/callback/google?code=mock-code&state=/kos/subang");
+      const { state, nonce } = createOAuthState("/kos/subang");
+      const request = new NextRequest(
+        `http://localhost:3000/api/auth/callback/google?code=mock-code&state=${state}`,
+        {
+          headers: {
+            cookie: `oauth_state=${nonce}`,
+          },
+        }
+      );
       const response = await googleCallbackGET(request);
 
       expect(createSpy).toHaveBeenCalledWith({
@@ -202,7 +211,15 @@ describe("Google SSO Only Authentication & Simplified Flow (Issue #257)", () => 
         avatar: "https://lh3.googleusercontent.com/updated.jpg",
       });
 
-      const request = new NextRequest("http://localhost:3000/api/auth/callback/google?code=mock-code");
+      const { state, nonce } = createOAuthState("/");
+      const request = new NextRequest(
+        `http://localhost:3000/api/auth/callback/google?code=mock-code&state=${state}`,
+        {
+          headers: {
+            cookie: `oauth_state=${nonce}`,
+          },
+        }
+      );
       const response = await googleCallbackGET(request);
 
       expect(updateSpy).toHaveBeenCalledWith({

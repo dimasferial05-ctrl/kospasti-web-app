@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { isSafeRedirectPath } from "@/lib/auth";
+import { isSafeRedirectPath, createOAuthState } from "@/lib/auth";
 
 export async function GET(request: NextRequest) {
   try {
@@ -19,6 +19,9 @@ export async function GET(request: NextRequest) {
     const rawCallback = searchParams.get("callbackUrl");
     const callbackUrl = isSafeRedirectPath(rawCallback) ? (rawCallback as string) : "/";
 
+    // Buat state nonce acak kriptografis (Mitigasi OAuth CSRF - RFC 6749 Section 10.12)
+    const { state, nonce } = createOAuthState(callbackUrl);
+
     // Tentukan origin URL aplikasi
     const origin =
       process.env.NEXT_PUBLIC_APP_URL?.replace(/\/+$/, "") ||
@@ -34,9 +37,22 @@ export async function GET(request: NextRequest) {
     googleOAuthUrl.searchParams.set("scope", "openid email profile");
     googleOAuthUrl.searchParams.set("access_type", "offline");
     googleOAuthUrl.searchParams.set("prompt", "select_account");
-    googleOAuthUrl.searchParams.set("state", callbackUrl);
+    googleOAuthUrl.searchParams.set("state", state);
 
-    return NextResponse.redirect(googleOAuthUrl.toString());
+    const response = NextResponse.redirect(googleOAuthUrl.toString());
+
+    // Pasang cookie oauth_state HttpOnly yang aman (TTL: 10 menit)
+    response.cookies.set({
+      name: "oauth_state",
+      value: nonce,
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      path: "/",
+      maxAge: 10 * 60, // 10 menit
+      sameSite: "lax",
+    });
+
+    return response;
   } catch (error) {
     console.error("Gagal menginisiasi Google OAuth:", error);
     return NextResponse.json(

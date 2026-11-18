@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { signUserToken, isSafeRedirectPath } from "@/lib/auth";
+import { signUserToken, parseOAuthState } from "@/lib/auth";
 
 export async function GET(request: NextRequest) {
   const origin =
@@ -11,17 +11,32 @@ export async function GET(request: NextRequest) {
   try {
     const searchParams = request.nextUrl.searchParams;
     const code = searchParams.get("code");
-    const state = searchParams.get("state");
+    const rawState = searchParams.get("state");
     const error = searchParams.get("error");
 
     // Jika pengguna membatalkan otorisasi di Google
     if (error) {
       console.warn("Google OAuth ditolak atau error:", error);
-      return NextResponse.redirect(new URL("/login?error=oauth_cancelled", origin));
+      const res = NextResponse.redirect(new URL("/login?error=oauth_cancelled", origin));
+      res.cookies.delete("oauth_state");
+      return res;
     }
 
     if (!code) {
-      return NextResponse.redirect(new URL("/login?error=missing_code", origin));
+      const res = NextResponse.redirect(new URL("/login?error=missing_code", origin));
+      res.cookies.delete("oauth_state");
+      return res;
+    }
+
+    // 0. Validasi State Nonce (Pencegahan OAuth CSRF - RFC 6749 Section 10.12)
+    const oauthCookieNonce = request.cookies.get("oauth_state")?.value;
+    const { nonce: stateNonce, callbackUrl: targetPath } = parseOAuthState(rawState);
+
+    if (!oauthCookieNonce || !stateNonce || oauthCookieNonce !== stateNonce) {
+      console.warn("OAuth CSRF Terdeteksi: State nonce tidak cocok atau cookie oauth_state tidak ditemukan.");
+      const res = NextResponse.redirect(new URL("/login?error=invalid_state", origin));
+      res.cookies.delete("oauth_state");
+      return res;
     }
 
     const clientId = process.env.GOOGLE_CLIENT_ID;
@@ -29,7 +44,9 @@ export async function GET(request: NextRequest) {
 
     if (!clientId || !clientSecret) {
       console.error("GOOGLE_CLIENT_ID atau GOOGLE_CLIENT_SECRET belum dikonfigurasi.");
-      return NextResponse.redirect(new URL("/login?error=server_configuration", origin));
+      const res = NextResponse.redirect(new URL("/login?error=server_configuration", origin));
+      res.cookies.delete("oauth_state");
+      return res;
     }
 
     const redirectUri = `${origin}/api/auth/callback/google`;
@@ -53,7 +70,9 @@ export async function GET(request: NextRequest) {
 
     if (!tokenResponse.ok || !tokenData?.access_token) {
       console.error("Gagal menukar token Google OAuth:", tokenData);
-      return NextResponse.redirect(new URL("/login?error=oauth_exchange_failed", origin));
+      const res = NextResponse.redirect(new URL("/login?error=oauth_exchange_failed", origin));
+      res.cookies.delete("oauth_state");
+      return res;
     }
 
     // 2. Ambil informasi profil pengguna dari Google
@@ -67,7 +86,9 @@ export async function GET(request: NextRequest) {
 
     if (!userResponse.ok || !googleUser?.email) {
       console.error("Gagal mengambil profil user dari Google:", googleUser);
-      return NextResponse.redirect(new URL("/login?error=oauth_profile_failed", origin));
+      const res = NextResponse.redirect(new URL("/login?error=oauth_profile_failed", origin));
+      res.cookies.delete("oauth_state");
+      return res;
     }
 
     const email = googleUser.email.toLowerCase().trim();
@@ -110,11 +131,13 @@ export async function GET(request: NextRequest) {
       bio: user.bio,
     });
 
-    // 5. Tentukan tujuan redirect (Cegah celah Open Redirect via protocol-relative URL //)
-    const targetPath = isSafeRedirectPath(state) ? (state as string) : "/";
+    // 5. Tentukan tujuan redirect yang telah divalidasi dan aman
     const redirectTarget = new URL(targetPath, origin);
 
     const response = NextResponse.redirect(redirectTarget);
+
+    // Hapus cookie oauth_state setelah berhasil digunakan (Single-use / Anti-Replay)
+    response.cookies.delete("oauth_state");
 
     // 6. Pasang Secure HTTP-Only Cookie
     response.cookies.set({
@@ -130,6 +153,8 @@ export async function GET(request: NextRequest) {
     return response;
   } catch (error) {
     console.error("Error pada callback Google OAuth:", error);
-    return NextResponse.redirect(new URL("/login?error=internal_server_error", origin));
+    const res = NextResponse.redirect(new URL("/login?error=internal_server_error", origin));
+    res.cookies.delete("oauth_state");
+    return res;
   }
 }
