@@ -44,11 +44,13 @@ export function RenewBookingModal({
 
   if (!booking) return null;
 
-  // Hitung estimasi tanggal sewa periode baru
-  const now = new Date();
+  // Hitung estimasi tanggal sewa periode baru (+1 bulan kalender penuh)
   const prevMoveIn = new Date(booking.move_in_date);
-  const nextPeriodDate = new Date(prevMoveIn.getTime() + 30 * 24 * 60 * 60 * 1000);
-  const estimatedNewMoveIn = nextPeriodDate > now ? nextPeriodDate : now;
+  const nextPeriodDate = new Date(prevMoveIn);
+  nextPeriodDate.setMonth(nextPeriodDate.getMonth() + 1);
+
+  const nextEndDate = new Date(nextPeriodDate);
+  nextEndDate.setMonth(nextEndDate.getMonth() + 1);
 
   const rentalAmount =
     booking.room_type?.price_per_month ??
@@ -146,12 +148,14 @@ export function RenewBookingModal({
 
           <div className="flex items-start gap-3 pt-2 border-t border-slate-200/60 dark:border-slate-700/60">
             <Calendar className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-            <div>
+            <div className="space-y-0.5">
               <div className="text-[11px] text-slate-500 dark:text-slate-400">Periode Perpanjangan Baru</div>
               <div className="font-bold text-slate-900 dark:text-white">
-                Mulai {formatDate(estimatedNewMoveIn.toISOString())}
+                {formatDate(nextPeriodDate.toISOString())} s.d. {formatDate(nextEndDate.toISOString())}
               </div>
-              <div className="text-[11px] text-slate-500">Durasi: 1 Bulan (dapat diperpanjang kembali)</div>
+              <div className="text-[11px] text-emerald-700 dark:text-emerald-300 font-medium">
+                ✓ Otomatis menambah masa tinggal 1 bulan kalender penuh
+              </div>
             </div>
           </div>
 

@@ -135,12 +135,13 @@ export async function POST(
     }
 
     // 6. Kalkulasi Tanggal Masuk Periode Baru (Occupancy Continuity)
-    const now = new Date();
+    // Menambahkan 1 bulan kalender penuh dari tanggal masuk periode sebelumnya
     const prevMoveIn = new Date(existingBooking.move_in_date);
-    // Asumsi standar periode sewa bulanan: +30 hari dari tanggal masuk periode sebelumnya
-    const nextPeriodDate = new Date(prevMoveIn.getTime() + 30 * 24 * 60 * 60 * 1000);
-    // Jika tanggal periode berikutnya sudah terlewat di masa lalu, gunakan hari ini
-    const newMoveInDate = nextPeriodDate > now ? nextPeriodDate : now;
+    const nextMoveInDate = new Date(prevMoveIn);
+    nextMoveInDate.setMonth(nextMoveInDate.getMonth() + 1);
+
+    const newEndDate = new Date(nextMoveInDate);
+    newEndDate.setMonth(newEndDate.getMonth() + 1);
 
     // 7. Hitung Tarif Sewa
     const rentalAmount =
@@ -157,7 +158,7 @@ export async function POST(
         room_type_id: existingBooking.room_type_id,
         student_name: existingBooking.student_name,
         student_whatsapp: existingBooking.student_whatsapp,
-        move_in_date: newMoveInDate,
+        move_in_date: nextMoveInDate,
         status: "PENDING",
         amount: rentalAmount,
         service_fee: existingBooking.service_fee || 5000,
@@ -194,6 +195,7 @@ export async function POST(
           id: newBooking.id,
           checkoutUrl: `/checkout/${newBooking.id}`,
           moveInDate: newBooking.move_in_date,
+          periodEndDate: newEndDate,
           amount: newBooking.amount,
           propertyName: newBooking.property.name,
           roomTypeName: newBooking.room_type?.name,

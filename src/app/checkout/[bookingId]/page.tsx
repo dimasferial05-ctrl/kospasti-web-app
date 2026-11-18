@@ -38,6 +38,7 @@ declare global {
 
 interface BookingDetail {
   id: string;
+  isRenewal?: boolean;
   studentName: string;
   studentWhatsapp: string;
   moveInDate: string;
@@ -368,7 +369,7 @@ export default function CheckoutPage() {
               <div className="border-b border-slate-100 dark:border-slate-800 pb-3">
                 <p className="text-xs text-slate-500 dark:text-slate-400">Tipe Pembayaran</p>
                 <p className="text-sm font-semibold text-slate-800 dark:text-slate-100">
-                  Booking Fee (Escrow)
+                  {booking?.isRenewal ? "Perpanjangan Sewa (Escrow)" : "Booking Fee (Escrow)"}
                 </p>
               </div>
 
@@ -436,10 +437,12 @@ export default function CheckoutPage() {
                   QRIS
                 </div>
                 <h1 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white">
-                  Pembayaran DP Kos
+                  {booking?.isRenewal ? "Pembayaran Perpanjangan Sewa" : "Pembayaran DP Kos"}
                 </h1>
                 <p className="text-sm text-slate-500 dark:text-slate-400 max-w-xs mx-auto">
-                  Gunakan aplikasi e-Wallet atau M-Banking Anda untuk menyelesaikan pesanan.
+                  {booking?.isRenewal
+                    ? "Gunakan e-Wallet atau M-Banking Anda untuk melanjutkan masa tinggal di kos ini."
+                    : "Gunakan aplikasi e-Wallet atau M-Banking Anda untuk menyelesaikan pesanan."}
                 </p>
               </div>
 
@@ -460,7 +463,7 @@ export default function CheckoutPage() {
                   Nominal: {formatRupiah(totalPrice)}
                 </div>
                 <p className="mt-3 text-[11px] text-slate-500 dark:text-slate-400 max-w-xs text-center">
-                  ⚡ Klik tombol <strong>Bayar DP Sekarang</strong> di bawah untuk membuka QRIS / Virtual Account resmi Midtrans.
+                  ⚡ Klik tombol <strong>{booking?.isRenewal ? "Bayar Perpanjangan Sekarang" : "Bayar DP Sekarang"}</strong> di bawah untuk membuka QRIS / Virtual Account resmi Midtrans.
                 </p>
               </div>
 
@@ -631,7 +634,11 @@ export default function CheckoutPage() {
                 ) : (
                   <>
                     <Wallet className="w-4 h-4" />
-                    <span>Bayar DP Sekarang (QRIS &amp; VA Midtrans)</span>
+                    <span>
+                      {booking?.isRenewal
+                        ? "Bayar Perpanjangan Sewa Sekarang (QRIS & VA)"
+                        : "Bayar DP Sekarang (QRIS & VA Midtrans)"}
+                    </span>
                   </>
                 )}
               </button>

@@ -118,6 +118,28 @@ export async function GET(
     const adminFee = booking.service_fee || 5000;
     const totalPrice = rentPrice + adminFee;
 
+    // Deteksi apakah booking ini merupakan perpanjangan sewa (renewal)
+    // Penyewa memiliki booking sebelumnya di properti yang sama yang dibuat sebelum booking ini
+    const propertyId = booking.property_id || booking.property?.id;
+    const priorBooking = booking.user_id && propertyId
+      ? await prisma.booking.findFirst({
+          where: {
+            user_id: booking.user_id,
+            property_id: propertyId,
+            id: { not: booking.id },
+            created_at: { lt: booking.created_at },
+            status: { in: ["PAID", "APPROVED", "ACCEPTED", "COMPLETED", "PAYOUT_PENDING", "PAYOUT_PAID"] },
+          },
+          orderBy: { created_at: "desc" },
+          select: {
+            id: true,
+            move_in_date: true,
+          },
+        }).catch(() => null)
+      : null;
+
+    const isRenewal = Boolean(priorBooking);
+
     const invoiceDateStr = new Date(booking.created_at)
       .toISOString()
       .slice(0, 7)
@@ -130,6 +152,8 @@ export async function GET(
         data: {
           id: booking.id,
           invoiceNumber,
+          isRenewal,
+          priorBookingId: priorBooking?.id || null,
           studentName: booking.student_name,
           studentWhatsapp: booking.student_whatsapp,
           studentEmail: booking.user?.email || null,

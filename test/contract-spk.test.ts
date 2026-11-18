@@ -26,6 +26,7 @@ describe("Digital Contract & Lease Agreement Data (Issue #424)", () => {
     payment_gateway_ref: "REF-123456",
     snap_token: "snap-token-mock",
     user_id: mockTenantId,
+    property_id: "prop-1",
     property: {
       id: "prop-1",
       name: "Kos Graha Mulia",
@@ -91,5 +92,24 @@ describe("Digital Contract & Lease Agreement Data (Issue #424)", () => {
     expect(data.property.rental_terms).toBe("Sewa dibayar bulanan dimuka. Pembatalan sepihak tunduk pada kebijakan refund.");
     expect(data.property.owner.name).toBe("Ibu Hj. Siti");
     expect(data.property.owner.email).toBe("pemilik@kospasti.com");
+  });
+
+  it("2. Mendeteksi status isRenewal = true jika terdapat pesanan lunas sebelumnya di properti yang sama", async () => {
+    vi.spyOn(prisma.booking, "findUnique").mockResolvedValue(mockBookingData as any);
+    vi.spyOn(prisma.booking, "findFirst").mockResolvedValue({
+      id: "prior-booking-1",
+      move_in_date: new Date("2026-10-01"),
+    } as any);
+
+    const req = new Request(`http://localhost:3000/api/bookings/${mockBookingId}`, {
+      method: "GET",
+    });
+
+    const res = await GET(req, { params: Promise.resolve({ id: mockBookingId }) });
+    const json = await res.json();
+
+    expect(res.status).toBe(200);
+    expect(json.data.isRenewal).toBe(true);
+    expect(json.data.priorBookingId).toBe("prior-booking-1");
   });
 });
