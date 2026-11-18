@@ -3,7 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { sendWhatsAppMessage } from "@/lib/whatsapp";
 import { isValidAdminRequest, createAdminUnauthorizedResponse } from "@/lib/admin-auth";
 
-import { ALLOWED_STATUSES, ACTIVE_BOOKING_STATUSES } from "@/lib/booking-statuses";
+import { ALLOWED_STATUSES, RESERVED_BOOKING_STATUSES } from "@/lib/booking-statuses";
 
 export async function PATCH(
   request: NextRequest,
@@ -106,8 +106,8 @@ export async function PATCH(
         },
       });
 
-      const isOldActive = ACTIVE_BOOKING_STATUSES.includes(existingBooking.status);
-      const isNewActive = ACTIVE_BOOKING_STATUSES.includes(status);
+      const isOldActive = RESERVED_BOOKING_STATUSES.includes(existingBooking.status);
+      const isNewActive = RESERVED_BOOKING_STATUSES.includes(status);
 
       if (isOldActive && !isNewActive && existingBooking.property_id) {
         await tx.property.update({

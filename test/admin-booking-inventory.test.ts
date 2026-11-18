@@ -1,12 +1,27 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { NextRequest } from "next/server";
 import { PATCH } from "@/app/api/admin/bookings/[id]/route";
-import { ALLOWED_STATUSES, ACTIVE_BOOKING_STATUSES } from "@/lib/booking-statuses";
+import {
+  ALLOWED_STATUSES,
+  RESERVED_BOOKING_STATUSES,
+  ACTIVE_BOOKING_STATUSES,
+} from "@/lib/booking-statuses";
 import { prisma } from "@/lib/prisma";
 
-describe("Admin Booking Status & Inventory Synchronization (Issue #265)", () => {
+describe("Admin Booking Status & Inventory Synchronization (Issue #265 & #420)", () => {
+  const originalAdminToken = process.env.ADMIN_TOKEN;
+
   beforeEach(() => {
     vi.restoreAllMocks();
+    process.env.ADMIN_TOKEN = "kospasti_admin_authenticated";
+  });
+
+  afterEach(() => {
+    if (originalAdminToken !== undefined) {
+      process.env.ADMIN_TOKEN = originalAdminToken;
+    } else {
+      delete process.env.ADMIN_TOKEN;
+    }
   });
 
   const createAdminRequest = (body: Record<string, unknown>) => {
@@ -28,8 +43,8 @@ describe("Admin Booking Status & Inventory Synchronization (Issue #265)", () => 
     expect(ALLOWED_STATUSES).toContain("COMPLETED");
   });
 
-  it("ACTIVE_BOOKING_STATUSES memuat seluruh status yang menempati kamar", () => {
-    expect(ACTIVE_BOOKING_STATUSES).toEqual([
+  it("RESERVED_BOOKING_STATUSES memuat seluruh status yang menempati kamar", () => {
+    expect(RESERVED_BOOKING_STATUSES).toEqual([
       "PENDING",
       "PAID",
       "SUCCESS",
@@ -38,6 +53,10 @@ describe("Admin Booking Status & Inventory Synchronization (Issue #265)", () => 
       "APPROVED",
       "COMPLETED",
     ]);
+  });
+
+  it("ACTIVE_BOOKING_STATUSES tetap sinkron dengan RESERVED_BOOKING_STATUSES (backward compatibility)", () => {
+    expect(ACTIVE_BOOKING_STATUSES).toEqual(RESERVED_BOOKING_STATUSES);
   });
 
   describe("Kalkulasi Sisa Kamar (available_rooms) saat Transisi Status", () => {
