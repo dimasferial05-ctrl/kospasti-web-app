@@ -90,8 +90,11 @@ describe("Dark Mode Implementation - Issue #237 Acceptance Criteria", () => {
   });
 
   it("AC 5: Mobile (Sudah Login) memiliki opsi tema interaktif di Halaman Profil di bawah Tampilan Aplikasi", () => {
+    const infoTabPath = path.resolve(__dirname, "../src/components/profile/ProfileInfoTab.tsx");
     const profilPath = path.resolve(__dirname, "../src/app/profil/page.tsx");
-    const profilContent = fs.readFileSync(profilPath, "utf-8");
+    const profilContent = fs.existsSync(infoTabPath)
+      ? fs.readFileSync(infoTabPath, "utf-8")
+      : fs.readFileSync(profilPath, "utf-8");
 
     // Contains "Tampilan Aplikasi" section
     expect(profilContent).toContain("Tampilan Aplikasi");

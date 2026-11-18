@@ -3,47 +3,15 @@
 import { useState, useEffect, useRef, Suspense, useSyncExternalStore } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Image from "next/image";
-import Link from "next/link";
 import {
   User as UserIcon,
   History,
   LogOut,
-  Camera,
-  Mail,
-  Phone,
-  FileText,
   Loader2,
-  CheckCircle2,
-  AlertCircle,
-  Calendar,
   CalendarClock,
-  MapPin,
-  Building,
-  ArrowRight,
   ArrowLeft,
-  ExternalLink,
-  Edit3,
-  X,
-  Clock,
   ShieldCheck,
-  Sun,
-  Moon,
-  Monitor,
 } from "lucide-react";
-import { useTheme } from "next-themes";
-import { HelpTooltip } from "@/components/ui/Tooltip";
-import {
-  VISIT_STATUS_LABELS,
-  VISIT_TIME_SLOTS,
-  MAX_STUDENT_VISIT_RESCHEDULES,
-  canStudentRescheduleVisit,
-  getTodayWibDateString,
-  getMaxVisitWibDateString,
-  VisitStatus,
-  formatVisitDateId,
-} from "@/lib/visit-schedule";
-import { saveLocalScheduledVisit } from "@/components/features/ScheduleVisitModal";
-import { OfflineBanner } from "@/components/ui/OfflineBanner";
 import {
   saveCachedBookings,
   getCachedBookings,
@@ -52,73 +20,13 @@ import {
   clearOfflineCaches,
   useNetworkStatus,
 } from "@/lib/offline-storage";
+import { UserProfile, BookingItem, VisitScheduleItem } from "@/types/profile";
+import { ProfileInfoTab } from "@/components/profile/ProfileInfoTab";
+import { BookingsTab } from "@/components/profile/BookingsTab";
+import { VisitsTab } from "@/components/profile/VisitsTab";
+import { SecurityTab } from "@/components/profile/SecurityTab";
 
-interface UserProfile {
-  id: string;
-  name: string;
-  email: string;
-  whatsapp: string | null;
-  bio: string | null;
-  avatar: string | null;
-  created_at: string;
-  hasPassword?: boolean;
-  isGoogleLinked?: boolean;
-}
-
-interface BookingProperty {
-  id: string;
-  name: string;
-  price_per_month: number;
-  available_rooms: number;
-  gender_type: string;
-  facilities: string;
-  image_url: string | null;
-  address: string | null;
-}
-
-interface BookingItem {
-  id: string;
-  student_name: string;
-  student_whatsapp: string;
-  move_in_date: string;
-  status: string;
-  created_at: string;
-  checkin_confirmed_at?: string | null;
-  cancellation_reason?: string | null;
-  refund_bank_name?: string | null;
-  refund_account_number?: string | null;
-  refund_account_holder?: string | null;
-  refund_note?: string | null;
-  refunded_at?: string | null;
-  property: BookingProperty;
-}
-
-interface VisitScheduleItem {
-  id: string;
-  student_name: string;
-  student_whatsapp: string;
-  visit_date: string;
-  visit_time_slot: string;
-  notes: string | null;
-  status: string;
-  reschedule_date: string | null;
-  reschedule_time_slot: string | null;
-  reschedule_note: string | null;
-  student_reschedule_count?: number;
-  cancellation_reason: string | null;
-  created_at: string;
-  property: {
-    id: string;
-    name: string;
-    address: string | null;
-    image_url: string | null;
-    price_per_month: number;
-    owner?: {
-      name: string;
-      whatsapp_number: string;
-    };
-  };
-}
+type TabKey = "profile" | "bookings" | "visits" | "security";
 
 function ProfileContent() {
   const router = useRouter();
@@ -126,13 +34,19 @@ function ProfileContent() {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const rawTab = searchParams.get("tab");
-  const queryTab: "profile" | "bookings" | "visits" =
-    rawTab === "bookings" ? "bookings" : rawTab === "visits" ? "visits" : "profile";
-  const [manualTab, setManualTab] = useState<"profile" | "bookings" | "visits" | null>(null);
-  const activeTab = manualTab ?? queryTab;
-  const setActiveTab = (tab: "profile" | "bookings" | "visits") => setManualTab(tab);
+  const queryTab: TabKey =
+    rawTab === "bookings"
+      ? "bookings"
+      : rawTab === "visits"
+      ? "visits"
+      : rawTab === "security"
+      ? "security"
+      : "profile";
 
-  const { theme, setTheme } = useTheme();
+  const [manualTab, setManualTab] = useState<TabKey | null>(null);
+  const activeTab = manualTab ?? queryTab;
+  const setActiveTab = (tab: TabKey) => setManualTab(tab);
+
   const themeMounted = useSyncExternalStore(
     () => () => {},
     () => true,
@@ -141,7 +55,6 @@ function ProfileContent() {
 
   const [isLoadingUser, setIsLoadingUser] = useState(true);
   const [user, setUser] = useState<UserProfile | null>(null);
-
   const [isEditing, setIsEditing] = useState(false);
 
   // Form State
@@ -166,121 +79,6 @@ function ProfileContent() {
   const [isLoadingVisits, setIsLoadingVisits] = useState(false);
   const [visitsLoaded, setVisitsLoaded] = useState(false);
 
-  // Student Visit Reschedule Modal State
-  const visitRescheduleDialogRef = useRef<HTMLDialogElement>(null);
-  const [visitMinDate] = useState(() => getTodayWibDateString());
-  const [visitMaxDate] = useState(() => getMaxVisitWibDateString(30));
-  const [reschedulingVisit, setReschedulingVisit] = useState<VisitScheduleItem | null>(null);
-  const [visitRescheduleDate, setVisitRescheduleDate] = useState("");
-  const [visitRescheduleSlot, setVisitRescheduleSlot] = useState<string>(
-    VISIT_TIME_SLOTS[2].value
-  );
-  const [visitRescheduleNote, setVisitRescheduleNote] = useState("");
-  const [isSubmittingVisitReschedule, setIsSubmittingVisitReschedule] = useState(false);
-  const [visitRescheduleError, setVisitRescheduleError] = useState<string | null>(null);
-  const [visitRescheduleSuccess, setVisitRescheduleSuccess] = useState<string | null>(null);
-
-  const openStudentRescheduleModal = (visit: VisitScheduleItem) => {
-    const rawCurrentDate = visit.reschedule_date || visit.visit_date;
-    const formattedYmd = rawCurrentDate
-      ? getTodayWibDateString(new Date(rawCurrentDate))
-      : visitMinDate;
-    setVisitRescheduleDate(formattedYmd >= visitMinDate ? formattedYmd : visitMinDate);
-    setVisitRescheduleSlot(
-      visit.reschedule_time_slot || visit.visit_time_slot || VISIT_TIME_SLOTS[2].value
-    );
-    setVisitRescheduleNote(visit.notes || "");
-    setVisitRescheduleError(null);
-    setVisitRescheduleSuccess(null);
-    setReschedulingVisit(visit);
-  };
-
-  useEffect(() => {
-    const dialog = visitRescheduleDialogRef.current;
-    if (!dialog) return;
-    if (reschedulingVisit) {
-      if (!dialog.open) dialog.showModal();
-    } else if (dialog.open) {
-      dialog.close();
-    }
-  }, [reschedulingVisit]);
-
-  const handleSubmitStudentReschedule = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    if (!reschedulingVisit || isSubmittingVisitReschedule) return;
-
-    if (!visitRescheduleDate || visitRescheduleDate < visitMinDate) {
-      setVisitRescheduleError("Tanggal survei baru tidak boleh lebih awal dari hari ini.");
-      return;
-    }
-
-    try {
-      setIsSubmittingVisitReschedule(true);
-      setVisitRescheduleError(null);
-
-      const res = await fetch(`/api/user/visits/${reschedulingVisit.id}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          visitDate: visitRescheduleDate,
-          visitTimeSlot: visitRescheduleSlot,
-          notes: visitRescheduleNote.trim(),
-        }),
-      });
-
-      const json = await res.json().catch(() => null);
-      if (!res.ok || !json?.success) {
-        setVisitRescheduleError(
-          json?.error || "Gagal mengirim perubahan jadwal survei."
-        );
-        return;
-      }
-
-      if (json.visit) {
-        setVisits((prev) =>
-          prev.map((item) =>
-            item.id === reschedulingVisit.id ? { ...item, ...json.visit } : item
-          )
-        );
-        saveLocalScheduledVisit(reschedulingVisit.property.id, {
-          id: json.visit.id,
-          status: json.visit.status,
-          visit_date: json.visit.visit_date,
-          visit_time_slot: json.visit.visit_time_slot,
-        });
-      }
-
-      setVisitRescheduleSuccess(
-        json.message ||
-          "Permintaan perubahan jadwal survei berhasil dikirim ke pemilik kos."
-      );
-      setReschedulingVisit(null);
-    } catch {
-      setVisitRescheduleError("Terjadi kesalahan koneksi saat menyimpan jadwal baru.");
-    } finally {
-      setIsSubmittingVisitReschedule(false);
-    }
-  };
-
-  // Cancellation Modal State
-  const [cancellingBooking, setCancellingBooking] = useState<BookingItem | null>(null);
-  const [cancelReasonCategory, setCancelReasonCategory] = useState("Perubahan rencana kuliah/studi");
-  const [cancelCustomReason, setCancelCustomReason] = useState("");
-  const [cancelBankName, setCancelBankName] = useState("BCA");
-  const [cancelCustomBank, setCancelCustomBank] = useState("");
-  const [cancelAccountNumber, setCancelAccountNumber] = useState("");
-  const [cancelAccountHolder, setCancelAccountHolder] = useState("");
-  const [isSubmittingCancel, setIsSubmittingCancel] = useState(false);
-  const [cancelError, setCancelError] = useState<string | null>(null);
-  const [cancelSuccessMsg, setCancelSuccessMsg] = useState<string | null>(null);
-
-  // Dispute Modal State
-  const [disputeBooking, setDisputeBooking] = useState<BookingItem | null>(null);
-  const [disputeReason, setDisputeReason] = useState("");
-  const [isSubmittingDispute, setIsSubmittingDispute] = useState(false);
-  const [disputeError, setDisputeError] = useState<string | null>(null);
-  const [disputeSuccessMsg, setDisputeSuccessMsg] = useState<string | null>(null);
-
   // Logout & Offline State
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const { isOnline } = useNetworkStatus();
@@ -288,9 +86,7 @@ function ProfileContent() {
   const [bookingsLastSyncedAt, setBookingsLastSyncedAt] = useState<string | null>(null);
 
   // 1. Fetch User Profile
-  useEffect(() => {
-    let isMounted = true;
-
+  const fetchProfile = async () => {
     const applyCachedProfile = () => {
       const cached = getCachedUserProfile<UserProfile>();
       if (cached?.profile) {
@@ -304,49 +100,40 @@ function ProfileContent() {
       return false;
     };
 
-    async function fetchProfile() {
-      if (typeof navigator !== "undefined" && navigator.onLine === false) {
-        if (isMounted) {
-          applyCachedProfile();
-          setIsLoadingUser(false);
-        }
+    if (typeof navigator !== "undefined" && navigator.onLine === false) {
+      applyCachedProfile();
+      setIsLoadingUser(false);
+      return;
+    }
+
+    try {
+      const res = await fetch("/api/user/profile");
+      if (res.status === 401) {
+        clearOfflineCaches();
+        router.push("/login");
         return;
       }
 
-      try {
-        const res = await fetch("/api/user/profile");
-        if (res.status === 401) {
-          clearOfflineCaches();
-          router.push("/login");
-          return;
-        }
-
-        const data = await res.json();
-        if (isMounted && data.success && data.user) {
-          setUser(data.user);
-          setName(data.user.name || "");
-          setWhatsapp(data.user.whatsapp || "");
-          setBio(data.user.bio || "");
-          setAvatarPreview(data.user.avatar || null);
-          saveCachedUserProfile(data.user);
-        }
-      } catch (error) {
-        console.error("Gagal mengambil data profil:", error);
-        if (isMounted) {
-          applyCachedProfile();
-        }
-      } finally {
-        if (isMounted) {
-          setIsLoadingUser(false);
-        }
+      const data = await res.json();
+      if (data.success && data.user) {
+        setUser(data.user);
+        setName(data.user.name || "");
+        setWhatsapp(data.user.whatsapp || "");
+        setBio(data.user.bio || "");
+        setAvatarPreview(data.user.avatar || null);
+        saveCachedUserProfile(data.user);
       }
+    } catch (error) {
+      console.error("Gagal mengambil data profil:", error);
+      applyCachedProfile();
+    } finally {
+      setIsLoadingUser(false);
     }
+  };
 
+  useEffect(() => {
     fetchProfile();
-
-    return () => {
-      isMounted = false;
-    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [router]);
 
   // Cancel Editing & Revert Form
@@ -361,9 +148,7 @@ function ProfileContent() {
   };
 
   // 2. Fetch Bookings when Bookings Tab is active
-  useEffect(() => {
-    let isMounted = true;
-
+  const fetchBookings = async () => {
     const applyCachedBookings = () => {
       const cached = getCachedBookings<BookingItem>();
       if (cached?.bookings) {
@@ -376,86 +161,72 @@ function ProfileContent() {
       return false;
     };
 
-    async function fetchBookings() {
-      if (bookingsLoaded && isOnline && !isOfflineBookings) return;
+    if (bookingsLoaded && isOnline && !isOfflineBookings) return;
 
-      if (typeof navigator !== "undefined" && navigator.onLine === false) {
-        if (isMounted) {
-          applyCachedBookings();
-          setIsLoadingBookings(false);
-        }
+    if (typeof navigator !== "undefined" && navigator.onLine === false) {
+      applyCachedBookings();
+      setIsLoadingBookings(false);
+      return;
+    }
+
+    try {
+      setIsLoadingBookings(true);
+      const res = await fetch("/api/user/bookings");
+      if (res.status === 401) {
+        clearOfflineCaches();
+        router.push("/login");
         return;
       }
 
-      try {
-        setIsLoadingBookings(true);
-        const res = await fetch("/api/user/bookings");
-        if (res.status === 401) {
-          clearOfflineCaches();
-          router.push("/login");
-          return;
-        }
-
-        const data = await res.json();
-        if (isMounted && data.success && Array.isArray(data.bookings)) {
-          setBookings(data.bookings);
-          setBookingsLoaded(true);
-          setIsOfflineBookings(false);
-          setBookingsLastSyncedAt(null);
-          saveCachedBookings(data.bookings);
-        }
-      } catch (error) {
-        console.error("Gagal mengambil riwayat pesanan:", error);
-        if (isMounted) {
-          applyCachedBookings();
-        }
-      } finally {
-        if (isMounted) {
-          setIsLoadingBookings(false);
-        }
+      const data = await res.json();
+      if (data.success && Array.isArray(data.bookings)) {
+        setBookings(data.bookings);
+        setBookingsLoaded(true);
+        setIsOfflineBookings(false);
+        setBookingsLastSyncedAt(null);
+        saveCachedBookings(data.bookings);
       }
+    } catch (error) {
+      console.error("Gagal mengambil riwayat pesanan:", error);
+      applyCachedBookings();
+    } finally {
+      setIsLoadingBookings(false);
     }
+  };
 
+  useEffect(() => {
     if (activeTab === "bookings") {
       fetchBookings();
     }
-
-    return () => {
-      isMounted = false;
-    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeTab, bookingsLoaded, isOnline, isOfflineBookings, router]);
 
-  useEffect(() => {
-    let isMounted = true;
-
-    async function fetchVisits() {
-      if (visitsLoaded) return;
-      try {
-        setIsLoadingVisits(true);
-        const res = await fetch("/api/visits?audience=USER");
-        if (res.status === 401) {
-          router.push("/login");
-          return;
-        }
-        const data = await res.json();
-        if (isMounted && data.success && Array.isArray(data.visits)) {
-          setVisits(data.visits);
-          setVisitsLoaded(true);
-        }
-      } catch (error) {
-        console.error("Gagal mengambil jadwal survei:", error);
-      } finally {
-        if (isMounted) setIsLoadingVisits(false);
+  // 3. Fetch Visits when Visits Tab is active
+  const fetchVisits = async () => {
+    try {
+      setIsLoadingVisits(true);
+      const res = await fetch("/api/visits?audience=USER");
+      if (res.status === 401) {
+        router.push("/login");
+        return;
       }
+      const data = await res.json();
+      if (data.success && Array.isArray(data.visits)) {
+        setVisits(data.visits);
+        setVisitsLoaded(true);
+      }
+    } catch (error) {
+      console.error("Gagal mengambil jadwal survei:", error);
+    } finally {
+      setIsLoadingVisits(false);
     }
+  };
 
-    if (activeTab === "visits") {
+  useEffect(() => {
+    if (activeTab === "visits" && !visitsLoaded) {
       fetchVisits();
     }
-
-    return () => {
-      isMounted = false;
-    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeTab, visitsLoaded, router]);
 
   // Handle Avatar Selection
@@ -507,7 +278,9 @@ function ProfileContent() {
 
     const waRegex = /^(?:\+62|62|0)8[0-9]{8,11}$/;
     if (!waRegex.test(trimmedWhatsapp)) {
-      setSaveErrorMessage("Format nomor WhatsApp tidak valid. Gunakan format seperti 08123456789 atau +628123456789.");
+      setSaveErrorMessage(
+        "Format nomor WhatsApp tidak valid. Gunakan format seperti 08123456789 atau +628123456789."
+      );
       return;
     }
 
@@ -554,8 +327,6 @@ function ProfileContent() {
     }
   };
 
-
-
   // Handle Logout
   const handleLogout = async () => {
     try {
@@ -568,213 +339,6 @@ function ProfileContent() {
       console.error("Gagal logout:", error);
     } finally {
       setIsLoggingOut(false);
-    }
-  };
-
-  const formatRupiah = (val: number) => {
-    return new Intl.NumberFormat("id-ID", {
-      style: "currency",
-      currency: "IDR",
-      maximumFractionDigits: 0,
-    }).format(val);
-  };
-
-  const formatDate = (dateString: string) => {
-    try {
-      const date = new Date(dateString);
-      return date.toLocaleDateString("id-ID", {
-        day: "numeric",
-        month: "long",
-        year: "numeric",
-      });
-    } catch {
-      return dateString;
-    }
-  };
-
-  const renderStatusBadge = (status: string) => {
-    const upper = (status || "").toUpperCase();
-    if (upper === "ACCEPTED" || upper === "CONFIRMED" || upper === "APPROVED" || upper === "SUCCESS") {
-      return (
-        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold rounded-full bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
-          <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
-          <span>Disetujui</span>
-          <HelpTooltip text="Pesanan telah disetujui pemilik kos. Anda dapat langsung berkomunikasi untuk persiapan check-in." />
-        </span>
-      );
-    }
-    if (upper === "COMPLETED") {
-      return (
-        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold rounded-full bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800">
-          <Clock className="w-3.5 h-3.5 shrink-0 text-indigo-600" />
-          <span>Check-In Dikonfirmasi Mitra</span>
-          <HelpTooltip text="Mitra mengonfirmasi Anda telah check-in. Terdapat masa tenggang 12 jam untuk melaporkan masalah jika ada kendala." />
-        </span>
-      );
-    }
-    if (upper === "DISPUTED") {
-      return (
-        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold rounded-full bg-rose-50 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-800">
-          <AlertCircle className="w-3.5 h-3.5 shrink-0 text-rose-600" />
-          <span>Dalam Sanggahan (Dispute)</span>
-          <HelpTooltip text="Anda telah mengajukan sanggahan/masalah. Tim Admin KosPasti sedang menginvestigasi laporan Anda." />
-        </span>
-      );
-    }
-    if (upper === "PAYOUT_PENDING" || upper === "PAYOUT_PAID") {
-      return (
-        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold rounded-full bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
-          <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
-          <span>Selesai</span>
-          <HelpTooltip text="Check-in selesai dan masa sewa telah aktif." />
-        </span>
-      );
-    }
-    if (upper === "PAID") {
-      return (
-        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold rounded-full bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800">
-          <Clock className="w-3.5 h-3.5 shrink-0" />
-          <span>Menunggu Konfirmasi Pemilik</span>
-          <HelpTooltip text="DP Anda telah terverifikasi lunas. Pemilik kos sedang memeriksa ketersediaan kamar untuk menyetujui pesanan Anda." />
-        </span>
-      );
-    }
-    if (upper === "REFUND_REQUESTED") {
-      return (
-        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold rounded-full bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800">
-          <Clock className="w-3.5 h-3.5 shrink-0 text-amber-600" />
-          <span>Menunggu Pengembalian Dana</span>
-          <HelpTooltip text="Pengajuan pembatalan telah diterima. Pemilik kos sedang memproses pengembalian dana ke rekening/e-wallet Anda." />
-        </span>
-      );
-    }
-    if (upper === "REFUNDED") {
-      return (
-        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold rounded-full bg-sky-50 dark:bg-sky-950/60 text-sky-700 dark:text-sky-300 border border-sky-200 dark:border-sky-800">
-          <CheckCircle2 className="w-3.5 h-3.5 shrink-0 text-sky-600" />
-          <span>Dana Telah Dikembalikan</span>
-          <HelpTooltip text="Pengembalian dana telah selesai ditransfer oleh pemilik kos." />
-        </span>
-      );
-    }
-    if (upper === "CANCELLED") {
-      return (
-        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold rounded-full bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
-          <AlertCircle className="w-3.5 h-3.5 shrink-0 text-slate-500" />
-          <span>Dibatalkan</span>
-          <HelpTooltip text="Pesanan ini telah dibatalkan." />
-        </span>
-      );
-    }
-    if (upper === "REJECTED") {
-      return (
-        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold rounded-full bg-rose-50 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-800">
-          <AlertCircle className="w-3.5 h-3.5 shrink-0" />
-          <span>Ditolak Pemilik</span>
-          <HelpTooltip text="Pesanan tidak dapat dipenuhi pemilik kos." />
-        </span>
-      );
-    }
-    return (
-      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold rounded-full bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800">
-        <AlertCircle className="w-3.5 h-3.5 shrink-0" />
-        <span>Menunggu Pembayaran DP</span>
-        <HelpTooltip text="Silakan selesaikan pembayaran DP Anda sesuai batas waktu invoice untuk mengunci kamar kos." />
-      </span>
-    );
-  };
-
-  const handleOpenCancelModal = (booking: BookingItem) => {
-    setCancellingBooking(booking);
-    setCancelReasonCategory("Perubahan rencana kuliah/studi");
-    setCancelCustomReason("");
-    setCancelBankName("BCA");
-    setCancelCustomBank("");
-    setCancelAccountNumber("");
-    setCancelAccountHolder(user?.name || booking.student_name || "");
-    setCancelError(null);
-  };
-
-  const handleSubmitCancel = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!cancellingBooking) return;
-
-    const isPaidOrApproved = ["PAID", "APPROVED", "ACCEPTED"].includes(cancellingBooking.status?.toUpperCase());
-
-    const finalReason =
-      cancelReasonCategory === "Lainnya"
-        ? cancelCustomReason.trim()
-        : cancelCustomReason.trim()
-        ? `${cancelReasonCategory} - ${cancelCustomReason.trim()}`
-        : cancelReasonCategory;
-
-    const finalBank = cancelBankName === "Lainnya" ? cancelCustomBank.trim() : cancelBankName;
-
-    if (isPaidOrApproved) {
-      if (!finalReason) {
-        setCancelError("Alasan pembatalan wajib diisi.");
-        return;
-      }
-      if (!finalBank) {
-        setCancelError("Nama Bank atau E-Wallet tujuan pengembalian dana wajib diisi.");
-        return;
-      }
-      if (!cancelAccountNumber.trim()) {
-        setCancelError("Nomor rekening atau nomor akun e-wallet tujuan wajib diisi.");
-        return;
-      }
-      if (!cancelAccountHolder.trim()) {
-        setCancelError("Nama lengkap pemilik rekening tujuan wajib diisi.");
-        return;
-      }
-    }
-
-    try {
-      setIsSubmittingCancel(true);
-      setCancelError(null);
-
-      const res = await fetch(`/api/user/bookings/${cancellingBooking.id}/cancel`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          reason: finalReason,
-          bankName: finalBank,
-          accountNumber: cancelAccountNumber.trim(),
-          accountHolder: cancelAccountHolder.trim(),
-        }),
-      });
-
-      const data = await res.json().catch(() => null);
-
-      if (!res.ok || !data?.success) {
-        setCancelError(data?.error || "Gagal memproses pembatalan pesanan.");
-        return;
-      }
-
-      // Update state bookings secara optimis
-      setBookings((prev) =>
-        prev.map((item) =>
-          item.id === cancellingBooking.id
-            ? {
-                ...item,
-                status: data.data?.status || (isPaidOrApproved ? "REFUND_REQUESTED" : "CANCELLED"),
-                cancellation_reason: data.data?.cancellation_reason || finalReason,
-                refund_bank_name: data.data?.refund_bank_name || finalBank,
-                refund_account_number: data.data?.refund_account_number || cancelAccountNumber.trim(),
-                refund_account_holder: data.data?.refund_account_holder || cancelAccountHolder.trim(),
-              }
-            : item
-        )
-      );
-
-      setCancelSuccessMsg(data.message || "Pesanan berhasil dibatalkan.");
-      setTimeout(() => setCancelSuccessMsg(null), 5000);
-      setCancellingBooking(null);
-    } catch (err) {
-      console.error("Gagal mengirim pembatalan:", err);
-      setCancelError("Terjadi kesalahan jaringan saat memproses pembatalan.");
-    } finally {
-      setIsSubmittingCancel(false);
     }
   };
 
@@ -864,7 +428,6 @@ function ProfileContent() {
                 <span>Data Diri</span>
               </button>
 
-
               <button
                 type="button"
                 role="tab"
@@ -899,6 +462,23 @@ function ProfileContent() {
                 <span>Jadwal Survei</span>
               </button>
 
+              <button
+                type="button"
+                role="tab"
+                id="tab-security"
+                aria-selected={activeTab === "security"}
+                aria-controls="panel-security"
+                onClick={() => setActiveTab("security")}
+                className={`flex-1 lg:flex-none flex items-center justify-center lg:justify-start gap-2.5 px-4 py-3 rounded-xl text-sm font-semibold transition-colors cursor-pointer whitespace-nowrap focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 ${
+                  activeTab === "security"
+                    ? "bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800"
+                    : "text-slate-650 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white"
+                }`}
+              >
+                <ShieldCheck className="w-4 h-4" />
+                <span>Keamanan</span>
+              </button>
+
               <hr className="my-1 border-slate-100 dark:border-slate-800 hidden lg:block" />
 
               <button
@@ -928,424 +508,28 @@ function ProfileContent() {
                 tabIndex={0}
                 className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 sm:p-8 shadow-sm focus:outline-none"
               >
-                <div className="border-b border-slate-100 dark:border-slate-800 pb-4 mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                  <div>
-                    <h2 className="text-lg font-bold text-slate-900 dark:text-white">Data Diri & Profil</h2>
-                    <p className="text-sm text-slate-500 dark:text-slate-400">
-                      {isEditing
-                        ? "Ubah data diri Anda pada formulir di bawah ini lalu klik Simpan Perubahan."
-                        : "Informasi akun dan data diri yang tersimpan di sistem KosPasti."}
-                    </p>
-                  </div>
-
-                  {!isEditing && (
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setSaveSuccessMessage(null);
-                        setSaveErrorMessage(null);
-                        setIsEditing(true);
-                      }}
-                      className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/60 hover:bg-emerald-100 dark:hover:bg-emerald-900/60 border border-emerald-200 dark:border-emerald-800 rounded-xl transition-colors cursor-pointer self-start sm:self-auto"
-                    >
-                      <Edit3 className="w-4 h-4" />
-                      <span>Edit Profil</span>
-                    </button>
-                  )}
-                </div>
-
-                {saveSuccessMessage && (
-                  <div className="mb-6 p-4 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300 text-sm flex items-center gap-3">
-                    <CheckCircle2 className="w-5 h-5 shrink-0 text-emerald-600 dark:text-emerald-400" />
-                    <span>{saveSuccessMessage}</span>
-                  </div>
-                )}
-
-                {saveErrorMessage && (
-                  <div className="mb-6 p-4 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 text-rose-800 dark:text-rose-300 text-sm flex items-center gap-3">
-                    <AlertCircle className="w-5 h-5 shrink-0 text-rose-600 dark:text-rose-400" />
-                    <span>{saveErrorMessage}</span>
-                  </div>
-                )}
-
-                {!isEditing ? (
-                  /* VIEW MODE */
-                  <div className="space-y-6">
-                    <div className="flex items-center gap-5 p-4 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-150 dark:border-slate-800">
-                      <div className="relative w-20 h-20 rounded-full overflow-hidden bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 flex items-center justify-center shrink-0">
-                        {avatarPreview ? (
-                          <Image
-                            src={avatarPreview}
-                            alt={user?.name || "Foto Profil"}
-                            fill
-                            className="object-cover"
-                            unoptimized={avatarPreview.startsWith("blob:")}
-                          />
-                        ) : (
-                          <UserIcon className="w-9 h-9 text-slate-400 dark:text-slate-500" />
-                        )}
-                      </div>
-                      <div>
-                        <span className="text-xs font-semibold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800 px-2.5 py-0.5 rounded-full inline-block mb-1">
-                          Foto Profil
-                        </span>
-                        <p className="text-sm font-medium text-slate-800 dark:text-slate-200">
-                          {user?.avatar ? "Foto profil kustom terpasang" : "Menggunakan avatar bawaan"}
-                        </p>
-                        <p className="text-xs text-slate-500 dark:text-slate-400">
-                          Klik tombol &quot;Edit Profil&quot; di atas untuk mengganti foto.
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60">
-                        <span className="text-xs font-medium text-slate-500 dark:text-slate-400 block mb-1 flex items-center gap-1.5">
-                          <UserIcon className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500" />
-                          Nama Lengkap
-                        </span>
-                        <p className="text-sm font-semibold text-slate-900 dark:text-white">{user?.name || "-"}</p>
-                      </div>
-
-                      <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60">
-                        <span className="text-xs font-medium text-slate-500 dark:text-slate-400 block mb-1 flex items-center gap-1.5">
-                          <Phone className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500" />
-                          Nomor WhatsApp
-                        </span>
-                        <p className="text-sm font-semibold text-slate-900 dark:text-white">{user?.whatsapp || "-"}</p>
-                      </div>
-
-                      <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 md:col-span-2">
-                        <div className="flex items-center justify-between gap-2 mb-1 flex-wrap">
-                          <span className="text-xs font-medium text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
-                            <Mail className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500" />
-                            Alamat Email
-                          </span>
-                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 text-[11px] font-semibold rounded-full bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
-                            <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
-                            <span>Terhubung Google SSO</span>
-                          </span>
-                        </div>
-                        <p className="text-sm font-semibold text-slate-900 dark:text-white">{user?.email || "-"}</p>
-                      </div>
-
-                      <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 md:col-span-2">
-                        <span className="text-xs font-medium text-slate-500 dark:text-slate-400 block mb-1 flex items-center gap-1.5">
-                          <FileText className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500" />
-                          Bio Singkat
-                        </span>
-                        {user?.bio ? (
-                          <p className="text-sm text-slate-700 dark:text-slate-300 whitespace-pre-wrap leading-relaxed">
-                            {user.bio}
-                          </p>
-                        ) : (
-                          <p className="text-sm text-slate-400 dark:text-slate-500 italic">
-                            Belum ada bio singkat. Klik &quot;Edit Profil&quot; untuk menambahkan deskripsi diri.
-                          </p>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* Seksi Tampilan Aplikasi (Pengaturan Akun) */}
-                    <div className="p-4 sm:p-5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-850/60 space-y-3">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <div className="w-8 h-8 rounded-lg bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800 flex items-center justify-center text-emerald-600 dark:text-emerald-400 shrink-0">
-                            {themeMounted && (theme === "dark" ? <Moon className="w-4 h-4" /> : theme === "light" ? <Sun className="w-4 h-4 text-amber-500" /> : <Monitor className="w-4 h-4" />)}
-                          </div>
-                          <div>
-                            <span className="text-sm font-bold text-slate-900 dark:text-white block">
-                              Tampilan Aplikasi
-                            </span>
-                            <span className="text-xs text-slate-500 dark:text-slate-400">
-                              Pilih tema visual antarmuka yang nyaman untuk mata Anda
-                            </span>
-                          </div>
-                        </div>
-
-                        <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950/70 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 capitalize">
-                          {themeMounted ? (theme === "dark" ? "Mode Gelap" : theme === "light" ? "Mode Terang" : "Sistem") : "Sistem"}
-                        </span>
-                      </div>
-
-                      {/* Interactive Radio Button Cards */}
-                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
-                        {[
-                          {
-                            id: "light",
-                            title: "Mode Terang",
-                            desc: "Warna latar cerah bersih",
-                            icon: Sun,
-                            iconColor: "text-amber-500",
-                          },
-                          {
-                            id: "dark",
-                            title: "Mode Gelap",
-                            desc: "Nyaman di kondisi minim cahaya",
-                            icon: Moon,
-                            iconColor: "text-emerald-400",
-                          },
-                          {
-                            id: "system",
-                            title: "Ikuti Sistem",
-                            desc: "Otomatis sinkron dengan perangkat",
-                            icon: Monitor,
-                            iconColor: "text-slate-500 dark:text-slate-400",
-                          },
-                        ].map((item) => {
-                          const Icon = item.icon;
-                          const isSelected = themeMounted && theme === item.id;
-                          return (
-                            <label
-                              key={item.id}
-                              onClick={() => {
-                                if (item.id === "light") setTheme("light");
-                                else if (item.id === "dark") setTheme("dark");
-                                else setTheme("system");
-                              }}
-                              className={`relative flex items-start gap-3 p-3.5 rounded-xl border transition-all cursor-pointer select-none ${
-                                isSelected
-                                    ? "bg-white dark:bg-slate-800 border-emerald-500 shadow-sm ring-2 ring-emerald-500/20"
-                                  : "bg-white/80 dark:bg-slate-900/60 border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 hover:bg-white dark:hover:bg-slate-800/80"
-                              }`}
-                            >
-                              {/* Custom Radio Button */}
-                              <div className="mt-0.5 flex items-center justify-center">
-                                <input
-                                  type="radio"
-                                  name="theme-selection"
-                                  value={item.id}
-                                  checked={isSelected}
-                                  onChange={() => {
-                                    if (item.id === "light") setTheme("light");
-                                    else if (item.id === "dark") setTheme("dark");
-                                    else setTheme("system");
-                                  }}
-                                  className="sr-only"
-                                />
-                                <div
-                                  className={`w-4 h-4 rounded-full border flex items-center justify-center transition-colors ${
-                                    isSelected
-                                      ? "border-emerald-600 bg-emerald-600"
-                                      : "border-slate-300 dark:border-slate-600 bg-transparent"
-                                  }`}
-                                >
-                                  {isSelected && (
-                                    <div className="w-1.5 h-1.5 rounded-full bg-white" />
-                                  )}
-                                </div>
-                              </div>
-
-                              <div className="flex-1 min-w-0">
-                                <div className="flex items-center gap-1.5 mb-0.5">
-                                  <Icon className={`w-3.5 h-3.5 ${item.iconColor} shrink-0`} />
-                                  <span
-                                    className={`text-xs font-bold leading-none ${
-                                      isSelected
-                                        ? "text-slate-900 dark:text-white"
-                                        : "text-slate-700 dark:text-slate-300"
-                                    }`}
-                                  >
-                                    {item.title}
-                                  </span>
-                                </div>
-                                <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-tight">
-                                  {item.desc}
-                                </p>
-                              </div>
-                            </label>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  </div>
-                ) : (
-                  /* EDIT MODE FORM */
-                  <form onSubmit={handleSaveProfile} className="space-y-6">
-                    {/* Foto Profil Uploader */}
-                    <div>
-                      <label className="block text-sm font-semibold text-slate-800 dark:text-slate-200 mb-2">
-                        Foto Profil
-                      </label>
-                      <div className="flex items-center gap-5">
-                        <div
-                          onClick={() => fileInputRef.current?.click()}
-                          className="group relative w-24 h-24 rounded-full overflow-hidden bg-slate-100 dark:bg-slate-800 border-2 border-dashed border-slate-300 dark:border-slate-700 hover:border-emerald-500 cursor-pointer flex items-center justify-center transition-colors"
-                        >
-                          {avatarPreview ? (
-                            <Image
-                              src={avatarPreview}
-                              alt="Preview Avatar"
-                              fill
-                              className="object-cover group-hover:opacity-75 transition-opacity"
-                              unoptimized={avatarPreview.startsWith("blob:")}
-                            />
-                          ) : (
-                            <UserIcon className="w-10 h-10 text-slate-400 group-hover:text-emerald-500 transition-colors" />
-                          )}
-
-                          <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex flex-col items-center justify-center text-white transition-opacity">
-                            <Camera className="w-6 h-6 mb-0.5" />
-                            <span className="text-[10px] font-medium">Ubah</span>
-                          </div>
-                        </div>
-
-                        <div className="space-y-1.5">
-                          <button
-                            type="button"
-                            onClick={() => fileInputRef.current?.click()}
-                            className="px-3.5 py-1.5 text-xs font-semibold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60 hover:bg-emerald-100 dark:hover:bg-emerald-900/60 rounded-lg border border-emerald-200 dark:border-emerald-800 transition-colors cursor-pointer"
-                          >
-                            Pilih Foto Baru
-                          </button>
-                          <p className="text-xs text-slate-500 dark:text-slate-400">
-                            Format JPG, PNG, atau WebP. Maksimal 2MB.
-                          </p>
-                        </div>
-
-                        <input
-                          ref={fileInputRef}
-                          type="file"
-                          accept="image/png, image/jpeg, image/jpg, image/webp"
-                          onChange={handleAvatarChange}
-                          className="hidden"
-                        />
-                      </div>
-                    </div>
-
-                    {/* Input Email (Read-Only) */}
-                    <div>
-                      <label className="block text-sm font-semibold text-slate-800 dark:text-slate-200 mb-1.5">
-                        Alamat Email
-                      </label>
-                      <div className="relative">
-                        <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
-                          <Mail className="w-4 h-4" />
-                        </div>
-                        <input
-                          type="email"
-                          value={user?.email || ""}
-                          readOnly
-                          disabled
-                          className="w-full pl-10 pr-4 py-2.5 text-sm bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-500 dark:text-slate-400 cursor-not-allowed select-none"
-                        />
-                      </div>
-                      <p className="text-xs text-slate-400 mt-1">
-                        Email akun tidak dapat diubah karena terhubung dengan autentikasi utama.
-                      </p>
-                    </div>
-
-                    {/* Input Nama Lengkap */}
-                    <div>
-                      <label
-                        htmlFor="user-name"
-                        className="block text-sm font-semibold text-slate-800 dark:text-slate-200 mb-1.5"
-                      >
-                        Nama Lengkap <span className="text-rose-500">*</span>
-                      </label>
-                      <div className="relative">
-                        <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
-                          <UserIcon className="w-4 h-4" />
-                        </div>
-                        <input
-                          id="user-name"
-                          type="text"
-                          required
-                          maxLength={100}
-                          value={name}
-                          onChange={(e) => setName(e.target.value)}
-                          placeholder="Contoh: Budi Pratama"
-                          className="w-full pl-10 pr-4 py-2.5 text-sm bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-colors"
-                        />
-                      </div>
-                    </div>
-
-                    {/* Input WhatsApp */}
-                    <div>
-                      <label
-                        htmlFor="user-whatsapp"
-                        className="block text-sm font-semibold text-slate-800 dark:text-slate-200 mb-1.5"
-                      >
-                        Nomor WhatsApp <span className="text-rose-500">*</span>
-                      </label>
-                      <div className="relative">
-                        <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
-                          <Phone className="w-4 h-4" />
-                        </div>
-                        <input
-                          id="user-whatsapp"
-                          type="tel"
-                          required
-                          maxLength={15}
-                          value={whatsapp}
-                          onChange={(e) => setWhatsapp(e.target.value)}
-                          placeholder="Contoh: 08123456789 atau +628123456789"
-                          className="w-full pl-10 pr-4 py-2.5 text-sm bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-colors"
-                        />
-                      </div>
-                      <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                        Nomor ini digunakan oleh pemilik kos untuk mengonfirmasi pemesanan Anda.
-                      </p>
-                    </div>
-
-                    {/* Textarea Bio Singkat */}
-                    <div>
-                      <div className="flex items-center justify-between mb-1.5">
-                        <label
-                          htmlFor="user-bio"
-                          className="block text-sm font-semibold text-slate-800 dark:text-slate-200"
-                        >
-                          Bio Singkat
-                        </label>
-                        <span
-                          className={`text-xs ${
-                            bio.length > 150 ? "text-rose-600 font-semibold" : "text-slate-400"
-                          }`}
-                        >
-                          {bio.length}/150
-                        </span>
-                      </div>
-                      <div className="relative">
-                        <textarea
-                          id="user-bio"
-                          rows={3}
-                          maxLength={150}
-                          value={bio}
-                          onChange={(e) => setBio(e.target.value)}
-                          placeholder="Tuliskan sedikit tentang diri Anda, kampus/pekerjaan, dsb..."
-                          className="w-full p-3.5 text-sm bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-colors resize-none"
-                        />
-                      </div>
-                    </div>
-
-                    <div className="pt-2 flex items-center justify-end gap-3">
-                      <button
-                        type="button"
-                        onClick={handleCancelEdit}
-                        disabled={isSaving}
-                        className="inline-flex items-center gap-1.5 px-5 py-2.5 text-sm font-semibold text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-xl transition-colors cursor-pointer disabled:opacity-50"
-                      >
-                        <X className="w-4 h-4" />
-                        <span>Batal</span>
-                      </button>
-
-                      <button
-                        type="submit"
-                        disabled={isSaving}
-                        className="inline-flex items-center gap-2 px-6 py-2.5 text-sm font-semibold text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl shadow-sm transition-all disabled:opacity-50 cursor-pointer"
-                      >
-                        {isSaving ? (
-                          <>
-                            <Loader2 className="w-4 h-4 animate-spin" />
-                            <span>Menyimpan...</span>
-                          </>
-                        ) : (
-                          <span>Simpan Perubahan</span>
-                        )}
-                      </button>
-                    </div>
-                  </form>
-                )}
+                <ProfileInfoTab
+                  user={user}
+                  isEditing={isEditing}
+                  setIsEditing={setIsEditing}
+                  name={name}
+                  setName={setName}
+                  whatsapp={whatsapp}
+                  setWhatsapp={setWhatsapp}
+                  bio={bio}
+                  setBio={setBio}
+                  avatarPreview={avatarPreview}
+                  fileInputRef={fileInputRef}
+                  handleAvatarChange={handleAvatarChange}
+                  handleSaveProfile={handleSaveProfile}
+                  handleCancelEdit={handleCancelEdit}
+                  isSaving={isSaving}
+                  saveSuccessMessage={saveSuccessMessage}
+                  saveErrorMessage={saveErrorMessage}
+                  setSaveSuccessMessage={setSaveSuccessMessage}
+                  setSaveErrorMessage={setSaveErrorMessage}
+                  themeMounted={themeMounted}
+                />
               </div>
             )}
 
@@ -1358,615 +542,19 @@ function ProfileContent() {
                 tabIndex={0}
                 className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 sm:p-8 shadow-sm focus:outline-none"
               >
-                <div className="border-b border-slate-100 dark:border-slate-800 pb-4 mb-6">
-                  <h2 className="text-lg font-bold text-slate-900 dark:text-white">Riwayat Pemesanan Kos</h2>
-                  <p className="text-sm text-slate-500 dark:text-slate-400">
-                    Daftar semua permohonan dan transaksi sewa kos yang pernah Anda buat.
-                  </p>
-                </div>
-
-                {(!isOnline || isOfflineBookings) && (
-                  <OfflineBanner
-                    title="Mode Offline: Riwayat Pesanan Tersimpan"
-                    message="Anda dapat tetap membuka dan mencetak Bukti Sewa (E-Receipt) dari pesanan yang tersimpan di perangkat."
-                    lastSyncedAt={bookingsLastSyncedAt}
-                    className="mb-6"
-                  />
-                )}
-
-                {/* Banner Feedback Pembatalan */}
-                {cancelSuccessMsg && (
-                  <div className="mb-4 p-4 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-200 text-xs sm:text-sm font-semibold flex items-center gap-2">
-                    <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-600 dark:text-emerald-400" />
-                    <span>{cancelSuccessMsg}</span>
-                  </div>
-                )}
-
-                {isLoadingBookings ? (
-                  <div className="py-12 flex flex-col items-center justify-center text-slate-500 dark:text-slate-400">
-                    <Loader2 className="w-7 h-7 animate-spin text-emerald-600 mb-2" />
-                    <p className="text-sm">Memuat riwayat pesanan...</p>
-                  </div>
-                ) : bookings.length === 0 ? (
-                  <div className="py-12 px-4 text-center border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-2xl">
-                    <div className="w-14 h-14 bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-500 rounded-full flex items-center justify-center mx-auto mb-3">
-                      <Building className="w-7 h-7" />
-                    </div>
-                    <h3 className="text-base font-bold text-slate-800 dark:text-slate-200">Belum Ada Riwayat Pesanan</h3>
-                    <p className="text-sm text-slate-500 dark:text-slate-400 max-w-sm mx-auto mt-1 mb-5">
-                      Anda belum pernah mengajukan sewa kos. Temukan kos impian Anda sekarang!
-                    </p>
-                    <Link
-                      href="/search"
-                      className="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-semibold text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl shadow-sm transition-colors"
-                    >
-                      <span>Cari Kos Sekarang</span>
-                      <ArrowRight className="w-4 h-4" />
-                    </Link>
-                  </div>
-                ) : (
-                  <div className="space-y-4">
-                    {disputeSuccessMsg && (
-                      <div className="p-4 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300 text-xs font-semibold flex items-center gap-2">
-                        <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                        <span>{disputeSuccessMsg}</span>
-                      </div>
-                    )}
-                    {bookings.map((booking) => {
-                      const canCancel = ["PENDING", "PAID", "APPROVED", "ACCEPTED"].includes(
-                        booking.status?.toUpperCase()
-                      );
-
-                      return (
-                        <div
-                          key={booking.id}
-                          className="border border-slate-200 dark:border-slate-800 rounded-2xl p-4 sm:p-5 hover:border-slate-300 dark:hover:border-slate-700 bg-white dark:bg-slate-900/60 transition-colors flex flex-col gap-4"
-                        >
-                          <div className="flex flex-col sm:flex-row gap-4 justify-between items-start">
-                            <div className="flex gap-4">
-                              <div className="relative w-20 h-20 sm:w-24 sm:h-24 rounded-xl overflow-hidden bg-slate-100 dark:bg-slate-800 shrink-0">
-                                {booking.property?.image_url ? (
-                                  <Image
-                                    src={booking.property.image_url}
-                                    alt={booking.property.name}
-                                    fill
-                                    className="object-cover"
-                                  />
-                                ) : (
-                                  <div className="w-full h-full flex items-center justify-center text-slate-400 dark:text-slate-500">
-                                    <Building className="w-8 h-8" />
-                                  </div>
-                                )}
-                              </div>
-
-                              <div className="space-y-1.5">
-                                <div className="flex items-center gap-2 flex-wrap">
-                                  <h3 className="font-bold text-slate-900 dark:text-white text-base">
-                                    {booking.property?.name || "Kos"}
-                                  </h3>
-                                  {booking.property?.gender_type && (
-                                    <span className="text-[11px] font-medium px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
-                                      {booking.property.gender_type}
-                                    </span>
-                                  )}
-                                </div>
-
-                                {booking.property?.address && (
-                                  <p className="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-1 line-clamp-1">
-                                    <MapPin className="w-3.5 h-3.5 shrink-0 text-slate-400" />
-                                    <span>{booking.property.address}</span>
-                                  </p>
-                                )}
-
-                                <div className="flex items-center gap-4 text-xs text-slate-600 dark:text-slate-300 pt-1">
-                                  <span className="flex items-center gap-1">
-                                    <Calendar className="w-3.5 h-3.5 text-slate-400" />
-                                    <span>Rencana Masuk: {formatDate(booking.move_in_date)}</span>
-                                  </span>
-                                </div>
-
-                                <p className="text-xs text-slate-400">
-                                  Dipesan pada: {formatDate(booking.created_at)}
-                                </p>
-                              </div>
-                            </div>
-
-                            <div className="w-full sm:w-auto flex sm:flex-col justify-between sm:items-end items-center gap-2 pt-3 sm:pt-0 border-t sm:border-t-0 border-slate-100 dark:border-slate-800">
-                              {renderStatusBadge(booking.status)}
-
-                              <div className="text-right">
-                                <span className="text-xs text-slate-500 block">Biaya Sewa</span>
-                                <span className="text-sm sm:text-base font-bold text-emerald-700 dark:text-emerald-400">
-                                  {formatRupiah(booking.property?.price_per_month || 0)}
-                                  <span className="text-xs font-medium text-slate-500">/bln</span>
-                                </span>
-                              </div>
-
-                              <div className="flex flex-wrap items-center gap-2 pt-1 w-full sm:w-auto justify-end">
-                                {booking.status?.toUpperCase() === "PENDING" && (
-                                  <Link
-                                    href={`/checkout/${booking.id}`}
-                                    className="inline-flex items-center justify-center gap-1.5 px-3.5 py-1.5 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 active:scale-95 rounded-xl shadow-soft hover:shadow-float transition-all cursor-pointer text-center"
-                                  >
-                                    <span>Bayar Sekarang</span>
-                                    <ArrowRight className="w-3.5 h-3.5" />
-                                  </Link>
-                                )}
-
-                                {["ACCEPTED", "APPROVED", "PAID", "COMPLETED", "PAYOUT_PENDING", "PAYOUT_PAID"].includes(booking.status?.toUpperCase()) && (
-                                  <Link
-                                    href={`/receipt/${booking.id}`}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    data-testid={`receipt-btn-${booking.id}`}
-                                    className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/60 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 border border-emerald-200 dark:border-emerald-800 rounded-xl transition-all active:scale-95 cursor-pointer"
-                                  >
-                                    <FileText className="w-3.5 h-3.5" />
-                                    <span>Kuitansi Resmi</span>
-                                  </Link>
-                                )}
-
-                                {canCancel && (
-                                  <button
-                                    type="button"
-                                    onClick={() => handleOpenCancelModal(booking)}
-                                    className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/40 hover:bg-rose-100 dark:hover:bg-rose-900/40 border border-rose-200 dark:border-rose-800 rounded-xl transition-all active:scale-95 cursor-pointer"
-                                  >
-                                    <X className="w-3.5 h-3.5" />
-                                    <span>Batalkan Pesanan</span>
-                                  </button>
-                                )}
-
-                                {booking.property?.id && (
-                                  <Link
-                                    href={`/kos/${booking.property.id}`}
-                                    className="inline-flex items-center gap-1 text-xs font-medium text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 hover:underline px-2 py-1"
-                                  >
-                                    <span>Lihat Kos</span>
-                                    <ExternalLink className="w-3 h-3" />
-                                  </Link>
-                                )}
-                              </div>
-                            </div>
-                          </div>
-
-                          {/* Grace period & Dispute Banner for COMPLETED booking */}
-                          {booking.status?.toUpperCase() === "COMPLETED" && (() => {
-                            const confirmedAt = booking.checkin_confirmed_at
-                              ? new Date(booking.checkin_confirmed_at)
-                              : null;
-                            const deadline = confirmedAt
-                              ? new Date(confirmedAt.getTime() + 12 * 60 * 60 * 1000)
-                              : null;
-                            const isWithinGracePeriod = deadline ? Date.now() < deadline.getTime() : false;
-
-                            if (isWithinGracePeriod && deadline) {
-                              const diffMs = deadline.getTime() - Date.now();
-                              const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
-                              const diffMins = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
-
-                              return (
-                                <div className="mt-1 pt-3 border-t border-slate-150 dark:border-slate-800/80 bg-indigo-50/70 dark:bg-indigo-950/40 p-3.5 rounded-xl border border-indigo-200 dark:border-indigo-800/60 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
-                                  <div className="space-y-1">
-                                    <div className="flex items-center gap-1.5 font-bold text-indigo-900 dark:text-indigo-200">
-                                      <Clock className="w-3.5 h-3.5 text-indigo-600" />
-                                      <span>Check-In Dikonfirmasi Mitra (Masa Tenggang 12 Jam)</span>
-                                    </div>
-                                    <p className="text-slate-600 dark:text-slate-400 text-[11px]">
-                                      Sisa waktu pengajuan masalah kamar:{" "}
-                                      <strong className="text-indigo-700 dark:text-indigo-300">
-                                        {diffHours} jam {diffMins} menit lagi
-                                      </strong>
-                                      . Jika tidak ada sanggahan, dana akan otomatis diteruskan ke mitra.
-                                    </p>
-                                  </div>
-                                  <button
-                                    type="button"
-                                    onClick={() => {
-                                      setDisputeBooking(booking);
-                                      setDisputeReason("");
-                                      setDisputeError(null);
-                                    }}
-                                    className="px-3.5 py-1.5 rounded-xl font-bold text-xs bg-rose-600 hover:bg-rose-700 text-white shadow-xs transition-colors shrink-0 cursor-pointer self-start sm:self-auto"
-                                  >
-                                    Laporkan Masalah
-                                  </button>
-                                </div>
-                              );
-                            }
-
-                            return (
-                              <div className="mt-1 pt-3 border-t border-slate-150 dark:border-slate-800/80 bg-emerald-50/60 dark:bg-emerald-950/30 p-3 rounded-xl border border-emerald-200 dark:border-emerald-800/50 flex items-center gap-2 text-xs text-emerald-800 dark:text-emerald-300">
-                                <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                                <span>Check-in selesai dan masa tenggang telah berakhir. Selamat menikmati kamar kos Anda!</span>
-                              </div>
-                            );
-                          })()}
-
-                          {/* Dispute Info Banner */}
-                          {booking.status?.toUpperCase() === "DISPUTED" && (
-                            <div className="mt-1 pt-3 border-t border-slate-150 dark:border-slate-800/80 bg-rose-50/70 dark:bg-rose-950/30 p-3.5 rounded-xl border border-rose-200 dark:border-rose-800/60 text-xs text-rose-900 dark:text-rose-200 space-y-1">
-                              <div className="flex items-center gap-1.5 font-bold">
-                                <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
-                                <span>Laporan Kendala (Dispute) Sedang Ditangani</span>
-                              </div>
-                              <p className="text-[11px] text-slate-600 dark:text-slate-400">
-                                Tim Admin KosPasti sedang menginvestigasi laporan Anda dan menahan pencairan dana ke mitra. Kami akan segera menghubungi Anda.
-                              </p>
-                              {booking.cancellation_reason && (
-                                <p className="text-[11px] text-slate-700 dark:text-slate-300 mt-1">
-                                  <strong>Keterangan masalah:</strong> {booking.cancellation_reason}
-                                </p>
-                              )}
-                            </div>
-                          )}
-
-                          {/* Info Pembatalan / Refund Details jika ada */}
-                          {(booking.cancellation_reason && booking.status?.toUpperCase() !== "DISPUTED" || booking.refund_bank_name || booking.refund_note) && (
-                            <div className="mt-1 pt-3 border-t border-slate-150 dark:border-slate-800/80 bg-slate-50/80 dark:bg-slate-800/40 p-3 rounded-xl text-xs space-y-1">
-                              {booking.cancellation_reason && booking.status?.toUpperCase() !== "DISPUTED" && (
-                                <p className="text-slate-700 dark:text-slate-300">
-                                  <strong className="text-slate-800 dark:text-slate-200">Alasan Pembatalan:</strong>{" "}
-                                  {booking.cancellation_reason}
-                                </p>
-                              )}
-                              {booking.refund_bank_name && (
-                                <p className="text-slate-600 dark:text-slate-400">
-                                  <strong className="text-slate-700 dark:text-slate-300">Rekening Tujuan Refund:</strong>{" "}
-                                  {booking.refund_bank_name} - {booking.refund_account_number} a.n. {booking.refund_account_holder}
-                                </p>
-                              )}
-                              {booking.refund_note && (
-                                <p className="text-emerald-700 dark:text-emerald-400 font-medium">
-                                  <strong>Catatan Refund:</strong> {booking.refund_note}
-                                </p>
-                              )}
-                            </div>
-                          )}
-                        </div>
-                      );
-                    })}
-                  </div>
-                )}
+                <BookingsTab
+                  bookings={bookings}
+                  isLoadingBookings={isLoadingBookings}
+                  isOnline={isOnline}
+                  isOfflineBookings={isOfflineBookings}
+                  bookingsLastSyncedAt={bookingsLastSyncedAt}
+                  user={user}
+                  onBookingsUpdated={fetchBookings}
+                />
               </div>
             )}
 
-            {/* MODAL PEMBATALAN & PENGAJUAN REFUND */}
-            {cancellingBooking && (
-              <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-200">
-                <div
-                  className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 sm:p-7 max-w-lg w-full shadow-float space-y-5 animate-in zoom-in-95 duration-200"
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  <div className="flex items-start justify-between gap-3 border-b border-slate-100 dark:border-slate-800 pb-4">
-                    <div>
-                      <h3 className="text-lg font-black text-slate-900 dark:text-white">
-                        {["PAID", "APPROVED", "ACCEPTED"].includes(cancellingBooking.status?.toUpperCase())
-                          ? "Pengajuan Pembatalan & Refund"
-                          : "Batalkan Pemesanan"}
-                      </h3>
-                      <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                        Kos: <strong className="text-slate-800 dark:text-slate-200">{cancellingBooking.property.name}</strong>
-                      </p>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => setCancellingBooking(null)}
-                      className="p-1.5 rounded-full text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
-                    >
-                      <X className="w-5 h-5" />
-                    </button>
-                  </div>
-
-                  {cancelError && (
-                    <div className="p-3.5 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 text-rose-700 dark:text-rose-300 text-xs font-semibold flex items-center gap-2">
-                      <AlertCircle className="w-4 h-4 shrink-0 text-rose-600" />
-                      <span>{cancelError}</span>
-                    </div>
-                  )}
-
-                  {["PAID", "APPROVED", "ACCEPTED"].includes(cancellingBooking.status?.toUpperCase()) ? (
-                    <form onSubmit={handleSubmitCancel} className="space-y-4">
-                      <div className="p-3 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 text-amber-800 dark:text-amber-300 text-xs leading-relaxed">
-                        Dana DP Anda dijamin aman melalui sistem escrow KosPasti. Mohon berikan informasi rekening atau akun e-wallet Anda untuk proses pengembalian dana.
-                      </div>
-
-                      <div>
-                        <label className="block text-xs font-bold text-slate-800 dark:text-slate-200 mb-1">
-                          Alasan Pembatalan <span className="text-rose-500">*</span>
-                        </label>
-                        <select
-                          value={cancelReasonCategory}
-                          onChange={(e) => setCancelReasonCategory(e.target.value)}
-                          className="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"
-                        >
-                          <option value="Perubahan rencana kuliah/studi">Perubahan rencana kuliah/studi</option>
-                          <option value="Salah memilih tipe kamar atau lokasi">Salah memilih tipe kamar atau lokasi</option>
-                          <option value="Menemukan alternatif hunian lain">Menemukan alternatif hunian lain</option>
-                          <option value="Tidak jadi merantau">Tidak jadi merantau</option>
-                          <option value="Lainnya">Alasan lainnya</option>
-                        </select>
-                      </div>
-
-                      <div>
-                        <label className="block text-xs font-bold text-slate-800 dark:text-slate-200 mb-1">
-                          Keterangan Tambahan
-                        </label>
-                        <textarea
-                          rows={2}
-                          value={cancelCustomReason}
-                          onChange={(e) => setCancelCustomReason(e.target.value)}
-                          placeholder="Jelaskan secara singkat alasan pembatalan..."
-                          className="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white placeholder:text-slate-400 focus:ring-2 focus:ring-emerald-500 focus:outline-none"
-                        />
-                      </div>
-
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        <div>
-                          <label className="block text-xs font-bold text-slate-800 dark:text-slate-200 mb-1">
-                            Bank / E-Wallet Tujuan <span className="text-rose-500">*</span>
-                          </label>
-                          <select
-                            value={cancelBankName}
-                            onChange={(e) => setCancelBankName(e.target.value)}
-                            className="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"
-                          >
-                            <option value="BCA">Bank BCA</option>
-                            <option value="Mandiri">Bank Mandiri</option>
-                            <option value="BNI">Bank BNI</option>
-                            <option value="BRI">Bank BRI</option>
-                            <option value="BSI">Bank Syariah Indonesia (BSI)</option>
-                            <option value="GoPay">GoPay</option>
-                            <option value="OVO">OVO</option>
-                            <option value="DANA">DANA</option>
-                            <option value="ShopeePay">ShopeePay</option>
-                            <option value="Lainnya">Lainnya</option>
-                          </select>
-                          {cancelBankName === "Lainnya" && (
-                            <input
-                              type="text"
-                              required
-                              placeholder="Ketik nama bank/e-wallet"
-                              value={cancelCustomBank}
-                              onChange={(e) => setCancelCustomBank(e.target.value)}
-                              className="mt-1.5 w-full px-3 py-1.5 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"
-                            />
-                          )}
-                        </div>
-
-                        <div>
-                          <label className="block text-xs font-bold text-slate-800 dark:text-slate-200 mb-1">
-                            Nomor Rekening / No HP <span className="text-rose-500">*</span>
-                          </label>
-                          <input
-                            type="text"
-                            required
-                            placeholder="Contoh: 1234567890 / 0812xxx"
-                            value={cancelAccountNumber}
-                            onChange={(e) => setCancelAccountNumber(e.target.value)}
-                            className="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"
-                          />
-                        </div>
-                      </div>
-
-                      <div>
-                        <label className="block text-xs font-bold text-slate-800 dark:text-slate-200 mb-1">
-                          Nama Pemilik Rekening (Sesuai Buku Tabungan / Akun) <span className="text-rose-500">*</span>
-                        </label>
-                        <input
-                          type="text"
-                          required
-                          placeholder="Nama lengkap pemilik rekening"
-                          value={cancelAccountHolder}
-                          onChange={(e) => setCancelAccountHolder(e.target.value)}
-                          className="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"
-                        />
-                      </div>
-
-                      <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-slate-100 dark:border-slate-800">
-                        <button
-                          type="button"
-                          onClick={() => setCancellingBooking(null)}
-                          disabled={isSubmittingCancel}
-                          className="px-4 py-2 text-xs font-bold text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-xl transition-colors cursor-pointer"
-                        >
-                          Batal
-                        </button>
-                        <button
-                          type="submit"
-                          disabled={isSubmittingCancel}
-                          className="inline-flex items-center gap-2 px-5 py-2 text-xs font-bold text-white bg-rose-600 hover:bg-rose-700 active:scale-95 rounded-xl shadow-soft hover:shadow-float transition-all disabled:opacity-50 cursor-pointer"
-                        >
-                          {isSubmittingCancel ? (
-                            <>
-                              <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                              <span>Mengirim Pengajuan...</span>
-                            </>
-                          ) : (
-                            <span>Kirim Pengajuan Pembatalan</span>
-                          )}
-                        </button>
-                      </div>
-                    </form>
-                  ) : (
-                    /* Modal pembatalan untuk pesanan PENDING (belum bayar) */
-                    <form onSubmit={handleSubmitCancel} className="space-y-4">
-                      <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
-                        Pesanan ini belum dibayar. Jika Anda membatalkan, pesanan akan langsung ditutup dan kamar akan kembali tersedia untuk penyewa lain.
-                      </p>
-
-                      <div>
-                        <label className="block text-xs font-bold text-slate-800 dark:text-slate-200 mb-1">
-                          Alasan Pembatalan
-                        </label>
-                        <select
-                          value={cancelReasonCategory}
-                          onChange={(e) => setCancelReasonCategory(e.target.value)}
-                          className="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"
-                        >
-                          <option value="Perubahan rencana kuliah/studi">Perubahan rencana kuliah/studi</option>
-                          <option value="Salah memilih tipe kamar atau lokasi">Salah memilih tipe kamar atau lokasi</option>
-                          <option value="Menemukan alternatif hunian lain">Menemukan alternatif hunian lain</option>
-                          <option value="Tidak jadi merantau">Tidak jadi merantau</option>
-                          <option value="Lainnya">Lainnya</option>
-                        </select>
-                      </div>
-
-                      <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-slate-100 dark:border-slate-800">
-                        <button
-                          type="button"
-                          onClick={() => setCancellingBooking(null)}
-                          disabled={isSubmittingCancel}
-                          className="px-4 py-2 text-xs font-bold text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-xl transition-colors cursor-pointer"
-                        >
-                          Kembali
-                        </button>
-                        <button
-                          type="submit"
-                          disabled={isSubmittingCancel}
-                          className="inline-flex items-center gap-2 px-5 py-2 text-xs font-bold text-white bg-rose-600 hover:bg-rose-700 active:scale-95 rounded-xl shadow-soft hover:shadow-float transition-all disabled:opacity-50 cursor-pointer"
-                        >
-                          {isSubmittingCancel ? (
-                            <>
-                              <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                              <span>Membatalkan...</span>
-                            </>
-                          ) : (
-                            <span>Ya, Batalkan Pesanan</span>
-                          )}
-                        </button>
-                      </div>
-                    </form>
-                  )}
-                </div>
-              </div>
-            )}
-
-            {/* MODAL LAPORKAN MASALAH / DISPUTE */}
-            {disputeBooking && (
-              <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-200">
-                <div
-                  className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 sm:p-7 max-w-lg w-full shadow-float space-y-5 animate-in zoom-in-95 duration-200"
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  <div className="flex items-start justify-between gap-3 border-b border-slate-100 dark:border-slate-800 pb-4">
-                    <div className="flex items-center gap-3">
-                      <div className="p-2.5 rounded-2xl bg-rose-100 dark:bg-rose-950/50 text-rose-600 dark:text-rose-400">
-                        <AlertCircle className="w-5 h-5" />
-                      </div>
-                      <div>
-                        <h3 className="text-lg font-black text-slate-900 dark:text-white">
-                          Laporkan Masalah Check-In
-                        </h3>
-                        <p className="text-xs text-slate-500 dark:text-slate-400">
-                          {disputeBooking.property.name}
-                        </p>
-                      </div>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => setDisputeBooking(null)}
-                      className="p-1.5 rounded-full text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
-                    >
-                      <X className="w-5 h-5" />
-                    </button>
-                  </div>
-
-                  {disputeError && (
-                    <div className="p-3.5 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 text-rose-700 dark:text-rose-300 text-xs font-semibold flex items-center gap-2">
-                      <AlertCircle className="w-4 h-4 shrink-0 text-rose-600" />
-                      <span>{disputeError}</span>
-                    </div>
-                  )}
-
-                  <div className="p-3 rounded-2xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 text-xs text-amber-900 dark:text-amber-200 leading-relaxed">
-                    Pengajuan masalah akan menahan dana sewa Anda di sistem Escrow KosPasti agar tidak dicairkan ke pemilik kos. Tim Admin akan memverifikasi laporan Anda secepatnya.
-                  </div>
-
-                  <form
-                    onSubmit={async (e) => {
-                      e.preventDefault();
-                      if (!disputeReason.trim()) {
-                        setDisputeError("Mohon deskripsikan masalah yang Anda alami.");
-                        return;
-                      }
-
-                      setIsSubmittingDispute(true);
-                      setDisputeError(null);
-
-                      try {
-                        const res = await fetch(`/api/user/bookings/${disputeBooking.id}/dispute`, {
-                          method: "POST",
-                          headers: { "Content-Type": "application/json" },
-                          body: JSON.stringify({ reason: disputeReason.trim() }),
-                        });
-
-                        const data = await res.json();
-                        if (!res.ok || !data.success) {
-                          throw new Error(data.error || "Gagal mengajukan dispute.");
-                        }
-
-                        setDisputeSuccessMsg("Laporan masalah Anda berhasil diajukan. Tim Admin akan segera menghubungi Anda.");
-                        setDisputeBooking(null);
-
-                        // Reload bookings
-                        const refreshRes = await fetch("/api/user/bookings");
-                        const refreshData = await refreshRes.json();
-                        if (refreshData.success && Array.isArray(refreshData.bookings)) {
-                          setBookings(refreshData.bookings);
-                        }
-                      } catch (err: unknown) {
-                        setDisputeError(err instanceof Error ? err.message : "Terjadi kesalahan saat mengirim laporan.");
-                      } finally {
-                        setIsSubmittingDispute(false);
-                      }
-                    }}
-                    className="space-y-4"
-                  >
-                    <div>
-                      <label className="block text-xs font-bold text-slate-800 dark:text-slate-200 mb-1.5">
-                        Jelaskan Masalah / Kendala <span className="text-rose-500">*</span>
-                      </label>
-                      <textarea
-                        rows={3}
-                        required
-                        value={disputeReason}
-                        onChange={(e) => setDisputeReason(e.target.value)}
-                        placeholder="Contoh: Kamar tidak sesuai foto, pemilik tidak dapat dihubungi saat check-in, atau fasilitas utama rusak."
-                        className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white placeholder:text-slate-400 focus:ring-2 focus:ring-rose-500 focus:outline-none"
-                      />
-                    </div>
-
-                    <div className="flex items-center justify-end gap-2.5 pt-2 border-t border-slate-100 dark:border-slate-800">
-                      <button
-                        type="button"
-                        disabled={isSubmittingDispute}
-                        onClick={() => setDisputeBooking(null)}
-                        className="px-4 py-2 text-xs font-bold text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-xl transition-colors cursor-pointer"
-                      >
-                        Batal
-                      </button>
-                      <button
-                        type="submit"
-                        disabled={isSubmittingDispute}
-                        className="inline-flex items-center gap-2 px-5 py-2 text-xs font-bold text-white bg-rose-600 hover:bg-rose-700 active:scale-95 rounded-xl shadow-soft hover:shadow-float transition-all disabled:opacity-50 cursor-pointer"
-                      >
-                        {isSubmittingDispute ? (
-                          <>
-                            <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                            <span>Mengirim Laporan...</span>
-                          </>
-                        ) : (
-                          <span>Kirim Laporan Masalah</span>
-                        )}
-                      </button>
-                    </div>
-                  </form>
-                </div>
-              </div>
-            )}
-
-            {/* TAB 3: JADWAL SURVEI LOKASI */}
+            {/* TAB 3: JADWAL SURVEI */}
             {activeTab === "visits" && (
               <div
                 role="tabpanel"
@@ -1975,339 +563,32 @@ function ProfileContent() {
                 tabIndex={0}
                 className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 sm:p-8 shadow-sm focus:outline-none"
               >
-                <div className="border-b border-slate-100 dark:border-slate-800 pb-4 mb-6">
-                  <h2 className="text-lg font-bold text-slate-900 dark:text-white">
-                    Jadwal Survei Lokasi Kos
-                  </h2>
-                  <p className="text-sm text-slate-500 dark:text-slate-400">
-                    Pantau status persetujuan survei lokasi dari pemilik kos sebelum melakukan booking.
-                  </p>
-                </div>
+                <VisitsTab
+                  visits={visits}
+                  isLoadingVisits={isLoadingVisits}
+                  onVisitsUpdated={fetchVisits}
+                />
+              </div>
+            )}
 
-                {visitRescheduleSuccess && (
-                  <div
-                    role="status"
-                    className="mb-5 p-3.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-200 text-xs font-medium flex items-start justify-between gap-3"
-                  >
-                    <div className="flex items-start gap-2">
-                      <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
-                      <span>{visitRescheduleSuccess}</span>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => setVisitRescheduleSuccess(null)}
-                      aria-label="Tutup notifikasi sukses ubah jadwal"
-                      className="text-emerald-600 hover:text-emerald-800 p-0.5 cursor-pointer"
-                    >
-                      <X className="w-4 h-4" />
-                    </button>
-                  </div>
-                )}
-
-                {isLoadingVisits ? (
-                  <div className="py-12 flex flex-col items-center justify-center text-slate-500 dark:text-slate-400">
-                    <Loader2 className="w-7 h-7 animate-spin text-emerald-600 mb-2" />
-                    <p className="text-sm">Memuat jadwal survei...</p>
-                  </div>
-                ) : visits.length === 0 ? (
-                  <div className="py-12 px-4 text-center border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-2xl">
-                    <div className="w-14 h-14 bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-500 rounded-full flex items-center justify-center mx-auto mb-3">
-                      <CalendarClock className="w-7 h-7" />
-                    </div>
-                    <h3 className="text-base font-bold text-slate-800 dark:text-slate-200">
-                      Belum Ada Jadwal Survei
-                    </h3>
-                    <p className="text-sm text-slate-500 dark:text-slate-400 max-w-sm mx-auto mt-1 mb-5">
-                      Anda dapat menjadwalkan survei langsung dari halaman detail kos pilihan Anda.
-                    </p>
-                    <Link
-                      href="/search"
-                      className="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-semibold text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl shadow-sm transition-colors"
-                    >
-                      <span>Cari Kos Sekarang</span>
-                      <ArrowRight className="w-4 h-4" />
-                    </Link>
-                  </div>
-                ) : (
-                  <div className="space-y-4">
-                    {visits.map((visit) => {
-                      const statusLabel =
-                        VISIT_STATUS_LABELS[visit.status as VisitStatus] || visit.status;
-                      return (
-                        <div
-                          key={visit.id}
-                          className="border border-slate-200 dark:border-slate-800 rounded-2xl p-4 sm:p-5 bg-white dark:bg-slate-900/60 flex flex-col gap-3"
-                        >
-                          <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
-                            <div className="space-y-1">
-                              <Link
-                                href={`/kos/${visit.property.id}`}
-                                className="font-bold text-slate-900 dark:text-white text-base hover:text-emerald-600 transition-colors"
-                              >
-                                {visit.property.name}
-                              </Link>
-                              {visit.property.address && (
-                                <p className="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-1">
-                                  <MapPin className="w-3.5 h-3.5 shrink-0" />
-                                  <span>{visit.property.address}</span>
-                                </p>
-                              )}
-                              <div className="flex flex-wrap items-center gap-3 text-xs text-slate-600 dark:text-slate-300 pt-1">
-                                <span className="flex items-center gap-1 font-semibold">
-                                  <Calendar className="w-3.5 h-3.5 text-emerald-600" />
-                                  <span>{formatVisitDateId(visit.visit_date)}</span>
-                                </span>
-                                <span className="flex items-center gap-1">
-                                  <Clock className="w-3.5 h-3.5 text-slate-400" />
-                                  <span>{visit.visit_time_slot} WIB</span>
-                                </span>
-                              </div>
-                            </div>
-
-                            <span
-                              className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-bold shrink-0 self-start border ${
-                                visit.status === "ACCEPTED"
-                                  ? "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/60 dark:text-emerald-300 dark:border-emerald-800"
-                                  : visit.status === "RESCHEDULED"
-                                  ? "bg-sky-50 text-sky-700 border-sky-200 dark:bg-sky-950/60 dark:text-sky-300 dark:border-sky-800"
-                                  : visit.status === "REJECTED" || visit.status === "CANCELLED"
-                                  ? "bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-950/60 dark:text-rose-300 dark:border-rose-800"
-                                  : "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/60 dark:text-amber-300 dark:border-amber-800"
-                              }`}
-                            >
-                              {statusLabel}
-                            </span>
-                          </div>
-
-                          {visit.status === "RESCHEDULED" && visit.reschedule_date && (
-                            <div className="p-3 rounded-xl bg-sky-50 dark:bg-sky-950/40 border border-sky-200 dark:border-sky-800 text-xs text-sky-900 dark:text-sky-200">
-                              <p className="font-bold">Usulan Jadwal Baru dari Pemilik:</p>
-                              <p className="mt-0.5">
-                                {formatVisitDateId(visit.reschedule_date)} ({visit.reschedule_time_slot} WIB)
-                              </p>
-                              {visit.reschedule_note && (
-                                <p className="mt-1 italic">&quot;{visit.reschedule_note}&quot;</p>
-                              )}
-                            </div>
-                          )}
-
-                          {visit.status === "REJECTED" && visit.cancellation_reason && (
-                            <div className="p-3 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 text-xs text-rose-800 dark:text-rose-200">
-                              <strong>Catatan Pemilik:</strong> {visit.cancellation_reason}
-                            </div>
-                          )}
-
-                          <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-slate-100 dark:border-slate-800">
-                            <div className="text-[11px] font-medium text-slate-500 dark:text-slate-400">
-                              {(visit.student_reschedule_count ?? 0) >= MAX_STUDENT_VISIT_RESCHEDULES &&
-                                ["PENDING", "ACCEPTED", "RESCHEDULED"].includes(visit.status) && (
-                                  <span>Kuota ubah jadwal (1x) sudah digunakan</span>
-                                )}
-                            </div>
-                            <div className="flex flex-wrap items-center justify-end gap-2">
-                              {canStudentRescheduleVisit(
-                                visit.status,
-                                visit.student_reschedule_count ?? 0
-                              ) && (
-                                <button
-                                  type="button"
-                                  onClick={() => openStudentRescheduleModal(visit)}
-                                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-xs font-semibold text-slate-800 dark:text-slate-100 transition-colors cursor-pointer"
-                                >
-                                  <CalendarClock className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
-                                  <span>Ubah Jadwal</span>
-                                </button>
-                              )}
-                              {visit.property.owner?.whatsapp_number && (
-                                <a
-                                  href={`https://wa.me/${visit.property.owner.whatsapp_number.replace(/\D/g, "")}`}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
-                                >
-                                  <Phone className="w-3.5 h-3.5 text-emerald-600" />
-                                  <span>Chat Pemilik</span>
-                                </a>
-                              )}
-                              <Link
-                                href={`/kos/${visit.property.id}`}
-                                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition-colors"
-                              >
-                                <span>Lihat Kos / Booking</span>
-                                <ArrowRight className="w-3.5 h-3.5" />
-                              </Link>
-                            </div>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                )}
+            {/* TAB 4: KEAMANAN & KATA SANDI */}
+            {activeTab === "security" && (
+              <div
+                role="tabpanel"
+                id="panel-security"
+                aria-labelledby="tab-security"
+                tabIndex={0}
+                className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 sm:p-8 shadow-sm focus:outline-none"
+              >
+                <SecurityTab
+                  user={user}
+                  onPasswordUpdated={fetchProfile}
+                />
               </div>
             )}
           </main>
         </div>
       </div>
-
-      {/* Modal Ubah Jadwal Survei (Penyewa, maks 1x) */}
-      <dialog
-        ref={visitRescheduleDialogRef}
-        closedby="any"
-        aria-labelledby="student-visit-reschedule-title"
-        onClose={() => {
-          setReschedulingVisit(null);
-          setVisitRescheduleError(null);
-        }}
-        className="m-auto w-[calc(100%-1.5rem)] max-w-md rounded-2xl sm:rounded-3xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 p-0 text-slate-900 dark:text-slate-100 shadow-float backdrop:bg-slate-900/60"
-      >
-        {reschedulingVisit && (
-          <div className="p-5 sm:p-6">
-            <div className="flex items-start justify-between gap-3 pb-3 border-b border-slate-100 dark:border-slate-800">
-              <div className="flex items-start gap-2.5">
-                <div className="w-9 h-9 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
-                  <CalendarClock className="w-5 h-5" />
-                </div>
-                <div>
-                  <h3
-                    id="student-visit-reschedule-title"
-                    className="text-base font-extrabold text-slate-900 dark:text-white"
-                  >
-                    Ubah Jadwal Survei
-                  </h3>
-                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                    {reschedulingVisit.property.name}
-                  </p>
-                </div>
-              </div>
-              <button
-                type="button"
-                onClick={() => setReschedulingVisit(null)}
-                aria-label="Tutup modal ubah jadwal survei"
-                className="p-1.5 rounded-xl text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-
-            <form onSubmit={handleSubmitStudentReschedule} className="mt-4 space-y-4">
-              <p className="text-[11px] font-medium text-amber-800 dark:text-amber-200 bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 rounded-xl px-3 py-2">
-                Perubahan jadwal hanya dapat dilakukan 1x dan akan dikirim ulang ke pemilik kos untuk dikonfirmasi.
-              </p>
-
-              {visitRescheduleError && (
-                <div
-                  role="alert"
-                  className="p-3 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 text-rose-800 dark:text-rose-200 text-xs font-medium flex items-start gap-2"
-                >
-                  <AlertCircle className="w-4 h-4 text-rose-600 dark:text-rose-400 shrink-0 mt-0.5" />
-                  <span>{visitRescheduleError}</span>
-                </div>
-              )}
-
-              <div>
-                <label
-                  htmlFor="student-reschedule-date"
-                  className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5"
-                >
-                  Tanggal Kunjungan Baru
-                </label>
-                <input
-                  id="student-reschedule-date"
-                  name="visitDate"
-                  type="date"
-                  min={visitMinDate}
-                  max={visitMaxDate}
-                  value={visitRescheduleDate}
-                  onChange={(e) => {
-                    setVisitRescheduleDate(e.target.value);
-                    if (visitRescheduleError) setVisitRescheduleError(null);
-                  }}
-                  required
-                  className="w-full px-3.5 py-2.5 text-sm rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
-                />
-              </div>
-
-              <fieldset>
-                <legend className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
-                  Perkiraan Jam Kunjungan (WIB)
-                </legend>
-                <div className="grid grid-cols-2 gap-2">
-                  {VISIT_TIME_SLOTS.map((slot) => {
-                    const checked = visitRescheduleSlot === slot.value;
-                    const radioId = `resched-slot-${slot.value.replace(/\s+/g, "")}`;
-                    return (
-                      <label
-                        key={slot.value}
-                        htmlFor={radioId}
-                        className={`flex items-center gap-2 px-3 py-2 rounded-xl border text-xs font-semibold cursor-pointer transition-all ${
-                          checked
-                            ? "bg-emerald-50 dark:bg-emerald-950/60 border-emerald-500 text-emerald-800 dark:text-emerald-200"
-                            : "bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300"
-                        }`}
-                      >
-                        <input
-                          id={radioId}
-                          type="radio"
-                          name="rescheduleTimeSlot"
-                          value={slot.value}
-                          checked={checked}
-                          onChange={(e) => setVisitRescheduleSlot(e.target.value)}
-                          className="accent-emerald-600 shrink-0"
-                        />
-                        <span className="truncate">{slot.value}</span>
-                      </label>
-                    );
-                  })}
-                </div>
-              </fieldset>
-
-              <div>
-                <label
-                  htmlFor="student-reschedule-note"
-                  className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5"
-                >
-                  Alasan / Catatan (Opsional)
-                </label>
-                <textarea
-                  id="student-reschedule-note"
-                  name="notes"
-                  rows={2}
-                  maxLength={500}
-                  placeholder="Contoh: Ada jadwal kuliah pengganti, mohon geser ke hari berikutnya."
-                  value={visitRescheduleNote}
-                  onChange={(e) => setVisitRescheduleNote(e.target.value)}
-                  className="w-full px-3.5 py-2.5 text-sm rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
-                />
-              </div>
-
-              <div className="flex gap-2.5 pt-1">
-                <button
-                  type="button"
-                  onClick={() => setReschedulingVisit(null)}
-                  disabled={isSubmittingVisitReschedule}
-                  className="w-1/2 py-2.5 px-4 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-semibold text-sm cursor-pointer"
-                >
-                  Batal
-                </button>
-                <button
-                  type="submit"
-                  disabled={isSubmittingVisitReschedule}
-                  className="w-1/2 py-2.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-70"
-                >
-                  {isSubmittingVisitReschedule ? (
-                    <>
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                      <span>Mengirim...</span>
-                    </>
-                  ) : (
-                    <span>Kirim Jadwal Baru</span>
-                  )}
-                </button>
-              </div>
-            </form>
-          </div>
-        )}
-      </dialog>
     </div>
   );
 }
@@ -2318,7 +599,7 @@ export default function ProfilePage() {
       fallback={
         <div className="min-h-[70vh] flex flex-col items-center justify-center p-6 text-slate-500">
           <Loader2 className="w-8 h-8 animate-spin text-emerald-600 mb-3" />
-          <p className="text-sm font-medium">Memuat profil pengguna...</p>
+          <p className="text-sm font-medium">Memuat halaman profil...</p>
         </div>
       }
     >
@@ -2326,4 +607,3 @@ export default function ProfilePage() {
     </Suspense>
   );
 }
-

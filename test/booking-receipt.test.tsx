@@ -79,7 +79,14 @@ describe("E-Receipt Resmi & Voucher Booking Siap Cetak (#372)", () => {
   describe("3. Tombol Kuitansi di Halaman Profil Pengguna (/profil)", () => {
     it("menyediakan tautan kuitansi resmi untuk pesanan yang telah lunas/disetujui", () => {
       const filePath = path.resolve(__dirname, "../src/app/profil/page.tsx");
-      const content = fs.readFileSync(filePath, "utf-8");
+      const bookingsTabPath = path.resolve(
+        __dirname,
+        "../src/components/profile/BookingsTab.tsx"
+      );
+      const content =
+        (fs.existsSync(bookingsTabPath)
+          ? fs.readFileSync(bookingsTabPath, "utf-8")
+          : "") + fs.readFileSync(filePath, "utf-8");
 
       expect(content).toContain('href={`/receipt/${booking.id}`}');
       expect(content).toContain("Kuitansi Resmi");

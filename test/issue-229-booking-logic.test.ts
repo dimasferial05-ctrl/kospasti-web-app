@@ -91,6 +91,7 @@ describe("Issue #229: Booking Logic & Profile Upgrades (Non-Destructive Mocked T
           },
           property: {
             updateMany: vi.fn().mockResolvedValue({ count: 1 }),
+            findUnique: vi.fn().mockResolvedValue({ price_per_month: 500000 }),
           },
         };
         return callback(txMock);
@@ -155,7 +156,14 @@ describe("Issue #229: Booking Logic & Profile Upgrades (Non-Destructive Mocked T
       const fs = await import("fs");
       const path = await import("path");
       const profilPath = path.resolve(__dirname, "../src/app/profil/page.tsx");
-      const content = fs.readFileSync(profilPath, "utf-8");
+      const bookingsTabPath = path.resolve(
+        __dirname,
+        "../src/components/profile/BookingsTab.tsx"
+      );
+      const content =
+        (fs.existsSync(bookingsTabPath)
+          ? fs.readFileSync(bookingsTabPath, "utf-8")
+          : "") + fs.readFileSync(profilPath, "utf-8");
 
       // Verifikasi logika render tombol Bayar Sekarang
       expect(content).toContain('booking.status?.toUpperCase() === "PENDING"');
