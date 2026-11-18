@@ -22,6 +22,7 @@ export function formatWhatsAppNumber(phone: string): string {
 export interface SendWhatsAppParams {
   to: string;
   message: string;
+  skipDeviceCheck?: boolean; // Opsional: jika caller sudah melakukan pre-flight check device di awal batch
 }
 
 export interface SendWhatsAppResult {
@@ -31,21 +32,73 @@ export interface SendWhatsAppResult {
   error?: string;
 }
 
-export async function checkFonnteDeviceStatus(token: string): Promise<boolean> {
+export interface DeviceStatusCacheEntry {
+  status: boolean;
+  expiresAt: number;
+}
+
+export interface CheckDeviceStatusOptions {
+  forceRefresh?: boolean;
+  ttlMs?: number;
+}
+
+// TTL default cache status device: 60 detik (1 menit)
+export const DEFAULT_DEVICE_STATUS_CACHE_TTL_MS = 60 * 1000;
+
+// In-memory cache map per token Fonnte
+const deviceStatusCache = new Map<string, DeviceStatusCacheEntry>();
+
+/**
+ * Membersihkan cache status device (berguna untuk testing atau force reset).
+ */
+export function clearDeviceStatusCache(): void {
+  deviceStatusCache.clear();
+}
+
+export async function checkFonnteDeviceStatus(
+  token: string,
+  options?: CheckDeviceStatusOptions
+): Promise<boolean> {
+  const trimmedToken = token.trim();
+  const now = Date.now();
+  const ttl = options?.ttlMs ?? DEFAULT_DEVICE_STATUS_CACHE_TTL_MS;
+
+  // 1. Cek apakah status yang masih valid tersedia di cache
+  if (!options?.forceRefresh) {
+    const cached = deviceStatusCache.get(trimmedToken);
+    if (cached && now < cached.expiresAt) {
+      return cached.status;
+    }
+  }
+
+  // 2. Jika tidak ada di cache atau expired, lakukan request HTTP ke Fonnte
   try {
     const response = await fetch("https://api.fonnte.com/device", {
       method: "POST",
       headers: {
-        Authorization: token.trim(),
+        Authorization: trimmedToken,
       },
     });
 
     const result = await response.json().catch(() => null);
 
     // Status perangkat bisa berupa "connect" atau "disconnect"
-    return result?.device_status === "connect";
+    const isConnected = result?.device_status === "connect";
+
+    // 3. Simpan hasil ke cache
+    deviceStatusCache.set(trimmedToken, {
+      status: isConnected,
+      expiresAt: now + ttl,
+    });
+
+    return isConnected;
   } catch (error) {
     console.error("[WHATSAPP DEVICE ERROR] Gagal mengecek status device:", error);
+    // Jika terjadi error jaringan, simpan false dengan TTL singkat (10 detik)
+    deviceStatusCache.set(trimmedToken, {
+      status: false,
+      expiresAt: now + 10 * 1000,
+    });
     return false; // Asumsikan disconnected demi keamanan jika terjadi error
   }
 }
@@ -53,6 +106,7 @@ export async function checkFonnteDeviceStatus(token: string): Promise<boolean> {
 export async function sendWhatsAppMessage({
   to,
   message,
+  skipDeviceCheck,
 }: SendWhatsAppParams): Promise<SendWhatsAppResult> {
   const token = process.env.FONNTE_TOKEN || process.env.WHATSAPP_TOKEN;
   const formattedNumber = formatWhatsAppNumber(to);
@@ -78,15 +132,19 @@ export async function sendWhatsAppMessage({
     };
   }
 
-  // Validasi status device Fonnte sebelum mengirim pesan
-  const isDeviceConnected = await checkFonnteDeviceStatus(token);
+  // Validasi status device Fonnte sebelum mengirim pesan (kecuali jika di-skip)
+  if (!skipDeviceCheck) {
+    const isDeviceConnected = await checkFonnteDeviceStatus(token);
 
-  if (!isDeviceConnected) {
-    console.warn("[WHATSAPP ABORTED] Device Fonnte sedang terputus (disconnected). Pesan dibatalkan untuk menghemat kuota.");
-    return {
-      success: false,
-      error: "Sistem pengiriman pesan sedang offline. Device WhatsApp tidak terhubung.",
-    };
+    if (!isDeviceConnected) {
+      console.warn(
+        "[WHATSAPP ABORTED] Device Fonnte sedang terputus (disconnected). Pesan dibatalkan untuk menghemat kuota."
+      );
+      return {
+        success: false,
+        error: "Sistem pengiriman pesan sedang offline. Device WhatsApp tidak terhubung.",
+      };
+    }
   }
 
   try {
