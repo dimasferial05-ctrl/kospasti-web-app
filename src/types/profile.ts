@@ -35,6 +35,13 @@ export interface BookingItem {
   refund_account_holder?: string | null;
   refund_note?: string | null;
   refunded_at?: string | null;
+  amount?: number;
+  room_type?: {
+    id: string;
+    name: string;
+    price_per_month: number;
+    image_url?: string | null;
+  } | null;
   property: BookingProperty;
 }
 

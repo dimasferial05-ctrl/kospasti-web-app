@@ -26,6 +26,7 @@ import { TrustAura } from "@/components/ui/backgrounds";
 
 interface BookingReceiptDetail {
   id: string;
+  isRenewal?: boolean;
   invoiceNumber?: string;
   studentName: string;
   studentWhatsapp: string;
@@ -397,12 +398,20 @@ export default function BookingReceiptPage() {
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
               <h1 className="text-lg sm:text-xl font-black text-slate-900 dark:text-white print:text-black tracking-tight uppercase">
-                {isPaid
-                  ? "Voucher Booking &amp; Bukti Pembayaran Resmi"
-                  : "Voucher Booking &amp; Bukti Pembayaran Resmi (Menunggu Pembayaran)"}
+                {booking.isRenewal
+                  ? isPaid
+                    ? "Kuitansi & Bukti Pembayaran Perpanjangan Sewa Kos"
+                    : "Kuitansi Perpanjangan Sewa Kos (Menunggu Pembayaran)"
+                  : isPaid
+                  ? "Voucher Booking & Bukti Pembayaran Resmi"
+                  : "Voucher Booking & Bukti Pembayaran Resmi (Menunggu Pembayaran)"}
               </h1>
               <p className="text-xs text-slate-500 dark:text-slate-400 print:text-slate-600 mt-0.5">
-                {isPaid
+                {booking.isRenewal
+                  ? isPaid
+                    ? "Bukti pembayaran sah perpanjangan sewa kamar kos untuk periode hunian berikutnya."
+                    : "Selesaikan pembayaran Anda agar perpanjangan masa sewa kamar kos otomatis aktif."
+                  : isPaid
                   ? "Tunjukkan dokumen ini saat kedatangan untuk serah terima kunci kamar kos."
                   : "Selesaikan pembayaran Anda agar voucher resmi dan konfirmasi serah terima kunci diterbitkan."}
               </p>
@@ -597,16 +606,30 @@ export default function BookingReceiptPage() {
           <div className="space-y-2 text-xs text-left">
             <div className="flex items-center gap-1.5 font-bold text-slate-900 dark:text-white print:text-black">
               <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-              <span>Instruksi Serah Terima Kunci Kamar:</span>
+              <span>
+                {booking.isRenewal
+                  ? "Ketentuan Perpanjangan Masa Tinggal:"
+                  : "Instruksi Serah Terima Kunci Kamar:"}
+              </span>
             </div>
-            <ol className="list-decimal pl-4 space-y-1 text-slate-600 dark:text-slate-400 print:text-slate-700 text-[11px] sm:text-xs">
-              <li>Tunjukkan voucher ini kepada Pemilik/Pengelola Kos saat Anda tiba di lokasi.</li>
-              <li>Pemilik kos akan mencocokkan Booking ID dan menyerahkan kunci kamar kepada Anda.</li>
-              <li>
-                Lakukan pengecekan fisik kamar kos. Anda dilindungi jaminan garansi penahanan dana sewa
-                selama <strong>12 jam</strong> sejak waktu check-in.
-              </li>
-            </ol>
+            {booking.isRenewal ? (
+              <ol className="list-decimal pl-4 space-y-1 text-slate-600 dark:text-slate-400 print:text-slate-700 text-[11px] sm:text-xs">
+                <li>Pembayaran perpanjangan sewa ini otomatis memperpanjang masa tinggal Anda untuk 1 bulan ke depan.</li>
+                <li>Tidak diperlukan serah terima kunci ulang karena Anda telah menempati kamar fisik tersebut.</li>
+                <li>
+                  Dana sewa tetap diamankan oleh sistem Rekening Bersama (Escrow) KosPasti dan diteruskan ke mitra sesuai jadwal.
+                </li>
+              </ol>
+            ) : (
+              <ol className="list-decimal pl-4 space-y-1 text-slate-600 dark:text-slate-400 print:text-slate-700 text-[11px] sm:text-xs">
+                <li>Tunjukkan voucher ini kepada Pemilik/Pengelola Kos saat Anda tiba di lokasi.</li>
+                <li>Pemilik kos akan mencocokkan Booking ID dan menyerahkan kunci kamar kepada Anda.</li>
+                <li>
+                  Lakukan pengecekan fisik kamar kos. Anda dilindungi jaminan garansi penahanan dana sewa
+                  selama <strong>12 jam</strong> sejak waktu check-in.
+                </li>
+              </ol>
+            )}
           </div>
         </div>
 
