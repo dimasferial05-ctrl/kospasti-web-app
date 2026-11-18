@@ -117,7 +117,7 @@ export async function POST(request: Request) {
     // 2. Rate Limiting: 10 request / menit per IP atau per owner
     const clientIp = getClientIp(request);
     const identifier = partnerPayload?.ownerId ? `owner:${partnerPayload.ownerId}` : `ip:${clientIp}`;
-    const rateLimitResult = globalRateLimiter.check(identifier, {
+    const rateLimitResult = await globalRateLimiter.check(identifier, {
       maxRequests: 10,
       windowMs: 60 * 1000,
       prefix: "ai-description",

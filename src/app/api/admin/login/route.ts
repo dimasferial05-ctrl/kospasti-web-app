@@ -21,7 +21,7 @@ export async function POST(request: Request) {
     const clientKey = getClientIp(request);
 
     // 1. Periksa rate limiting
-    const blockStatus = globalRateLimiter.isBlocked(clientKey, RATE_LIMIT_OPTIONS);
+    const blockStatus = await globalRateLimiter.isBlocked(clientKey, RATE_LIMIT_OPTIONS);
     if (blockStatus.blocked) {
       return NextResponse.json(
         {
@@ -59,7 +59,7 @@ export async function POST(request: Request) {
     const password = body?.password;
 
     if (!email || !password) {
-      globalRateLimiter.recordFailure(clientKey, RATE_LIMIT_OPTIONS);
+      await globalRateLimiter.recordFailure(clientKey, RATE_LIMIT_OPTIONS);
       return NextResponse.json(
         {
           success: false,
@@ -73,7 +73,7 @@ export async function POST(request: Request) {
     const isPasswordValid = safeCompare(password, validPassword);
 
     if (!isEmailValid || !isPasswordValid) {
-      globalRateLimiter.recordFailure(clientKey, RATE_LIMIT_OPTIONS);
+      await globalRateLimiter.recordFailure(clientKey, RATE_LIMIT_OPTIONS);
       return NextResponse.json(
         {
           success: false,
@@ -84,7 +84,7 @@ export async function POST(request: Request) {
     }
 
     // Login sukses: reset status percobaan untuk client ini
-    globalRateLimiter.reset(clientKey, RATE_LIMIT_OPTIONS.prefix);
+    await globalRateLimiter.reset(clientKey, RATE_LIMIT_OPTIONS.prefix);
 
     const response = NextResponse.json(
       {

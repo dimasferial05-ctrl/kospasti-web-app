@@ -139,7 +139,7 @@ function fallbackExtractCriteria(prompt: string): AISearchResult {
 export async function POST(req: Request) {
   try {
     const clientIp = getClientIp(req);
-    const rateLimitResult = globalRateLimiter.check(clientIp, {
+    const rateLimitResult = await globalRateLimiter.check(clientIp, {
       maxRequests: 10,
       windowMs: 60 * 1000,
       prefix: "ai-search",
