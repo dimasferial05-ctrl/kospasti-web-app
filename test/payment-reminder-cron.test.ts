@@ -9,17 +9,34 @@ vi.mock("@/lib/whatsapp", () => ({
   formatWhatsAppNumber: vi.fn((num: string) => num.replace(/\D/g, "")),
 }));
 
-vi.mock("@/lib/prisma", () => ({
-  prisma: {
+vi.mock("@/lib/prisma", () => {
+  const mockPrisma = {
     booking: {
       findMany: vi.fn(),
       update: vi.fn(),
+      updateMany: vi.fn(),
+    },
+    property: {
+      update: vi.fn(),
+    },
+    roomType: {
+      update: vi.fn(),
+    },
+    magicLink: {
+      updateMany: vi.fn(),
     },
     notification: {
       create: vi.fn().mockResolvedValue({ id: "notif-1" }),
     },
-  },
-}));
+    $transaction: vi.fn(async (cb: any) => {
+      if (typeof cb === "function") {
+        return cb(mockPrisma);
+      }
+      return cb;
+    }),
+  };
+  return { prisma: mockPrisma };
+});
 
 describe("Payment Reminder Cron Automation - Issue #400", () => {
   const originalEnvCronSecret = process.env.CRON_SECRET;
@@ -219,17 +236,20 @@ describe("Payment Reminder Cron Automation - Issue #400", () => {
   });
 
   describe("Sub-Routine 2: Pembersihan Pesanan Kedaluwarsa (> 24 Jam)", () => {
-    it("otomatis membatalkan pesanan PENDING yang usianya sudah melewati 24 jam", async () => {
+    it("otomatis membatalkan pesanan PENDING yang usianya sudah melewati 24 jam dan mengembalikan kuota kamar", async () => {
       const mockOverdue = [
-        { id: "overdue-1" },
-        { id: "overdue-2" },
+        { id: "overdue-1", property_id: "prop-1", room_type_id: "room-1" },
+        { id: "overdue-2", property_id: "prop-2", room_type_id: null },
       ];
 
       vi.mocked(prisma.booking.findMany)
         .mockResolvedValueOnce([]) // Sub-routine 1 tidak ada reminder baru
         .mockResolvedValueOnce(mockOverdue as never); // Sub-routine 2 ada 2 overdue
 
-      vi.mocked(prisma.booking.update).mockResolvedValue({} as never);
+      vi.mocked(prisma.booking.updateMany).mockResolvedValue({ count: 1 } as never);
+      vi.mocked(prisma.property.update).mockResolvedValue({} as never);
+      vi.mocked(prisma.roomType.update).mockResolvedValue({} as never);
+      vi.mocked(prisma.magicLink.updateMany).mockResolvedValue({ count: 1 } as never);
 
       const req = createRequest("POST", `Bearer ${mockCronSecret}`);
       const res = await POST(req);
@@ -238,20 +258,27 @@ describe("Payment Reminder Cron Automation - Issue #400", () => {
       expect(res.status).toBe(200);
       expect(json.summary.expiredBookingsCancelled).toBe(2);
 
-      expect(prisma.booking.update).toHaveBeenCalledWith({
-        where: { id: "overdue-1" },
+      expect(prisma.booking.updateMany).toHaveBeenCalledWith({
+        where: { id: "overdue-1", status: "PENDING" },
         data: {
           status: "CANCELLED",
           cancellation_reason: "EXPIRED_UNPAID_TIMEOUT",
         },
       });
 
-      expect(prisma.booking.update).toHaveBeenCalledWith({
-        where: { id: "overdue-2" },
-        data: {
-          status: "CANCELLED",
-          cancellation_reason: "EXPIRED_UNPAID_TIMEOUT",
-        },
+      expect(prisma.property.update).toHaveBeenCalledWith({
+        where: { id: "prop-1" },
+        data: { available_rooms: { increment: 1 } },
+      });
+
+      expect(prisma.roomType.update).toHaveBeenCalledWith({
+        where: { id: "room-1" },
+        data: { available_rooms: { increment: 1 } },
+      });
+
+      expect(prisma.magicLink.updateMany).toHaveBeenCalledWith({
+        where: { booking_id: "overdue-1", is_used: false },
+        data: { is_used: true },
       });
     });
   });

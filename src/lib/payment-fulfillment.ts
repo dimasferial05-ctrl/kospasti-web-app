@@ -96,28 +96,30 @@ export async function fulfillPaidBooking({
         },
       });
 
-      // b. Kurangi kuota kamar pada Property jika masih tersedia
-      if (booking.property && booking.property.available_rooms > 0) {
-        await tx.property.update({
-          where: { id: booking.property_id },
-          data: {
-            available_rooms: {
-              decrement: 1,
+      // b & c. Kurangi kuota kamar HANYA jika booking awal TIDAK berstatus PENDING (safety fallback).
+      // Catatan Arsitektur: Kamar sudah di-reserve (decrement: 1) saat booking dibuat di POST /api/bookings (status PENDING).
+      if (booking.status !== "PENDING") {
+        if (booking.property && booking.property.available_rooms > 0) {
+          await tx.property.update({
+            where: { id: booking.property_id },
+            data: {
+              available_rooms: {
+                decrement: 1,
+              },
             },
-          },
-        });
-      }
+          });
+        }
 
-      // c. Kurangi kuota kamar pada RoomType jika ada dan masih tersedia
-      if (booking.room_type_id && booking.room_type && booking.room_type.available_rooms > 0) {
-        await tx.roomType.update({
-          where: { id: booking.room_type_id },
-          data: {
-            available_rooms: {
-              decrement: 1,
+        if (booking.room_type_id && booking.room_type && booking.room_type.available_rooms > 0) {
+          await tx.roomType.update({
+            where: { id: booking.room_type_id },
+            data: {
+              available_rooms: {
+                decrement: 1,
+              },
             },
-          },
-        });
+          });
+        }
       }
 
       // d. Catat atau perbarui entitas Payout dengan perhitungan komisi platform (Take Rate)
