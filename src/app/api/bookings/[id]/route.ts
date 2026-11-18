@@ -54,11 +54,14 @@ export async function GET(
             price_per_month: true,
             image_url: true,
             gender_type: true,
+            rules: true,
+            rental_terms: true,
             owner_id: true,
             owner: {
               select: {
                 name: true,
                 whatsapp_number: true,
+                email: true,
               },
             },
           },

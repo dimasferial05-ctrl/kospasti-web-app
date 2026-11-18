@@ -15,10 +15,13 @@ import {
   ArrowRight,
   ExternalLink,
   X,
+  FileCheck,
+  RefreshCw,
 } from "lucide-react";
 import { OfflineBanner } from "@/components/ui/OfflineBanner";
 import { HelpTooltip } from "@/components/ui/Tooltip";
 import { CancelBookingModal } from "@/components/profile/modals/CancelBookingModal";
+import { RenewBookingModal } from "@/components/profile/modals/RenewBookingModal";
 import { BookingItem, UserProfile } from "@/types/profile";
 
 export interface BookingsTabProps {
@@ -58,6 +61,9 @@ export function BookingsTab({
   const [isSubmittingDispute, setIsSubmittingDispute] = useState(false);
   const [disputeError, setDisputeError] = useState<string | null>(null);
   const [disputeSuccessMsg, setDisputeSuccessMsg] = useState<string | null>(null);
+
+  // Renewal Modal State
+  const [renewingBooking, setRenewingBooking] = useState<BookingItem | null>(null);
 
   const formatRupiah = (val: number) => {
     return new Intl.NumberFormat("id-ID", {
@@ -391,16 +397,39 @@ export function BookingsTab({
                       )}
 
                       {["ACCEPTED", "APPROVED", "PAID", "COMPLETED", "PAYOUT_PENDING", "PAYOUT_PAID"].includes(booking.status?.toUpperCase()) && (
-                        <Link
-                          href={`/receipt/${booking.id}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          data-testid={`receipt-btn-${booking.id}`}
-                          className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/60 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 border border-emerald-200 dark:border-emerald-800 rounded-xl transition-all active:scale-95 cursor-pointer"
-                        >
-                          <FileText className="w-3.5 h-3.5" />
-                          <span>Kuitansi Resmi</span>
-                        </Link>
+                        <>
+                          <Link
+                            href={`/contract/${booking.id}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            data-testid={`contract-btn-${booking.id}`}
+                            className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-slate-700 dark:text-slate-200 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 rounded-xl transition-all active:scale-95 cursor-pointer"
+                          >
+                            <FileCheck className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+                            <span>Kontrak SPK</span>
+                          </Link>
+
+                          <Link
+                            href={`/receipt/${booking.id}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            data-testid={`receipt-btn-${booking.id}`}
+                            className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/60 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 border border-emerald-200 dark:border-emerald-800 rounded-xl transition-all active:scale-95 cursor-pointer"
+                          >
+                            <FileText className="w-3.5 h-3.5" />
+                            <span>Kuitansi Resmi</span>
+                          </Link>
+
+                          <button
+                            type="button"
+                            onClick={() => setRenewingBooking(booking)}
+                            data-testid={`renew-btn-${booking.id}`}
+                            className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 active:scale-95 rounded-xl shadow-soft hover:shadow-float transition-all cursor-pointer"
+                          >
+                            <RefreshCw className="w-3.5 h-3.5" />
+                            <span>Perpanjang Sewa</span>
+                          </button>
+                        </>
                       )}
 
                       {canCancel && (
@@ -666,6 +695,18 @@ export function BookingsTab({
           </div>
         </div>
       )}
+
+      {/* Modal Perpanjangan Sewa */}
+      <RenewBookingModal
+        booking={renewingBooking}
+        onClose={() => setRenewingBooking(null)}
+        onSuccess={() => {
+          setRenewingBooking(null);
+          if (onBookingsUpdated) {
+            onBookingsUpdated();
+          }
+        }}
+      />
     </div>
   );
 }
