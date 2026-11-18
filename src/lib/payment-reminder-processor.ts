@@ -84,20 +84,65 @@ export async function runPaymentReminderProcess(now = new Date()): Promise<{
     },
     select: {
       id: true,
+      property_id: true,
+      room_type_id: true,
     },
   });
 
   let expiredBookingsCancelled = 0;
   for (const booking of overduePendingBookings) {
     try {
-      await prisma.booking.update({
-        where: { id: booking.id },
-        data: {
-          status: "CANCELLED",
-          cancellation_reason: "EXPIRED_UNPAID_TIMEOUT",
-        },
+      await prisma.$transaction(async (tx) => {
+        // Update hanya jika status masih PENDING (mencegah race-condition dengan pembayaran yang baru masuk)
+        const updated = await tx.booking.updateMany({
+          where: {
+            id: booking.id,
+            status: "PENDING",
+          },
+          data: {
+            status: "CANCELLED",
+            cancellation_reason: "EXPIRED_UNPAID_TIMEOUT",
+          },
+        });
+
+        // Jika status berhasil diubah ke CANCELLED, kembalikan kuota kamar ke inventaris
+        if (updated.count > 0) {
+          if (booking.property_id) {
+            await tx.property.update({
+              where: { id: booking.property_id },
+              data: {
+                available_rooms: {
+                  increment: 1,
+                },
+              },
+            });
+          }
+
+          if (booking.room_type_id) {
+            await tx.roomType.update({
+              where: { id: booking.room_type_id },
+              data: {
+                available_rooms: {
+                  increment: 1,
+                },
+              },
+            });
+          }
+
+          // Nonaktifkan magic link verifikasi yang belum terpakai
+          await tx.magicLink.updateMany({
+            where: {
+              booking_id: booking.id,
+              is_used: false,
+            },
+            data: {
+              is_used: true,
+            },
+          });
+
+          expiredBookingsCancelled++;
+        }
       });
-      expiredBookingsCancelled++;
     } catch (err) {
       console.error(
         `[PAYMENT REMINDER PROCESSOR] Gagal membatalkan pesanan kedaluwarsa ${booking.id}:`,
