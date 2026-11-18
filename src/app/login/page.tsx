@@ -26,6 +26,9 @@ function LoginForm() {
     if (error === "server_configuration") {
       return "Konfigurasi Google OAuth server belum lengkap. Silakan hubungi admin.";
     }
+    if (error === "invalid_state") {
+      return "Sesi login Google tidak valid atau telah kedaluwarsa. Silakan coba masuk kembali.";
+    }
     return "Terjadi kesalahan saat masuk dengan Google. Silakan coba lagi.";
   };
 

@@ -135,3 +135,55 @@ export function isValidPartnerPassword(password: unknown): boolean {
   return PARTNER_PASSWORD_REGEX.test(password);
 }
 
+/**
+ * Menghasilkan state token acak (nonce) untuk proteksi OAuth CSRF dan mengemasnya bersama callbackUrl.
+ */
+export function createOAuthState(callbackUrl: string = "/"): { state: string; nonce: string } {
+  const nonce = crypto.randomUUID();
+  const safeCallback = isSafeRedirectPath(callbackUrl) ? callbackUrl : "/";
+  const payload = JSON.stringify({ nonce, callbackUrl: safeCallback });
+  const state = Buffer.from(payload, "utf-8").toString("base64url");
+  return { state, nonce };
+}
+
+/**
+ * Membaca parameter state dari Google OAuth callback, mengekstrak nonce dan callbackUrl.
+ * Mendukung format base64url JSON serta fallback aman untuk kompatibilitas.
+ */
+export function parseOAuthState(stateParam?: string | null): { nonce: string | null; callbackUrl: string } {
+  if (!stateParam || typeof stateParam !== "string") {
+    return { nonce: null, callbackUrl: "/" };
+  }
+
+  // 1. Coba dekode format standar Base64URL JSON
+  try {
+    const decoded = Buffer.from(stateParam, "base64url").toString("utf-8");
+    const parsed = JSON.parse(decoded);
+    if (parsed && typeof parsed === "object") {
+      const nonce = typeof parsed.nonce === "string" && parsed.nonce.trim() ? parsed.nonce.trim() : null;
+      const callbackUrl = isSafeRedirectPath(parsed.callbackUrl) ? (parsed.callbackUrl as string) : "/";
+      return { nonce, callbackUrl };
+    }
+  } catch {
+    // Abaikan jika bukan format Base64URL JSON
+  }
+
+  // 2. Fallback format delimiter (misal: "nonce:callbackUrl")
+  if (stateParam.includes(":")) {
+    const [noncePart, ...rest] = stateParam.split(":");
+    const rawCallback = rest.join(":");
+    let decodedCallback = "/";
+    try {
+      decodedCallback = decodeURIComponent(rawCallback);
+    } catch {
+      decodedCallback = rawCallback;
+    }
+    const callbackUrl = isSafeRedirectPath(decodedCallback) ? decodedCallback : "/";
+    return { nonce: noncePart?.trim() || null, callbackUrl };
+  }
+
+  // 3. Fallback format legacy (string path langsung tanpa nonce)
+  const legacyCallback = isSafeRedirectPath(stateParam) ? stateParam : "/";
+  return { nonce: null, callbackUrl: legacyCallback };
+}
+
