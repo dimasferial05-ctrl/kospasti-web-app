@@ -1,5 +1,8 @@
 import { NextResponse } from "next/server";
+import { cookies } from "next/headers";
 import { prisma } from "@/lib/prisma";
+import { verifyUserToken, verifyOwnerToken } from "@/lib/auth";
+import { isValidAdminRequest } from "@/lib/admin-auth";
 
 export async function GET(
   request: Request,
@@ -19,6 +22,27 @@ export async function GET(
       );
     }
 
+    // 1. Ekstraksi dan verifikasi sesi pemanggil (User, Partner, atau Admin)
+    const cookieStore = await cookies();
+    const userToken = cookieStore.get("user_token")?.value;
+    const partnerToken =
+      cookieStore.get("partner_token")?.value || cookieStore.get("owner_token")?.value;
+
+    const isAdmin = isValidAdminRequest(request);
+    const userPayload = userToken ? await verifyUserToken(userToken) : null;
+    const ownerPayload = partnerToken ? await verifyOwnerToken(partnerToken) : null;
+
+    // Jika tidak ada satu pun sesi yang terotentikasi, tolak dengan 401 Unauthorized
+    if (!isAdmin && !userPayload && !ownerPayload) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Unauthorized: Anda harus login terlebih dahulu untuk mengakses rincian pesanan.",
+        },
+        { status: 401 }
+      );
+    }
+
     const booking = await prisma.booking.findUnique({
       where: { id: id.trim() },
       include: {
@@ -30,6 +54,7 @@ export async function GET(
             price_per_month: true,
             image_url: true,
             gender_type: true,
+            owner_id: true,
             owner: {
               select: {
                 name: true,
@@ -61,6 +86,27 @@ export async function GET(
           error: "Booking tidak ditemukan",
         },
         { status: 404 }
+      );
+    }
+
+    // 2. Evaluasi Hak Akses (Otorisasi Anti-IDOR)
+    let isAuthorized = false;
+
+    if (isAdmin) {
+      isAuthorized = true;
+    } else if (userPayload && booking.user_id === userPayload.userId) {
+      isAuthorized = true;
+    } else if (ownerPayload && booking.property?.owner_id === ownerPayload.ownerId) {
+      isAuthorized = true;
+    }
+
+    if (!isAuthorized) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Akses ditolak: Anda tidak memiliki izin untuk melihat rincian pesanan ini.",
+        },
+        { status: 403 }
       );
     }
 

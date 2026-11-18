@@ -1,58 +1,82 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import { GET } from "../src/app/api/bookings/[id]/route";
 import { prisma } from "../src/lib/prisma";
-import { clearDatabase } from "./helpers";
+import * as nextHeaders from "next/headers";
+import * as authLib from "../src/lib/auth";
+
+vi.mock("next/headers", () => ({
+  cookies: vi.fn(),
+}));
 
 describe("GET /api/bookings/[id]", () => {
-  beforeEach(async () => {
-    await clearDatabase();
+  const mockUserId = "test-user-id-123";
+
+  beforeEach(() => {
     vi.restoreAllMocks();
+
+    (nextHeaders.cookies as unknown as ReturnType<typeof vi.fn>).mockResolvedValue({
+      get: vi.fn().mockImplementation((name: string) =>
+        name === "user_token" ? { value: "valid-user-token" } : undefined
+      ),
+    });
+
+    vi.spyOn(authLib, "verifyUserToken").mockResolvedValue({
+      userId: mockUserId,
+      email: "user@example.com",
+      name: "Test User",
+    } as never);
   });
 
   describe("Skenario Sukses", () => {
     it("berhasil mengambil data booking kos reguler beserta rincian harganya", async () => {
-      const owner = await prisma.owner.create({
-        data: {
-          name: "Ibu Siti",
-          whatsapp_number: "081234567890",
-        },
-      });
-
-      const property = await prisma.property.create({
-        data: {
+      const mockBooking = {
+        id: "booking-reguler-1",
+        student_name: "Ahmad Dahlan",
+        student_whatsapp: "089876543210",
+        move_in_date: new Date("2026-10-01"),
+        status: "PENDING",
+        amount: 850000,
+        service_fee: 5000,
+        created_at: new Date("2026-09-01T10:00:00Z"),
+        paid_at: null,
+        payment_method: null,
+        payment_gateway_ref: null,
+        snap_token: null,
+        user_id: mockUserId,
+        property: {
+          id: "prop-1",
           name: "Kos Melati Nyaman",
-          price_per_month: 850000,
-          available_rooms: 2,
-          gender_type: "PUTRI",
-          facilities: "AC, WiFi",
           address: "Jl. Melati No. 10",
-          owner_id: owner.id,
+          price_per_month: 850000,
+          image_url: "/uploads/image.jpg",
+          gender_type: "PUTRI",
+          owner_id: "owner-1",
+          owner: {
+            name: "Ibu Siti",
+            whatsapp_number: "081234567890",
+          },
         },
-      });
-
-      const booking = await prisma.booking.create({
-        data: {
-          property_id: property.id,
-          student_name: "Ahmad Dahlan",
-          student_whatsapp: "089876543210",
-          move_in_date: new Date("2026-10-01"),
-          status: "PENDING",
+        room_type: null,
+        user: {
+          email: "ahmad@example.com",
         },
-      });
+      };
 
-      const request = new Request(`http://localhost/api/bookings/${booking.id}`, {
+      vi.spyOn(prisma.booking, "findUnique").mockResolvedValueOnce(mockBooking as never);
+
+      const request = new Request(`http://localhost/api/bookings/${mockBooking.id}`, {
         method: "GET",
       });
 
       const response = await GET(request, {
-        params: Promise.resolve({ id: booking.id }),
+        params: Promise.resolve({ id: mockBooking.id }),
       });
 
       const result = await response.json();
 
       expect(response.status).toBe(200);
       expect(result.success).toBe(true);
-      expect(result.data.id).toBe(booking.id);
+      expect(result.data.id).toBe(mockBooking.id);
       expect(result.data.studentName).toBe("Ahmad Dahlan");
       expect(result.data.property.name).toBe("Kos Melati Nyaman");
       expect(result.data.roomType).toBeNull();
@@ -62,50 +86,52 @@ describe("GET /api/bookings/[id]", () => {
     });
 
     it("berhasil mengambil data booking dengan tipe kamar spesifik beserta rincian harganya", async () => {
-      const owner = await prisma.owner.create({
-        data: {
-          name: "Bapak Budi",
-          whatsapp_number: "081298765432",
-        },
-      });
-
-      const property = await prisma.property.create({
-        data: {
+      const mockBookingVip = {
+        id: "booking-vip-2",
+        student_name: "Dimas Ferial",
+        student_whatsapp: "081234567899",
+        move_in_date: new Date("2026-10-15"),
+        status: "PENDING",
+        amount: 1200000,
+        service_fee: 5000,
+        created_at: new Date("2026-09-01T10:00:00Z"),
+        paid_at: null,
+        payment_method: null,
+        payment_gateway_ref: null,
+        snap_token: null,
+        user_id: mockUserId,
+        property: {
+          id: "prop-2",
           name: "Kos Graha Mulia",
+          address: "Jl. Kaliurang",
           price_per_month: 600000,
-          available_rooms: 5,
+          image_url: "/uploads/image2.jpg",
           gender_type: "CAMPUR",
-          facilities: "WiFi, Parkir",
-          owner_id: owner.id,
+          owner_id: "owner-2",
+          owner: {
+            name: "Bapak Budi",
+            whatsapp_number: "081298765432",
+          },
         },
-      });
-
-      const roomType = await prisma.roomType.create({
-        data: {
+        room_type: {
+          id: "room-type-vip",
           name: "Tipe VIP King",
           price_per_month: 1200000,
-          available_rooms: 2,
-          property_id: property.id,
+          image_url: "/uploads/room.jpg",
         },
-      });
-
-      const booking = await prisma.booking.create({
-        data: {
-          property_id: property.id,
-          room_type_id: roomType.id,
-          student_name: "Dimas Ferial",
-          student_whatsapp: "081234567899",
-          move_in_date: new Date("2026-10-15"),
-          status: "PENDING",
+        user: {
+          email: "dimas@example.com",
         },
-      });
+      };
 
-      const request = new Request(`http://localhost/api/bookings/${booking.id}`, {
+      vi.spyOn(prisma.booking, "findUnique").mockResolvedValueOnce(mockBookingVip as never);
+
+      const request = new Request(`http://localhost/api/bookings/${mockBookingVip.id}`, {
         method: "GET",
       });
 
       const response = await GET(request, {
-        params: Promise.resolve({ id: booking.id }),
+        params: Promise.resolve({ id: mockBookingVip.id }),
       });
 
       const result = await response.json();
@@ -122,6 +148,8 @@ describe("GET /api/bookings/[id]", () => {
 
   describe("Skenario Tidak Ditemukan (404)", () => {
     it("mengembalikan status 404 ketika booking ID tidak ditemukan", async () => {
+      vi.spyOn(prisma.booking, "findUnique").mockResolvedValueOnce(null);
+
       const request = new Request("http://localhost/api/bookings/random-uuid", {
         method: "GET",
       });
