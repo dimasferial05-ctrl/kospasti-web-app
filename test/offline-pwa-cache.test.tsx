@@ -223,7 +223,10 @@ describe("Offline PWA Storage & Cache (#390)", () => {
 
     it("memastikan halaman /profil terintegrasi dengan cache riwayat booking dan pembersihan cache saat logout", () => {
       const profilPath = path.join(process.cwd(), "src/app/profil/page.tsx");
-      const content = fs.readFileSync(profilPath, "utf-8");
+      const bookingsTabPath = path.join(process.cwd(), "src/components/profile/BookingsTab.tsx");
+      const content =
+        fs.readFileSync(profilPath, "utf-8") +
+        (fs.existsSync(bookingsTabPath) ? fs.readFileSync(bookingsTabPath, "utf-8") : "");
 
       expect(content).toContain("saveCachedBookings");
       expect(content).toContain("getCachedBookings");
