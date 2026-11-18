@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import crypto from "crypto";
-import { sendWhatsAppMessage } from "@/lib/whatsapp";
+import { sendWhatsAppMessage, checkFonnteDeviceStatus } from "@/lib/whatsapp";
 
 async function executeMonthlyUpdateRoutine(request: Request) {
   try {
@@ -51,6 +51,25 @@ async function executeMonthlyUpdateRoutine(request: Request) {
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
     const results: Array<{ ownerId: string; ownerName: string; phone: string; success: boolean }> = [];
 
+    // Pre-flight check status device WhatsApp Fonnte di awal batch
+    const waToken = process.env.FONNTE_TOKEN || process.env.WHATSAPP_TOKEN;
+    if (waToken && waToken.trim() !== "") {
+      const isDeviceConnected = await checkFonnteDeviceStatus(waToken);
+      if (!isDeviceConnected) {
+        console.warn(
+          "[CRON MONTHLY UPDATE] Device WhatsApp sedang disconnected. Membatalkan pengiriman batch untuk menghemat kuota."
+        );
+        return NextResponse.json(
+          {
+            success: false,
+            error: "Device WhatsApp sedang disconnected. Broadcast pengingat bulanan ditunda.",
+            totalOwners: owners.length,
+          },
+          { status: 503 }
+        );
+      }
+    }
+
     for (const owner of owners) {
       try {
         // Invalidate older unused ROOM_UPDATE tokens for this owner
@@ -98,6 +117,7 @@ async function executeMonthlyUpdateRoutine(request: Request) {
         const sendRes = await sendWhatsAppMessage({
           to: owner.whatsapp_number,
           message,
+          skipDeviceCheck: true,
         });
 
         results.push({

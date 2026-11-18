@@ -5,6 +5,7 @@ import * as whatsappLib from "@/lib/whatsapp";
 
 vi.mock("@/lib/whatsapp", () => ({
   sendWhatsAppMessage: vi.fn().mockResolvedValue({ success: true }),
+  checkFonnteDeviceStatus: vi.fn().mockResolvedValue(true),
 }));
 
 describe("Monthly Update Cron Security & Authorization (Issue #269)", () => {
