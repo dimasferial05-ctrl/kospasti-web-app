@@ -133,6 +133,19 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // 1. Cek apakah pengguna mengklik obrolan di kos miliknya sendiri
+    if (actor.type === "OWNER" && property.owner_id === actor.id && !body?.user_id) {
+      return NextResponse.json(
+        {
+          success: false,
+          is_own_property: true,
+          error: "Ini adalah properti kos yang Anda kelola sendiri. Untuk melihat pesan masuk dari calon penyewa, silakan buka menu Pesan Masuk di Dashboard Mitra.",
+          redirect_url: "/partner/dashboard/chats",
+        },
+        { status: 400 }
+      );
+    }
+
     // Tentukan user_id dan owner_id
     let userId = "";
     let ownerId = property.owner_id;
@@ -140,16 +153,48 @@ export async function POST(request: NextRequest) {
     if (actor.type === "USER") {
       userId = actor.id;
     } else {
-      // Jika pemilik yang membuka room, ia butuh target user_id
+      // Jika aktor adalah OWNER:
       const targetUserId = typeof body?.user_id === "string" ? body.user_id.trim() : "";
-      if (!targetUserId) {
-        return NextResponse.json(
-          { success: false, error: "Pemilik kos wajib menyertakan target user_id untuk membuka obrolan." },
-          { status: 400 }
-        );
+      if (targetUserId) {
+        // Kasus: Pemilik kos yang ingin membalas/memulai chat ke mahasiswa tertentu
+        userId = targetUserId;
+        ownerId = actor.id;
+      } else {
+        // Kasus: Pemilik kos sedang menjelajahi kos milik mitra lain dan ingin bertanya sebagai penyewa
+        const ownerRecord = await prisma.owner.findUnique({
+          where: { id: actor.id },
+        });
+
+        if (ownerRecord) {
+          // Cari atau buatkan akun User pendamping
+          let companionUser = await prisma.user.findFirst({
+            where: {
+              OR: [
+                ownerRecord.email ? { email: ownerRecord.email } : {},
+                ownerRecord.whatsapp_number ? { whatsapp: ownerRecord.whatsapp_number } : {},
+              ].filter((cond) => Object.keys(cond).length > 0),
+            },
+          });
+
+          if (!companionUser) {
+            companionUser = await prisma.user.create({
+              data: {
+                name: ownerRecord.name,
+                email: ownerRecord.email || `partner_${ownerRecord.id.slice(0, 8)}@kospasti.local`,
+                whatsapp: ownerRecord.whatsapp_number,
+                avatar: ownerRecord.avatar_url,
+              },
+            });
+          }
+          userId = companionUser.id;
+          ownerId = property.owner_id;
+        } else {
+          return NextResponse.json(
+            { success: false, error: "Identitas akun tidak valid untuk memulai obrolan." },
+            { status: 400 }
+          );
+        }
       }
-      userId = targetUserId;
-      ownerId = actor.id;
     }
 
     // Cari atau buat ChatRoom
