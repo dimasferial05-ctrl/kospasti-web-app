@@ -14,6 +14,7 @@ import {
   XCircle,
   Percent,
   ShieldCheck,
+  Zap,
 } from "lucide-react";
 
 export interface PayoutInvoiceModalProps {
@@ -28,6 +29,9 @@ export interface PayoutInvoiceModalProps {
     net_amount?: number;
     status: string;
     payout_method_snapshot?: string | null;
+    disbursement_id?: string | null;
+    disbursement_reference_no?: string | null;
+    disbursement_provider?: string | null;
     processed_at?: string | null;
     processed_by?: string | null;
     notes?: string | null;
@@ -170,6 +174,12 @@ export function PayoutInvoiceModal({
               <span className="font-mono font-bold text-sm text-slate-900 dark:text-white block">
                 {invoiceNumber}
               </span>
+              {payout.disbursement_reference_no && (
+                <span className="inline-flex items-center gap-1 text-[11px] font-mono font-bold text-indigo-700 dark:text-indigo-300 bg-indigo-50 dark:bg-indigo-950/50 px-2 py-0.5 rounded-md border border-indigo-200 dark:border-indigo-800/60 block sm:inline-block">
+                  <Zap className="w-3 h-3 text-indigo-600" />
+                  <span>Ref Bank: {payout.disbursement_reference_no}</span>
+                </span>
+              )}
               <div className="mt-1">
                 {payout.status === "PAYOUT_PAID" ? (
                   <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/50 px-2 py-0.5 rounded-full border border-emerald-200 dark:border-emerald-800/60">

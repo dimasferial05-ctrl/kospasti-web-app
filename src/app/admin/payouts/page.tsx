@@ -20,6 +20,7 @@ import {
   ExternalLink,
   MessageCircle,
   X,
+  Zap,
 } from "lucide-react";
 
 interface PayoutRecord {
@@ -28,6 +29,11 @@ interface PayoutRecord {
   amount: number;
   status: string;
   payout_method_snapshot: string | null;
+  disbursement_id?: string | null;
+  disbursement_reference_no?: string | null;
+  disbursement_status?: string | null;
+  disbursement_provider?: string | null;
+  disbursement_error?: string | null;
   processed_at: string | null;
   processed_by: string | null;
   notes: string | null;
@@ -633,9 +639,16 @@ export default function AdminPayoutsPage() {
                               Proses Payout
                             </button>
                           ) : (
-                            <span className="text-xs text-slate-400">
-                              {p.processed_at ? formatDate(p.processed_at) : "Selesai"}
-                            </span>
+                            <div className="space-y-0.5">
+                              <span className="text-xs text-slate-500 dark:text-slate-400 block font-medium">
+                                {p.processed_at ? formatDate(p.processed_at) : "Selesai"}
+                              </span>
+                              {p.disbursement_reference_no && (
+                                <span className="inline-block text-[10px] font-mono text-emerald-600 dark:text-emerald-400 font-semibold bg-emerald-50 dark:bg-emerald-950/40 px-1.5 py-0.5 rounded">
+                                  Ref: {p.disbursement_reference_no}
+                                </span>
+                              )}
+                            </div>
                           )}
                         </td>
                       </tr>
@@ -655,12 +668,14 @@ export default function AdminPayoutsPage() {
             <div className="flex items-start justify-between gap-3 border-b border-slate-100 dark:border-slate-800 pb-4">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-2xl bg-emerald-100 dark:bg-emerald-950/50 flex items-center justify-center text-emerald-600 dark:text-emerald-400 shrink-0">
-                  <Wallet className="w-6 h-6" />
+                  <Zap className="w-6 h-6" />
                 </div>
                 <div>
-                  <h3 className="font-extrabold text-slate-900 dark:text-white text-base">
-                    Konfirmasi Pencairan Dana (Payout)
-                  </h3>
+                  <div className="flex items-center gap-2">
+                    <h3 className="font-extrabold text-slate-900 dark:text-white text-base">
+                      Pencairan Dana Otomatis (Instant Transfer)
+                    </h3>
+                  </div>
                   <p className="text-xs text-slate-500 dark:text-slate-400">
                     ID Booking: {selectedPayout.booking_id}
                   </p>
@@ -673,6 +688,14 @@ export default function AdminPayoutsPage() {
               >
                 <X className="w-5 h-5" />
               </button>
+            </div>
+
+            {/* Gateway Info Banner */}
+            <div className="p-3 rounded-2xl bg-indigo-50/70 dark:bg-indigo-950/30 border border-indigo-150 dark:border-indigo-800/40 flex items-center gap-2.5 text-xs text-indigo-700 dark:text-indigo-300">
+              <Zap className="w-4 h-4 shrink-0 text-indigo-600 dark:text-indigo-400" />
+              <span>
+                <strong>Midtrans Iris Payout Gateway:</strong> Dana bersih akan ditransfer otomatis secara instan ke rekening bank penerima saat disetujui.
+              </span>
             </div>
 
             {/* Rincian Penerima & Nominal */}
@@ -690,7 +713,7 @@ export default function AdminPayoutsPage() {
                 <span className="font-semibold text-slate-900 dark:text-white">{selectedPayout.booking.property.name}</span>
               </div>
               <div className="flex justify-between pt-1 border-t border-slate-200 dark:border-slate-700">
-                <span className="text-slate-500">Nominal yang Dicairkan:</span>
+                <span className="text-slate-500">Nominal Bersih yang Ditransfer:</span>
                 <span className="font-extrabold text-sm text-emerald-600 dark:text-emerald-400">
                   {formatRupiah(selectedPayout.amount)}
                 </span>
@@ -699,9 +722,16 @@ export default function AdminPayoutsPage() {
 
             {/* Rekening Tujuan Box */}
             <div className="p-4 rounded-2xl bg-emerald-50/50 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-800/50 text-xs space-y-1">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400 block">
-                Rekening Tujuan Transfer:
-              </span>
+              <div className="flex items-center justify-between">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400">
+                  Rekening Tujuan Transfer:
+                </span>
+                {selectedPayout.owner.payout_method?.is_verified && (
+                  <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-150/60 dark:bg-emerald-900/50 px-2 py-0.5 rounded-full">
+                    <CheckCircle2 className="w-3 h-3 text-emerald-600" /> Siap Transfer
+                  </span>
+                )}
+              </div>
               {selectedPayout.owner.payout_method ? (
                 <>
                   <p className="font-bold text-slate-900 dark:text-white text-sm">
@@ -713,7 +743,7 @@ export default function AdminPayoutsPage() {
                   {!selectedPayout.owner.payout_method.is_verified && (
                     <p className="text-rose-600 font-bold pt-1 flex items-start gap-1.5">
                       <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
-                      <span>Peringatan: Rekening ini belum diverifikasi. Harap verifikasi terlebih dahulu di tab Verifikasi Rekening Mitra.</span>
+                      <span>Peringatan: Rekening ini belum diverifikasi. Harap verifikasi terlebih dahulu di tab Verifikasi Rekening Mitra sebelum mencairkan via gateway.</span>
                     </p>
                   )}
                 </>
@@ -730,7 +760,7 @@ export default function AdminPayoutsPage() {
                 type="text"
                 value={payoutNotes}
                 onChange={(e) => setPayoutNotes(e.target.value)}
-                placeholder="Contoh: Transfer via VA BCA batch #1234"
+                placeholder="Contoh: Pencairan sewa bulan ke-1 disetujui"
                 className="w-full px-3.5 py-2 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500"
               />
             </div>
@@ -748,15 +778,18 @@ export default function AdminPayoutsPage() {
                 type="button"
                 disabled={isProcessing || !selectedPayout.owner.payout_method?.is_verified}
                 onClick={handleProcessPayout}
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white shadow-md shadow-emerald-600/20 disabled:opacity-50 transition-colors"
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white shadow-md shadow-emerald-600/20 disabled:opacity-50 transition-colors cursor-pointer"
               >
                 {isProcessing ? (
                   <>
                     <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                    Memproses...
+                    Mentransfer ke Bank...
                   </>
                 ) : (
-                  "Konfirmasi & Cairkan Dana"
+                  <>
+                    <Zap className="w-3.5 h-3.5" />
+                    ⚡ Setujui & Cairkan Otomatis
+                  </>
                 )}
               </button>
             </div>
