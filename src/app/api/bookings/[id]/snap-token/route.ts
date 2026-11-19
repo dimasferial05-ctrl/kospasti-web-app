@@ -108,12 +108,37 @@ export async function POST(
       0;
 
     const serviceFee = booking.service_fee || SERVICE_FEE;
-    const grossAmount = rentPrice + serviceFee;
+    const securityDeposit = booking.security_deposit || 0;
+    const grossAmount = rentPrice + serviceFee + securityDeposit;
     const propertyName = booking.property?.name || "Kamar Kos";
     const roomName = booking.room_type?.name ? ` - ${booking.room_type.name}` : "";
 
     // Buat order_id unik per sesi transaksi agar pengguna bisa mengganti metode pembayaran tanpa terkunci
     const midtransOrderId = `${booking.id}__${Date.now().toString(36)}`;
+
+    const itemDetails = [
+      {
+        id: `RENT-${booking.id.slice(0, 10)}`,
+        name: `Sewa ${propertyName}${roomName}`.substring(0, 50),
+        price: rentPrice,
+        quantity: 1,
+      },
+      {
+        id: "SERVICE-FEE",
+        name: "Biaya Layanan & Garansi Anti-Tipu",
+        price: serviceFee,
+        quantity: 1,
+      },
+    ];
+
+    if (securityDeposit > 0) {
+      itemDetails.push({
+        id: "SECURITY-DEPOSIT",
+        name: "Deposit Jaminan Kerusakan (Escrow)",
+        price: securityDeposit,
+        quantity: 1,
+      });
+    }
 
     // Minta Snap Token resmi ke Midtrans
     const snapResult = await createSnapTransaction({
@@ -124,20 +149,7 @@ export async function POST(
         email: booking.user?.email || undefined,
         phone: booking.student_whatsapp || undefined,
       },
-      itemDetails: [
-        {
-          id: `RENT-${booking.id.slice(0, 10)}`,
-          name: `Sewa ${propertyName}${roomName}`.substring(0, 50),
-          price: rentPrice,
-          quantity: 1,
-        },
-        {
-          id: "SERVICE-FEE",
-          name: "Biaya Layanan & Garansi Anti-Tipu",
-          price: serviceFee,
-          quantity: 1,
-        },
-      ],
+      itemDetails,
       expiryMinutes: 60 * 24, // 24 jam batas bayar
     });
 

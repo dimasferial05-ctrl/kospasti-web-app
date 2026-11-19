@@ -147,7 +147,7 @@ export async function POST(
 
       // Kembalikan ketersediaan kamar karena penyewa telah resmi keluar (+1)
       if (booking.room_type_id) {
-        await tx.roomType.update({
+        await tx.roomType.updateMany({
           where: { id: booking.room_type_id },
           data: {
             available_rooms: { increment: 1 },
@@ -155,7 +155,7 @@ export async function POST(
         });
       }
 
-      await tx.property.update({
+      await tx.property.updateMany({
         where: { id: booking.property_id },
         data: {
           available_rooms: { increment: 1 },

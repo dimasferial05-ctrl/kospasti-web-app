@@ -2,10 +2,12 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { GET as getBookingDetail } from "@/app/api/bookings/[id]/route";
 import { POST as renewBooking } from "@/app/api/bookings/[id]/renew/route";
 import { POST as partnerCheckout } from "@/app/api/partner/bookings/[id]/checkout/route";
+import { POST as getSnapToken } from "@/app/api/bookings/[id]/snap-token/route";
 import { prisma } from "@/lib/prisma";
 import * as nextHeaders from "next/headers";
 import * as authLib from "@/lib/auth";
 import * as notifLib from "@/lib/notifications";
+import * as midtransLib from "@/lib/midtrans";
 
 vi.mock("next/headers", () => ({
   cookies: vi.fn(),
@@ -106,6 +108,60 @@ describe("Sistem Deposit Jaminan Kerusakan & Escrow Pelepasan (Issue #426)", () 
       expect(json.data.pricing.securityDeposit).toBe(300000);
       expect(json.data.pricing.totalPrice).toBe(1305000); // 1.000.000 + 5.000 + 300.000
     });
+
+    it("memasukkan deposit jaminan pada grossAmount dan itemDetails saat request Midtrans Snap Token", async () => {
+      (nextHeaders.cookies as unknown as ReturnType<typeof vi.fn>).mockResolvedValue({
+        get: vi.fn().mockImplementation((name: string) => {
+          if (name === "user_token") return { value: "valid-user-token" };
+          return undefined;
+        }),
+      });
+
+      vi.spyOn(authLib, "verifyUserToken").mockResolvedValue({
+        userId: mockTenantId,
+        email: "dimas@kospasti.com",
+        role: "USER",
+      } as any);
+
+      vi.spyOn(prisma.booking, "findUnique").mockResolvedValue({
+        ...baseBooking,
+        status: "PENDING",
+      } as any);
+
+      let snapParams: any = null;
+      vi.spyOn(midtransLib, "createSnapTransaction").mockImplementation(async (params: any) => {
+        snapParams = params;
+        return {
+          token: "mock-snap-token-deposit",
+          redirect_url: "https://app.sandbox.midtrans.com/snap/v2/vtweb/mock-snap-token-deposit",
+        };
+      });
+
+      vi.spyOn(prisma.booking, "update").mockResolvedValue({} as any);
+
+      const req = new Request(`http://localhost:3000/api/bookings/${mockBookingId}/snap-token`, {
+        method: "POST",
+      });
+
+      const res = await getSnapToken(req, {
+        params: Promise.resolve({ id: mockBookingId }),
+      });
+      const json = await res.json();
+
+      expect(res.status).toBe(200);
+      expect(json.success).toBe(true);
+      expect(snapParams).not.toBeNull();
+      // grossAmount harus 1.000.000 (sewa) + 5.000 (admin) + 300.000 (deposit) = 1.305.000
+      expect(snapParams.grossAmount).toBe(1305000);
+      expect(snapParams.itemDetails).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            id: "SECURITY-DEPOSIT",
+            price: 300000,
+          }),
+        ])
+      );
+    });
   });
 
   describe("2. Proteksi Bebas Deposit Ganda pada Perpanjangan Sewa (Renewal)", () => {
@@ -193,11 +249,19 @@ describe("Sistem Deposit Jaminan Kerusakan & Escrow Pelepasan (Issue #426)", () 
               roomTypeIncremented = true;
               return {};
             }),
+            updateMany: vi.fn().mockImplementation(() => {
+              roomTypeIncremented = true;
+              return { count: 1 };
+            }),
           },
           property: {
             update: vi.fn().mockImplementation(() => {
               propertyIncremented = true;
               return {};
+            }),
+            updateMany: vi.fn().mockImplementation(() => {
+              propertyIncremented = true;
+              return { count: 1 };
             }),
           },
         };
@@ -247,8 +311,14 @@ describe("Sistem Deposit Jaminan Kerusakan & Escrow Pelepasan (Issue #426)", () 
               return { ...baseBooking, ...args.data };
             }),
           },
-          roomType: { update: vi.fn().mockResolvedValue({}) },
-          property: { update: vi.fn().mockResolvedValue({}) },
+          roomType: {
+            update: vi.fn().mockResolvedValue({}),
+            updateMany: vi.fn().mockResolvedValue({ count: 1 }),
+          },
+          property: {
+            update: vi.fn().mockResolvedValue({}),
+            updateMany: vi.fn().mockResolvedValue({ count: 1 }),
+          },
         };
         return await callback(fakeTx);
       });
