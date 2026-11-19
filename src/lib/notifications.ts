@@ -97,12 +97,13 @@ export async function notifyPayoutProcessed(params: {
   bankName: string;
   accountNumber: string;
   ownerId?: string | null;
+  referenceNo?: string | null;
 }) {
   const message = [
     `[KosPasti] Halo ${params.ownerName}!`,
-    `Dana sebesar Rp ${params.amount.toLocaleString("id-ID")} sudah dicairkan`,
+    `Dana sewa sebesar Rp ${params.amount.toLocaleString("id-ID")} telah berhasil ditransfer otomatis via Payout Gateway`,
     `ke rekening ${params.bankName} ${params.accountNumber}.`,
-    `Dana akan masuk dalam 1-2 hari kerja.`,
+    params.referenceNo ? `No. Referensi Transfer: ${params.referenceNo}` : `Dana akan langsung masuk ke mutasi rekening Anda.`,
     `Terima kasih telah bermitra dengan KosPasti!`,
   ].join("\n");
 
@@ -112,8 +113,8 @@ export async function notifyPayoutProcessed(params: {
   if (params.ownerId) {
     await createInAppNotification({
       ownerId: params.ownerId,
-      title: "Dana Payout Telah Dicairkan",
-      message: `Dana sebesar Rp ${params.amount.toLocaleString("id-ID")} sedang dicairkan ke rekening ${params.bankName} ${params.accountNumber}.`,
+      title: "Dana Payout Telah Ditransfer",
+      message: `Dana sewa sebesar Rp ${params.amount.toLocaleString("id-ID")} telah ditransfer ke rekening ${params.bankName} ${params.accountNumber}.${params.referenceNo ? ` Ref: ${params.referenceNo}` : ""}`,
       type: "PAYOUT_UPDATE",
       link: "/partner/dashboard/payouts",
     });

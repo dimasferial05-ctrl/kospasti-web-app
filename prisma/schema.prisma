@@ -232,8 +232,13 @@ model Payout {
   net_amount             Int       @default(0) // Nominal bersih yang ditransfer ke pemilik
   status                 String    @default("PAYOUT_PENDING")
   // Status valid: "PAYOUT_PENDING" | "PAYOUT_PAID" | "PAYOUT_FAILED"
-  payout_method_snapshot String?   // JSON string: snapshot rekening saat payout diproses
-  processed_at           DateTime? // Kapan admin memproses
+  payout_method_snapshot    String?   // JSON string: snapshot rekening saat payout diproses
+  disbursement_id           String?   // ID transaksi payout dari Midtrans Iris
+  disbursement_reference_no String?   // Nomor referensi bank dari disbursement gateway
+  disbursement_status       String?   // "queued" | "completed" | "failed" | "simulated"
+  disbursement_provider     String?   @default("MIDTRANS_IRIS")
+  disbursement_error        String?   // Catatan error jika transfer ditolak gateway
+  processed_at              DateTime? // Kapan admin memproses
   processed_by           String?   // Email/ID admin yang memproses
   notes                  String?   // Catatan internal admin
   created_at             DateTime  @default(now())
