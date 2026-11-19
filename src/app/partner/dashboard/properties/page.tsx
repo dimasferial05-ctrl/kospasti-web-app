@@ -35,6 +35,7 @@ interface RoomTypeItem {
   id?: string;
   name: string;
   price_per_month: number | string;
+  security_deposit?: number | string;
   available_rooms: number | string;
   facilities?: string | null;
   specifications?: string | null;
@@ -163,6 +164,7 @@ export default function PartnerPropertiesPage() {
       {
         name: "Tipe A (Standar)",
         price_per_month: "850000",
+        security_deposit: "250000",
         available_rooms: "5",
         facilities: "Kasur, Lemari, WiFi, Kamar Mandi Dalam",
         specifications: "Ukuran 3x4 meter, ventilasi jendela luas, listrik token mandiri",
@@ -204,6 +206,7 @@ export default function PartnerPropertiesPage() {
           id: rt.id,
           name: rt.name,
           price_per_month: String(rt.price_per_month),
+          security_deposit: String((rt as any).security_deposit || "0"),
           available_rooms: String(rt.available_rooms),
           facilities: rt.facilities || "",
           specifications: rt.specifications || "",
@@ -493,6 +496,7 @@ export default function PartnerPropertiesPage() {
               id: rt.id,
               name: rt.name,
               price_per_month: rt.price_per_month,
+              security_deposit: Number(rt.security_deposit) || 0,
               available_rooms: rt.available_rooms,
               facilities: rt.facilities,
               specifications: rt.specifications,
@@ -1131,7 +1135,7 @@ export default function PartnerPropertiesPage() {
                         )}
                       </div>
 
-                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
                         <div>
                           <label className="block text-[11px] font-bold text-slate-600 dark:text-slate-300 uppercase mb-1">
                             Nama Tipe Kamar *
@@ -1163,6 +1167,26 @@ export default function PartnerPropertiesPage() {
                               }
                             }}
                             onChange={(e) => updateRoomType(idx, "price_per_month", e.target.value)}
+                            className="w-full px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 text-xs font-medium focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-[11px] font-bold text-slate-600 dark:text-slate-300 uppercase mb-1">
+                            Deposit Jaminan (Rp)
+                          </label>
+                          <input
+                            type="number"
+                            min="0"
+                            step="10000"
+                            placeholder="Contoh: 250000"
+                            value={rt.security_deposit || ""}
+                            onKeyDown={(e) => {
+                              if (["e", "E", "+", "-"].includes(e.key)) {
+                                e.preventDefault();
+                              }
+                            }}
+                            onChange={(e) => updateRoomType(idx, "security_deposit", e.target.value)}
                             className="w-full px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 text-xs font-medium focus:ring-2 focus:ring-emerald-500 focus:outline-none"
                           />
                         </div>

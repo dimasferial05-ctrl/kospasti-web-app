@@ -36,6 +36,12 @@ export interface BookingItem {
   refund_note?: string | null;
   refunded_at?: string | null;
   amount?: number;
+  security_deposit?: number;
+  deposit_status?: string | null;
+  deposit_refunded_at?: string | null;
+  deposit_claimed_amount?: number | null;
+  deposit_claim_reason?: string | null;
+  checkout_confirmed_at?: string | null;
   room_type?: {
     id: string;
     name: string;

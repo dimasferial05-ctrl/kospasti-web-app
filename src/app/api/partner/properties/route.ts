@@ -183,11 +183,20 @@ export async function POST(request: NextRequest) {
         room_types: {
           create:
             room_types.length > 0
-              ? room_types
+              ? room_types.map((rt: any) => ({
+                  name: rt.name,
+                  price_per_month: Math.floor(Number(rt.price_per_month) || 0),
+                  security_deposit: Math.max(0, Math.floor(Number(rt.security_deposit) || 0)),
+                  available_rooms: Math.max(0, Math.floor(Number(rt.available_rooms) || 0)),
+                  facilities: typeof rt.facilities === "string" && rt.facilities.trim() ? rt.facilities.trim() : null,
+                  specifications: typeof rt.specifications === "string" && rt.specifications.trim() ? rt.specifications.trim() : null,
+                  image_url: rt.image_url || null,
+                }))
               : [
                   {
                     name: "Standar",
                     price_per_month: Math.floor(finalPrice),
+                    security_deposit: 0,
                     available_rooms: Math.max(0, Math.floor(finalRooms)),
                     facilities: typeof facilities === "string" && facilities.trim() ? facilities.trim() : "Kasur, Lemari",
                     specifications: null,

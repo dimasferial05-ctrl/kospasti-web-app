@@ -56,9 +56,16 @@ interface BookingReceiptDetail {
     price_per_month: number;
     image_url: string | null;
   } | null;
+  securityDeposit?: number;
+  depositStatus?: string | null;
+  depositRefundedAt?: string | null;
+  depositClaimedAmount?: number | null;
+  depositClaimReason?: string | null;
+  checkoutConfirmedAt?: string | null;
   pricing: {
     rentPrice: number;
     adminFee: number;
+    securityDeposit?: number;
     totalPrice: number;
   };
 }
@@ -563,6 +570,32 @@ export default function BookingReceiptPage() {
                 {formatRupiah(booking.pricing.adminFee)}
               </span>
             </div>
+            {((booking.pricing.securityDeposit ?? booking.securityDeposit ?? 0) > 0) && (
+              <div className="flex items-center justify-between text-slate-600 dark:text-slate-300 print:text-slate-700">
+                <span className="flex items-center gap-1.5">
+                  <span>Deposit Jaminan Kerusakan (Escrow)</span>
+                  <span className="text-[10px] bg-sky-100 dark:bg-sky-950 text-sky-700 dark:text-sky-300 px-1.5 py-0.2 rounded font-semibold">
+                    {booking.depositStatus === "REFUNDED"
+                      ? "100% Dikembalikan"
+                      : booking.depositStatus === "CLAIMED"
+                      ? "Klaim Kerusakan Selesai"
+                      : "Ditahan Aman di Escrow"}
+                  </span>
+                </span>
+                <span className="font-medium text-slate-900 dark:text-white print:text-black">
+                  {formatRupiah(booking.pricing.securityDeposit ?? booking.securityDeposit ?? 0)}
+                </span>
+              </div>
+            )}
+            {booking.depositStatus === "CLAIMED" && (
+              <div className="p-2 rounded-lg bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/50 text-[11px] text-amber-900 dark:text-amber-200 space-y-0.5">
+                <div className="font-semibold">Catatan Klaim Kerusakan Kamar:</div>
+                <div>Potongan: {formatRupiah(booking.depositClaimedAmount || 0)} ({booking.depositClaimReason || "Fasilitas rusak/kunci hilang"})</div>
+                {((booking.pricing.securityDeposit ?? booking.securityDeposit ?? 0) - (booking.depositClaimedAmount || 0) > 0) && (
+                  <div>Sisa deposit dikembalikan: {formatRupiah((booking.pricing.securityDeposit ?? booking.securityDeposit ?? 0) - (booking.depositClaimedAmount || 0))}</div>
+                )}
+              </div>
+            )}
 
             <div className="pt-2 border-t border-slate-200 dark:border-slate-700/80 print:border-slate-300 flex items-center justify-between font-bold text-sm">
               <span className="text-slate-900 dark:text-white print:text-black">

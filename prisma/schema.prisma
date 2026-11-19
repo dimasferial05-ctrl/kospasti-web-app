@@ -66,6 +66,7 @@ model RoomType {
   id              String    @id @default(uuid())
   name            String
   price_per_month Int
+  security_deposit Int      @default(0)
   available_rooms Int       @default(0)
   facilities      String?
   specifications  String?
@@ -128,11 +129,17 @@ model Booking {
   refunded_at            DateTime?
   amount                 Int         @default(0)
   service_fee            Int         @default(5000)
+  security_deposit       Int         @default(0)
+  deposit_status         String?     @default("HELD") // "NONE" | "HELD" | "REFUNDED" | "CLAIMED"
+  deposit_refunded_at    DateTime?
+  deposit_claimed_amount Int?        @default(0)
+  deposit_claim_reason   String?
   payment_gateway_ref    String?
   payment_method         String?
   snap_token             String?
   paid_at                DateTime?
   checkin_confirmed_at   DateTime?
+  checkout_confirmed_at  DateTime?
   reminder_sent_at         DateTime?
   review_prompted_at       DateTime?
   payment_reminder_sent_at DateTime?
