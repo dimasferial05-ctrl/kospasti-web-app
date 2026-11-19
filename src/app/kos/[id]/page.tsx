@@ -26,6 +26,7 @@ import {
   Layers,
   BadgeCheck,
   MessageCircle,
+  MessageSquare,
   Share2,
   CalendarClock,
 } from "lucide-react";
@@ -243,6 +244,34 @@ export default function PropertyDetailPage() {
       router.push(`/login?callbackUrl=${callbackUrl}`);
     } finally {
       setIsCheckingAuth(false);
+    }
+  };
+
+  const [isOpeningChat, setIsOpeningChat] = useState(false);
+  const handleOpenDirectChat = async () => {
+    if (!property?.id || isOpeningChat) return;
+    setIsOpeningChat(true);
+    try {
+      const res = await fetch("/api/chat/rooms", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ property_id: property.id }),
+      });
+      if (res.status === 401) {
+        const callbackUrl = encodeURIComponent(`/kos/${property.id}`);
+        router.push(`/login?callbackUrl=${callbackUrl}`);
+        return;
+      }
+      const data = await res.json();
+      if (res.ok && data.success && data.room?.id) {
+        router.push(`/chat/${data.room.id}`);
+      } else {
+        alert(data.error || "Gagal membuka ruang obrolan.");
+      }
+    } catch {
+      alert("Terjadi kesalahan saat menghubungkan ke obrolan.");
+    } finally {
+      setIsOpeningChat(false);
     }
   };
 
@@ -1566,6 +1595,22 @@ export default function PropertyDetailPage() {
               </div>
 
               <div className="flex items-center gap-2 w-auto lg:w-full">
+                {/* Tombol Chat Langsung dengan Masking Privasi di Mobile */}
+                <button
+                  type="button"
+                  onClick={handleOpenDirectChat}
+                  disabled={isOpeningChat}
+                  className="lg:hidden p-2.5 rounded-xl border border-emerald-200 dark:border-emerald-800 bg-emerald-50/60 dark:bg-emerald-950/40 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 transition-colors shrink-0 flex items-center justify-center cursor-pointer shadow-2xs"
+                  title="Tanya Pengelola via Chat Langsung"
+                  aria-label="Tanya Pengelola via Chat Langsung"
+                >
+                  {isOpeningChat ? (
+                    <Loader2 className="w-5 h-5 animate-spin text-emerald-600" />
+                  ) : (
+                    <MessageSquare className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+                  )}
+                </button>
+
                 {/* Tombol Bantuan CS WhatsApp di Mobile Bottom Bar */}
                 <a
                   href={buildSupportWhatsAppUrl({
@@ -1627,6 +1672,26 @@ export default function PropertyDetailPage() {
                     : "Amankan Kamar"}
                 </button>
               </div>
+
+              {/* Tombol Sekunder Desktop: Chat Langsung Pengelola */}
+              <button
+                type="button"
+                onClick={handleOpenDirectChat}
+                disabled={isOpeningChat}
+                className="hidden lg:flex w-full py-2.5 px-4 rounded-xl border border-emerald-600/30 dark:border-emerald-500/30 bg-emerald-50/50 dark:bg-emerald-950/30 hover:bg-emerald-100/60 dark:hover:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 text-sm font-bold items-center justify-center gap-2 transition-all duration-200 active:scale-95 cursor-pointer shadow-2xs focus:outline-none focus:ring-2 focus:ring-emerald-500/40"
+              >
+                {isOpeningChat ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin text-emerald-600" />
+                    <span>Membuka Obrolan...</span>
+                  </>
+                ) : (
+                  <>
+                    <MessageSquare className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                    <span>Chat Pengelola (Privasi Terjaga)</span>
+                  </>
+                )}
+              </button>
 
               {/* Tombol Sekunder Desktop: Jadwalkan Survei Lokasi */}
               <button
