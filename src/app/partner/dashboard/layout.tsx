@@ -15,6 +15,7 @@ import {
   ExternalLink,
   Wallet,
   CreditCard,
+  MessageSquare,
 } from "lucide-react";
 import { Sidebar, SidebarBody, SidebarLink, type Links } from "@/components/ui/sidebar";
 import { SidebarThemeToggle } from "@/components/ui/SidebarThemeToggle";
@@ -141,6 +142,21 @@ export default function PartnerDashboardLayout({
         />
       ),
       active: Boolean(pathname?.startsWith("/partner/dashboard/visits")),
+    },
+    {
+      label: "Pesan Masuk",
+      href: "/partner/dashboard/chats",
+      icon: (
+        <MessageSquare
+          size={20}
+          className={`shrink-0 transition-colors ${
+            pathname?.startsWith("/partner/dashboard/chats")
+              ? "text-emerald-400"
+              : "text-slate-400"
+          }`}
+        />
+      ),
+      active: Boolean(pathname?.startsWith("/partner/dashboard/chats")),
     },
     {
       label: "Ulasan Penyewa",

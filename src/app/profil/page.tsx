@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef, Suspense, useSyncExternalStore } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import Link from "next/link";
 import Image from "next/image";
 import {
   User as UserIcon,
@@ -11,6 +12,7 @@ import {
   CalendarClock,
   ArrowLeft,
   ShieldCheck,
+  MessageSquare,
 } from "lucide-react";
 import {
   saveCachedBookings,
@@ -461,6 +463,14 @@ function ProfileContent() {
                 <CalendarClock className="w-4 h-4" />
                 <span>Jadwal Survei</span>
               </button>
+
+              <Link
+                href="/chat"
+                className="flex-1 lg:flex-none flex items-center justify-center lg:justify-start gap-2.5 px-4 py-3 rounded-xl text-sm font-semibold transition-colors cursor-pointer whitespace-nowrap text-slate-650 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white"
+              >
+                <MessageSquare className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                <span>Pesan &amp; Obrolan</span>
+              </Link>
 
               <button
                 type="button"

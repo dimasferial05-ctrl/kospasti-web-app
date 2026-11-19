@@ -30,6 +30,7 @@ import {
   Download,
   MonitorSmartphone,
   Scale,
+  MessageSquare,
 } from "lucide-react";
 import { useTheme } from "next-themes";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
@@ -393,6 +394,21 @@ export function Header({ isLoggedIn: initialIsLoggedIn = false }: HeaderProps) {
               {isLoggedIn ? (
                 <div className="flex items-center gap-2 sm:gap-2.5">
                   <NotificationBell audience="USER" />
+
+                  {/* Tombol Pesan & Obrolan Desktop */}
+                  <Link
+                    href="/chat"
+                    className={`hidden md:flex items-center justify-center w-9 h-9 rounded-full transition-colors relative border ${
+                      pathname?.startsWith("/chat")
+                        ? "bg-emerald-50 dark:bg-emerald-950/60 border-emerald-300 dark:border-emerald-700 text-emerald-600 dark:text-emerald-400"
+                        : "border-slate-200/80 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 hover:text-emerald-600 dark:hover:text-emerald-400"
+                    }`}
+                    title="Pesan & Obrolan Saya"
+                    aria-label="Pesan & Obrolan Saya"
+                  >
+                    <MessageSquare className="w-4 h-4" />
+                  </Link>
+
                   <div
                     className="relative"
                     ref={dropdownRef}
@@ -497,6 +513,19 @@ export function Header({ isLoggedIn: initialIsLoggedIn = false }: HeaderProps) {
                         >
                           <History className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
                           <span>Riwayat Pesanan</span>
+                        </Link>
+
+                        <Link
+                          href="/chat"
+                          onClick={() => setIsDropdownOpen(false)}
+                          className={`flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium transition-colors ${
+                            pathname?.startsWith("/chat")
+                              ? "bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 font-semibold"
+                              : "text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white"
+                          }`}
+                        >
+                          <MessageSquare className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                          <span>Pesan &amp; Obrolan</span>
                         </Link>
 
                         <Link
