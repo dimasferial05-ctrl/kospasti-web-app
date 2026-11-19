@@ -582,3 +582,54 @@ export async function notifyPaymentReminder(params: {
   await Promise.all(tasks);
 }
 
+export async function notifyDepositReleased(params: {
+  tenantName: string;
+  tenantWhatsapp: string;
+  propertyName: string;
+  depositAmount: number;
+  refundedAmount: number;
+  claimedAmount: number;
+  claimReason?: string | null;
+  userId?: string | null;
+  bookingId?: string;
+}) {
+  const isFullyRefunded = params.claimedAmount === 0;
+  const message = isFullyRefunded
+    ? [
+        `[KosPasti] Halo ${params.tenantName}!`,
+        `Pemeriksaan kamar di ${params.propertyName} telah selesai. Kondisi kamar dinyatakan baik tanpa kerusakan.`,
+        `Deposit jaminan sebesar Rp${params.refundedAmount.toLocaleString("id-ID")} telah dikembalikan dari sistem Escrow ke rekening Anda.`,
+        `Terima kasih telah menyewa melalui KosPasti!`,
+      ].join("\n")
+    : [
+        `[KosPasti] Halo ${params.tenantName}!`,
+        `Pemeriksaan kamar di ${params.propertyName} telah selesai.`,
+        `Terdapat klaim kerusakan fasilitas sebesar Rp${params.claimedAmount.toLocaleString("id-ID")}${params.claimReason ? ` (Alasan: ${params.claimReason})` : ""}.`,
+        params.refundedAmount > 0
+          ? `Sisa deposit sebesar Rp${params.refundedAmount.toLocaleString("id-ID")} telah dikembalikan ke rekening Anda.`
+          : `Seluruh deposit digunakan untuk penggantian kerusakan fasilitas.`,
+        `Rincian selengkapnya dapat dilihat di aplikasi KosPasti.`,
+      ].join("\n");
+
+  if (params.userId) {
+    await createInAppNotification({
+      userId: params.userId,
+      title: isFullyRefunded ? "Deposit Dikembalikan" : "Deposit Selesai Diperiksa",
+      message: isFullyRefunded
+        ? `Deposit jaminan Rp${params.refundedAmount.toLocaleString("id-ID")} untuk ${params.propertyName} telah dikembalikan secara penuh.`
+        : `Pemeriksaan kamar ${params.propertyName} selesai. Klaim kerusakan Rp${params.claimedAmount.toLocaleString("id-ID")}${params.refundedAmount > 0 ? `, sisa Rp${params.refundedAmount.toLocaleString("id-ID")} dikembalikan.` : "."}`,
+      type: "BOOKING_STATUS",
+      link: params.bookingId ? `/receipt/${params.bookingId}` : "/profil",
+    });
+  }
+
+  try {
+    if (params.tenantWhatsapp) {
+      await sendWhatsAppMessage({ to: params.tenantWhatsapp, message });
+    }
+  } catch (err) {
+    console.error("[NOTIFICATION ERROR] Gagal mengirim pesan WA deposit release:", err);
+  }
+}
+
+

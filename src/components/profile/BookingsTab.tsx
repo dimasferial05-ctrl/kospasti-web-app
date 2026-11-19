@@ -17,6 +17,7 @@ import {
   X,
   FileCheck,
   RefreshCw,
+  ShieldCheck,
 } from "lucide-react";
 import { OfflineBanner } from "@/components/ui/OfflineBanner";
 import { HelpTooltip } from "@/components/ui/Tooltip";
@@ -383,6 +384,21 @@ export function BookingsTab({
                         {formatRupiah(booking.property?.price_per_month || 0)}
                         <span className="text-xs font-medium text-slate-500">/bln</span>
                       </span>
+                      {Boolean(booking.security_deposit && booking.security_deposit > 0) && (
+                        <div className="mt-1">
+                          <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-sky-700 dark:text-sky-300 bg-sky-50 dark:bg-sky-950/60 border border-sky-200 dark:border-sky-800 px-2 py-0.5 rounded-full">
+                            <ShieldCheck className="w-2.5 h-2.5 text-sky-600 dark:text-sky-400" />
+                            <span>
+                              Deposit {formatRupiah(booking.security_deposit || 0)}:{" "}
+                              {booking.deposit_status === "REFUNDED"
+                                ? "Dikembalikan"
+                                : booking.deposit_status === "CLAIMED"
+                                ? "Selesai Diklaim"
+                                : "Ditahan Escrow"}
+                            </span>
+                          </span>
+                        </div>
+                      )}
                     </div>
 
                     <div className="flex flex-wrap items-center gap-2 pt-1 w-full sm:w-auto justify-end">

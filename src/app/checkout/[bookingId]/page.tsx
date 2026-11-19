@@ -61,6 +61,7 @@ interface BookingDetail {
   pricing: {
     rentPrice: number;
     adminFee: number;
+    securityDeposit?: number;
     totalPrice: number;
   };
 }
@@ -236,7 +237,8 @@ export default function CheckoutPage() {
 
   const rentPrice = booking?.pricing?.rentPrice ?? 0;
   const adminFee = booking?.pricing?.adminFee ?? 5000;
-  const totalPrice = booking?.pricing?.totalPrice ?? rentPrice + adminFee;
+  const securityDeposit = booking?.pricing?.securityDeposit ?? 0;
+  const totalPrice = booking?.pricing?.totalPrice ?? rentPrice + adminFee + securityDeposit;
 
   if (booking && (booking.status === "PAID" || booking.status === "COMPLETED")) {
     return (
@@ -396,7 +398,29 @@ export default function CheckoutPage() {
                     {formatRupiah(adminFee)}
                   </span>
                 </div>
+                {securityDeposit > 0 && (
+                  <div className="flex items-center justify-between">
+                    <span className="flex items-center gap-1">
+                      <span>Deposit Jaminan Kerusakan</span>
+                      <span className="text-[10px] text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800 px-1 py-0.2 rounded font-medium">
+                        Dapat Dikembalikan
+                      </span>
+                    </span>
+                    <span className="font-medium text-slate-800 dark:text-slate-100">
+                      {formatRupiah(securityDeposit)}
+                    </span>
+                  </div>
+                )}
               </div>
+
+              {securityDeposit > 0 && (
+                <div className="p-3 bg-emerald-50/70 dark:bg-emerald-950/30 border border-emerald-100 dark:border-emerald-900/40 rounded-xl flex items-start gap-2.5 text-left">
+                  <ShieldCheck className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
+                  <p className="text-[11px] text-slate-600 dark:text-slate-400 leading-relaxed">
+                    Uang deposit jaminan <strong>{formatRupiah(securityDeposit)}</strong> ditahan aman di Rekening Bersama (Escrow) KosPasti dan akan dikembalikan 100% ke rekening Anda saat checkout kamar jika fasilitas diserahkan dalam kondisi baik.
+                  </p>
+                </div>
+              )}
 
               {/* Total Tagihan */}
               <div className="flex items-center justify-between pt-1">

@@ -215,14 +215,15 @@ export async function PATCH(
         where: { property_id: id },
       });
       await prisma.roomType.createMany({
-        data: room_types.map((rt) => ({
+        data: room_types.map((rt: any) => ({
           property_id: id,
           name: rt.name,
-          price_per_month: rt.price_per_month,
-          available_rooms: rt.available_rooms,
-          facilities: rt.facilities,
-          specifications: rt.specifications,
-          image_url: rt.image_url,
+          price_per_month: Math.floor(Number(rt.price_per_month) || 0),
+          security_deposit: Math.max(0, Math.floor(Number(rt.security_deposit) || 0)),
+          available_rooms: Math.max(0, Math.floor(Number(rt.available_rooms) || 0)),
+          facilities: rt.facilities || null,
+          specifications: rt.specifications || null,
+          image_url: rt.image_url || null,
         })),
       });
     }

@@ -188,15 +188,17 @@ export async function POST(request: Request) {
         throw new Error("Kamar sudah penuh atau tidak ditemukan");
       }
 
-      // 3. Ambil tarif sewa untuk field amount
+      // 3. Ambil tarif sewa dan uang deposit jaminan untuk field amount & security_deposit
       let bookingAmount = 0;
+      let securityDeposit = 0;
       if (resolvedRoomTypeId) {
         const roomTypeData = await tx.roomType.findUnique({
           where: { id: resolvedRoomTypeId },
-          select: { price_per_month: true },
+          select: { price_per_month: true, security_deposit: true },
         });
         if (roomTypeData) {
           bookingAmount = roomTypeData.price_per_month;
+          securityDeposit = roomTypeData.security_deposit || 0;
         }
       }
       if (bookingAmount === 0) {
@@ -219,6 +221,8 @@ export async function POST(request: Request) {
           move_in_date: parsedDate,
           status: "PENDING",
           amount: bookingAmount,
+          security_deposit: securityDeposit,
+          deposit_status: securityDeposit > 0 ? "HELD" : "NONE",
           user_id: userPayload.userId,
         },
         include: {

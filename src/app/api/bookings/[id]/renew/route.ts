@@ -152,6 +152,7 @@ export async function POST(
 
     // 8. Buat Booking Baru dengan Status PENDING
     // Catatan: TIDAK mengurangi available_rooms karena kamar fisik sudah ditempati oleh penyewa yang sama (occupancy retention)
+    // Deposit jaminan kerusakan diatur 0 (NONE) karena deposit awal dari booking pertama tetap aktif ditahan di rekening bersama Escrow
     const newBooking = await prisma.booking.create({
       data: {
         property_id: existingBooking.property_id,
@@ -162,6 +163,8 @@ export async function POST(
         status: "PENDING",
         amount: rentalAmount,
         service_fee: existingBooking.service_fee || 5000,
+        security_deposit: 0,
+        deposit_status: "NONE",
         user_id: userPayload.userId,
       },
       include: {

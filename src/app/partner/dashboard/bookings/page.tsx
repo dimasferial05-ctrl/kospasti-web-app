@@ -20,6 +20,8 @@ import {
   DollarSign,
   HelpCircle,
   Download,
+  ShieldCheck,
+  AlertTriangle,
 } from "lucide-react";
 import { HelpTooltip } from "@/components/ui/Tooltip";
 import { ExportFinancialModal } from "@/components/partner/ExportFinancialModal";
@@ -38,6 +40,12 @@ interface Booking {
   refund_account_holder?: string | null;
   refund_note?: string | null;
   refunded_at?: string | null;
+  security_deposit?: number;
+  deposit_status?: string | null;
+  deposit_refunded_at?: string | null;
+  deposit_claimed_amount?: number | null;
+  deposit_claim_reason?: string | null;
+  checkout_confirmed_at?: string | null;
   property: {
     id: string;
     name: string;
@@ -68,6 +76,11 @@ export default function PartnerBookingsPage() {
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [confirmCheckinBooking, setConfirmCheckinBooking] = useState<Booking | null>(null);
   const [checkinLoading, setCheckinLoading] = useState(false);
+  const [confirmCheckoutBooking, setConfirmCheckoutBooking] = useState<Booking | null>(null);
+  const [checkoutCondition, setCheckoutCondition] = useState<"GOOD" | "DAMAGED">("GOOD");
+  const [claimAmount, setClaimAmount] = useState<string>("");
+  const [claimReason, setClaimReason] = useState<string>("");
+  const [checkoutLoading, setCheckoutLoading] = useState(false);
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
 
 
@@ -253,6 +266,53 @@ export default function PartnerBookingsPage() {
         <span>Ditolak</span>
         <HelpTooltip text="Pesanan dibatalkan/ditolak. Kuota kamar otomatis dikembalikan dan DP direfund ke penyewa." />
       </span>
+    );
+  };
+
+  const renderCheckoutControl = (b: Booking) => {
+    if (b.checkout_confirmed_at) {
+      return (
+        <div className="mt-2 p-2.5 rounded-xl bg-slate-100/80 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/60 text-xs space-y-1">
+          <div className="flex items-center justify-between font-bold text-slate-800 dark:text-slate-200">
+            <span className="flex items-center gap-1.5 text-emerald-700 dark:text-emerald-400">
+              <CheckCircle2 className="w-3.5 h-3.5" />
+              Kamar Telah Checkout
+            </span>
+            <span className="text-[10px] text-slate-400 font-normal">
+              {new Date(b.checkout_confirmed_at).toLocaleDateString("id-ID")}
+            </span>
+          </div>
+          <div className="text-[11px] text-slate-600 dark:text-slate-400">
+            {b.deposit_status === "REFUNDED" ? (
+              <span className="text-emerald-700 dark:text-emerald-400 font-semibold">
+                Deposit jaminan 100% telah dikembalikan ke penyewa.
+              </span>
+            ) : b.deposit_status === "CLAIMED" ? (
+              <span className="text-amber-700 dark:text-amber-400 font-medium">
+                Klaim kerusakan: Rp{(b.deposit_claimed_amount || 0).toLocaleString("id-ID")} ({b.deposit_claim_reason || "Kerusakan kamar"}).
+              </span>
+            ) : (
+              <span>Pemeriksaan kamar selesai dan kuota kamar telah dikembalikan (+1).</span>
+            )}
+          </div>
+        </div>
+      );
+    }
+
+    return (
+      <button
+        type="button"
+        onClick={() => {
+          setConfirmCheckoutBooking(b);
+          setCheckoutCondition("GOOD");
+          setClaimAmount("");
+          setClaimReason("");
+        }}
+        className="w-full mt-2 py-2 px-3 rounded-xl bg-sky-600 hover:bg-sky-700 text-white font-bold text-xs flex items-center justify-center gap-1.5 transition-all shadow-sm shadow-sky-600/20 cursor-pointer"
+      >
+        <ShieldCheck className="w-3.5 h-3.5" />
+        <span>Konfirmasi Checkout & Pelepasan Deposit</span>
+      </button>
     );
   };
 
@@ -608,6 +668,7 @@ export default function PartnerBookingsPage() {
                     <p className="text-[11px] text-slate-600 dark:text-slate-400">
                       Masa tenggang (Grace Period 12 jam) sedang berjalan. Payout otomatis dibuat ke antrean admin setelah masa tenggang berakhir.
                     </p>
+                    {renderCheckoutControl(b)}
                   </div>
                 ) : b.status === "PAYOUT_PENDING" ? (
                   <div className="pt-2 border-t border-slate-100 dark:border-slate-800 p-3 rounded-2xl bg-amber-50/70 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/50 text-xs text-amber-900 dark:text-amber-200 space-y-1">
@@ -618,6 +679,7 @@ export default function PartnerBookingsPage() {
                     <p className="text-[11px] text-slate-600 dark:text-slate-400">
                       Permintaan pencairan dana telah dibuat. Admin KosPasti akan memproses transfer ke rekening mitra Anda.
                     </p>
+                    {renderCheckoutControl(b)}
                   </div>
                 ) : b.status === "PAYOUT_PAID" ? (
                   <div className="pt-2 border-t border-slate-100 dark:border-slate-800 p-3 rounded-2xl bg-emerald-50/70 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800/50 text-xs text-emerald-900 dark:text-emerald-200 space-y-1">
@@ -628,6 +690,7 @@ export default function PartnerBookingsPage() {
                     <p className="text-[11px] text-slate-600 dark:text-slate-400">
                       Dana sewa telah dicairkan ke rekening Anda. Cek rincian di <Link href="/partner/dashboard/payouts" className="text-emerald-600 underline font-semibold">Riwayat Payout</Link>.
                     </p>
+                    {renderCheckoutControl(b)}
                   </div>
                 ) : b.status === "DISPUTED" ? (
                   <div className="pt-2 border-t border-slate-100 dark:border-slate-800 p-3 rounded-2xl bg-rose-50/70 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-800/50 text-xs text-rose-900 dark:text-rose-200 space-y-1">
@@ -757,6 +820,162 @@ export default function PartnerBookingsPage() {
                   </>
                 ) : (
                   "Ya, Konfirmasi Check-In"
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Dialog Konfirmasi Checkout & Pelepasan Deposit */}
+      {confirmCheckoutBooking && (
+        <div className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in duration-200">
+          <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-2xl max-w-lg w-full p-6 space-y-5">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-2xl bg-sky-100 dark:bg-sky-950/50 flex items-center justify-center text-sky-600 dark:text-sky-400 shrink-0">
+                <ShieldCheck className="w-6 h-6" />
+              </div>
+              <div>
+                <h3 className="font-extrabold text-slate-900 dark:text-white text-base">
+                  Checkout Kamar & Pelepasan Deposit
+                </h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400">
+                  {confirmCheckoutBooking.property.name}
+                </p>
+              </div>
+            </div>
+
+            <div className="bg-slate-50 dark:bg-slate-800/60 p-4 rounded-2xl border border-slate-150 dark:border-slate-800 text-xs space-y-2">
+              <div className="flex justify-between">
+                <span className="text-slate-500">Penyewa:</span>
+                <span className="font-bold text-slate-900 dark:text-white">{confirmCheckoutBooking.student_name}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-slate-500">Total Deposit Ditahan:</span>
+                <span className="font-bold text-emerald-700 dark:text-emerald-400">
+                  Rp{(confirmCheckoutBooking.security_deposit || 0).toLocaleString("id-ID")}
+                </span>
+              </div>
+            </div>
+
+            <div className="space-y-3">
+              <label className="text-xs font-bold text-slate-900 dark:text-white block">
+                Hasil Pemeriksaan Kondisi Kamar:
+              </label>
+              <div className="grid grid-cols-2 gap-3">
+                <button
+                  type="button"
+                  onClick={() => setCheckoutCondition("GOOD")}
+                  className={`p-3 rounded-2xl border text-left transition-all cursor-pointer ${
+                    checkoutCondition === "GOOD"
+                      ? "border-emerald-500 bg-emerald-50/60 dark:bg-emerald-950/40 text-emerald-900 dark:text-emerald-200 font-bold"
+                      : "border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300"
+                  }`}
+                >
+                  <div className="text-xs flex items-center gap-1.5 mb-1">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                    <span>Kondisi Baik</span>
+                  </div>
+                  <div className="text-[11px] font-normal text-slate-500">
+                    Bebas kerusakan, deposit 100% kembali ke penyewa.
+                  </div>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setCheckoutCondition("DAMAGED")}
+                  className={`p-3 rounded-2xl border text-left transition-all cursor-pointer ${
+                    checkoutCondition === "DAMAGED"
+                      ? "border-rose-500 bg-rose-50/60 dark:bg-rose-950/40 text-rose-900 dark:text-rose-200 font-bold"
+                      : "border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300"
+                  }`}
+                >
+                  <div className="text-xs flex items-center gap-1.5 mb-1">
+                    <AlertTriangle className="w-4 h-4 text-rose-600" />
+                    <span>Ada Kerusakan</span>
+                  </div>
+                  <div className="text-[11px] font-normal text-slate-500">
+                    Kunci hilang atau fasilitas rusak (klaim deposit).
+                  </div>
+                </button>
+              </div>
+
+              {checkoutCondition === "DAMAGED" && (
+                <div className="space-y-3 pt-2 p-3 bg-rose-50/50 dark:bg-rose-950/20 border border-rose-200 dark:border-rose-800/40 rounded-2xl animate-in fade-in">
+                  <div>
+                    <label className="text-[11px] font-bold text-slate-700 dark:text-slate-300 block mb-1">
+                      Nominal Potongan Kerusakan (Maksimal Rp{(confirmCheckoutBooking.security_deposit || 0).toLocaleString("id-ID")}):
+                    </label>
+                    <input
+                      type="number"
+                      value={claimAmount}
+                      onChange={(e) => setClaimAmount(e.target.value)}
+                      placeholder="Contoh: 150000"
+                      className="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-rose-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[11px] font-bold text-slate-700 dark:text-slate-300 block mb-1">
+                      Alasan / Keterangan Kerusakan Fasilitas:
+                    </label>
+                    <textarea
+                      value={claimReason}
+                      onChange={(e) => setClaimReason(e.target.value)}
+                      placeholder="Contoh: Kunci kamar hilang dan engsel jendela kamar patah."
+                      rows={2}
+                      className="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-rose-500"
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div className="flex items-center justify-end gap-3 pt-2">
+              <button
+                type="button"
+                disabled={checkoutLoading}
+                onClick={() => setConfirmCheckoutBooking(null)}
+                className="px-4 py-2.5 rounded-xl text-xs font-bold border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 transition-colors cursor-pointer"
+              >
+                Batal
+              </button>
+              <button
+                type="button"
+                disabled={checkoutLoading}
+                onClick={async () => {
+                  setCheckoutLoading(true);
+                  try {
+                    const res = await fetch(`/api/partner/bookings/${confirmCheckoutBooking.id}/checkout`, {
+                      method: "POST",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify({
+                        condition: checkoutCondition,
+                        claimAmount: checkoutCondition === "DAMAGED" ? Number(claimAmount) : 0,
+                        claimReason: checkoutCondition === "DAMAGED" ? claimReason : undefined,
+                      }),
+                    });
+                    const data = await res.json();
+                    if (!res.ok || !data.success) {
+                      throw new Error(data.error || "Gagal memproses checkout kamar.");
+                    }
+                    setSuccessMsg(data.message || "Checkout kamar dan pelepasan deposit berhasil diproses.");
+                    setConfirmCheckoutBooking(null);
+                    fetchBookings();
+                  } catch (err: any) {
+                    setErrorMsg(err.message || "Terjadi kesalahan saat memproses checkout.");
+                  } finally {
+                    setCheckoutLoading(false);
+                  }
+                }}
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-bold bg-sky-600 hover:bg-sky-700 text-white shadow-md shadow-sky-600/20 disabled:opacity-50 transition-colors cursor-pointer"
+              >
+                {checkoutLoading ? (
+                  <>
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    Memproses...
+                  </>
+                ) : (
+                  "Proses Checkout & Pelepasan Deposit"
                 )}
               </button>
             </div>

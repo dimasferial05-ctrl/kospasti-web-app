@@ -116,7 +116,8 @@ export async function GET(
     const rentPrice =
       booking.room_type?.price_per_month ?? booking.property?.price_per_month ?? booking.amount ?? 0;
     const adminFee = booking.service_fee || 5000;
-    const totalPrice = rentPrice + adminFee;
+    const securityDeposit = booking.security_deposit || 0;
+    const totalPrice = rentPrice + adminFee + securityDeposit;
 
     // Deteksi apakah booking ini merupakan perpanjangan sewa (renewal)
     // Penyewa memiliki booking sebelumnya di properti yang sama yang dibuat sebelum booking ini
@@ -164,12 +165,20 @@ export async function GET(
           paymentMethod: booking.payment_method,
           paymentGatewayRef: booking.payment_gateway_ref,
           snapToken: booking.snap_token,
+          checkinConfirmedAt: booking.checkin_confirmed_at,
+          checkoutConfirmedAt: booking.checkout_confirmed_at,
+          securityDeposit,
+          depositStatus: booking.deposit_status || (securityDeposit > 0 ? "HELD" : "NONE"),
+          depositRefundedAt: booking.deposit_refunded_at,
+          depositClaimedAmount: booking.deposit_claimed_amount || 0,
+          depositClaimReason: booking.deposit_claim_reason,
           property: booking.property,
           roomType: booking.room_type,
           pricing: {
             rentPrice,
             adminFee,
             serviceFee: adminFee,
+            securityDeposit,
             totalPrice,
           },
         },

@@ -57,6 +57,7 @@ interface BookingContractDetail {
   pricing: {
     rentPrice: number;
     adminFee: number;
+    securityDeposit?: number;
     totalPrice: number;
   };
 }
@@ -428,10 +429,16 @@ export default function ContractPage() {
               <span>Pasal 4: Biaya Sewa & Jaminan Escrow KosPasti</span>
             </h2>
             <p>
-              PIHAK KEDUA membayar biaya sewa sebesar <strong>{formatRupiah(booking.pricing.totalPrice)}</strong>{" "}
-              (termasuk sewa bulanan {formatRupiah(booking.pricing.rentPrice)} dan biaya administrasi platform{" "}
+              PIHAK KEDUA membayar total biaya sebesar <strong>{formatRupiah(booking.pricing.totalPrice)}</strong>{" "}
+              (termasuk sewa bulanan {formatRupiah(booking.pricing.rentPrice)}
+              {(booking.pricing.securityDeposit || 0) > 0 ? `, deposit jaminan kerusakan fasilitas ${formatRupiah(booking.pricing.securityDeposit || 0)},` : ""} dan biaya administrasi platform{" "}
               {formatRupiah(booking.pricing.adminFee)}). Seluruh dana sewa ditahan di rekening bersama KosPasti (Escrow) dan baru diteruskan ke PIHAK PERTAMA setelah masa garansi kedatangan 12 jam selesai tanpa sengketa.
             </p>
+            {(booking.pricing.securityDeposit || 0) > 0 && (
+              <p className="mt-1.5 text-xs text-slate-700 dark:text-slate-300 print:text-slate-800">
+                Uang jaminan kerusakan sebesar <strong>{formatRupiah(booking.pricing.securityDeposit || 0)}</strong> disimpan aman pada sistem Rekening Bersama KosPasti dan wajib dikembalikan 100% kepada PIHAK KEDUA saat masa tinggal berakhir (checkout), terkecuali jika terbukti terdapat kerusakan fisik fasilitas atau kehilangan kunci kamar oleh kelalaian penyewa.
+              </p>
+            )}
           </section>
 
           {/* PASAL 5: TATA TERTIB & KETENTUAN HUNIAN */}
