@@ -65,6 +65,7 @@ model Property {
   @@index([owner_id])
   @@index([status])
   @@index([average_rating])
+  @@index([latitude, longitude])
 }
 
 model RoomType {

@@ -1,4 +1,18 @@
 import { prisma } from "@/lib/prisma";
+import { Prisma } from "@prisma/client";
+
+function getTargetSchema(): string {
+  try {
+    const url = process.env.DATABASE_URL || "";
+    const match = url.match(/[?&]schema=([^&]+)/);
+    if (match && match[1]) {
+      return match[1];
+    }
+  } catch {
+    // fallback
+  }
+  return "public";
+}
 
 export interface NearbyPropertyRaw {
   id: string;
@@ -40,9 +54,42 @@ export interface DetailedPropertyWithDistance {
   }>;
 }
 
+export interface BoundingBox {
+  minLat: number;
+  maxLat: number;
+  minLng: number;
+  maxLng: number;
+}
+
+/**
+ * Menghitung kotak pembatas (Bounding Box) berdasarkan titik pusat koordinat dan radius (km).
+ * 1 derajat latitude ~ 111.045 km
+ * 1 derajat longitude ~ 111.045 * cos(latitude) km
+ */
+export function calculateBoundingBox(
+  lat: number,
+  lng: number,
+  radiusKm: number
+): BoundingBox {
+  const safeRadius = Math.max(0.1, radiusKm);
+  const latDelta = safeRadius / 111.045;
+
+  // Lindungi dari pembagian 0 atau nilai ekstrem pada kutub
+  const latRad = (lat * Math.PI) / 180;
+  const cosLat = Math.max(Math.cos(latRad), 0.01);
+  const lngDelta = safeRadius / (111.045 * cosLat);
+
+  return {
+    minLat: lat - latDelta,
+    maxLat: lat + latDelta,
+    minLng: lng - lngDelta,
+    maxLng: lng + lngDelta,
+  };
+}
+
 /**
  * Mengambil properti kos dalam radius tertentu (maksimal 10km secara default)
- * menggunakan Raw SQL PostgreSQL dengan Rumus Haversine.
+ * menggunakan Raw SQL PostgreSQL dengan Bounding Box Pre-filter dan Rumus Haversine.
  */
 export async function findPropertiesWithinRadius(
   targetLat: number,
@@ -50,22 +97,44 @@ export async function findPropertiesWithinRadius(
   radiusInKm: number = 10,
   limit: number = 25
 ): Promise<NearbyPropertyRaw[]> {
+  if (
+    typeof targetLat !== "number" ||
+    typeof targetLng !== "number" ||
+    isNaN(targetLat) ||
+    isNaN(targetLng) ||
+    targetLat < -90 ||
+    targetLat > 90 ||
+    targetLng < -180 ||
+    targetLng > 180
+  ) {
+    return [];
+  }
+
+  const safeRadius = Math.max(0.1, radiusInKm);
+  const safeLimit = Math.max(1, Math.min(limit, 100));
+  const bbox = calculateBoundingBox(targetLat, targetLng, safeRadius);
+
   try {
+    const tableIdentifier = Prisma.raw(`"${getTargetSchema()}"."Property"`);
+
     const rawProperties = await prisma.$queryRaw<NearbyPropertyRaw[]>`
       SELECT id, name, latitude, longitude,
         ( 6371 * acos( LEAST(1.0, GREATEST(-1.0,
           cos(radians(${targetLat})) * cos(radians(latitude)) * cos(radians(longitude) - radians(${targetLng})) +
           sin(radians(${targetLat})) * sin(radians(latitude))
         )) ) ) AS distance
-      FROM "Property"
-      WHERE latitude IS NOT NULL AND longitude IS NOT NULL
-        AND status = 'PUBLISHED'
+      FROM ${tableIdentifier}
+      WHERE status = 'PUBLISHED'
+        AND latitude IS NOT NULL
+        AND longitude IS NOT NULL
+        AND latitude BETWEEN ${bbox.minLat} AND ${bbox.maxLat}
+        AND longitude BETWEEN ${bbox.minLng} AND ${bbox.maxLng}
         AND ( 6371 * acos( LEAST(1.0, GREATEST(-1.0,
           cos(radians(${targetLat})) * cos(radians(latitude)) * cos(radians(longitude) - radians(${targetLng})) +
           sin(radians(${targetLat})) * sin(radians(latitude))
-        )) ) ) <= ${radiusInKm}
+        )) ) ) <= ${safeRadius}
       ORDER BY distance ASC
-      LIMIT ${limit};
+      LIMIT ${safeLimit};
     `;
 
     return rawProperties.map((p) => ({
@@ -73,7 +142,7 @@ export async function findPropertiesWithinRadius(
       distance: Math.round(Number(p.distance) * 10) / 10,
     }));
   } catch (error) {
-    console.error("Error running Haversine query raw SQL:", error);
+    console.error("Error running Haversine query raw SQL with bounding box:", error);
     return [];
   }
 }
