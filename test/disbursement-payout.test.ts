@@ -1,5 +1,5 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
-import { normalizeBankCode, createDisbursement } from "@/lib/disbursement";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { normalizeBankCode, createDisbursement, isIrisSimulation } from "@/lib/disbursement";
 import { POST } from "@/app/api/admin/payouts/[id]/process/route";
 import { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
@@ -163,12 +163,90 @@ describe("Disbursement Service - createDisbursement", () => {
 
     fetchSpy.mockRestore();
   });
+
+  describe("Production Environment Security Guard (Fail-Closed)", () => {
+    const testEnv = { ...originalEnv };
+
+    beforeEach(() => {
+      process.env = { ...testEnv };
+    });
+
+    afterEach(() => {
+      process.env = { ...testEnv };
+    });
+
+    it("throws FATAL error if IRIS_API_KEY is missing in production for isIrisSimulation()", () => {
+      process.env.NODE_ENV = "production";
+      delete process.env.IRIS_API_KEY;
+      delete process.env.IRIS_SIMULATION;
+
+      expect(() => isIrisSimulation()).toThrowError(
+        "FATAL: IRIS_API_KEY wajib dikonfigurasi pada mode produksi!"
+      );
+    });
+
+    it("throws FATAL error if IRIS_SIMULATION is true in production for isIrisSimulation()", () => {
+      process.env.NODE_ENV = "production";
+      process.env.IRIS_SIMULATION = "true";
+      process.env.IRIS_API_KEY = "iris_live_secret";
+
+      expect(() => isIrisSimulation()).toThrowError(
+        "FATAL: Mode simulasi IRIS_SIMULATION dilarang aktif pada mode produksi!"
+      );
+    });
+
+    it("returns false if IRIS_API_KEY is present and IRIS_SIMULATION is not true in production", () => {
+      process.env.NODE_ENV = "production";
+      process.env.IRIS_API_KEY = "iris_live_secret";
+      delete process.env.IRIS_SIMULATION;
+
+      expect(isIrisSimulation()).toBe(false);
+    });
+
+    it("throws FATAL error in createDisbursement() if IRIS_API_KEY is missing in production", async () => {
+      process.env.NODE_ENV = "production";
+      delete process.env.IRIS_API_KEY;
+      delete process.env.IRIS_SIMULATION;
+
+      await expect(
+        createDisbursement({
+          payoutId: "payout-prod-test",
+          amount: 1000000,
+          bankName: "BCA",
+          accountNumber: "1234567890",
+          accountHolder: "Budi Santoso",
+        })
+      ).rejects.toThrowError("FATAL: IRIS_API_KEY wajib dikonfigurasi pada mode produksi!");
+    });
+
+    it("throws FATAL error in createDisbursement() if IRIS_SIMULATION is true in production", async () => {
+      process.env.NODE_ENV = "production";
+      process.env.IRIS_SIMULATION = "true";
+      process.env.IRIS_API_KEY = "iris_live_secret";
+
+      await expect(
+        createDisbursement({
+          payoutId: "payout-prod-test",
+          amount: 1000000,
+          bankName: "BCA",
+          accountNumber: "1234567890",
+          accountHolder: "Budi Santoso",
+        })
+      ).rejects.toThrowError("FATAL: Mode simulasi IRIS_SIMULATION dilarang aktif pada mode produksi!");
+    });
+  });
 });
 
 describe("Admin Payout Process API Route (POST /api/admin/payouts/[id]/process)", () => {
+  const routeEnv = { ...process.env };
+
   beforeEach(() => {
     vi.clearAllMocks();
-    process.env.IRIS_SIMULATION = "true";
+    process.env = { ...routeEnv, NODE_ENV: "test", IRIS_SIMULATION: "true" };
+  });
+
+  afterEach(() => {
+    process.env = { ...routeEnv };
   });
 
   it("returns 401 if admin is not authenticated", async () => {
