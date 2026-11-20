@@ -187,9 +187,32 @@ export async function deleteUploadedFile(fileUrl: string): Promise<boolean> {
   // Kasus 2: URL file lokal (/uploads/...)
   if (fileUrl.startsWith("/uploads/")) {
     try {
-      const relativePath = fileUrl.replace(/^\//, "");
-      const absolutePath = path.join(process.cwd(), "public", relativePath);
+      // Decode URI component untuk menangani URL-encoded traversal (%2e%2e%2f)
+      let decodedUrl = fileUrl;
+      try {
+        decodedUrl = decodeURIComponent(fileUrl);
+      } catch {
+        // Abaikan jika format URI decoding gagal, gunakan raw string
+      }
+
+      // Hilangkan leading slash atau backslash
+      const relativePath = decodedUrl.replace(/^(\/|\\)+/, "");
+      const uploadsBaseDir = path.resolve(process.cwd(), "public", "uploads");
+      const absolutePath = path.resolve(process.cwd(), "public", relativePath);
+
+      // Keamanan Strict Boundary: Pastikan path berada tepat di dalam folder public/uploads
+      const isWithinUploads = absolutePath.startsWith(uploadsBaseDir + path.sep);
+      if (!isWithinUploads) {
+        console.warn(`[SECURITY WARNING] Percobaan path traversal terdeteksi pada penghapusan file: "${fileUrl}"`);
+        return false;
+      }
+
       if (fs.existsSync(absolutePath)) {
+        const stat = await fs.promises.stat(absolutePath);
+        // Cegah penghapusan jika target bukan file reguler (misal direktori)
+        if (!stat.isFile()) {
+          return false;
+        }
         await fs.promises.unlink(absolutePath);
         return true;
       }

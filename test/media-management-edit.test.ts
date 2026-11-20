@@ -12,6 +12,7 @@ import path from "path";
 
 describe("Fitur Manajemen Media di Halaman Edit Properti (Issue #93)", () => {
   let ownerId: string;
+  const adminToken = process.env.ADMIN_TOKEN || "kospasti_admin_authenticated";
 
   beforeEach(async () => {
     await clearDatabase();
@@ -70,7 +71,7 @@ describe("Fitur Manajemen Media di Halaman Edit Properti (Issue #93)", () => {
       const request = new NextRequest("http://localhost:3000/api/admin/media/non-existent-id", {
         method: "DELETE",
         headers: {
-          cookie: "admin_token=kospasti_admin_authenticated",
+          cookie: `admin_token=${adminToken}`,
         },
       });
 
@@ -108,7 +109,7 @@ describe("Fitur Manajemen Media di Halaman Edit Properti (Issue #93)", () => {
       const request = new NextRequest(`http://localhost:3000/api/admin/media/${mediaToDelete.id}`, {
         method: "DELETE",
         headers: {
-          cookie: "admin_token=kospasti_admin_authenticated",
+          cookie: `admin_token=${adminToken}`,
         },
       });
 
@@ -177,7 +178,7 @@ describe("Fitur Manajemen Media di Halaman Edit Properti (Issue #93)", () => {
       const request = new NextRequest(`http://localhost:3000/api/admin/properties/${property.id}/thumbnail`, {
         method: "PATCH",
         headers: {
-          cookie: "admin_token=kospasti_admin_authenticated",
+          cookie: `admin_token=${adminToken}`,
         },
         body: JSON.stringify({}),
       });
@@ -213,7 +214,7 @@ describe("Fitur Manajemen Media di Halaman Edit Properti (Issue #93)", () => {
       const request = new NextRequest(`http://localhost:3000/api/admin/properties/${property.id}/thumbnail`, {
         method: "PATCH",
         headers: {
-          cookie: "admin_token=kospasti_admin_authenticated",
+          cookie: `admin_token=${adminToken}`,
         },
         body: JSON.stringify({ media_url: "/uploads/properties/new-target-thumb.jpg" }),
       });
@@ -237,11 +238,14 @@ describe("Fitur Manajemen Media di Halaman Edit Properti (Issue #93)", () => {
 
   describe("4. Logika UI Admin Panel & Halaman Detail Kos", () => {
     it("memastikan URL upload lokal tidak dimasukkan ke input URL Gambar saat edit di admin", () => {
-      const filePath = path.resolve(__dirname, "../src/app/admin/properties/page.tsx");
-      const content = fs.readFileSync(filePath, "utf-8");
+      const modalFormPath = path.resolve(__dirname, "../src/components/forms/property/PropertyModalForm.tsx");
+      const modalFormContent = fs.readFileSync(modalFormPath, "utf-8");
 
-      expect(content).toContain('!prop.image_url.startsWith("/uploads/")');
-      expect(content).toContain("const isThumbnail = editingProperty.image_url === item.url;");
+      expect(modalFormContent).toContain('!editingProperty.image_url.startsWith("/uploads/")');
+
+      const mediaSectionPath = path.resolve(__dirname, "../src/components/forms/property/PropertyMediaUploadSection.tsx");
+      const mediaSectionContent = fs.readFileSync(mediaSectionPath, "utf-8");
+      expect(mediaSectionContent).toContain("const isThumb = thumbnailUrl === m.url;");
     });
 
     it("memastikan gambar thumbnail selalu muncul di index pertama (paling depan) pada halaman detail kos", () => {
@@ -327,7 +331,7 @@ describe("Fitur Manajemen Media di Halaman Edit Properti (Issue #93)", () => {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
-          cookie: "admin_token=kospasti_admin_authenticated",
+          cookie: `admin_token=${adminToken}`,
         },
         body: JSON.stringify({
           name: "Kos Media Dedup (Updated)",
