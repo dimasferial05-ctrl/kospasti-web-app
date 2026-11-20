@@ -259,14 +259,6 @@ export async function GET(request: Request) {
             price_per_month: "asc",
           },
         },
-        reviews: {
-          where: {
-            is_hidden: false,
-          },
-          select: {
-            rating: true,
-          },
-        },
       },
     });
 
@@ -292,17 +284,19 @@ export async function GET(request: Request) {
           ? roomTypes.reduce((sum, rt) => sum + rt.available_rooms, 0)
           : p.available_rooms;
 
-      const activeReviews = p.reviews || [];
-      const totalReviews = activeReviews.length;
+      const totalReviews = p.total_reviews ?? ((p as any).reviews?.length || 0);
       const avgRating =
-        totalReviews > 0
+        p.average_rating ??
+        (totalReviews > 0 && (p as any).reviews
           ? Number(
               (
-                activeReviews.reduce((sum, r) => sum + r.rating, 0) /
-                totalReviews
+                (p as any).reviews.reduce(
+                  (sum: number, r: { rating: number }) => sum + r.rating,
+                  0
+                ) / totalReviews
               ).toFixed(1)
             )
-          : 0;
+          : 0);
 
       const nearestCampus = findNearestCampus(p.latitude, p.longitude);
 

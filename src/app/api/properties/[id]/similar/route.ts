@@ -75,14 +75,6 @@ export async function GET(
             price_per_month: "asc",
           },
         },
-        reviews: {
-          where: {
-            is_hidden: false,
-          },
-          select: {
-            rating: true,
-          },
-        },
       },
       take: 25, // Ambil pool kandidat untuk diberi skor
     });
@@ -158,17 +150,19 @@ export async function GET(
         score += Math.max(0, Math.round((1 - diffRatio) * 20));
       }
 
-      const activeReviews = cand.reviews || [];
-      const totalReviews = activeReviews.length;
+      const totalReviews = cand.total_reviews ?? (cand as any).reviews?.length ?? 0;
       const avgRating =
-        totalReviews > 0
+        cand.average_rating ??
+        (totalReviews > 0 && (cand as any).reviews
           ? Number(
               (
-                activeReviews.reduce((sum, r) => sum + r.rating, 0) /
-                totalReviews
+                (cand as any).reviews.reduce(
+                  (sum: number, r: { rating: number }) => sum + r.rating,
+                  0
+                ) / totalReviews
               ).toFixed(1)
             )
-          : 0;
+          : 0);
 
       return {
         property: {

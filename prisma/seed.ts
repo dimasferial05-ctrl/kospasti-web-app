@@ -491,6 +491,14 @@ async function main() {
     },
   });
 
+  await prisma.property.update({
+    where: { id: owner1.properties[0].id },
+    data: {
+      average_rating: 5.0,
+      total_reviews: 1,
+    },
+  });
+
   await prisma.review.create({
     data: {
       rating: 5,
@@ -499,6 +507,14 @@ async function main() {
       user_id: user5.id,
       booking_id: booking5.id,
       is_hidden: false,
+    },
+  });
+
+  await prisma.property.update({
+    where: { id: owner3.properties[1].id },
+    data: {
+      average_rating: 5.0,
+      total_reviews: 1,
     },
   });
 

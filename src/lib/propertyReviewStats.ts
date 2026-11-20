@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { Prisma } from "@prisma/client";
 
 export interface PropertyReviewStatsResult {
   averageRating: number;
@@ -11,7 +12,7 @@ export interface PropertyReviewStatsResult {
  */
 export async function updatePropertyReviewStats(
   propertyId: string,
-  tx?: any
+  tx?: Prisma.TransactionClient | typeof prisma
 ): Promise<PropertyReviewStatsResult> {
   const client = tx || prisma;
 
