@@ -10,7 +10,8 @@ export async function GET(
   try {
     const { id } = await props.params;
     const cookieStore = await cookies();
-    const partnerToken = cookieStore.get("partner_token")?.value;
+    const partnerToken =
+      cookieStore.get("partner_token")?.value || cookieStore.get("owner_token")?.value;
 
     if (!partnerToken) {
       return NextResponse.json(
@@ -20,7 +21,8 @@ export async function GET(
     }
 
     const payload = await verifyOwnerToken(partnerToken);
-    if (!payload || !payload.ownerId) {
+    const ownerId = payload?.ownerId || (payload as any)?.id;
+    if (!payload || !ownerId) {
       return NextResponse.json(
         { success: false, error: "Unauthorized" },
         { status: 401 }
@@ -31,7 +33,7 @@ export async function GET(
     const property = await prisma.property.findFirst({
       where: {
         id,
-        owner_id: payload.ownerId,
+        owner_id: ownerId,
       },
     });
 
@@ -118,7 +120,8 @@ export async function POST(
   try {
     const { id } = await props.params;
     const cookieStore = await cookies();
-    const partnerToken = cookieStore.get("partner_token")?.value;
+    const partnerToken =
+      cookieStore.get("partner_token")?.value || cookieStore.get("owner_token")?.value;
 
     if (!partnerToken) {
       return NextResponse.json(
@@ -128,7 +131,8 @@ export async function POST(
     }
 
     const payload = await verifyOwnerToken(partnerToken);
-    if (!payload || !payload.ownerId) {
+    const ownerId = payload?.ownerId || (payload as any)?.id;
+    if (!payload || !ownerId) {
       return NextResponse.json(
         { success: false, error: "Unauthorized" },
         { status: 401 }
@@ -138,7 +142,7 @@ export async function POST(
     const property = await prisma.property.findFirst({
       where: {
         id,
-        owner_id: payload.ownerId,
+        owner_id: ownerId,
       },
     });
 
