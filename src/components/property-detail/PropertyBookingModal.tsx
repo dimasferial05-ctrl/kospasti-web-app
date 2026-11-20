@@ -112,7 +112,7 @@ export function PropertyBookingModal({
                 </div>
                 <div className="text-right">
                   <p className="text-xs font-extrabold text-emerald-700 dark:text-emerald-400">
-                    Rp {selectedRoomType.price_per_month.toLocaleString("id-ID")}
+                    Rp {Number(selectedRoomType.price_per_month || 0).toLocaleString("id-ID")}
                   </p>
                   <p className="text-[10px] text-slate-500 dark:text-slate-400">/ bulan</p>
                 </div>

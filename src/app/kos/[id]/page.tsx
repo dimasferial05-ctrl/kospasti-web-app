@@ -23,7 +23,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://kospasti.com";
   const cleanAppUrl = appUrl.replace(/\/+$/, "");
-  const formattedPrice = `Rp ${property.price_per_month.toLocaleString("id-ID")}`;
+  const formattedPrice = `Rp ${Number(property.price_per_month || 0).toLocaleString("id-ID")}`;
   const title = `${property.name} - Sewa Kos di Subang | KosPasti`;
   const description =
     property.description?.slice(0, 160) ||
