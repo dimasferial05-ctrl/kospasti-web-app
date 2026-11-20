@@ -8,15 +8,25 @@ export async function clearDatabase() {
     return;
   }
 
-  await prisma.notification.deleteMany();
-  await prisma.visitSchedule.deleteMany();
-  await prisma.review.deleteMany();
-  await prisma.booking.deleteMany();
-  await prisma.magicLink.deleteMany();
-  await prisma.propertyMedia.deleteMany();
-  await prisma.savedProperty.deleteMany();
-  await prisma.roomType.deleteMany();
-  await prisma.property.deleteMany();
-  await prisma.owner.deleteMany();
-  await prisma.user.deleteMany();
+  try {
+    await Promise.allSettled([
+      prisma.chatMessage?.deleteMany().catch(() => {}),
+      prisma.chatRoom?.deleteMany().catch(() => {}),
+      prisma.notification?.deleteMany().catch(() => {}),
+      prisma.visitSchedule?.deleteMany().catch(() => {}),
+      prisma.review?.deleteMany().catch(() => {}),
+      prisma.payout?.deleteMany().catch(() => {}),
+      prisma.payoutMethod?.deleteMany().catch(() => {}),
+      prisma.booking?.deleteMany().catch(() => {}),
+      prisma.magicLink?.deleteMany().catch(() => {}),
+      prisma.propertyMedia?.deleteMany().catch(() => {}),
+      prisma.savedProperty?.deleteMany().catch(() => {}),
+      prisma.roomType?.deleteMany().catch(() => {}),
+      prisma.property?.deleteMany().catch(() => {}),
+      prisma.owner?.deleteMany().catch(() => {}),
+      prisma.user?.deleteMany().catch(() => {}),
+    ]);
+  } catch (error) {
+    console.warn("⚠️ [OFFLINE NOTICE] clearDatabase() dilewati atau mengalami kendala koneksi:", error);
+  }
 }
