@@ -46,6 +46,10 @@ import { useFocusTrap } from "@/hooks/useFocusTrap";
 import { formatWhatsAppNumber } from "@/lib/whatsapp";
 import { buildSupportWhatsAppUrl } from "@/components/support/CustomerSupportWidget";
 import { generateLodgingJsonLd } from "@/lib/seo";
+import { PropertyGalleryViewer } from "@/components/property-detail/PropertyGalleryViewer";
+import { PropertyBookingModal } from "@/components/property-detail/PropertyBookingModal";
+import { PropertyStickyBottomBar } from "@/components/property-detail/PropertyStickyBottomBar";
+import { PropertyOwnerContactCard } from "@/components/property-detail/PropertyOwnerContactCard";
 
 interface PropertyMediaItem {
   id?: string;
@@ -195,20 +199,6 @@ export default function PropertyDetailPage() {
     message: "",
   });
 
-  const bookingModalRef = useFocusTrap<HTMLDivElement>({
-    isOpen: isModalOpen,
-    onClose: () => {
-      setIsModalOpen(false);
-      setBookingError(null);
-      setDateValidationError(false);
-    },
-  });
-
-  const pendingModalRef = useFocusTrap<HTMLDivElement>({
-    isOpen: pendingBookingNotice.isOpen,
-    onClose: () => setPendingBookingNotice({ isOpen: false, message: "" }),
-  });
-
   const handleOpenBookingModal = async (roomTypeToBook?: RoomTypeItem) => {
     setBookingError(null);
     setDateValidationError(false);
@@ -266,14 +256,12 @@ export default function PropertyDetailPage() {
       if (res.ok && data.success && data.room?.id) {
         router.push(`/chat/${data.room.id}`);
       } else if (data.is_own_property) {
-        if (confirm(`${data.error}\n\nIngin membuka menu Pesan Masuk di Dasbor Mitra sekarang?`)) {
-          router.push(data.redirect_url || "/partner/dashboard/chats");
-        }
+        router.push(data.redirect_url || "/partner/dashboard/chats");
       } else {
-        alert(data.error || "Gagal membuka ruang obrolan.");
+        console.error(data.error || "Gagal membuka ruang obrolan.");
       }
     } catch {
-      alert("Terjadi kesalahan saat menghubungkan ke obrolan.");
+      console.error("Terjadi kesalahan saat menghubungkan ke obrolan.");
     } finally {
       setIsOpeningChat(false);
     }
@@ -898,188 +886,26 @@ export default function PropertyDetailPage() {
       {/* ========================================================================= */}
       {/* 1. HERO MEDIA SECTION: FULL WIDTH KE KANAN SESUAI PERMINTAAN USER         */}
       {/* ========================================================================= */}
-      <div id="section-media" className="w-full lg:mt-6">
-        <div className="w-full bg-slate-950 lg:rounded-3xl overflow-hidden shadow-md flex flex-col">
-          {/* Header Switcher Tab: Foto vs Video */}
-          <div className="bg-slate-900 border-b border-slate-800 px-4 py-2.5 flex items-center justify-between gap-3">
-            <div className="flex items-center gap-1.5">
-              <button
-                type="button"
-                onClick={() => setMediaMode("PHOTO")}
-                className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-                  mediaMode === "PHOTO"
-                    ? "bg-emerald-600 text-white shadow-xs"
-                    : "text-slate-400 hover:text-white hover:bg-slate-800"
-                }`}
-              >
-                <Camera className="w-3.5 h-3.5" />
-                <span>Foto ({photoList.length})</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setMediaMode("VIDEO")}
-                className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-                  mediaMode === "VIDEO"
-                    ? "bg-rose-600 text-white shadow-xs"
-                    : "text-slate-400 hover:text-white hover:bg-slate-800"
-                }`}
-              >
-                <Play className="w-3.5 h-3.5 fill-current" />
-                <span>Video {hasVideo ? "Tour" : ""}</span>
-              </button>
-            </div>
-
-            {mediaMode === "PHOTO" && photoList.length > 0 && (
-              <button
-                type="button"
-                onClick={() => openLightbox(activeIndex)}
-                className="inline-flex items-center gap-1.5 text-xs text-slate-300 hover:text-white bg-slate-800/80 hover:bg-slate-800 px-3 py-1.5 rounded-lg border border-slate-700/80 transition-colors cursor-pointer"
-                title="Buka gambar fullscreen"
-              >
-                <Maximize2 className="w-3.5 h-3.5" />
-                <span className="hidden sm:inline">Buka Fullscreen</span>
-              </button>
-            )}
-          </div>
-
-          {/* Media Player / Viewer */}
-          <div className="w-full h-80 sm:h-96 lg:h-[460px] relative bg-black flex items-center justify-center overflow-hidden">
-            {mediaMode === "VIDEO" ? (
-              // Tampilan Video YouTube / Native
-              <div className="w-full h-full flex items-center justify-center bg-black">
-                {youtubeEmbedUrl ? (
-                  <iframe
-                    src={youtubeEmbedUrl}
-                    title={`Video Tour - ${property.name}`}
-                    className="w-full h-full border-0"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    allowFullScreen
-                  />
-                ) : nativeVideoUrl ? (
-                  <video
-                    src={nativeVideoUrl}
-                    controls
-                    playsInline
-                    className="w-full h-full object-contain bg-black"
-                  />
-                ) : (
-                  <div className="flex flex-col items-center justify-center text-slate-400 gap-3 p-6 text-center">
-                    <div className="w-14 h-14 rounded-full bg-slate-900 flex items-center justify-center text-slate-500 border border-slate-800">
-                      <Tv className="w-7 h-7" />
-                    </div>
-                    <div>
-                      <p className="text-sm font-bold text-slate-200">
-                        Belum Ada Video Tour
-                      </p>
-                      <p className="text-xs text-slate-500 max-w-sm mt-0.5">
-                        Pemilik kos belum menambahkan link video YouTube untuk kos ini. Silakan lihat galeri foto di tab Foto.
-                      </p>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => setMediaMode("PHOTO")}
-                      className="mt-1 px-4 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-semibold transition-colors cursor-pointer"
-                    >
-                      Beralih ke Foto
-                    </button>
-                  </div>
-                )}
-              </div>
-            ) : (
-              // Tampilan Foto Galeri
-              <div
-                className="w-full h-full relative cursor-pointer group flex items-center justify-center"
-                onClick={() => openLightbox(activeIndex)}
-              >
-                {currentPhoto ? (
-                  /* eslint-disable-next-line @next/next/no-img-element */
-                  <img
-                    src={currentPhoto.url}
-                    alt={`${property.name} - Foto ${activeIndex + 1}`}
-                    className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-102"
-                  />
-                ) : (
-                  <div className="flex flex-col items-center justify-center text-slate-500 gap-2">
-                    <Home className="w-12 h-12 stroke-[1.5]" />
-                    <span className="text-xs">Foto tidak tersedia</span>
-                  </div>
-                )}
-
-                {/* Overlay Hint Klik Fullscreen */}
-                <div className="absolute inset-0 bg-black/10 group-hover:bg-black/30 transition-colors flex items-center justify-center">
-                  <div className="opacity-0 group-hover:opacity-100 transition-opacity bg-black/70 backdrop-blur-xs text-white text-xs font-semibold px-4 py-2 rounded-full flex items-center gap-2 shadow-lg">
-                    <Maximize2 className="w-4 h-4" />
-                    <span>Klik untuk melihat Fullscreen &amp; Geser</span>
-                  </div>
-                </div>
-
-                {/* Tombol Navigasi Kiri / Kanan */}
-                {photoList.length > 1 && (
-                  <>
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        prevSlide();
-                      }}
-                      aria-label="Foto sebelumnya"
-                      className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-slate-950/70 hover:bg-slate-950 text-white flex items-center justify-center backdrop-blur-xs transition-all shadow-md cursor-pointer z-10"
-                    >
-                      <ChevronLeft className="w-6 h-6" />
-                    </button>
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        nextSlide();
-                      }}
-                      aria-label="Foto berikutnya"
-                      className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-slate-950/70 hover:bg-slate-950 text-white flex items-center justify-center backdrop-blur-xs transition-all shadow-md cursor-pointer z-10"
-                    >
-                      <ChevronRight className="w-6 h-6" />
-                    </button>
-
-                    {/* Counter Badge */}
-                    <div className="absolute bottom-4 right-4 px-3 py-1 bg-black/75 backdrop-blur-xs text-white text-xs font-bold rounded-full flex items-center gap-1.5 z-10 shadow-md">
-                      <Camera className="w-3.5 h-3.5" />
-                      <span>
-                        {activeIndex + 1} / {photoList.length}
-                      </span>
-                    </div>
-                  </>
-                )}
-              </div>
-            )}
-          </div>
-
-          {/* Thumbnails Bar (Hanya di mode PHOTO) */}
-          {mediaMode === "PHOTO" && photoList.length > 1 && (
-            <div className="bg-slate-950 border-t border-slate-900 p-3 flex items-center gap-2.5 overflow-x-auto scrollbar-none">
-              {photoList.map((item, idx) => (
-                <button
-                  key={idx}
-                  type="button"
-                  onClick={() => setActiveIndex(idx)}
-                  aria-label={`Pilih foto ${idx + 1}`}
-                  className={`relative w-16 h-16 sm:w-20 sm:h-20 shrink-0 rounded-xl overflow-hidden border-2 transition-all cursor-pointer ${
-                    activeIndex === idx
-                      ? "border-emerald-500 ring-2 ring-emerald-500/50 opacity-100 scale-102"
-                      : "border-slate-800 opacity-60 hover:opacity-100"
-                  }`}
-                >
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={item.url}
-                    alt={`Thumbnail ${idx + 1}`}
-                    className="w-full h-full object-cover"
-                  />
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
-      </div>
+      <PropertyGalleryViewer
+        propertyName={property.name}
+        photoList={photoList}
+        activeIndex={activeIndex}
+        setActiveIndex={setActiveIndex}
+        mediaMode={mediaMode}
+        setMediaMode={setMediaMode}
+        youtubeEmbedUrl={youtubeEmbedUrl}
+        nativeVideoUrl={nativeVideoUrl}
+        hasVideo={hasVideo}
+        isLightboxOpen={isLightboxOpen}
+        lightboxIndex={lightboxIndex}
+        setLightboxIndex={setLightboxIndex}
+        openLightbox={openLightbox}
+        closeLightbox={closeLightbox}
+        prevLightbox={prevLightbox}
+        nextLightbox={nextLightbox}
+        prevSlide={prevSlide}
+        nextSlide={nextSlide}
+      />
 
       {/* ========================================================================= */}
       {/* 2. BODY CONTENT SECTION: DI BAWAH FOTO PROPERTI (KONTEN KIRI & AMANKAN KANAN) */}
@@ -1497,77 +1323,7 @@ export default function PropertyDetailPage() {
           </div>
 
           {/* Card 8: Info Pemilik / Pengelola */}
-          <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl sm:rounded-3xl border border-slate-200/80 dark:border-slate-800 shadow-soft flex flex-col gap-3.5">
-            <div className="flex items-center justify-between gap-3">
-              <div className="flex items-center gap-3.5">
-                {property.owner?.avatar_url ? (
-                  <div className="w-11 h-11 rounded-2xl overflow-hidden shrink-0 border border-emerald-300 dark:border-emerald-700 shadow-xs">
-                    <Image
-                      src={property.owner.avatar_url}
-                      alt={property.owner.name || "Pemilik Kos"}
-                      width={44}
-                      height={44}
-                      className="w-full h-full object-cover"
-                      unoptimized
-                    />
-                  </div>
-                ) : (
-                  <div className="w-11 h-11 rounded-2xl bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center font-bold text-sm shadow-2xs">
-                    <User className="w-5 h-5" />
-                  </div>
-                )}
-                <div>
-                  <p className="text-[11px] font-medium text-slate-400 uppercase tracking-wider">
-                    Dikelola oleh
-                  </p>
-                  <p className="text-sm font-bold text-slate-900 dark:text-white">
-                    {property.owner?.name || "Pemilik Kos"}
-                  </p>
-                </div>
-              </div>
-
-              {property.owner?.whatsapp_number && (
-                <a
-                  href={`https://wa.me/${formatWhatsAppNumber(property.owner.whatsapp_number)}?text=${encodeURIComponent(
-                    `Halo ${property.owner.name || "Pemilik Kos"}, saya tertarik dengan kos "${property.name}" di KosPasti (${typeof window !== "undefined" ? window.location.origin : ""}/kos/${property.id}). Apakah masih ada kamar yang tersedia?`
-                  )}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 px-3.5 py-2 sm:px-4 sm:py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white text-xs sm:text-sm font-semibold transition-all duration-200 shadow-soft hover:shadow-float shrink-0 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:ring-offset-2"
-                  aria-label={`Hubungi pemilik kos ${property.owner.name || ""} via WhatsApp`}
-                >
-                  <MessageCircle className="w-4 h-4" />
-                  <span className="hidden sm:inline">Tanya Pemilik</span>
-                  <span className="sm:hidden">Chat WA</span>
-                </a>
-              )}
-            </div>
-
-            {/* Catatan Edukasi Keamanan Transaksi */}
-            <div className="pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center gap-2 text-[11px] text-slate-500 dark:text-slate-400">
-              <BadgeCheck className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
-              <span>
-                Gunakan tombol <strong className="text-slate-700 dark:text-slate-200">Amankan Kamar</strong> di KosPasti untuk jaminan garansi 100% uang kembali.
-              </span>
-            </div>
-
-            {/* Akses Cepat Bantuan CS KosPasti */}
-            <div className="pt-2.5 mt-1 border-t border-slate-100 dark:border-slate-800/60 flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
-              <span className="text-[11px]">Butuh konfirmasi atau bantuan tim KosPasti?</span>
-              <a
-                href={buildSupportWhatsAppUrl({
-                  propertyName: property.name,
-                  propertyId: property.id,
-                })}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="font-bold text-emerald-600 hover:text-emerald-700 dark:text-emerald-400 dark:hover:text-emerald-300 inline-flex items-center gap-1 transition-colors text-xs shrink-0"
-              >
-                <span>Chat CS</span>
-                <ArrowRight className="w-3.5 h-3.5" />
-              </a>
-            </div>
-          </div>
+          <PropertyOwnerContactCard property={property} />
 
           {/* Card 9: Ulasan & Rating Penyewa */}
           <div id="reviews-section">
@@ -1579,180 +1335,17 @@ export default function PropertyDetailPage() {
         {/* KOLOM KANAN (KARTU AMANKAN KAMAR STICKY DI BAWAH FOTO PROPERTI)          */}
         {/* ========================================================================= */}
         <div className="w-full lg:w-[380px] shrink-0">
-          <div className="fixed bottom-0 left-0 w-full bg-white dark:bg-slate-900 border-t border-slate-200/80 dark:border-slate-800 p-4 pb-[max(1rem,env(safe-area-inset-bottom))] flex justify-between items-center z-[60] lg:z-10 lg:static lg:block lg:p-6 lg:border lg:border-slate-200/60 dark:lg:border-slate-800 lg:rounded-2xl lg:shadow-soft lg:sticky lg:top-32">
-            <div className="max-w-7xl mx-auto lg:max-w-none w-full px-2 sm:px-4 lg:px-0 flex justify-between lg:flex-col lg:gap-4 items-center lg:items-start">
-              <div className="lg:w-full">
-                <p className="text-[10px] lg:text-xs text-slate-400 font-semibold uppercase tracking-wider">
-                  {selectedRoomType ? `Harga (${selectedRoomType.name})` : "Harga per bulan"}
-                </p>
-                <p className="text-lg lg:text-3xl font-black text-slate-900 dark:text-white mt-0.5">
-                  {formattedPrice}{" "}
-                  <span className="text-xs lg:text-sm font-medium text-slate-500 dark:text-slate-400">
-                    / bln
-                  </span>
-                </p>
-                {isFull && (
-                  <p className="text-[11px] lg:text-xs text-rose-500 font-semibold mt-1">
-                    Mohon maaf, tipe kamar ini telah penuh.
-                  </p>
-                )}
-              </div>
-
-              <div className="flex items-center gap-2 w-auto lg:w-full">
-                {/* Tombol Chat Langsung dengan Masking Privasi di Mobile */}
-                <button
-                  type="button"
-                  onClick={handleOpenDirectChat}
-                  disabled={isOpeningChat}
-                  className="lg:hidden p-2.5 rounded-xl border border-emerald-200 dark:border-emerald-800 bg-emerald-50/60 dark:bg-emerald-950/40 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 transition-colors shrink-0 flex items-center justify-center cursor-pointer shadow-2xs"
-                  title="Tanya Pengelola via Chat Langsung"
-                  aria-label="Tanya Pengelola via Chat Langsung"
-                >
-                  {isOpeningChat ? (
-                    <Loader2 className="w-5 h-5 animate-spin text-emerald-600" />
-                  ) : (
-                    <MessageSquare className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
-                  )}
-                </button>
-
-                {/* Tombol Bantuan CS WhatsApp di Mobile Bottom Bar */}
-                <a
-                  href={buildSupportWhatsAppUrl({
-                    propertyName: property.name,
-                    propertyId: property.id,
-                  })}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="lg:hidden p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 transition-colors shrink-0 flex items-center justify-center cursor-pointer shadow-2xs"
-                  title="Hubungi CS KosPasti via WhatsApp"
-                  aria-label="Hubungi CS KosPasti via WhatsApp"
-                >
-                  <MessageCircle className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
-                </a>
-
-                <button
-                  type="button"
-                  onClick={() => setIsVisitModalOpen(true)}
-                  className={`lg:hidden p-2.5 sm:px-3 rounded-xl border text-xs font-bold transition-all duration-200 active:scale-95 shrink-0 flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs ${
-                    existingVisit
-                      ? "border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300"
-                      : "border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-100"
-                  }`}
-                  title={
-                    existingVisit
-                      ? "Survei Sudah Dijadwalkan"
-                      : "Jadwalkan Survei Lokasi"
-                  }
-                  aria-label={
-                    existingVisit
-                      ? "Survei Sudah Dijadwalkan"
-                      : "Jadwalkan Survei Lokasi"
-                  }
-                >
-                  {existingVisit ? (
-                    <Check className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
-                  ) : (
-                    <CalendarClock className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
-                  )}
-                  <span className="hidden sm:inline">
-                    {existingVisit ? "Terjadwal" : "Survei"}
-                  </span>
-                </button>
-
-                <button
-                  type="button"
-                  disabled={isFull || isCheckingAuth}
-                  onClick={() => handleOpenBookingModal()}
-                  className={`px-5 sm:px-6 py-2.5 lg:py-3.5 w-full rounded-xl font-bold text-white transition-all duration-200 cursor-pointer shadow-sm ${
-                    isFull || isCheckingAuth
-                      ? "bg-slate-400 cursor-not-allowed"
-                      : "bg-emerald-600 hover:bg-emerald-700 hover:-translate-y-0.5 hover:shadow-md active:translate-y-0"
-                  }`}
-                >
-                  {isFull
-                    ? "Kamar Penuh"
-                    : isCheckingAuth
-                    ? "Memeriksa..."
-                    : "Amankan Kamar"}
-                </button>
-              </div>
-
-              {/* Tombol Sekunder Desktop: Chat Langsung Pengelola */}
-              <button
-                type="button"
-                onClick={handleOpenDirectChat}
-                disabled={isOpeningChat}
-                className="hidden lg:flex w-full py-2.5 px-4 rounded-xl border border-emerald-600/30 dark:border-emerald-500/30 bg-emerald-50/50 dark:bg-emerald-950/30 hover:bg-emerald-100/60 dark:hover:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 text-sm font-bold items-center justify-center gap-2 transition-all duration-200 active:scale-95 cursor-pointer shadow-2xs focus:outline-none focus:ring-2 focus:ring-emerald-500/40"
-              >
-                {isOpeningChat ? (
-                  <>
-                    <Loader2 className="w-4 h-4 animate-spin text-emerald-600" />
-                    <span>Membuka Obrolan...</span>
-                  </>
-                ) : (
-                  <>
-                    <MessageSquare className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
-                    <span>Chat Pengelola (Privasi Terjaga)</span>
-                  </>
-                )}
-              </button>
-
-              {/* Tombol Sekunder Desktop: Jadwalkan Survei Lokasi */}
-              <button
-                type="button"
-                onClick={() => setIsVisitModalOpen(true)}
-                className={`hidden lg:flex w-full py-2.5 px-4 rounded-xl border text-sm font-bold items-center justify-center gap-2 transition-all duration-200 active:scale-95 cursor-pointer shadow-2xs focus:outline-none focus:ring-2 focus:ring-emerald-500/40 ${
-                  existingVisit
-                    ? "border-emerald-200 dark:border-emerald-800 bg-emerald-50/70 dark:bg-emerald-950/40 hover:bg-emerald-100/70 dark:hover:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300"
-                    : "border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-100"
-                }`}
-              >
-                {existingVisit ? (
-                  <>
-                    <Check className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
-                    <span>Survei Sudah Dijadwalkan</span>
-                  </>
-                ) : (
-                  <>
-                    <CalendarClock className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
-                    <span>Jadwalkan Survei Lokasi</span>
-                  </>
-                )}
-              </button>
-
-              {/* Jaminan KosPasti */}
-              <div className="hidden lg:flex flex-col gap-2 pt-3 border-t border-slate-100 dark:border-slate-800 text-[11px] text-slate-500 dark:text-slate-400 w-full">
-                <div className="flex items-center gap-2">
-                  <Check className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
-                  <span>Pasti Sesuai Deskripsi &amp; Foto</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Check className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
-                  <span>Tanpa Biaya Tambahan Tersembunyi</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Check className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
-                  <span>Konfirmasi Langsung Pemilik</span>
-                </div>
-              </div>
-
-              {/* Tombol Bantuan CS di Desktop Sticky Card */}
-              <div className="hidden lg:block w-full pt-1">
-                <a
-                  href={buildSupportWhatsAppUrl({
-                    propertyName: property.name,
-                    propertyId: property.id,
-                  })}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-full py-2 px-3 rounded-xl border border-slate-200/90 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/80 text-slate-700 dark:text-slate-300 text-xs font-semibold flex items-center justify-center gap-2 transition-all duration-200 cursor-pointer shadow-2xs hover:shadow-soft"
-                >
-                  <MessageCircle className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
-                  <span>Bantuan CS KosPasti</span>
-                </a>
-              </div>
-            </div>
-          </div>
+          <PropertyStickyBottomBar
+            property={property}
+            selectedRoomType={selectedRoomType}
+            formattedPrice={formattedPrice}
+            isCheckingAuth={isCheckingAuth}
+            onOpenBookingModal={handleOpenBookingModal}
+            isOpeningChat={isOpeningChat}
+            onOpenDirectChat={handleOpenDirectChat}
+            existingVisit={existingVisit}
+            onOpenVisitModal={() => setIsVisitModalOpen(true)}
+          />
         </div>
       </div>
 
@@ -1767,313 +1360,36 @@ export default function PropertyDetailPage() {
         />
       </div>
 
-      {/* ========================================================================= */}
-      {/* 3. LIGHTBOX MODAL FULLSCREEN (BISA DI-GESER DENGAN SWIPE / TOMBOL / KEYBOARD) */}
-      {/* ========================================================================= */}
-      {isLightboxOpen && (
-        <div className="fixed inset-0 z-[100] bg-black/95 flex flex-col justify-between animate-in fade-in duration-200 backdrop-blur-sm select-none">
-          {/* Lightbox Header */}
-          <div className="px-4 py-3 flex items-center justify-between text-white z-10 bg-gradient-to-b from-black/80 to-transparent">
-            <div className="flex items-center gap-2">
-              <Camera className="w-4 h-4 text-emerald-400" />
-              <span className="text-xs sm:text-sm font-semibold">
-                Foto {lightboxIndex + 1} dari {photoList.length}
-              </span>
-            </div>
-            <button
-              type="button"
-              onClick={closeLightbox}
-              className="p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors cursor-pointer"
-              aria-label="Tutup Fullscreen"
-            >
-              <X className="w-5 h-5" />
-            </button>
-          </div>
 
-          {/* Lightbox Main Image Viewer */}
-          <div className="relative flex-1 flex items-center justify-center p-4">
-            {photoList[lightboxIndex] && (
-              /* eslint-disable-next-line @next/next/no-img-element */
-              <img
-                src={photoList[lightboxIndex].url}
-                alt={`${property.name} - Foto ${lightboxIndex + 1}`}
-                className="max-h-[75vh] sm:max-h-[80vh] max-w-full object-contain rounded-lg shadow-2xl transition-all duration-200"
-              />
-            )}
-
-            {/* Prev / Next Arrows */}
-            {photoList.length > 1 && (
-              <>
-                <button
-                  type="button"
-                  onClick={prevLightbox}
-                  aria-label="Foto sebelumnya"
-                  className="absolute left-3 sm:left-6 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-white/15 hover:bg-white/30 text-white flex items-center justify-center backdrop-blur-md transition-all shadow-lg cursor-pointer"
-                >
-                  <ChevronLeft className="w-7 h-7" />
-                </button>
-                <button
-                  type="button"
-                  onClick={nextLightbox}
-                  aria-label="Foto berikutnya"
-                  className="absolute right-3 sm:right-6 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-white/15 hover:bg-white/30 text-white flex items-center justify-center backdrop-blur-md transition-all shadow-lg cursor-pointer"
-                >
-                  <ChevronRight className="w-7 h-7" />
-                </button>
-              </>
-            )}
-          </div>
-
-          {/* Lightbox Bottom Thumbnails Slider */}
-          {photoList.length > 1 && (
-            <div className="bg-black/80 border-t border-white/10 p-3 flex items-center justify-center gap-2 overflow-x-auto scrollbar-none z-10">
-              {photoList.map((item, idx) => (
-                <button
-                  key={idx}
-                  type="button"
-                  onClick={() => setLightboxIndex(idx)}
-                  className={`relative w-14 h-14 rounded-lg overflow-hidden border-2 transition-all cursor-pointer shrink-0 ${
-                    lightboxIndex === idx
-                      ? "border-emerald-500 scale-105 opacity-100 ring-2 ring-emerald-500/50"
-                      : "border-white/20 opacity-40 hover:opacity-100"
-                  }`}
-                >
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={item.url}
-                    alt={`Thumb ${idx + 1}`}
-                    className="w-full h-full object-cover"
-                  />
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
-      )}
 
       {/* ========================================================================= */}
-      {/* 4. BOOKING FORM MODAL                                                    */}
+      {/* 4. BOOKING FORM & PENDING MODALS (DECOMPOSED)                             */}
       {/* ========================================================================= */}
-      {isModalOpen && (
-        <div
-          className="fixed inset-0 z-[60] bg-black/60 flex items-end sm:items-center justify-center p-0 sm:p-4 animate-in fade-in duration-200"
-          onClick={(e) => {
-            if (e.target === e.currentTarget) {
-              setIsModalOpen(false);
-              setBookingError(null);
-              setDateValidationError(false);
-            }
-          }}
-        >
-          <div
-            ref={bookingModalRef}
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="booking-modal-title"
-            aria-describedby="booking-modal-desc"
-            className="bg-white dark:bg-slate-900 w-full max-w-md p-6 rounded-t-2xl sm:rounded-2xl shadow-xl border border-transparent dark:border-slate-800 flex flex-col gap-4 animate-in zoom-in-95 duration-200"
-          >
-            <div>
-              <h3 id="booking-modal-title" className="text-lg font-bold text-slate-900 dark:text-white">
-                Konfirmasi Pemesanan
-              </h3>
-              <p id="booking-modal-desc" className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                Pilih rencana tanggal mulai masuk untuk kamar kos ini.
-              </p>
-            </div>
-
-            {/* Selected Room Type Info */}
-            {selectedRoomType && (
-              <div className="bg-emerald-50/70 dark:bg-emerald-950/40 border border-emerald-200/90 dark:border-emerald-800 rounded-xl p-3 flex items-center justify-between">
-                <div>
-                  <p className="text-[11px] font-semibold text-emerald-800 dark:text-emerald-300 uppercase tracking-wide">
-                    Tipe Kamar Dipilih
-                  </p>
-                  <p className="text-sm font-bold text-slate-900 dark:text-white">
-                    {selectedRoomType.name}
-                  </p>
-                </div>
-                <div className="text-right">
-                  <p className="text-xs font-extrabold text-emerald-700 dark:text-emerald-400">
-                    Rp {selectedRoomType.price_per_month.toLocaleString("id-ID")}
-                  </p>
-                  <p className="text-[10px] text-slate-500 dark:text-slate-400">/ bulan</p>
-                </div>
-              </div>
-            )}
-
-            {/* User Profile Summary Card */}
-            <div className="bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-700 rounded-xl p-3.5 flex flex-col gap-2">
-              <div className="flex items-center justify-between">
-                <span className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-                  Data Pemesan (Akun Anda)
-                </span>
-                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300">
-                  Terverifikasi
-                </span>
-              </div>
-              <div className="flex items-center gap-3 pt-1">
-                <div className="relative w-10 h-10 rounded-full overflow-hidden bg-gradient-to-tr from-emerald-600 to-teal-500 border border-emerald-500 text-white font-bold text-xs flex items-center justify-center shadow-xs shrink-0">
-                  {userAvatar ? (
-                    <Image
-                      src={userAvatar}
-                      alt={studentName || "Foto Profil"}
-                      fill
-                      className="object-cover rounded-full"
-                      unoptimized={userAvatar.startsWith("blob:") || userAvatar.startsWith("data:")}
-                    />
-                  ) : (
-                    <span>
-                      {studentName
-                        ? studentName
-                            .split(" ")
-                            .filter(Boolean)
-                            .slice(0, 2)
-                            .map((w) => w[0].toUpperCase())
-                            .join("")
-                        : <User className="w-4 h-4" />}
-                    </span>
-                  )}
-                </div>
-                <div className="min-w-0 flex-1">
-                  <p className="text-sm font-bold text-slate-900 dark:text-white truncate">
-                    {studentName || "Pengguna"}
-                  </p>
-                  <p className="text-xs text-slate-500 dark:text-slate-400 truncate">
-                    {waNumber ? `WhatsApp: ${waNumber}` : "Nomor WhatsApp akun"}
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <div className="flex flex-col gap-4 mt-1">
-              {bookingError && (
-                <div
-                  role="alert"
-                  aria-live="assertive"
-                  className="p-3 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 rounded-xl text-rose-800 dark:text-rose-200 text-xs flex items-start justify-between gap-2 animate-in fade-in duration-200"
-                >
-                  <div className="flex items-start gap-2">
-                    <AlertCircle className="w-4 h-4 text-rose-600 dark:text-rose-400 shrink-0 mt-0.5" />
-                    <p className="font-medium leading-relaxed">{bookingError}</p>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => setBookingError(null)}
-                    className="text-rose-500 hover:text-rose-700 dark:text-rose-400 dark:hover:text-rose-200 p-0.5 rounded transition-colors"
-                    aria-label="Tutup pemberitahuan error"
-                  >
-                    <X className="w-3.5 h-3.5" />
-                  </button>
-                </div>
-              )}
-
-              <div>
-                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
-                  Rencana Tanggal Masuk <span className="text-rose-500">*</span>
-                </label>
-                <input
-                  type="date"
-                  min={minDate}
-                  value={moveInDate}
-                  onChange={(e) => {
-                    setMoveInDate(e.target.value);
-                    if (dateValidationError) setDateValidationError(false);
-                    if (bookingError) setBookingError(null);
-                  }}
-                  required
-                  className={`w-full px-3.5 py-2.5 text-sm border rounded-xl focus:outline-none transition-colors ${
-                    dateValidationError
-                      ? "border-rose-500 focus:ring-2 focus:ring-rose-500/40 text-slate-800 dark:text-white bg-white dark:bg-slate-800"
-                      : "border-slate-300 dark:border-slate-700 focus:ring-2 focus:ring-emerald-500 text-slate-800 dark:text-white bg-white dark:bg-slate-800"
-                  }`}
-                />
-              </div>
-
-              <div className="flex gap-3 mt-3">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setIsModalOpen(false);
-                    setBookingError(null);
-                    setDateValidationError(false);
-                  }}
-                  className="w-full py-2.5 px-4 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-semibold transition-colors cursor-pointer text-sm"
-                >
-                  Batal
-                </button>
-                <button
-                  type="button"
-                  disabled={isSubmitting}
-                  onClick={handleBookingSubmit}
-                  className="w-full py-2.5 px-4 rounded-xl bg-emerald-600 text-white font-semibold hover:bg-emerald-700 hover:-translate-y-0.5 hover:shadow-md active:translate-y-0 disabled:opacity-75 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-none transition-all duration-200 cursor-pointer text-sm flex items-center justify-center gap-2"
-                >
-                  {isSubmitting ? "Memproses..." : "Lanjut Pembayaran"}
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* ========================================================================= */}
-      {/* 5. MODAL PERINGATAN PESANAN PENDING (ANTI-SPAM BOOKING)                   */}
-      {/* ========================================================================= */}
-      {pendingBookingNotice.isOpen && (
-        <div
-          className="fixed inset-0 z-[70] bg-black/60 flex items-center justify-center p-4 animate-in fade-in duration-200"
-          onClick={(e) => {
-            if (e.target === e.currentTarget) setPendingBookingNotice({ isOpen: false, message: "" });
-          }}
-        >
-          <div
-            ref={pendingModalRef}
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="pending-booking-title"
-            aria-describedby="pending-booking-desc"
-            className="bg-white dark:bg-slate-900 w-full max-w-md p-6 rounded-2xl shadow-xl border border-transparent dark:border-slate-800 flex flex-col gap-4 animate-in zoom-in-95 duration-200"
-          >
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-400 flex items-center justify-center shrink-0">
-                <AlertCircle className="w-5 h-5 text-amber-600 dark:text-amber-400" />
-              </div>
-              <div>
-                <h3 id="pending-booking-title" className="text-base font-bold text-slate-900 dark:text-white">
-                  Pesanan Masih Menunggu Pembayaran
-                </h3>
-                <p className="text-xs text-slate-500 dark:text-slate-400">
-                  Selesaikan pesanan sebelumnya terlebih dahulu
-                </p>
-              </div>
-            </div>
-
-            <p id="pending-booking-desc" className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed bg-amber-50/70 dark:bg-amber-950/40 p-3.5 rounded-xl border border-amber-200/80 dark:border-amber-800">
-              {pendingBookingNotice.message}
-            </p>
-
-            <div className="flex flex-col sm:flex-row gap-2.5 pt-1">
-              <button
-                type="button"
-                onClick={() =>
-                  setPendingBookingNotice({ isOpen: false, message: "" })
-                }
-                className="w-full sm:w-1/2 py-2.5 px-4 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-semibold transition-colors cursor-pointer text-sm order-2 sm:order-1"
-              >
-                Tutup
-              </button>
-              <button
-                type="button"
-                onClick={() => router.push("/profil?tab=bookings")}
-                className="w-full sm:w-1/2 py-2.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold shadow-soft hover:shadow-float transition-all cursor-pointer text-sm flex items-center justify-center gap-1.5 order-1 sm:order-2"
-              >
-                <span>Riwayat Pesanan</span>
-                <ArrowRight className="w-4 h-4" />
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <PropertyBookingModal
+        isOpen={isModalOpen}
+        onClose={() => {
+          setIsModalOpen(false);
+          setBookingError(null);
+          setDateValidationError(false);
+        }}
+        selectedRoomType={selectedRoomType}
+        studentName={studentName}
+        waNumber={waNumber}
+        userAvatar={userAvatar}
+        moveInDate={moveInDate}
+        setMoveInDate={setMoveInDate}
+        minDate={minDate}
+        isSubmitting={isSubmitting}
+        bookingError={bookingError}
+        setBookingError={setBookingError}
+        dateValidationError={dateValidationError}
+        setDateValidationError={setDateValidationError}
+        onSubmit={handleBookingSubmit}
+        pendingBookingNotice={pendingBookingNotice}
+        onClosePendingNotice={() =>
+          setPendingBookingNotice({ isOpen: false, message: "" })
+        }
+      />
 
       {/* ========================================================================= */}
       {/* 6. MODAL JADWALKAN SURVEI LOKASI                                         */}
