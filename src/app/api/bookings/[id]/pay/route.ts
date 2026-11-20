@@ -9,6 +9,25 @@ export async function POST(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    // 0. Keamanan Tingkat Tinggi (Production Guard - Issue #432):
+    // Endpoint ini adalah rute legacy simulasi internal dan WAJIB ditolak di lingkungan produksi (Fail-Closed).
+    // Seluruh konfirmasi pembayaran resmi wajib melalui Webhook Gateway Midtrans (/api/webhooks/payment).
+    const isProduction = process.env.NODE_ENV === "production";
+    const isSimulationAllowed = process.env.ENABLE_PAYMENT_SIMULATION === "true";
+
+    if (isProduction || !isSimulationAllowed) {
+      return NextResponse.json(
+        {
+          success: false,
+          error:
+            "Endpoint ini telah dinonaktifkan permanen demi alasan keamanan. Seluruh pembayaran wajib melalui Payment Gateway resmi.",
+        },
+        { status: 404 }
+      );
+    }
+
+    console.warn("[SECURITY AUDIT] Internal payment simulation called on non-production environment.");
+
     const cookieStore = await cookies();
     const userToken = cookieStore.get("user_token")?.value;
 

@@ -13,6 +13,7 @@ describe("POST /api/bookings/[id]/pay", () => {
   beforeEach(async () => {
     await clearDatabase();
     vi.restoreAllMocks();
+    process.env.ENABLE_PAYMENT_SIMULATION = "true";
     delete process.env.FONNTE_TOKEN;
     delete process.env.WHATSAPP_TOKEN;
 

@@ -19,6 +19,7 @@ describe("User Booking Payment Authentication & Authorization (Issue #271)", () 
 
   beforeEach(() => {
     vi.restoreAllMocks();
+    process.env.ENABLE_PAYMENT_SIMULATION = "true";
 
     (nextHeaders.cookies as unknown as ReturnType<typeof vi.fn>).mockResolvedValue({
       get: vi.fn().mockReturnValue({ value: "valid-user-token" }),
@@ -37,6 +38,41 @@ describe("User Booking Payment Authentication & Authorization (Issue #271)", () 
       method: "POST",
     });
   };
+
+  describe("Skenario Keamanan Lingkungan Produksi & Fail-Closed Guard (Issue #432)", () => {
+    it("Menolak 404 jika berjalan pada mode NODE_ENV === 'production'", async () => {
+      const originalEnv = process.env.NODE_ENV;
+      const originalFlag = process.env.ENABLE_PAYMENT_SIMULATION;
+      try {
+        process.env.NODE_ENV = "production";
+        process.env.ENABLE_PAYMENT_SIMULATION = "true"; // Bahkan jika flag true, mode produksi wajib menolak!
+        const res = await POST(createRequest(), { params: Promise.resolve({ id: mockBookingId }) });
+        const data = await res.json();
+
+        expect(res.status).toBe(404);
+        expect(data.success).toBe(false);
+        expect(data.error).toContain("Endpoint ini telah dinonaktifkan permanen");
+      } finally {
+        process.env.NODE_ENV = originalEnv;
+        process.env.ENABLE_PAYMENT_SIMULATION = originalFlag;
+      }
+    });
+
+    it("Menolak 404 jika flag ENABLE_PAYMENT_SIMULATION tidak bernilai 'true'", async () => {
+      const originalFlag = process.env.ENABLE_PAYMENT_SIMULATION;
+      try {
+        delete process.env.ENABLE_PAYMENT_SIMULATION;
+        const res = await POST(createRequest(), { params: Promise.resolve({ id: mockBookingId }) });
+        const data = await res.json();
+
+        expect(res.status).toBe(404);
+        expect(data.success).toBe(false);
+        expect(data.error).toContain("Endpoint ini telah dinonaktifkan permanen");
+      } finally {
+        process.env.ENABLE_PAYMENT_SIMULATION = originalFlag;
+      }
+    });
+  });
 
   describe("Skenario Autentikasi Pengguna (401 Unauthorized)", () => {
     it("Menolak 401 jika cookie user_token tidak ada", async () => {
