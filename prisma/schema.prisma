@@ -62,6 +62,7 @@ model Property {
   reviews         Review[]
   visits          VisitSchedule[]
   chat_rooms      ChatRoom[]
+  room_units      RoomUnit[]
 
   @@index([owner_id])
   @@index([status])
@@ -83,6 +84,7 @@ model RoomType {
   property_id     String
   property        Property  @relation(fields: [property_id], references: [id], onDelete: Cascade)
   bookings        Booking[]
+  room_units      RoomUnit[]
 
   @@index([property_id])
 }
@@ -155,12 +157,15 @@ model Booking {
   payout                 Payout?
   chat_rooms             ChatRoom[]
   invoices               Invoice[]
+  room_unit_id           String?
+  room_unit              RoomUnit?       @relation(fields: [room_unit_id], references: [id], onDelete: SetNull)
 
   @@index([property_id])
   @@index([user_id])
   @@index([status])
   @@index([user_id, status])
   @@index([property_id, status])
+  @@index([room_unit_id])
 }
 
 model User {
@@ -402,6 +407,30 @@ model Invoice {
   @@index([status])
   @@index([due_date])
   @@index([status, due_date])
+}
+
+model RoomUnit {
+  id              String     @id @default(uuid())
+  room_type_id    String
+  room_type       RoomType   @relation(fields: [room_type_id], references: [id], onDelete: Cascade)
+  property_id     String
+  property        Property   @relation(fields: [property_id], references: [id], onDelete: Cascade)
+
+  unit_number     String     // Contoh: "101", "204", "A-01"
+  floor           Int        @default(1)
+  status          String     @default("VACANT") // VACANT, OCCUPIED, MAINTENANCE
+  notes           String?
+
+  bookings        Booking[]
+
+  created_at      DateTime   @default(now())
+  updated_at      DateTime   @updatedAt
+
+  @@unique([property_id, unit_number])
+  @@index([room_type_id])
+  @@index([property_id])
+  @@index([status])
+  @@index([property_id, status])
 }
 
 

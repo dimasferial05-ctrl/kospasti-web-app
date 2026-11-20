@@ -39,12 +39,12 @@ export function PropertyStickyBottomBar({
       ? selectedRoomType.available_rooms === 0
       : property.available_rooms === 0;
 
-  const currentPrice = selectedRoomType
-    ? selectedRoomType.price_per_month
-    : property.price_per_month;
+  const currentPrice =
+    selectedRoomType?.price_per_month ?? property?.price_per_month ?? 0;
 
   const formattedPrice =
-    formattedPriceProp || `Rp ${currentPrice.toLocaleString("id-ID")}`;
+    formattedPriceProp ||
+    `Rp ${Number(currentPrice || 0).toLocaleString("id-ID")}`;
 
   return (
     <div className="fixed bottom-0 left-0 w-full bg-white dark:bg-slate-900 border-t border-slate-200/80 dark:border-slate-800 p-4 pb-[max(1rem,env(safe-area-inset-bottom))] flex justify-between items-center z-[60] lg:z-10 lg:static lg:block lg:p-6 lg:border lg:border-slate-200/60 dark:lg:border-slate-800 lg:rounded-2xl lg:shadow-soft lg:sticky lg:top-32">

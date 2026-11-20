@@ -31,7 +31,7 @@ export async function generateMetadata({
     }
 
     const title = `${property.name} - Kos Murah Subang | KosPasti`;
-    const priceFormatted = `Rp ${property.price_per_month.toLocaleString("id-ID")}/bulan`;
+    const priceFormatted = `Rp ${Number(property.price_per_month || 0).toLocaleString("id-ID")}/bulan`;
     const description = `Sewa kamar di ${property.name}, ${property.address || "Subang"}. Harga mulai ${priceFormatted}. Sisa kamar: ${property.available_rooms}. Fasilitas: ${property.facilities || "Lengkap"}. Jaminan kepastian kamar real-time.`;
 
     const fullImageUrl = property.image_url

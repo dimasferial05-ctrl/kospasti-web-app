@@ -86,6 +86,31 @@ describe("Property Detail Page Component (/kos/[id])", () => {
     expect(html).not.toMatch(/Memuat detail (kamar|properti kos)\.\.\./);
   });
 
+  it("tidak melempar TypeError toLocaleString jika price_per_month bernilai undefined atau null", () => {
+    const mockPropertyUndefinedPrice = {
+      id: "uuid-kos-undefined-price",
+      name: "Kos Tanpa Harga Subang",
+      price_per_month: undefined,
+      available_rooms: 1,
+      gender_type: "CAMPUR",
+      facilities: "WiFi",
+      room_types: [
+        {
+          id: "rt-undefined-price",
+          name: "Kamar Tipe A",
+          price_per_month: undefined,
+          available_rooms: 1,
+        },
+      ],
+    };
+
+    expect(() => {
+      renderToStaticMarkup(
+        <PropertyDetailClient initialProperty={mockPropertyUndefinedPrice as any} />
+      );
+    }).not.toThrow();
+  });
+
   it("memiliki kelas Tailwind wajib untuk Sticky Bottom Bar", () => {
     const content = getFullPropertyDetailContent();
 

@@ -531,8 +531,9 @@ export default function PropertyDetailClient({ initialProperty }: PropertyDetail
     );
   }
 
-  const currentPrice = selectedRoomType ? selectedRoomType.price_per_month : property.price_per_month;
-  const formattedPrice = `Rp ${currentPrice.toLocaleString("id-ID")}`;
+  const currentPrice =
+    selectedRoomType?.price_per_month ?? property?.price_per_month ?? 0;
+  const formattedPrice = `Rp ${Number(currentPrice || 0).toLocaleString("id-ID")}`;
   const isFull = selectedRoomType
     ? selectedRoomType.available_rooms === 0
     : property.available_rooms === 0;
@@ -949,7 +950,7 @@ export default function PropertyDetailClient({ initialProperty }: PropertyDetail
                         <div className="text-left sm:text-right">
                           <p className="text-[10px] sm:text-xs text-slate-400 font-medium">Harga Kamar</p>
                           <p className="text-base sm:text-lg font-bold text-emerald-600 dark:text-emerald-400">
-                            Rp {rt.price_per_month.toLocaleString("id-ID")}
+                            Rp {Number(rt.price_per_month || 0).toLocaleString("id-ID")}
                             <span className="text-xs font-medium text-slate-500 dark:text-slate-400"> /bln</span>
                           </p>
                         </div>
@@ -1243,6 +1244,7 @@ export default function PropertyDetailClient({ initialProperty }: PropertyDetail
           setDateValidationError(false);
         }}
         selectedRoomType={selectedRoomType}
+        property={property}
         studentName={studentName}
         waNumber={waNumber}
         userAvatar={userAvatar}
