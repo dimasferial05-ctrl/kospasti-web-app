@@ -23,6 +23,7 @@ describe("Prisma Schema Index Definitions", () => {
     expect(bookingBlock).toContain("@@index([status])");
     expect(bookingBlock).toContain("@@index([user_id, status])");
     expect(bookingBlock).toContain("@@index([property_id, status])");
+    expect(bookingBlock).toContain("@@index([room_unit_id])");
   });
 
   it("should have index on RoomType property_id", () => {
@@ -57,5 +58,16 @@ describe("Prisma Schema Index Definitions", () => {
     expect(invoiceBlock).toContain("@@index([status])");
     expect(invoiceBlock).toContain("@@index([due_date])");
     expect(invoiceBlock).toContain("@@index([status, due_date])");
+  });
+
+  it("should have index on RoomUnit room_type_id, property_id, status, and composite property_id_status", () => {
+    const roomUnitMatch = schemaContent.match(/model RoomUnit \{([\s\S]*?)\n\}/);
+    expect(roomUnitMatch).toBeTruthy();
+    const unitBlock = roomUnitMatch ? roomUnitMatch[1] : "";
+    expect(unitBlock).toContain("@@index([room_type_id])");
+    expect(unitBlock).toContain("@@index([property_id])");
+    expect(unitBlock).toContain("@@index([status])");
+    expect(unitBlock).toContain("@@index([property_id, status])");
+    expect(unitBlock).toContain("@@unique([property_id, unit_number])");
   });
 });

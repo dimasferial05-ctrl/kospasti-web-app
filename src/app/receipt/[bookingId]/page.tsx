@@ -56,6 +56,12 @@ interface BookingReceiptDetail {
     price_per_month: number;
     image_url: string | null;
   } | null;
+  roomUnit?: {
+    id: string;
+    unitNumber: string;
+    floor: number;
+    status?: string;
+  } | null;
   securityDeposit?: number;
   depositStatus?: string | null;
   depositRefundedAt?: string | null;
@@ -522,6 +528,11 @@ export default function BookingReceiptPage() {
                 <span className="text-slate-400 dark:text-slate-500 block text-[11px]">Tipe Kamar:</span>
                 <span className="font-medium text-slate-800 dark:text-slate-200 print:text-black">
                   {booking.roomType?.name || "Kamar Reguler"}
+                  {booking.roomUnit && (
+                    <span className="ml-2 font-bold text-emerald-600 dark:text-emerald-400 print:text-black">
+                      • Kamar No. {booking.roomUnit.unitNumber} (Lantai {booking.roomUnit.floor})
+                    </span>
+                  )}
                 </span>
               </div>
               <div>

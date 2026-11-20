@@ -74,6 +74,14 @@ export async function GET(
             image_url: true,
           },
         },
+        room_unit: {
+          select: {
+            id: true,
+            unit_number: true,
+            floor: true,
+            status: true,
+          },
+        },
         user: {
           select: {
             email: true,
@@ -174,6 +182,14 @@ export async function GET(
           depositClaimReason: booking.deposit_claim_reason,
           property: booking.property,
           roomType: booking.room_type,
+          roomUnit: booking.room_unit
+            ? {
+                id: booking.room_unit.id,
+                unitNumber: booking.room_unit.unit_number,
+                floor: booking.room_unit.floor,
+                status: booking.room_unit.status,
+              }
+            : null,
           pricing: {
             rentPrice,
             adminFee,

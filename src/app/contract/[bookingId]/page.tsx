@@ -54,6 +54,12 @@ interface BookingContractDetail {
     image_url: string | null;
     facilities?: string | null;
   } | null;
+  roomUnit?: {
+    id: string;
+    unitNumber: string;
+    floor: number;
+    status?: string;
+  } | null;
   pricing: {
     rentPrice: number;
     adminFee: number;
@@ -394,7 +400,12 @@ export default function ContractPage() {
             <p>
               PIHAK PERTAMA setuju menyewakan kamar hunian pada properti <strong>{booking.property?.name}</strong>{" "}
               {booking.property?.address ? `yang beralamat di ${booking.property.address}` : ""}, tipe kamar{" "}
-              <strong>{booking.roomType?.name || "Kamar Reguler"}</strong>, khusus kategori{" "}
+              <strong>{booking.roomType?.name || "Kamar Reguler"}</strong>
+              {booking.roomUnit && (
+                <>
+                  , unit nomor <strong>{booking.roomUnit.unitNumber}</strong> (Lantai {booking.roomUnit.floor})
+                </>
+              )}, khusus kategori{" "}
               <strong className="uppercase">{booking.property?.gender_type || "Campur"}</strong>, dengan fasilitas yang telah diverifikasi pada sistem KosPasti.
             </p>
           </section>

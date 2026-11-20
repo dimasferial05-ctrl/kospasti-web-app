@@ -32,6 +32,7 @@ export async function PATCH(
 
     const body = await request.json().catch(() => null);
     let status = body?.status?.toUpperCase?.();
+    const roomUnitId = body?.room_unit_id?.toString()?.trim() || null;
 
     if (status === "REFUNDED") {
       return NextResponse.json(
@@ -65,6 +66,7 @@ export async function PATCH(
           },
         },
         room_type: true,
+        room_unit: true,
         user: true,
       },
     });
@@ -74,6 +76,50 @@ export async function PATCH(
         { success: false, error: "Pesanan booking tidak ditemukan atau bukan milik properti Anda." },
         { status: 404 }
       );
+    }
+
+    // Validasi pemilihan unit kamar jika pemilik mengalokasikan kamar
+    let targetUnit: any = null;
+    if (status === "APPROVED" && roomUnitId) {
+      targetUnit = await prisma.roomUnit.findFirst({
+        where: {
+          id: roomUnitId,
+          property_id: existing.property_id,
+        },
+      });
+
+      if (!targetUnit) {
+        return NextResponse.json(
+          {
+            success: false,
+            error: "Unit kamar yang dipilih tidak ditemukan pada properti ini.",
+          },
+          { status: 400 }
+        );
+      }
+
+      if (
+        targetUnit.status === "OCCUPIED" &&
+        targetUnit.id !== existing.room_unit_id
+      ) {
+        return NextResponse.json(
+          {
+            success: false,
+            error: `Kamar nomor '${targetUnit.unit_number}' saat ini sedang terisi (OCCUPIED). Harap pilih kamar yang masih kosong.`,
+          },
+          { status: 400 }
+        );
+      }
+
+      if (targetUnit.status === "MAINTENANCE") {
+        return NextResponse.json(
+          {
+            success: false,
+            error: `Kamar nomor '${targetUnit.unit_number}' sedang dalam perbaikan (MAINTENANCE). Harap pilih kamar lain.`,
+          },
+          { status: 400 }
+        );
+      }
     }
 
     const previousStatus = existing.status;
@@ -90,9 +136,36 @@ export async function PATCH(
         },
       });
 
+      const updateData: Record<string, any> = { status };
+
+      if (status === "APPROVED" && targetUnit) {
+        updateData.room_unit_id = targetUnit.id;
+        await tx.roomUnit.update({
+          where: { id: targetUnit.id },
+          data: { status: "OCCUPIED" },
+        });
+
+        // Jika sebelumnya dialokasikan ke unit lain, bebaskan unit lama
+        if (existing.room_unit_id && existing.room_unit_id !== targetUnit.id) {
+          await tx.roomUnit.update({
+            where: { id: existing.room_unit_id },
+            data: { status: "VACANT" },
+          });
+        }
+      } else if (status === "REJECTED") {
+        // Bebaskan unit kamar jika booking ditolak
+        if (existing.room_unit_id) {
+          updateData.room_unit_id = null;
+          await tx.roomUnit.update({
+            where: { id: existing.room_unit_id },
+            data: { status: "VACANT" },
+          });
+        }
+      }
+
       const updatedBooking = await tx.booking.update({
         where: { id },
-        data: { status },
+        data: updateData,
       });
 
       // Kembalikan kamar jika REJECTED (dan belum pernah dikembalikan)
@@ -146,7 +219,12 @@ export async function PATCH(
       });
 
       if (status === "APPROVED") {
-        const acceptMessage = [
+        const allocatedUnit = targetUnit || existing.room_unit;
+        const roomUnitLine = allocatedUnit
+          ? `🚪 *Nomor Kamar:* No. ${allocatedUnit.unit_number} (Lantai ${allocatedUnit.floor})`
+          : null;
+
+        const acceptMessageLines = [
           `Halo *${existing.student_name}*, kabar gembira! 🎉`,
           ``,
           `Pesanan kamar Anda di *${propertyName}* telah *DISETUJUI* oleh pemilik kos (*${ownerName}*) melalui Dasbor Mitra.`,
@@ -154,13 +232,22 @@ export async function PATCH(
           `📋 *Detail Pesanan:*`,
           `🏠 *Kos:* ${propertyName}`,
           `🏷️ *Tipe:* ${existing.room_type?.name || "Standar"}`,
+        ];
+
+        if (roomUnitLine) {
+          acceptMessageLines.push(roomUnitLine);
+        }
+
+        acceptMessageLines.push(
           `📅 *Tanggal Masuk:* ${moveInDateFormatted}`,
           `📍 *Alamat:* ${existing.property.address || "Lihat detail di aplikasi KosPasti"}`,
           ``,
           `Selamat menempati hunian baru Anda! Hubungi pemilik kos untuk koordinasi penyerahan kunci.`,
           ``,
-          `_Salam hangat dari KosPasti._`,
-        ].join("\n");
+          `_Salam hangat dari KosPasti._`
+        );
+
+        const acceptMessage = acceptMessageLines.join("\n");
 
         await sendWhatsAppMessage({
           to: existing.student_whatsapp,
