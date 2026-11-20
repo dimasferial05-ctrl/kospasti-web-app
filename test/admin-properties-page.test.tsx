@@ -84,7 +84,13 @@ describe("Manage Properties Page (/admin/properties)", () => {
       __dirname,
       "../src/app/admin/properties/page.tsx"
     );
-    const content = fs.readFileSync(filePath, "utf-8");
+    const modalPath = path.resolve(
+      __dirname,
+      "../src/components/forms/property/PropertyModalForm.tsx"
+    );
+    const content =
+      fs.readFileSync(filePath, "utf-8") +
+      (fs.existsSync(modalPath) ? "\n" + fs.readFileSync(modalPath, "utf-8") : "");
 
     // Modal state & elements
     expect(content).toContain("isModalOpen");
@@ -112,7 +118,18 @@ describe("Manage Properties Page (/admin/properties)", () => {
       __dirname,
       "../src/app/admin/properties/page.tsx"
     );
-    const content = fs.readFileSync(filePath, "utf-8");
+    const modalPath = path.resolve(
+      __dirname,
+      "../src/components/forms/property/PropertyModalForm.tsx"
+    );
+    const mediaSectionPath = path.resolve(
+      __dirname,
+      "../src/components/forms/property/PropertyMediaUploadSection.tsx"
+    );
+    const content =
+      fs.readFileSync(filePath, "utf-8") +
+      (fs.existsSync(modalPath) ? "\n" + fs.readFileSync(modalPath, "utf-8") : "") +
+      (fs.existsSync(mediaSectionPath) ? "\n" + fs.readFileSync(mediaSectionPath, "utf-8") : "");
 
     expect(content).toContain('type="file"');
     expect(content).toContain("multiple");
@@ -140,7 +157,13 @@ describe("Manage Properties Page (/admin/properties)", () => {
       __dirname,
       "../src/app/admin/properties/page.tsx"
     );
-    const content = fs.readFileSync(filePath, "utf-8");
+    const modalPath = path.resolve(
+      __dirname,
+      "../src/components/forms/property/PropertyModalForm.tsx"
+    );
+    const content =
+      fs.readFileSync(filePath, "utf-8") +
+      (fs.existsSync(modalPath) ? "\n" + fs.readFileSync(modalPath, "utf-8") : "");
 
     expect(content).toContain("handleSubmitForm");
     expect(content).toContain("/api/admin/properties/${editingProperty.id}");
@@ -154,7 +177,13 @@ describe("Manage Properties Page (/admin/properties)", () => {
       __dirname,
       "../src/app/admin/properties/page.tsx"
     );
-    const content = fs.readFileSync(filePath, "utf-8");
+    const modalPath = path.resolve(
+      __dirname,
+      "../src/components/forms/property/PropertyModalForm.tsx"
+    );
+    const content =
+      fs.readFileSync(filePath, "utf-8") +
+      (fs.existsSync(modalPath) ? "\n" + fs.readFileSync(modalPath, "utf-8") : "");
 
     expect(content).toContain('fetch("/api/admin/owners"');
     expect(content).toContain("fetchOwners");

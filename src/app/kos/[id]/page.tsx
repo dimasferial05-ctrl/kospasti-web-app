@@ -266,14 +266,12 @@ export default function PropertyDetailPage() {
       if (res.ok && data.success && data.room?.id) {
         router.push(`/chat/${data.room.id}`);
       } else if (data.is_own_property) {
-        if (confirm(`${data.error}\n\nIngin membuka menu Pesan Masuk di Dasbor Mitra sekarang?`)) {
-          router.push(data.redirect_url || "/partner/dashboard/chats");
-        }
+        router.push(data.redirect_url || "/partner/dashboard/chats");
       } else {
-        alert(data.error || "Gagal membuka ruang obrolan.");
+        console.error(data.error || "Gagal membuka ruang obrolan.");
       }
     } catch {
-      alert("Terjadi kesalahan saat menghubungkan ke obrolan.");
+      console.error("Terjadi kesalahan saat menghubungkan ke obrolan.");
     } finally {
       setIsOpeningChat(false);
     }

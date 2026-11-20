@@ -13,6 +13,33 @@ vi.mock("next/navigation", () => ({
   }),
 }));
 
+const getFullPropertyDetailContent = () => {
+  const filePath = path.resolve(__dirname, "../src/app/kos/[id]/page.tsx");
+  const galleryPath = path.resolve(
+    __dirname,
+    "../src/components/property-detail/PropertyGalleryViewer.tsx"
+  );
+  const bookingModalPath = path.resolve(
+    __dirname,
+    "../src/components/property-detail/PropertyBookingModal.tsx"
+  );
+  const bottomBarPath = path.resolve(
+    __dirname,
+    "../src/components/property-detail/PropertyStickyBottomBar.tsx"
+  );
+  const ownerCardPath = path.resolve(
+    __dirname,
+    "../src/components/property-detail/PropertyOwnerContactCard.tsx"
+  );
+  return (
+    fs.readFileSync(filePath, "utf-8") +
+    (fs.existsSync(galleryPath) ? "\n" + fs.readFileSync(galleryPath, "utf-8") : "") +
+    (fs.existsSync(bookingModalPath) ? "\n" + fs.readFileSync(bookingModalPath, "utf-8") : "") +
+    (fs.existsSync(bottomBarPath) ? "\n" + fs.readFileSync(bottomBarPath, "utf-8") : "") +
+    (fs.existsSync(ownerCardPath) ? "\n" + fs.readFileSync(ownerCardPath, "utf-8") : "")
+  );
+};
+
 describe("Property Detail Page Component (/kos/[id])", () => {
   beforeEach(() => {
     vi.restoreAllMocks();
@@ -39,8 +66,7 @@ describe("Property Detail Page Component (/kos/[id])", () => {
   });
 
   it("memiliki kelas Tailwind wajib untuk Sticky Bottom Bar", () => {
-    const filePath = path.resolve(__dirname, "../src/app/kos/[id]/page.tsx");
-    const content = fs.readFileSync(filePath, "utf-8");
+    const content = getFullPropertyDetailContent();
 
     // Acceptance Criteria: sticky bottom bar classes
     expect(content).toContain("fixed bottom-0 left-0 w-full bg-white");
@@ -64,8 +90,7 @@ describe("Property Detail Page Component (/kos/[id])", () => {
   });
 
   it("memiliki struktur tampilan foto utama, fasilitas, dan info pemilik", () => {
-    const filePath = path.resolve(__dirname, "../src/app/kos/[id]/page.tsx");
-    const content = fs.readFileSync(filePath, "utf-8");
+    const content = getFullPropertyDetailContent();
 
     // Foto utama
     expect(content).toContain("object-cover");
@@ -79,8 +104,7 @@ describe("Property Detail Page Component (/kos/[id])", () => {
   });
 
   it("memiliki komponen UI Galeri / Korsel dengan Main Viewer dan Thumbnail Navigator", () => {
-    const filePath = path.resolve(__dirname, "../src/app/kos/[id]/page.tsx");
-    const content = fs.readFileSync(filePath, "utf-8");
+    const content = getFullPropertyDetailContent();
 
     // Gallery state
     expect(content).toContain("activeIndex");
@@ -105,8 +129,7 @@ describe("Property Detail Page Component (/kos/[id])", () => {
   });
 
   it("menangani kondisi kamar habis (isFull) pada tombol Sticky Bottom Bar", () => {
-    const filePath = path.resolve(__dirname, "../src/app/kos/[id]/page.tsx");
-    const content = fs.readFileSync(filePath, "utf-8");
+    const content = getFullPropertyDetailContent();
 
     // Menghitung variabel isFull berdasarkan available_rooms === 0
     expect(content).toContain("property.available_rooms === 0");
@@ -128,8 +151,7 @@ describe("Property Detail Page Component (/kos/[id])", () => {
   });
 
   it("memiliki struktur Booking Form Modal yang lengkap, menampilkan data akun, dan responsif", () => {
-    const filePath = path.resolve(__dirname, "../src/app/kos/[id]/page.tsx");
-    const content = fs.readFileSync(filePath, "utf-8");
+    const content = getFullPropertyDetailContent();
 
     // Modal state
     expect(content).toContain("isModalOpen");
