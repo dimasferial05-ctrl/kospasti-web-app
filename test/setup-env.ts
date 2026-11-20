@@ -18,17 +18,22 @@ export function toTestDatabaseUrl(rawUrl: string): string {
   return rawUrl;
 }
 
-if (!process.env.DATABASE_URL) {
-  const envPath = path.resolve(__dirname, "../.env");
-  if (fs.existsSync(envPath)) {
-    const envContent = fs.readFileSync(envPath, "utf-8");
-    const match = envContent.match(/DATABASE_URL=["']?([^"'\r\n]+)["']?/);
-    if (match && match[1]) {
-      process.env.DATABASE_URL = match[1];
+if (process.env.TEST_OFFLINE === "true") {
+  // Mode offline: bersihkan DATABASE_URL agar tidak mencoba membuka koneksi ke cloud database eksternal
+  delete process.env.DATABASE_URL;
+} else {
+  if (!process.env.DATABASE_URL) {
+    const envPath = path.resolve(__dirname, "../.env");
+    if (fs.existsSync(envPath)) {
+      const envContent = fs.readFileSync(envPath, "utf-8");
+      const match = envContent.match(/DATABASE_URL=["']?([^"'\r\n]+)["']?/);
+      if (match && match[1]) {
+        process.env.DATABASE_URL = match[1];
+      }
     }
   }
-}
 
-if (process.env.DATABASE_URL) {
-  process.env.DATABASE_URL = toTestDatabaseUrl(process.env.DATABASE_URL);
+  if (process.env.DATABASE_URL) {
+    process.env.DATABASE_URL = toTestDatabaseUrl(process.env.DATABASE_URL);
+  }
 }

@@ -4,6 +4,10 @@ import path from "path";
 import { toTestDatabaseUrl } from "./setup-env";
 
 export default function setup() {
+  if (process.env.TEST_OFFLINE === "true") {
+    return;
+  }
+
   try {
     if (!process.env.DATABASE_URL) {
       const envPath = path.resolve(__dirname, "../.env");
