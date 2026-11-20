@@ -48,6 +48,8 @@ model Property {
   rental_terms    String?
   youtube_url     String?
   description     String?
+  average_rating  Float           @default(0.0)
+  total_reviews   Int             @default(0)
   created_at      DateTime        @default(now())
   updated_at      DateTime        @updatedAt
   owner_id        String
@@ -62,6 +64,7 @@ model Property {
 
   @@index([owner_id])
   @@index([status])
+  @@index([average_rating])
 }
 
 model RoomType {

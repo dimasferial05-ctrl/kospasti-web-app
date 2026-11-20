@@ -111,14 +111,6 @@ export async function fetchFullPropertiesByIds(
           price_per_month: "asc",
         },
       },
-      reviews: {
-        where: {
-          is_hidden: false,
-        },
-        select: {
-          rating: true,
-        },
-      },
     },
   });
 
@@ -132,18 +124,6 @@ export async function fetchFullPropertiesByIds(
       roomTypes.length > 0
         ? roomTypes.reduce((sum, rt) => sum + rt.available_rooms, 0)
         : property.available_rooms;
-
-    const activeReviews = property.reviews || [];
-    const totalReviews = activeReviews.length;
-    const avgRating =
-      totalReviews > 0
-        ? Number(
-            (
-              activeReviews.reduce((sum, r) => sum + r.rating, 0) /
-              totalReviews
-            ).toFixed(1)
-          )
-        : 0;
 
     return {
       id: property.id,
@@ -164,8 +144,8 @@ export async function fetchFullPropertiesByIds(
       is_24_hours: property.is_24_hours,
       status: property.status,
       rejectionReason: property.rejectionReason,
-      average_rating: avgRating,
-      total_reviews: totalReviews,
+      average_rating: property.average_rating ?? 0,
+      total_reviews: property.total_reviews ?? 0,
       last_updated: property.updated_at,
       distance_km: distanceMap.get(property.id) ?? null,
       owner: property.owner,
@@ -210,14 +190,6 @@ export async function getAllPropertiesFallback(
             price_per_month: "asc",
           },
         },
-        reviews: {
-          where: {
-            is_hidden: false,
-          },
-          select: {
-            rating: true,
-          },
-        },
       },
     });
 
@@ -231,18 +203,6 @@ export async function getAllPropertiesFallback(
         roomTypes.length > 0
           ? roomTypes.reduce((sum, rt) => sum + rt.available_rooms, 0)
           : property.available_rooms;
-
-      const activeReviews = property.reviews || [];
-      const totalReviews = activeReviews.length;
-      const avgRating =
-        totalReviews > 0
-          ? Number(
-              (
-                activeReviews.reduce((sum, r) => sum + r.rating, 0) /
-                totalReviews
-              ).toFixed(1)
-            )
-          : 0;
 
       return {
         id: property.id,
@@ -263,8 +223,8 @@ export async function getAllPropertiesFallback(
         is_24_hours: property.is_24_hours,
         status: property.status,
         rejectionReason: property.rejectionReason,
-        average_rating: avgRating,
-        total_reviews: totalReviews,
+        average_rating: property.average_rating ?? 0,
+        total_reviews: property.total_reviews ?? 0,
         last_updated: property.updated_at,
         distance_km: null,
         owner: property.owner,

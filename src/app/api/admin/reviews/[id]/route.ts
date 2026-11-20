@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { isValidAdminRequest, createAdminUnauthorizedResponse } from "@/lib/admin-auth";
+import { updatePropertyReviewStats } from "@/lib/propertyReviewStats";
 
 export async function PATCH(
   request: NextRequest,
@@ -48,6 +49,9 @@ export async function PATCH(
         is_hidden: isHidden,
       },
     });
+
+    // Perbarui kolom denormalisasi rating dan total ulasan pada Property
+    await updatePropertyReviewStats(existingReview.property_id);
 
     return NextResponse.json({
       success: true,

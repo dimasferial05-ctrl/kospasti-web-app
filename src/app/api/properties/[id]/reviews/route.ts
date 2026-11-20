@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { verifyUserToken } from "@/lib/auth";
 import { createInAppNotification } from "@/lib/notifications";
 import { saveUploadedFiles } from "@/lib/upload";
+import { updatePropertyReviewStats } from "@/lib/propertyReviewStats";
 
 async function authenticateUser(request?: NextRequest) {
   const cookieStore = await cookies();
@@ -385,6 +386,9 @@ export async function POST(
         },
       },
     });
+
+    // Perbarui kolom denormalisasi rating dan total ulasan pada Property secara atomik
+    await updatePropertyReviewStats(propertyId);
 
     // Kirim notifikasi ke mitra pemilik kos bahwa propertinya mendapat ulasan baru
     if (newReview.property?.owner_id) {
