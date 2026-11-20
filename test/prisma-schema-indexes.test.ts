@@ -46,4 +46,16 @@ describe("Prisma Schema Index Definitions", () => {
     expect(payoutBlock).toContain("@@index([owner_id])");
     expect(payoutBlock).toContain("@@index([status])");
   });
+
+  it("should have index on Invoice booking_id, owner_id, user_id, status, due_date, and composite status_due_date", () => {
+    const invoiceMatch = schemaContent.match(/model Invoice \{([\s\S]*?)\n\}/);
+    expect(invoiceMatch).toBeTruthy();
+    const invoiceBlock = invoiceMatch ? invoiceMatch[1] : "";
+    expect(invoiceBlock).toContain("@@index([booking_id])");
+    expect(invoiceBlock).toContain("@@index([owner_id])");
+    expect(invoiceBlock).toContain("@@index([user_id])");
+    expect(invoiceBlock).toContain("@@index([status])");
+    expect(invoiceBlock).toContain("@@index([due_date])");
+    expect(invoiceBlock).toContain("@@index([status, due_date])");
+  });
 });
