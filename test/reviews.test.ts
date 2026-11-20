@@ -10,6 +10,7 @@ import { GET as adminReviewsGET } from "../src/app/api/admin/reviews/route";
 import { PATCH as adminReviewPATCH } from "../src/app/api/admin/reviews/[id]/route";
 import { prisma } from "../src/lib/prisma";
 import { signUserToken } from "../src/lib/auth";
+import { updatePropertyReviewStats } from "../src/lib/propertyReviewStats";
 import { clearDatabase } from "./helpers";
 import { NextRequest } from "next/server";
 
@@ -399,6 +400,7 @@ describe("Review & Rating Feature (Issue #118)", () => {
           comment: "Nyaman dan strategis",
         },
       });
+      await updatePropertyReviewStats(property.id);
 
       // Test GET /api/properties
       const listRes = await propertiesGET(new Request("http://localhost:3000/api/properties"));
@@ -451,9 +453,10 @@ describe("Review & Rating Feature (Issue #118)", () => {
         },
       });
 
+      const adminToken = process.env.ADMIN_TOKEN || "kospasti_admin_authenticated";
       const req = new NextRequest("http://localhost/api/admin/reviews", {
         headers: {
-          cookie: "admin_token=kospasti_admin_authenticated",
+          cookie: `admin_token=${adminToken}`,
         },
       });
 
@@ -491,10 +494,11 @@ describe("Review & Rating Feature (Issue #118)", () => {
         },
       });
 
+      const adminToken = process.env.ADMIN_TOKEN || "kospasti_admin_authenticated";
       const patchReq = new NextRequest(`http://localhost/api/admin/reviews/${review.id}`, {
         method: "PATCH",
         headers: {
-          cookie: "admin_token=kospasti_admin_authenticated",
+          cookie: `admin_token=${adminToken}`,
         },
         body: JSON.stringify({ is_hidden: true }),
       });
