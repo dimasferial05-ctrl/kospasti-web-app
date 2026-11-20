@@ -1244,6 +1244,7 @@ export default function PropertyDetailClient({ initialProperty }: PropertyDetail
           setDateValidationError(false);
         }}
         selectedRoomType={selectedRoomType}
+        property={property}
         studentName={studentName}
         waNumber={waNumber}
         userAvatar={userAvatar}

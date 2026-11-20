@@ -2,6 +2,8 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { GET as getUnits, POST as createUnit } from "@/app/api/partner/properties/[id]/units/route";
 import { PATCH as updateBookingStatus } from "@/app/api/partner/bookings/[id]/route";
 import { GET as getBookingDetail } from "@/app/api/bookings/[id]/route";
+import { GET as getPartnerBookings } from "@/app/api/partner/bookings/route";
+import { POST as createBooking } from "@/app/api/bookings/route";
 import { prisma } from "@/lib/prisma";
 import * as authLib from "@/lib/auth";
 import * as whatsappLib from "@/lib/whatsapp";
@@ -394,6 +396,116 @@ describe("Manajemen Nomor Kamar & Inventaris Fisik (Room Unit & Key Inventory)",
       expect(data.data.roomUnit.unitNumber).toBe("204");
       expect(data.data.roomUnit.floor).toBe(2);
       expect(data.data.roomUnit.status).toBe("OCCUPIED");
+    });
+  });
+
+  describe("4. Endpoint Daftar Pesanan Mitra (/api/partner/bookings)", () => {
+    it("mengembalikan daftar booking milik mitra beserta relasi room_unit dan property", async () => {
+      vi.spyOn(authLib, "verifyOwnerToken").mockResolvedValue({
+        ownerId: "owner-123",
+        role: "OWNER",
+      } as any);
+
+      const mockBookings = [
+        {
+          id: "b-1",
+          student_name: "Asep",
+          student_whatsapp: "081234567890",
+          status: "APPROVED",
+          amount: 850000,
+          created_at: new Date(),
+          property: {
+            id: "prop-1",
+            name: "Kos Melati",
+            price_per_month: 850000,
+            available_rooms: 4,
+          },
+          room_type: null,
+          room_unit: {
+            id: "unit-101",
+            unit_number: "101",
+            floor: 1,
+            status: "OCCUPIED",
+          },
+        },
+      ];
+
+      vi.spyOn(prisma.booking, "findMany").mockResolvedValue(mockBookings as any);
+
+      const res = await getPartnerBookings();
+      const data = await res.json();
+
+      expect(res.status).toBe(200);
+      expect(data.success).toBe(true);
+      expect(data.bookings).toHaveLength(1);
+      expect(data.bookings[0].room_unit.unit_number).toBe("101");
+      expect(data.bookings[0].amount).toBe(850000);
+    });
+  });
+
+  describe("5. Booking Kos Tanpa Tipe Kamar (Kos Sederhana)", () => {
+    it("menggunakan tarif sewa property.price_per_month jika kos tidak memiliki tipe kamar terpisah", async () => {
+      vi.spyOn(authLib, "verifyUserToken").mockResolvedValue({
+        userId: "user-123",
+        name: "Dimas",
+        whatsapp: "081234567890",
+      } as any);
+
+      vi.spyOn(prisma.user, "findUnique").mockResolvedValue({
+        id: "user-123",
+        name: "Dimas",
+        whatsapp: "081234567890",
+      } as any);
+
+      vi.spyOn(prisma.booking, "findFirst").mockResolvedValue(null);
+
+      let createdAmount = 0;
+      let createdRoomTypeId: any = "NOT_SET";
+
+      vi.spyOn(prisma, "$transaction").mockImplementation(async (callback: any) => {
+        const txMock = {
+          booking: {
+            findFirst: vi.fn().mockResolvedValue(null),
+            create: vi.fn().mockImplementation((args) => {
+              createdAmount = args.data.amount;
+              createdRoomTypeId = args.data.room_type_id;
+              return {
+                id: "booking-no-rt-1",
+                ...args.data,
+                property: { name: "Kos Mawar", owner_id: "owner-1" },
+              };
+            }),
+          },
+          roomType: {
+            findFirst: vi.fn().mockResolvedValue(null),
+          },
+          property: {
+            updateMany: vi.fn().mockResolvedValue({ count: 1 }),
+            findUnique: vi.fn().mockResolvedValue({ price_per_month: 950000 }),
+          },
+        };
+        return callback(txMock);
+      });
+
+      const req = new Request("http://localhost:3000/api/bookings", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          propertyId: "prop-sederhana",
+          studentName: "Dimas",
+          waNumber: "081234567890",
+          moveInDate: "2026-12-01",
+        }),
+      });
+
+      const res = await createBooking(req);
+      const data = await res.json();
+
+      expect(res.status).toBe(201);
+      expect(data.success).toBe(true);
+      expect(createdRoomTypeId).toBeNull();
+      expect(createdAmount).toBe(950000);
+      expect(createdAmount).toBeGreaterThan(0);
     });
   });
 });

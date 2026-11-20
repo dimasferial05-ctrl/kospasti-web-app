@@ -11,6 +11,10 @@ export interface PropertyBookingModalProps {
   isOpen: boolean;
   onClose: () => void;
   selectedRoomType: RoomTypeItem | null;
+  property?: {
+    name: string;
+    price_per_month: number;
+  } | null;
   studentName: string;
   waNumber: string;
   userAvatar?: string | null;
@@ -31,6 +35,7 @@ export function PropertyBookingModal({
   isOpen,
   onClose,
   selectedRoomType,
+  property,
   studentName,
   waNumber,
   userAvatar,
@@ -99,25 +104,23 @@ export function PropertyBookingModal({
               </p>
             </div>
 
-            {/* Selected Room Type Info */}
-            {selectedRoomType && (
-              <div className="bg-emerald-50/70 dark:bg-emerald-950/40 border border-emerald-200/90 dark:border-emerald-800 rounded-xl p-3 flex items-center justify-between">
-                <div>
-                  <p className="text-[11px] font-semibold text-emerald-800 dark:text-emerald-300 uppercase tracking-wide">
-                    Tipe Kamar Dipilih
-                  </p>
-                  <p className="text-sm font-bold text-slate-900 dark:text-white">
-                    {selectedRoomType.name}
-                  </p>
-                </div>
-                <div className="text-right">
-                  <p className="text-xs font-extrabold text-emerald-700 dark:text-emerald-400">
-                    Rp {Number(selectedRoomType.price_per_month || 0).toLocaleString("id-ID")}
-                  </p>
-                  <p className="text-[10px] text-slate-500 dark:text-slate-400">/ bulan</p>
-                </div>
+            {/* Selected Room / Property Info */}
+            <div className="bg-emerald-50/70 dark:bg-emerald-950/40 border border-emerald-200/90 dark:border-emerald-800 rounded-xl p-3 flex items-center justify-between">
+              <div>
+                <p className="text-[11px] font-semibold text-emerald-800 dark:text-emerald-300 uppercase tracking-wide">
+                  {selectedRoomType ? "Tipe Kamar Dipilih" : "Kamar Dipilih"}
+                </p>
+                <p className="text-sm font-bold text-slate-900 dark:text-white">
+                  {selectedRoomType ? selectedRoomType.name : property?.name || "Kamar Reguler"}
+                </p>
               </div>
-            )}
+              <div className="text-right">
+                <p className="text-xs font-extrabold text-emerald-700 dark:text-emerald-400">
+                  Rp {Number(selectedRoomType?.price_per_month ?? property?.price_per_month ?? 0).toLocaleString("id-ID")}
+                </p>
+                <p className="text-[10px] text-slate-500 dark:text-slate-400">/ bulan</p>
+              </div>
+            </div>
 
             {/* User Profile Summary Card */}
             <div className="bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-700 rounded-xl p-3.5 flex flex-col gap-2">

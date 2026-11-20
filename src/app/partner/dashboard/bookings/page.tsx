@@ -22,6 +22,7 @@ import {
   Download,
   ShieldCheck,
   AlertTriangle,
+  DoorOpen,
 } from "lucide-react";
 import { HelpTooltip } from "@/components/ui/Tooltip";
 import { ExportFinancialModal } from "@/components/partner/ExportFinancialModal";
@@ -33,6 +34,7 @@ interface Booking {
   move_in_date: string;
   status: string;
   created_at: string;
+  amount?: number;
   checkin_confirmed_at?: string | null;
   cancellation_reason?: string | null;
   refund_bank_name?: string | null;
@@ -50,13 +52,19 @@ interface Booking {
     id: string;
     name: string;
     address: string | null;
-    price_per_month: number;
-    available_rooms: number;
+    price_per_month?: number | null;
+    available_rooms?: number | null;
   };
   room_type?: {
     id: string;
     name: string;
-    price_per_month: number;
+    price_per_month?: number | null;
+  } | null;
+  room_unit?: {
+    id: string;
+    unit_number: string;
+    floor?: number | null;
+    status: string;
   } | null;
   user?: {
     id: string;
@@ -83,6 +91,14 @@ export default function PartnerBookingsPage() {
   const [checkoutLoading, setCheckoutLoading] = useState(false);
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
 
+  // Modal Penetapan Unit Kamar Fisik saat Approve
+  const [approvingBooking, setApprovingBooking] = useState<Booking | null>(null);
+  const [availableUnits, setAvailableUnits] = useState<
+    Array<{ id: string; unit_number: string; floor?: number | null; room_type?: { name: string } | null }>
+  >([]);
+  const [selectedUnitId, setSelectedUnitId] = useState<string>("");
+  const [isCheckingUnits, setIsCheckingUnits] = useState(false);
+
 
 
   const fetchBookings = async () => {
@@ -106,7 +122,11 @@ export default function PartnerBookingsPage() {
     fetchBookings();
   }, []);
 
-  const handleUpdateStatus = async (bookingId: string, status: "APPROVED" | "REJECTED") => {
+  const handleUpdateStatus = async (
+    bookingId: string,
+    status: "APPROVED" | "REJECTED",
+    roomUnitId?: string | null
+  ) => {
     try {
       setActionLoadingId(bookingId);
       setErrorMsg(null);
@@ -114,7 +134,10 @@ export default function PartnerBookingsPage() {
       const res = await fetch(`/api/partner/bookings/${bookingId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status }),
+        body: JSON.stringify({
+          status,
+          ...(roomUnitId ? { room_unit_id: roomUnitId } : {}),
+        }),
       });
 
       const data = await res.json();
@@ -125,7 +148,15 @@ export default function PartnerBookingsPage() {
       }
 
       setBookings((prev) =>
-        prev.map((b) => (b.id === bookingId ? { ...b, status } : b))
+        prev.map((b) =>
+          b.id === bookingId
+            ? {
+                ...b,
+                status,
+                ...(data.booking?.room_unit ? { room_unit: data.booking.room_unit } : {}),
+              }
+            : b
+        )
       );
 
       setSuccessMsg(
@@ -137,6 +168,33 @@ export default function PartnerBookingsPage() {
     } catch {
       setErrorMsg("Terjadi kesalahan saat memproses status.");
     } finally {
+      setActionLoadingId(null);
+      setApprovingBooking(null);
+    }
+  };
+
+  const handleInitiateApprove = async (b: Booking) => {
+    try {
+      setActionLoadingId(b.id);
+      setIsCheckingUnits(true);
+
+      // Cek apakah properti memiliki unit kamar fisik (inventaris nomor kamar)
+      const res = await fetch(`/api/partner/properties/${b.property.id}/units?status=VACANT`);
+      const data = await res.json().catch(() => null);
+
+      if (res.ok && data?.success && Array.isArray(data.data) && data.data.length > 0) {
+        // Tampilkan modal pemilihan nomor kamar
+        setAvailableUnits(data.data);
+        setSelectedUnitId(data.data[0]?.id || "");
+        setApprovingBooking(b);
+      } else {
+        // Jika kos belum memiliki inventaris kamar fisik / tipe standar, langsung setujui tanpa unit
+        await handleUpdateStatus(b.id, "APPROVED");
+      }
+    } catch {
+      await handleUpdateStatus(b.id, "APPROVED");
+    } finally {
+      setIsCheckingUnits(false);
       setActionLoadingId(null);
     }
   };
@@ -161,9 +219,9 @@ export default function PartnerBookingsPage() {
     }
 
     const matchesSearch =
-      b.student_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      b.property.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      b.student_whatsapp.includes(searchQuery);
+      (b.student_name || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (b.property?.name || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (b.student_whatsapp || "").includes(searchQuery);
     return matchesFilter && matchesSearch;
   });
 
@@ -463,11 +521,11 @@ export default function PartnerBookingsPage() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {filteredBookings.map((b) => {
-            const cleanWa = b.student_whatsapp.replace(/\D/g, "");
+            const cleanWa = (b.student_whatsapp || "").replace(/\D/g, "");
             const waUrl = `https://wa.me/${cleanWa}?text=Halo%20kak%20${encodeURIComponent(
-              b.student_name
+              b.student_name || "Penyewa"
             )},%20saya%20pemilik%20${encodeURIComponent(
-              b.property.name
+              b.property?.name || "Kos"
             )}%20dari%20KosPasti.%20Mengenai%20pesanan%20sewa%20Anda...`;
 
             const isPendingAction = b.status === "PENDING" || b.status === "PAID";
@@ -475,6 +533,8 @@ export default function PartnerBookingsPage() {
             const isRefundRequested = b.status === "REFUND_REQUESTED";
             const isRefunded = b.status === "REFUNDED";
             const isCancelled = b.status === "CANCELLED";
+            const displayPrice =
+              b.room_type?.price_per_month ?? b.property?.price_per_month ?? b.amount ?? 0;
 
             return (
               <div
@@ -485,7 +545,9 @@ export default function PartnerBookingsPage() {
                 <div className="flex items-start justify-between gap-2">
                   <div>
                     {getStatusBadge(b.status)}
-                    <h3 className="font-extrabold text-slate-900 dark:text-white text-base">{b.student_name}</h3>
+                    <h3 className="font-extrabold text-slate-900 dark:text-white text-base">
+                      {b.student_name || "Penyewa"}
+                    </h3>
                     <p className="text-[11px] text-slate-400 mt-0.5">
                       Dipesan pada{" "}
                       {new Date(b.created_at).toLocaleDateString("id-ID", {
@@ -514,7 +576,9 @@ export default function PartnerBookingsPage() {
                       <Building2 className="w-3.5 h-3.5 text-slate-400" />
                       <span>Properti:</span>
                     </span>
-                    <span className="font-bold text-slate-800 dark:text-slate-200">{b.property.name}</span>
+                    <span className="font-bold text-slate-800 dark:text-slate-200">
+                      {b.property?.name || "Properti Kos"}
+                    </span>
                   </div>
 
                   {b.room_type && (
@@ -523,7 +587,21 @@ export default function PartnerBookingsPage() {
                         <BedDouble className="w-3.5 h-3.5 text-slate-400" />
                         <span>Tipe Kamar:</span>
                       </span>
-                      <span className="font-bold text-slate-800 dark:text-slate-200">{b.room_type.name}</span>
+                      <span className="font-bold text-slate-800 dark:text-slate-200">
+                        {b.room_type.name}
+                      </span>
+                    </div>
+                  )}
+
+                  {b.room_unit && (
+                    <div className="flex items-center justify-between bg-emerald-50/60 dark:bg-emerald-950/30 p-1.5 px-2.5 rounded-lg border border-emerald-200/60 dark:border-emerald-800/60">
+                      <span className="text-emerald-800 dark:text-emerald-300 font-semibold flex items-center gap-1.5">
+                        <DoorOpen className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+                        <span>Nomor Kamar:</span>
+                      </span>
+                      <span className="font-extrabold text-emerald-700 dark:text-emerald-400">
+                        {b.room_unit.unit_number} {b.room_unit.floor ? `(Lt. ${b.room_unit.floor})` : ""}
+                      </span>
                     </div>
                   )}
 
@@ -547,7 +625,7 @@ export default function PartnerBookingsPage() {
                       <span>Tarif Sewa:</span>
                     </span>
                     <span className="font-extrabold text-emerald-700 dark:text-emerald-400">
-                      Rp {(b.room_type?.price_per_month || b.property.price_per_month).toLocaleString("id-ID")} / bln
+                      Rp {Number(displayPrice || 0).toLocaleString("id-ID")} / bln
                     </span>
                   </div>
                 </div>
@@ -600,8 +678,8 @@ export default function PartnerBookingsPage() {
                   <div className="flex items-center gap-2 pt-2 border-t border-slate-100 dark:border-slate-800">
                     <button
                       type="button"
-                      onClick={() => handleUpdateStatus(b.id, "APPROVED")}
-                      disabled={actionLoadingId === b.id}
+                      onClick={() => handleInitiateApprove(b)}
+                      disabled={actionLoadingId === b.id || isCheckingUnits}
                       className="flex-1 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center justify-center gap-1.5 transition-all shadow-sm disabled:opacity-50 cursor-pointer"
                     >
                       {actionLoadingId === b.id ? (
@@ -976,6 +1054,100 @@ export default function PartnerBookingsPage() {
                   </>
                 ) : (
                   "Proses Checkout & Pelepasan Deposit"
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Penetapan Unit Kamar Spesifik saat Menyetujui Booking */}
+      {approvingBooking && (
+        <div className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in duration-200">
+          <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-2xl max-w-md w-full p-6 space-y-5 animate-in zoom-in-95 duration-150">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-2xl bg-emerald-100 dark:bg-emerald-950/50 flex items-center justify-center text-emerald-600 dark:text-emerald-400 shrink-0">
+                <DoorOpen className="w-6 h-6" />
+              </div>
+              <div>
+                <h3 className="text-base font-bold text-slate-900 dark:text-white">
+                  Tetapkan Nomor Kamar Fisik
+                </h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400">
+                  Pilih nomor kamar untuk <strong>{approvingBooking.student_name}</strong>.
+                </p>
+              </div>
+            </div>
+
+            <div className="space-y-3 bg-slate-50 dark:bg-slate-800/40 p-4 rounded-2xl border border-slate-200 dark:border-slate-700/60 text-xs">
+              <div className="flex items-center justify-between">
+                <span className="text-slate-500 dark:text-slate-400">Properti:</span>
+                <span className="font-bold text-slate-800 dark:text-slate-200">
+                  {approvingBooking.property.name}
+                </span>
+              </div>
+              {approvingBooking.room_type && (
+                <div className="flex items-center justify-between">
+                  <span className="text-slate-500 dark:text-slate-400">Tipe Kamar:</span>
+                  <span className="font-bold text-slate-800 dark:text-slate-200">
+                    {approvingBooking.room_type.name}
+                  </span>
+                </div>
+              )}
+            </div>
+
+            <div>
+              <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1.5">
+                Pilih Kamar yang Siap Huni (Status: VACANT) <span className="text-emerald-600">*</span>
+              </label>
+              <select
+                value={selectedUnitId}
+                onChange={(e) => setSelectedUnitId(e.target.value)}
+                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              >
+                <option value="">-- Tetapkan Nanti / Tanpa Nomor Kamar Spesifik --</option>
+                {availableUnits.map((u) => (
+                  <option key={u.id} value={u.id}>
+                    Kamar No. {u.unit_number} {u.floor ? `(Lantai ${u.floor})` : ""} {u.room_type ? `[${u.room_type.name}]` : ""}
+                  </option>
+                ))}
+              </select>
+              <p className="text-[11px] text-slate-400 dark:text-slate-500 mt-1.5 leading-relaxed">
+                Nomor kamar yang dipilih akan tercetak secara otomatis di lembar Kontrak Digital (SPK) dan Kuitansi Resmi penyewa.
+              </p>
+            </div>
+
+            <div className="flex items-center justify-end gap-2.5 pt-2">
+              <button
+                type="button"
+                onClick={() => setApprovingBooking(null)}
+                disabled={Boolean(actionLoadingId)}
+                className="px-4 py-2.5 rounded-xl text-xs font-bold border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 transition-colors cursor-pointer"
+              >
+                Batal
+              </button>
+              <button
+                type="button"
+                disabled={Boolean(actionLoadingId)}
+                onClick={() =>
+                  handleUpdateStatus(
+                    approvingBooking.id,
+                    "APPROVED",
+                    selectedUnitId || null
+                  )
+                }
+                className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-500 text-white shadow-md shadow-emerald-600/20 disabled:opacity-50 transition-colors cursor-pointer"
+              >
+                {actionLoadingId ? (
+                  <>
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    Menyimpan...
+                  </>
+                ) : (
+                  <>
+                    <Check className="w-3.5 h-3.5" />
+                    <span>Setujui &amp; Konfirmasi</span>
+                  </>
                 )}
               </button>
             </div>

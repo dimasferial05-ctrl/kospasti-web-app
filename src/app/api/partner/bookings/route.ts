@@ -6,7 +6,8 @@ import { prisma } from "@/lib/prisma";
 export async function GET() {
   try {
     const cookieStore = await cookies();
-    const partnerToken = cookieStore.get("partner_token")?.value;
+    const partnerToken =
+      cookieStore.get("partner_token")?.value || cookieStore.get("owner_token")?.value;
 
     if (!partnerToken) {
       return NextResponse.json(
@@ -16,7 +17,8 @@ export async function GET() {
     }
 
     const payload = await verifyOwnerToken(partnerToken);
-    if (!payload || !payload.ownerId) {
+    const ownerId = payload?.ownerId || (payload as any)?.id;
+    if (!payload || !ownerId) {
       return NextResponse.json(
         { success: false, error: "Unauthorized" },
         { status: 401 }
@@ -27,7 +29,7 @@ export async function GET() {
     const bookings = await prisma.booking.findMany({
       where: {
         property: {
-          owner_id: payload.ownerId,
+          owner_id: ownerId,
         },
       },
       include: {
@@ -45,6 +47,14 @@ export async function GET() {
             id: true,
             name: true,
             price_per_month: true,
+          },
+        },
+        room_unit: {
+          select: {
+            id: true,
+            unit_number: true,
+            floor: true,
+            status: true,
           },
         },
         user: {
@@ -73,6 +83,7 @@ export async function GET() {
       {
         success: true,
         bookings,
+        data: bookings,
       },
       { status: 200 }
     );

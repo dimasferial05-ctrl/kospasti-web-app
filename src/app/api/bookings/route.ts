@@ -170,6 +170,24 @@ export async function POST(request: Request) {
           throw new Error("Tipe kamar sudah penuh atau tidak ditemukan");
         }
         resolvedRoomTypeId = roomTypeId.trim();
+      } else {
+        // Jika tidak ada roomTypeId yang dikirimkan, periksa apakah properti ini memiliki tipe kamar di database
+        const availableRoomType = await tx.roomType.findFirst({
+          where: {
+            property_id: propertyId.trim(),
+            available_rooms: { gt: 0 },
+          },
+          orderBy: { price_per_month: "asc" },
+        });
+
+        if (availableRoomType) {
+          // Jika properti memiliki tipe kamar, otomatis kurangi stok tipe kamar yang tersedia
+          await tx.roomType.update({
+            where: { id: availableRoomType.id },
+            data: { available_rooms: { decrement: 1 } },
+          });
+          resolvedRoomTypeId = availableRoomType.id;
+        }
       }
 
       // 1. Kurangi kamar properti langsung DENGAN SYARAT kamar masih > 0
@@ -201,14 +219,33 @@ export async function POST(request: Request) {
           securityDeposit = roomTypeData.security_deposit || 0;
         }
       }
-      if (bookingAmount === 0) {
-        const propData = await tx.property.findUnique({
-          where: { id: propertyId.trim() },
-          select: { price_per_month: true },
+
+      const propData = await tx.property.findUnique({
+        where: { id: propertyId.trim() },
+        select: { price_per_month: true },
+      });
+
+      if (bookingAmount <= 0 && propData?.price_per_month) {
+        bookingAmount = propData.price_per_month;
+      }
+
+      // Fallback tambahan jika bookingAmount masih 0: cari dari tipe kamar mana pun di properti ini
+      if (bookingAmount <= 0) {
+        const anyRoomType = await tx.roomType.findFirst({
+          where: { property_id: propertyId.trim() },
+          orderBy: { price_per_month: "asc" },
         });
-        if (propData) {
-          bookingAmount = propData.price_per_month;
+        if (anyRoomType) {
+          bookingAmount = anyRoomType.price_per_month;
+          securityDeposit = anyRoomType.security_deposit || 0;
+          if (!resolvedRoomTypeId) {
+            resolvedRoomTypeId = anyRoomType.id;
+          }
         }
+      }
+
+      if (bookingAmount <= 0) {
+        throw new Error("Tarif sewa properti ini belum ditentukan oleh pemilik kos.");
       }
 
       // 4. Buat Data Booking jika update kamar di atas berhasil

@@ -101,11 +101,21 @@ export async function POST(
       );
     }
 
-    const rentPrice =
+    let rentPrice =
       booking.room_type?.price_per_month ??
       booking.property?.price_per_month ??
       booking.amount ??
       0;
+
+    if (rentPrice <= 0 && booking.property_id) {
+      const anyRt = await prisma.roomType.findFirst({
+        where: { property_id: booking.property_id },
+        orderBy: { price_per_month: "asc" },
+      });
+      if (anyRt?.price_per_month) {
+        rentPrice = anyRt.price_per_month;
+      }
+    }
 
     const serviceFee = booking.service_fee || SERVICE_FEE;
     const securityDeposit = booking.security_deposit || 0;
