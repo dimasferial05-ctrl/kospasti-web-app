@@ -93,6 +93,45 @@ export function middleware(request: NextRequest) {
     );
   }
 
+  // 7. Proteksi Dokumen Sewa (Kontrak & Kuitansi)
+  const isDocumentRoute =
+    pathname.startsWith("/contract") || pathname.startsWith("/receipt");
+  if (isDocumentRoute && !userToken && !partnerToken && !isValidAdmin) {
+    const currentPath = request.nextUrl.pathname;
+    const currentQuery = request.nextUrl.search;
+    const callbackUrl = encodeURIComponent(currentPath + currentQuery);
+    return NextResponse.redirect(
+      new URL(`/login?callbackUrl=${callbackUrl}`, request.url)
+    );
+  }
+
+  // 8. Proteksi Endpoint API User
+  if (pathname.startsWith("/api/user") && !userToken) {
+    return NextResponse.json(
+      {
+        success: false,
+        error: "Unauthorized: Sesi pengguna tidak valid atau telah berakhir.",
+      },
+      { status: 401 }
+    );
+  }
+
+  // 9. Proteksi Endpoint API Chat
+  if (
+    pathname.startsWith("/api/chat") &&
+    !userToken &&
+    !partnerToken &&
+    !isValidAdmin
+  ) {
+    return NextResponse.json(
+      {
+        success: false,
+        error: "Unauthorized: Silakan login terlebih dahulu untuk mengakses obrolan.",
+      },
+      { status: 401 }
+    );
+  }
+
   return NextResponse.next();
 }
 
@@ -107,6 +146,10 @@ export const config = {
     "/profil/:path*",
     "/pesanan/:path*",
     "/checkout/:path*",
+    "/contract/:path*",
+    "/receipt/:path*",
+    "/api/user/:path*",
+    "/api/chat/:path*",
   ],
 };
 
