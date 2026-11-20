@@ -165,7 +165,10 @@ describe("Property Radius Search Distance-Based Pagination (Issue #305)", () => 
     expect(result.data).toHaveLength(1);
     expect(findManySpy).toHaveBeenCalledWith(
       expect.objectContaining({
-        orderBy: { updated_at: "desc" },
+        orderBy: [
+          { is_featured: "desc" },
+          { updated_at: "desc" },
+        ],
       })
     );
   });
