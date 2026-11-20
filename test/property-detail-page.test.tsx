@@ -4,6 +4,7 @@ import fs from "fs";
 import path from "path";
 import { renderToStaticMarkup } from "react-dom/server";
 import PropertyDetailPage from "../src/app/kos/[id]/page";
+import PropertyDetailClient from "../src/components/property-detail/PropertyDetailClient";
 
 // Mock next/navigation
 vi.mock("next/navigation", () => ({
@@ -11,10 +12,15 @@ vi.mock("next/navigation", () => ({
   useRouter: () => ({
     push: vi.fn(),
   }),
+  notFound: vi.fn(),
 }));
 
 const getFullPropertyDetailContent = () => {
   const filePath = path.resolve(__dirname, "../src/app/kos/[id]/page.tsx");
+  const clientPath = path.resolve(
+    __dirname,
+    "../src/components/property-detail/PropertyDetailClient.tsx"
+  );
   const galleryPath = path.resolve(
     __dirname,
     "../src/components/property-detail/PropertyGalleryViewer.tsx"
@@ -33,6 +39,7 @@ const getFullPropertyDetailContent = () => {
   );
   return (
     fs.readFileSync(filePath, "utf-8") +
+    (fs.existsSync(clientPath) ? "\n" + fs.readFileSync(clientPath, "utf-8") : "") +
     (fs.existsSync(galleryPath) ? "\n" + fs.readFileSync(galleryPath, "utf-8") : "") +
     (fs.existsSync(bookingModalPath) ? "\n" + fs.readFileSync(bookingModalPath, "utf-8") : "") +
     (fs.existsSync(bottomBarPath) ? "\n" + fs.readFileSync(bottomBarPath, "utf-8") : "") +
@@ -45,24 +52,38 @@ describe("Property Detail Page Component (/kos/[id])", () => {
     vi.restoreAllMocks();
   });
 
-  it("memiliki direktif 'use client' di baris paling awal file", () => {
-    const filePath = path.resolve(__dirname, "../src/app/kos/[id]/page.tsx");
-    const content = fs.readFileSync(filePath, "utf-8");
-    const firstLine = content.trim().split("\n")[0].trim();
+  it("halaman page.tsx adalah Server Component dan PropertyDetailClient memiliki direktif 'use client'", () => {
+    const pagePath = path.resolve(__dirname, "../src/app/kos/[id]/page.tsx");
+    const pageContent = fs.readFileSync(pagePath, "utf-8");
+    expect(pageContent).not.toMatch(/^["']use client["'];?/);
+    expect(pageContent).toContain("generateMetadata");
+    expect(pageContent).toContain("PropertyDetailClient");
+
+    const clientPath = path.resolve(
+      __dirname,
+      "../src/components/property-detail/PropertyDetailClient.tsx"
+    );
+    const clientContent = fs.readFileSync(clientPath, "utf-8");
+    const firstLine = clientContent.trim().split("\n")[0].trim();
     expect(firstLine).toMatch(/^["']use client["'];?$/);
   });
 
-  it("merender status loading pada saat inisialisasi", () => {
-    global.fetch = vi.fn().mockImplementation(
-      () =>
-        new Promise(() => {
-          // Pending promise for initial state
-        })
+  it("merender PropertyDetailClient secara langsung dengan initialProperty tanpa loading spinner awal", () => {
+    const mockProperty = {
+      id: "uuid-kos-123",
+      name: "Kos Melati Subang",
+      price_per_month: 800000,
+      available_rooms: 2,
+      gender_type: "PUTRI",
+      facilities: "WiFi, Kasur",
+    };
+
+    const html = renderToStaticMarkup(
+      <PropertyDetailClient initialProperty={mockProperty as any} />
     );
 
-    const html = renderToStaticMarkup(<PropertyDetailPage />);
-
-    expect(html).toMatch(/Memuat detail (kamar|properti kos)\.\.\./);
+    expect(html).toContain("Kos Melati Subang");
+    expect(html).not.toMatch(/Memuat detail (kamar|properti kos)\.\.\./);
   });
 
   it("memiliki kelas Tailwind wajib untuk Sticky Bottom Bar", () => {
@@ -74,15 +95,13 @@ describe("Property Detail Page Component (/kos/[id])", () => {
   });
 
   it("memiliki padding bottom yang cukup (pb-24) agar tidak tertutup bottom bar", () => {
-    const filePath = path.resolve(__dirname, "../src/app/kos/[id]/page.tsx");
-    const content = fs.readFileSync(filePath, "utf-8");
+    const content = getFullPropertyDetailContent();
 
     expect(content).toContain("pb-24");
   });
 
   it("memiliki penanganan error dan not found dengan tombol kembali ke beranda", () => {
-    const filePath = path.resolve(__dirname, "../src/app/kos/[id]/page.tsx");
-    const content = fs.readFileSync(filePath, "utf-8");
+    const content = getFullPropertyDetailContent();
 
     expect(content).toContain("Kos tidak ditemukan");
     expect(content).toContain("Kembali ke Beranda");
@@ -183,8 +202,7 @@ describe("Property Detail Page Component (/kos/[id])", () => {
   });
 
   it("memiliki fungsi handleOpenBookingModal untuk memvalidasi sesi pengguna (/api/auth/me) sebelum membuka modal", () => {
-    const filePath = path.resolve(__dirname, "../src/app/kos/[id]/page.tsx");
-    const content = fs.readFileSync(filePath, "utf-8");
+    const content = getFullPropertyDetailContent();
 
     expect(content).toContain("handleOpenBookingModal");
     expect(content).toContain('fetch("/api/auth/me")');
