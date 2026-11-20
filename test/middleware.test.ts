@@ -12,6 +12,10 @@ describe("Next.js Security Middleware (src/middleware.ts)", () => {
     expect(config.matcher).toContain("/profil/:path*");
     expect(config.matcher).toContain("/pesanan/:path*");
     expect(config.matcher).toContain("/checkout/:path*");
+    expect(config.matcher).toContain("/contract/:path*");
+    expect(config.matcher).toContain("/receipt/:path*");
+    expect(config.matcher).toContain("/api/user/:path*");
+    expect(config.matcher).toContain("/api/chat/:path*");
   });
 
   describe("Proteksi Endpoint API Admin (/api/admin/*)", () => {
@@ -258,6 +262,123 @@ describe("Next.js Security Middleware (src/middleware.ts)", () => {
       const request = new NextRequest("http://localhost:3000/checkout/123", {
         headers: {
           cookie: "user_token=mock_jwt_token_user_123",
+        },
+      });
+      const response = middleware(request);
+
+      expect(response.status).toBe(200);
+    });
+  });
+
+  describe("Proteksi Dokumen Sewa (/contract/* dan /receipt/*)", () => {
+    it("mengalihkan ke /login jika tidak memiliki token pengguna/mitra/admin saat membuka /contract/123", () => {
+      const request = new NextRequest("http://localhost:3000/contract/123");
+      const response = middleware(request);
+
+      expect(response.status).toBe(307);
+      expect(response.headers.get("location")).toBe(
+        "http://localhost:3000/login?callbackUrl=%2Fcontract%2F123"
+      );
+    });
+
+    it("mengalihkan ke /login jika tidak memiliki token pengguna/mitra/admin saat membuka /receipt/123", () => {
+      const request = new NextRequest("http://localhost:3000/receipt/123");
+      const response = middleware(request);
+
+      expect(response.status).toBe(307);
+      expect(response.headers.get("location")).toBe(
+        "http://localhost:3000/login?callbackUrl=%2Freceipt%2F123"
+      );
+    });
+
+    it("mengizinkan akses ke /contract jika memiliki user_token", () => {
+      const request = new NextRequest("http://localhost:3000/contract/123", {
+        headers: {
+          cookie: "user_token=mock_jwt_token_user_123",
+        },
+      });
+      const response = middleware(request);
+
+      expect(response.status).toBe(200);
+    });
+
+    it("mengizinkan akses ke /receipt jika memiliki partner_token", () => {
+      const request = new NextRequest("http://localhost:3000/receipt/123", {
+        headers: {
+          cookie: "partner_token=mock_partner_token_456",
+        },
+      });
+      const response = middleware(request);
+
+      expect(response.status).toBe(200);
+    });
+
+    it("mengizinkan akses ke /contract jika memiliki admin_token valid", () => {
+      const request = new NextRequest("http://localhost:3000/contract/123", {
+        headers: {
+          cookie: "admin_token=kospasti_admin_authenticated",
+        },
+      });
+      const response = middleware(request);
+
+      expect(response.status).toBe(200);
+    });
+  });
+
+  describe("Proteksi Endpoint API User (/api/user/*)", () => {
+    it("menolak akses ke /api/user/* dan mengembalikan 401 jika tidak ada user_token", () => {
+      const request = new NextRequest("http://localhost:3000/api/user/profile");
+      const response = middleware(request);
+
+      expect(response.status).toBe(401);
+    });
+
+    it("mengizinkan akses ke /api/user/* jika user_token disertakan", () => {
+      const request = new NextRequest("http://localhost:3000/api/user/profile", {
+        headers: {
+          cookie: "user_token=mock_jwt_token_user_123",
+        },
+      });
+      const response = middleware(request);
+
+      expect(response.status).toBe(200);
+    });
+  });
+
+  describe("Proteksi Endpoint API Chat (/api/chat/*)", () => {
+    it("menolak akses ke /api/chat/* dan mengembalikan 401 jika tidak ada token sama sekali", () => {
+      const request = new NextRequest("http://localhost:3000/api/chat/rooms");
+      const response = middleware(request);
+
+      expect(response.status).toBe(401);
+    });
+
+    it("mengizinkan akses ke /api/chat/* jika memiliki user_token", () => {
+      const request = new NextRequest("http://localhost:3000/api/chat/rooms", {
+        headers: {
+          cookie: "user_token=mock_jwt_token_user_123",
+        },
+      });
+      const response = middleware(request);
+
+      expect(response.status).toBe(200);
+    });
+
+    it("mengizinkan akses ke /api/chat/* jika memiliki partner_token", () => {
+      const request = new NextRequest("http://localhost:3000/api/chat/rooms", {
+        headers: {
+          cookie: "partner_token=mock_partner_token_456",
+        },
+      });
+      const response = middleware(request);
+
+      expect(response.status).toBe(200);
+    });
+
+    it("mengizinkan akses ke /api/chat/* jika memiliki admin_token valid", () => {
+      const request = new NextRequest("http://localhost:3000/api/chat/rooms", {
+        headers: {
+          cookie: "admin_token=kospasti_admin_authenticated",
         },
       });
       const response = middleware(request);

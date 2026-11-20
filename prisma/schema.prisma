@@ -157,6 +157,8 @@ model Booking {
   @@index([property_id])
   @@index([user_id])
   @@index([status])
+  @@index([user_id, status])
+  @@index([property_id, status])
 }
 
 model User {

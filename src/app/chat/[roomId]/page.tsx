@@ -48,7 +48,27 @@ export default function StudentChatRoomPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isSending, setIsSending] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
+  const [viewportHeight, setViewportHeight] = useState<number | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (typeof window === "undefined" || !window.visualViewport) return;
+
+    const updateViewportHeight = () => {
+      if (window.visualViewport) {
+        setViewportHeight(window.visualViewport.height);
+        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+      }
+    };
+
+    window.visualViewport.addEventListener("resize", updateViewportHeight);
+    window.visualViewport.addEventListener("scroll", updateViewportHeight);
+
+    return () => {
+      window.visualViewport?.removeEventListener("resize", updateViewportHeight);
+      window.visualViewport?.removeEventListener("scroll", updateViewportHeight);
+    };
+  }, []);
 
   const fetchMessages = async (silent = false) => {
     if (!silent) setIsLoading(true);
@@ -177,7 +197,15 @@ export default function StudentChatRoomPage() {
 
   return (
     <div className="max-w-3xl mx-auto py-4 sm:py-6 px-3 sm:px-4">
-      <div className="bg-white dark:bg-slate-900 rounded-2xl sm:rounded-3xl border border-slate-200/80 dark:border-slate-800 shadow-float overflow-hidden flex flex-col h-[82vh]">
+      <div
+        style={{
+          height:
+            viewportHeight && viewportHeight < 600
+              ? `${viewportHeight - 24}px`
+              : undefined,
+        }}
+        className="bg-white dark:bg-slate-900 rounded-2xl sm:rounded-3xl border border-slate-200/80 dark:border-slate-800 shadow-float overflow-hidden flex flex-col h-[calc(100dvh-5rem)] sm:h-[82vh]"
+      >
         {/* Top Header */}
         <div className="p-3.5 sm:px-5 border-b border-slate-100 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md flex items-center justify-between gap-3 shrink-0">
           <div className="flex items-center gap-3">
@@ -291,6 +319,11 @@ export default function StudentChatRoomPage() {
             type="text"
             value={inputText}
             onChange={(e) => setInputText(e.target.value)}
+            onFocus={() => {
+              setTimeout(() => {
+                messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+              }, 250);
+            }}
             placeholder="Tulis pesan untuk pengelola kos..."
             className="flex-1 px-4 py-2.5 text-xs sm:text-sm rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500"
           />

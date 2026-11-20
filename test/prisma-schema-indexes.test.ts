@@ -14,13 +14,15 @@ describe("Prisma Schema Index Definitions", () => {
     expect(propertyBlock).toContain("@@index([status])");
   });
 
-  it("should have index on Booking property_id, user_id, and status", () => {
+  it("should have index on Booking property_id, user_id, status, and composite indexes", () => {
     const bookingMatch = schemaContent.match(/model Booking \{([\s\S]*?)\n\}/);
     expect(bookingMatch).toBeTruthy();
     const bookingBlock = bookingMatch ? bookingMatch[1] : "";
     expect(bookingBlock).toContain("@@index([property_id])");
     expect(bookingBlock).toContain("@@index([user_id])");
     expect(bookingBlock).toContain("@@index([status])");
+    expect(bookingBlock).toContain("@@index([user_id, status])");
+    expect(bookingBlock).toContain("@@index([property_id, status])");
   });
 
   it("should have index on RoomType property_id", () => {
