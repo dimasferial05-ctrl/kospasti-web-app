@@ -58,9 +58,20 @@ export function isIrisProduction(): boolean {
 }
 
 export function isIrisSimulation(): boolean {
-  // Jika secara eksplisit diaktifkan atau jika API key belum disetel, gunakan mode simulasi
+  // Guard Keamanan Finansial: Cegah Fail-Open di Lingkungan Produksi
+  if (process.env.NODE_ENV === "production") {
+    if (process.env.IRIS_SIMULATION === "true") {
+      throw new Error("FATAL: Mode simulasi IRIS_SIMULATION dilarang aktif pada mode produksi!");
+    }
+    if (!process.env.IRIS_API_KEY?.trim()) {
+      throw new Error("FATAL: IRIS_API_KEY wajib dikonfigurasi pada mode produksi!");
+    }
+    return false;
+  }
+
+  // Lingkungan non-produksi (development / test)
   if (process.env.IRIS_SIMULATION === "true") return true;
-  if (!process.env.IRIS_API_KEY) return true;
+  if (!process.env.IRIS_API_KEY?.trim()) return true;
   return false;
 }
 
@@ -78,6 +89,16 @@ export async function createDisbursement(
   params: CreateDisbursementParams
 ): Promise<CreateDisbursementResult> {
   const { payoutId, amount, bankName, accountNumber, accountHolder, notes, ownerEmail } = params;
+
+  // Guard Keamanan Finansial Produksi: Pastikan API Key ada & simulasi dilarang di produksi (Fail-Closed)
+  if (process.env.NODE_ENV === "production") {
+    if (process.env.IRIS_SIMULATION === "true") {
+      throw new Error("FATAL: Mode simulasi IRIS_SIMULATION dilarang aktif pada mode produksi!");
+    }
+    if (!process.env.IRIS_API_KEY?.trim()) {
+      throw new Error("FATAL: IRIS_API_KEY wajib dikonfigurasi pada mode produksi!");
+    }
+  }
 
   if (!payoutId || !amount || amount <= 0 || !bankName || !accountNumber || !accountHolder) {
     return {
