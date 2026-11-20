@@ -25,6 +25,7 @@ export interface PropertyGalleryViewerProps {
   hasVideo?: boolean;
   isLightboxOpen: boolean;
   lightboxIndex: number;
+  setLightboxIndex?: React.Dispatch<React.SetStateAction<number>>;
   openLightbox: (index: number) => void;
   closeLightbox: () => void;
   prevLightbox: () => void;
@@ -45,6 +46,7 @@ export function PropertyGalleryViewer({
   hasVideo = false,
   isLightboxOpen,
   lightboxIndex,
+  setLightboxIndex,
   openLightbox,
   closeLightbox,
   prevLightbox,
@@ -207,27 +209,24 @@ export function PropertyGalleryViewer({
           )}
         </div>
 
-        {/* Thumbnail Strip Selector */}
-        {photoList.length > 1 && (
-          <div className="bg-slate-900/90 border-t border-slate-800 p-2.5 sm:p-3 overflow-x-auto flex items-center gap-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-            {photoList.map((photo, idx) => (
+        {/* Thumbnails Bar (Hanya di mode PHOTO) */}
+        {mediaMode === "PHOTO" && photoList.length > 1 && (
+          <div className="bg-slate-950 border-t border-slate-900 p-3 flex items-center gap-2.5 overflow-x-auto scrollbar-none">
+            {photoList.map((item, idx) => (
               <button
                 key={idx}
                 type="button"
-                onClick={() => {
-                  setActiveIndex(idx);
-                  setMediaMode("PHOTO");
-                }}
+                onClick={() => setActiveIndex(idx)}
                 aria-label={`Pilih foto ${idx + 1}`}
-                className={`relative w-16 h-12 sm:w-20 sm:h-14 rounded-xl overflow-hidden shrink-0 border-2 transition-all cursor-pointer ${
-                  activeIndex === idx && mediaMode === "PHOTO"
-                    ? "border-emerald-500 ring-2 ring-emerald-500/30 scale-105"
+                className={`relative w-16 h-16 sm:w-20 sm:h-20 shrink-0 rounded-xl overflow-hidden border-2 transition-all cursor-pointer ${
+                  activeIndex === idx
+                    ? "border-emerald-500 ring-2 ring-emerald-500/50 opacity-100 scale-102"
                     : "border-slate-800 opacity-60 hover:opacity-100"
                 }`}
               >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
-                  src={photo.url}
+                  src={item.url}
                   alt={`Thumbnail ${idx + 1}`}
                   className="w-full h-full object-cover"
                 />
@@ -237,55 +236,87 @@ export function PropertyGalleryViewer({
         )}
       </div>
 
-      {/* Lightbox Modal */}
+      {/* Lightbox Modal Fullscreen */}
       {isLightboxOpen && (
-        <div
-          className="fixed inset-0 z-[100] bg-black/95 flex items-center justify-center p-4 animate-in fade-in duration-200"
-          onClick={closeLightbox}
-        >
-          <button
-            type="button"
-            onClick={closeLightbox}
-            className="absolute top-4 right-4 p-2 rounded-full bg-slate-800/80 hover:bg-slate-800 text-white transition-colors cursor-pointer z-20"
-            title="Tutup (Esc)"
-          >
-            <X className="w-6 h-6" />
-          </button>
+        <div className="fixed inset-0 z-[100] bg-black/95 flex flex-col justify-between animate-in fade-in duration-200 backdrop-blur-sm select-none">
+          {/* Lightbox Header */}
+          <div className="px-4 py-3 flex items-center justify-between text-white z-10 bg-gradient-to-b from-black/80 to-transparent">
+            <div className="flex items-center gap-2">
+              <Camera className="w-4 h-4 text-emerald-400" />
+              <span className="text-xs sm:text-sm font-semibold">
+                Foto {lightboxIndex + 1} dari {photoList.length}
+              </span>
+            </div>
+            <button
+              type="button"
+              onClick={closeLightbox}
+              className="p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors cursor-pointer"
+              aria-label="Tutup Fullscreen"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
 
-          <div
-            className="relative max-w-5xl max-h-[90vh] w-full flex items-center justify-center"
-            onClick={(e) => e.stopPropagation()}
-          >
+          {/* Lightbox Main Image Viewer */}
+          <div className="relative flex-1 flex items-center justify-center p-4">
             {photoList[lightboxIndex] && (
               /* eslint-disable-next-line @next/next/no-img-element */
               <img
                 src={photoList[lightboxIndex].url}
-                alt={`Lightbox Foto ${lightboxIndex + 1}`}
-                className="max-h-[85vh] max-w-full object-contain rounded-2xl shadow-2xl"
+                alt={`${propertyName} - Foto ${lightboxIndex + 1}`}
+                className="max-h-[75vh] sm:max-h-[80vh] max-w-full object-contain rounded-lg shadow-2xl transition-all duration-200"
               />
             )}
 
+            {/* Prev / Next Arrows */}
             {photoList.length > 1 && (
               <>
                 <button
                   type="button"
                   onClick={prevLightbox}
-                  className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 p-2.5 rounded-full bg-black/60 hover:bg-black/90 text-white transition-all cursor-pointer"
-                  title="Foto sebelumnya"
+                  aria-label="Foto sebelumnya"
+                  className="absolute left-3 sm:left-6 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-white/15 hover:bg-white/30 text-white flex items-center justify-center backdrop-blur-md transition-all shadow-lg cursor-pointer"
                 >
-                  <ChevronLeft className="w-6 h-6" />
+                  <ChevronLeft className="w-7 h-7" />
                 </button>
                 <button
                   type="button"
                   onClick={nextLightbox}
-                  className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 p-2.5 rounded-full bg-black/60 hover:bg-black/90 text-white transition-all cursor-pointer"
-                  title="Foto berikutnya"
+                  aria-label="Foto berikutnya"
+                  className="absolute right-3 sm:right-6 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-white/15 hover:bg-white/30 text-white flex items-center justify-center backdrop-blur-md transition-all shadow-lg cursor-pointer"
                 >
-                  <ChevronRight className="w-6 h-6" />
+                  <ChevronRight className="w-7 h-7" />
                 </button>
               </>
             )}
           </div>
+
+          {/* Lightbox Bottom Thumbnails Slider */}
+          {photoList.length > 1 && (
+            <div className="bg-black/80 border-t border-white/10 p-3 flex items-center justify-center gap-2 overflow-x-auto scrollbar-none z-10">
+              {photoList.map((item, idx) => (
+                <button
+                  key={idx}
+                  type="button"
+                  onClick={() =>
+                    setLightboxIndex ? setLightboxIndex(idx) : openLightbox(idx)
+                  }
+                  className={`relative w-14 h-14 rounded-lg overflow-hidden border-2 transition-all cursor-pointer shrink-0 ${
+                    lightboxIndex === idx
+                      ? "border-emerald-500 scale-105 opacity-100 ring-2 ring-emerald-500/50"
+                      : "border-white/20 opacity-40 hover:opacity-100"
+                  }`}
+                >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={item.url}
+                    alt={`Thumb ${idx + 1}`}
+                    className="w-full h-full object-cover"
+                  />
+                </button>
+              ))}
+            </div>
+          )}
         </div>
       )}
     </div>

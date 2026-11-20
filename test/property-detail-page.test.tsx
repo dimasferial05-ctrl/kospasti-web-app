@@ -193,8 +193,7 @@ describe("Property Detail Page Component (/kos/[id])", () => {
   });
 
   it("memiliki fungsi handleBookingSubmit untuk memvalidasi tanggal masuk, memanggil API booking, dan redirect ke checkout", () => {
-    const filePath = path.resolve(__dirname, "../src/app/kos/[id]/page.tsx");
-    const content = fs.readFileSync(filePath, "utf-8");
+    const content = getFullPropertyDetailContent();
 
     // Router & submit state setup
     expect(content).toContain("useRouter");
@@ -220,8 +219,7 @@ describe("Property Detail Page Component (/kos/[id])", () => {
   });
 
   it("memiliki layout Split-View (Epic 6) untuk tampilan desktop dan sticky booking card", () => {
-    const filePath = path.resolve(__dirname, "../src/app/kos/[id]/page.tsx");
-    const content = fs.readFileSync(filePath, "utf-8");
+    const content = getFullPropertyDetailContent();
 
     // Acceptance Criteria 1 & 2: Kontainer utama dan Split-View flex-row pada desktop
     expect(content).toContain("max-w-7xl mx-auto min-h-screen bg-slate-50");

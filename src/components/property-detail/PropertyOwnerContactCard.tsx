@@ -2,7 +2,7 @@
 
 import React from "react";
 import Image from "next/image";
-import { User, MessageCircle, BadgeCheck } from "lucide-react";
+import { User, MessageCircle, BadgeCheck, ArrowRight } from "lucide-react";
 import { formatWhatsAppNumber } from "@/lib/whatsapp";
 import { buildSupportWhatsAppUrl } from "@/components/support/CustomerSupportWidget";
 
@@ -77,7 +77,7 @@ export function PropertyOwnerContactCard({ property }: PropertyOwnerContactCardP
 
       {/* Akses Cepat Bantuan CS KosPasti */}
       <div className="pt-2.5 mt-1 border-t border-slate-100 dark:border-slate-800/60 flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
-        <span>Butuh bantuan terkait kos ini?</span>
+        <span className="text-[11px]">Butuh konfirmasi atau bantuan tim KosPasti?</span>
         <a
           href={buildSupportWhatsAppUrl({
             propertyName: property.name,
@@ -85,10 +85,10 @@ export function PropertyOwnerContactCard({ property }: PropertyOwnerContactCardP
           })}
           target="_blank"
           rel="noopener noreferrer"
-          className="text-emerald-600 dark:text-emerald-400 font-semibold hover:underline inline-flex items-center gap-1"
+          className="font-bold text-emerald-600 hover:text-emerald-700 dark:text-emerald-400 dark:hover:text-emerald-300 inline-flex items-center gap-1 transition-colors text-xs shrink-0"
         >
-          <MessageCircle className="w-3.5 h-3.5" />
-          <span>CS KosPasti</span>
+          <span>Chat CS</span>
+          <ArrowRight className="w-3.5 h-3.5" />
         </a>
       </div>
     </div>

@@ -13,6 +13,7 @@ export interface PropertyStickyBottomBarProps {
     available_rooms: number;
   };
   selectedRoomType: RoomTypeItem | null;
+  formattedPrice?: string;
   isCheckingAuth: boolean;
   onOpenBookingModal: () => void;
   isOpeningChat?: boolean;
@@ -24,6 +25,7 @@ export interface PropertyStickyBottomBarProps {
 export function PropertyStickyBottomBar({
   property,
   selectedRoomType,
+  formattedPrice: formattedPriceProp,
   isCheckingAuth,
   onOpenBookingModal,
   isOpeningChat = false,
@@ -41,45 +43,49 @@ export function PropertyStickyBottomBar({
     ? selectedRoomType.price_per_month
     : property.price_per_month;
 
-  const currentAvailableRooms = selectedRoomType
-    ? selectedRoomType.available_rooms
-    : property.available_rooms;
+  const formattedPrice =
+    formattedPriceProp || `Rp ${currentPrice.toLocaleString("id-ID")}`;
 
   return (
-    <div className="fixed bottom-0 left-0 w-full bg-white dark:bg-slate-900 border-t border-slate-200/90 dark:border-slate-800 p-4 z-40 lg:static lg:bg-transparent lg:border-none lg:p-0">
-      <div className="w-full flex flex-col gap-3">
-        {/* Info Harga & Sisa Kamar (Mobile Only di bar) */}
-        <div className="flex items-center justify-between lg:hidden">
-          <div>
-            <p className="text-[11px] text-slate-500 dark:text-slate-400">Harga Sewa</p>
-            <p className="text-base font-extrabold text-emerald-600 dark:text-emerald-400">
-              Rp {currentPrice.toLocaleString("id-ID")}{" "}
-              <span className="text-xs font-normal text-slate-500 dark:text-slate-400">/ bulan</span>
-            </p>
-          </div>
-          <div className="text-right">
-            <span
-              className={`inline-block px-2.5 py-1 rounded-full text-xs font-bold ${
-                isFull
-                  ? "bg-rose-100 text-rose-700 dark:bg-rose-950/80 dark:text-rose-300"
-                  : "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/80 dark:text-emerald-300"
-              }`}
-            >
-              {isFull ? "Penuh" : `Sisa ${currentAvailableRooms} Kamar`}
+    <div className="fixed bottom-0 left-0 w-full bg-white dark:bg-slate-900 border-t border-slate-200/80 dark:border-slate-800 p-4 pb-[max(1rem,env(safe-area-inset-bottom))] flex justify-between items-center z-[60] lg:z-10 lg:static lg:block lg:p-6 lg:border lg:border-slate-200/60 dark:lg:border-slate-800 lg:rounded-2xl lg:shadow-soft lg:sticky lg:top-32">
+      <div className="max-w-7xl mx-auto lg:max-w-none w-full px-2 sm:px-4 lg:px-0 flex justify-between lg:flex-col lg:gap-4 items-center lg:items-start">
+        <div className="lg:w-full">
+          <p className="text-[10px] lg:text-xs text-slate-400 font-semibold uppercase tracking-wider">
+            {selectedRoomType ? `Harga (${selectedRoomType.name})` : "Harga per bulan"}
+          </p>
+          <p className="text-lg lg:text-3xl font-black text-slate-900 dark:text-white mt-0.5">
+            {formattedPrice}{" "}
+            <span className="text-xs lg:text-sm font-medium text-slate-500 dark:text-slate-400">
+              / bln
             </span>
-          </div>
+          </p>
+          {isFull && (
+            <p className="text-[11px] lg:text-xs text-rose-500 font-semibold mt-1">
+              Mohon maaf, tipe kamar ini telah penuh.
+            </p>
+          )}
         </div>
 
-        {/* Warning Kamar Penuh */}
-        {isFull && (
-          <p className="text-xs text-rose-600 dark:text-rose-400 font-semibold bg-rose-50 dark:bg-rose-950/50 p-2.5 rounded-xl border border-rose-200 dark:border-rose-900/60 text-center">
-            Mohon maaf, tipe kamar ini telah penuh.
-          </p>
-        )}
+        <div className="flex items-center gap-2 w-auto lg:w-full">
+          {/* Tombol Chat Langsung dengan Masking Privasi di Mobile */}
+          {onOpenDirectChat && (
+            <button
+              type="button"
+              onClick={onOpenDirectChat}
+              disabled={isOpeningChat}
+              className="lg:hidden p-2.5 rounded-xl border border-emerald-200 dark:border-emerald-800 bg-emerald-50/60 dark:bg-emerald-950/40 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 transition-colors shrink-0 flex items-center justify-center cursor-pointer shadow-2xs"
+              title="Tanya Pengelola via Chat Langsung"
+              aria-label="Tanya Pengelola via Chat Langsung"
+            >
+              {isOpeningChat ? (
+                <Loader2 className="w-5 h-5 animate-spin text-emerald-600" />
+              ) : (
+                <MessageSquare className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+              )}
+            </button>
+          )}
 
-        {/* Action Buttons */}
-        <div className="flex items-center gap-2">
-          {/* CS WhatsApp Support Link (Mobile) */}
+          {/* Tombol Bantuan CS WhatsApp di Mobile Bottom Bar */}
           <a
             href={buildSupportWhatsAppUrl({
               propertyName: property.name,
@@ -94,7 +100,6 @@ export function PropertyStickyBottomBar({
             <MessageCircle className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
           </a>
 
-          {/* Tombol Survei (Mobile) */}
           {onOpenVisitModal && (
             <button
               type="button"
@@ -104,8 +109,16 @@ export function PropertyStickyBottomBar({
                   ? "border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300"
                   : "border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-100"
               }`}
-              title={existingVisit ? "Survei Sudah Dijadwalkan" : "Jadwalkan Survei Lokasi"}
-              aria-label={existingVisit ? "Survei Sudah Dijadwalkan" : "Jadwalkan Survei Lokasi"}
+              title={
+                existingVisit
+                  ? "Survei Sudah Dijadwalkan"
+                  : "Jadwalkan Survei Lokasi"
+              }
+              aria-label={
+                existingVisit
+                  ? "Survei Sudah Dijadwalkan"
+                  : "Jadwalkan Survei Lokasi"
+              }
             >
               {existingVisit ? (
                 <Check className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
@@ -118,7 +131,6 @@ export function PropertyStickyBottomBar({
             </button>
           )}
 
-          {/* Tombol Utama: Amankan Kamar */}
           <button
             type="button"
             disabled={isFull || isCheckingAuth}
@@ -183,6 +195,38 @@ export function PropertyStickyBottomBar({
             )}
           </button>
         )}
+
+        {/* Jaminan KosPasti */}
+        <div className="hidden lg:flex flex-col gap-2 pt-3 border-t border-slate-100 dark:border-slate-800 text-[11px] text-slate-500 dark:text-slate-400 w-full">
+          <div className="flex items-center gap-2">
+            <Check className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
+            <span>Pasti Sesuai Deskripsi &amp; Foto</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <Check className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
+            <span>Tanpa Biaya Tambahan Tersembunyi</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <Check className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
+            <span>Konfirmasi Langsung Pemilik</span>
+          </div>
+        </div>
+
+        {/* Tombol Bantuan CS di Desktop Sticky Card */}
+        <div className="hidden lg:block w-full pt-1">
+          <a
+            href={buildSupportWhatsAppUrl({
+              propertyName: property.name,
+              propertyId: property.id,
+            })}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="w-full py-2 px-3 rounded-xl border border-slate-200/90 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/80 text-slate-700 dark:text-slate-300 text-xs font-semibold flex items-center justify-center gap-2 transition-all duration-200 cursor-pointer shadow-2xs hover:shadow-soft"
+          >
+            <MessageCircle className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+            <span>Bantuan CS KosPasti</span>
+          </a>
+        </div>
       </div>
     </div>
   );

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef } from "react";
+import React from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { AlertCircle, User, ArrowRight, X } from "lucide-react";
@@ -47,6 +47,7 @@ export function PropertyBookingModal({
   onClosePendingNotice,
 }: PropertyBookingModalProps) {
   const router = useRouter();
+
   const bookingModalRef = useFocusTrap<HTMLDivElement>({
     isOpen,
     onClose: () => {
@@ -55,6 +56,7 @@ export function PropertyBookingModal({
       setDateValidationError(false);
     },
   });
+
   const pendingModalRef = useFocusTrap<HTMLDivElement>({
     isOpen: pendingBookingNotice.isOpen,
     onClose: onClosePendingNotice,
@@ -62,7 +64,7 @@ export function PropertyBookingModal({
 
   return (
     <>
-      {/* 1. MODAL BOOKING */}
+      {/* 4. BOOKING FORM MODAL */}
       {isOpen && (
         <div
           className="fixed inset-0 z-[60] bg-black/60 flex items-end sm:items-center justify-center p-0 sm:p-4 animate-in fade-in duration-200"
@@ -83,10 +85,16 @@ export function PropertyBookingModal({
             className="bg-white dark:bg-slate-900 w-full max-w-md p-6 rounded-t-2xl sm:rounded-2xl shadow-xl border border-transparent dark:border-slate-800 flex flex-col gap-4 animate-in zoom-in-95 duration-200"
           >
             <div>
-              <h3 id="booking-modal-title" className="text-lg font-bold text-slate-900 dark:text-white">
+              <h3
+                id="booking-modal-title"
+                className="text-lg font-bold text-slate-900 dark:text-white"
+              >
                 Konfirmasi Pemesanan
               </h3>
-              <p id="booking-modal-desc" className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+              <p
+                id="booking-modal-desc"
+                className="text-xs text-slate-500 dark:text-slate-400 mt-0.5"
+              >
                 Pilih rencana tanggal mulai masuk untuk kamar kos ini.
               </p>
             </div>
@@ -129,18 +137,22 @@ export function PropertyBookingModal({
                       alt={studentName || "Foto Profil"}
                       fill
                       className="object-cover rounded-full"
-                      unoptimized={userAvatar.startsWith("blob:") || userAvatar.startsWith("data:")}
+                      unoptimized={
+                        userAvatar.startsWith("blob:") || userAvatar.startsWith("data:")
+                      }
                     />
                   ) : (
                     <span>
-                      {studentName
-                        ? studentName
-                            .split(" ")
-                            .filter(Boolean)
-                            .slice(0, 2)
-                            .map((w) => w[0].toUpperCase())
-                            .join("")
-                        : <User className="w-4 h-4" />}
+                      {studentName ? (
+                        studentName
+                          .split(" ")
+                          .filter(Boolean)
+                          .slice(0, 2)
+                          .map((w) => w[0].toUpperCase())
+                          .join("")
+                      ) : (
+                        <User className="w-4 h-4" />
+                      )}
                     </span>
                   )}
                 </div>
@@ -169,8 +181,8 @@ export function PropertyBookingModal({
                   <button
                     type="button"
                     onClick={() => setBookingError(null)}
-                    className="text-rose-500 hover:text-rose-700 p-0.5 rounded cursor-pointer shrink-0"
-                    aria-label="Tutup pesan error"
+                    className="text-rose-500 hover:text-rose-700 dark:text-rose-400 dark:hover:text-rose-200 p-0.5 rounded transition-colors"
+                    aria-label="Tutup pemberitahuan error"
                   >
                     <X className="w-3.5 h-3.5" />
                   </button>
@@ -178,37 +190,28 @@ export function PropertyBookingModal({
               )}
 
               <div>
-                <label
-                  htmlFor="move-in-date-input"
-                  className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5"
-                >
+                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
                   Rencana Tanggal Masuk <span className="text-rose-500">*</span>
                 </label>
                 <input
-                  id="move-in-date-input"
                   type="date"
                   min={minDate}
                   value={moveInDate}
                   onChange={(e) => {
                     setMoveInDate(e.target.value);
-                    if (e.target.value) {
-                      setDateValidationError(false);
-                      setBookingError(null);
-                    }
+                    if (dateValidationError) setDateValidationError(false);
+                    if (bookingError) setBookingError(null);
                   }}
-                  className={`w-full p-2.5 rounded-xl border text-sm bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:outline-none focus:ring-2 transition-all ${
-                    dateValidationError
-                      ? "border-rose-500 focus:ring-rose-500/50 bg-rose-50/30"
-                      : "border-slate-300 dark:border-slate-700 focus:ring-emerald-500/50"
-                  }`}
                   required
+                  className={`w-full px-3.5 py-2.5 text-sm border rounded-xl focus:outline-none transition-colors ${
+                    dateValidationError
+                      ? "border-rose-500 focus:ring-2 focus:ring-rose-500/40 text-slate-800 dark:text-white bg-white dark:bg-slate-800"
+                      : "border-slate-300 dark:border-slate-700 focus:ring-2 focus:ring-emerald-500 text-slate-800 dark:text-white bg-white dark:bg-slate-800"
+                  }`}
                 />
-                <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1.5">
-                  Maksimal pemesanan dapat dilakukan untuk 30 hari ke depan.
-                </p>
               </div>
 
-              <div className="flex gap-2.5 pt-2">
+              <div className="flex gap-3 mt-3">
                 <button
                   type="button"
                   onClick={() => {
@@ -216,16 +219,15 @@ export function PropertyBookingModal({
                     setBookingError(null);
                     setDateValidationError(false);
                   }}
-                  disabled={isSubmitting}
-                  className="w-1/2 py-2.5 px-4 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-semibold transition-colors cursor-pointer text-sm"
+                  className="w-full py-2.5 px-4 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-semibold transition-colors cursor-pointer text-sm"
                 >
                   Batal
                 </button>
                 <button
                   type="button"
-                  onClick={onSubmit}
                   disabled={isSubmitting}
-                  className="w-1/2 py-2.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold shadow-soft hover:shadow-float active:scale-95 disabled:bg-slate-300 dark:disabled:bg-slate-700 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-none transition-all duration-200 cursor-pointer text-sm flex items-center justify-center gap-2"
+                  onClick={onSubmit}
+                  className="w-full py-2.5 px-4 rounded-xl bg-emerald-600 text-white font-semibold hover:bg-emerald-700 hover:-translate-y-0.5 hover:shadow-md active:translate-y-0 disabled:opacity-75 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-none transition-all duration-200 cursor-pointer text-sm flex items-center justify-center gap-2"
                 >
                   {isSubmitting ? "Memproses..." : "Lanjut Pembayaran"}
                 </button>
@@ -235,7 +237,7 @@ export function PropertyBookingModal({
         </div>
       )}
 
-      {/* 2. MODAL PERINGATAN PESANAN PENDING */}
+      {/* 5. MODAL PERINGATAN PESANAN PENDING (ANTI-SPAM BOOKING) */}
       {pendingBookingNotice.isOpen && (
         <div
           className="fixed inset-0 z-[70] bg-black/60 flex items-center justify-center p-4 animate-in fade-in duration-200"
@@ -256,7 +258,10 @@ export function PropertyBookingModal({
                 <AlertCircle className="w-5 h-5 text-amber-600 dark:text-amber-400" />
               </div>
               <div>
-                <h3 id="pending-booking-title" className="text-base font-bold text-slate-900 dark:text-white">
+                <h3
+                  id="pending-booking-title"
+                  className="text-base font-bold text-slate-900 dark:text-white"
+                >
                   Pesanan Masih Menunggu Pembayaran
                 </h3>
                 <p className="text-xs text-slate-500 dark:text-slate-400">
@@ -265,7 +270,10 @@ export function PropertyBookingModal({
               </div>
             </div>
 
-            <p id="pending-booking-desc" className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed bg-amber-50/70 dark:bg-amber-950/40 p-3.5 rounded-xl border border-amber-200/80 dark:border-amber-800">
+            <p
+              id="pending-booking-desc"
+              className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed bg-amber-50/70 dark:bg-amber-950/40 p-3.5 rounded-xl border border-amber-200/80 dark:border-amber-800"
+            >
               {pendingBookingNotice.message}
             </p>
 
