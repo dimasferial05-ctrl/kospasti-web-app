@@ -5,6 +5,7 @@ import {
   evaluateMidtransStatus,
 } from "@/lib/midtrans";
 import { fulfillPaidBooking } from "@/lib/payment-fulfillment";
+import { sendWhatsAppMessage } from "@/lib/whatsapp";
 
 export async function POST(request: Request) {
   try {
@@ -53,8 +54,97 @@ export async function POST(request: Request) {
       );
     }
 
-    // 2. Ambil data booking dari database beserta relasi terkait
+    // 2. Cek apakah ini transaksi tagihan sewa berkala (Invoice)
     const rawOrderId = String(order_id);
+    if (rawOrderId.startsWith("INV__") || rawOrderId.startsWith("INV-")) {
+      const invoiceKey = rawOrderId.includes("__")
+        ? rawOrderId.split("__")[1]
+        : rawOrderId;
+      const invoice = await prisma.invoice.findFirst({
+        where: {
+          OR: [
+            { id: invoiceKey },
+            { invoice_number: invoiceKey },
+            { invoice_number: rawOrderId },
+          ],
+        },
+        include: {
+          booking: {
+            include: { property: true, user: true },
+          },
+          owner: true,
+        },
+      });
+
+      if (!invoice) {
+        return NextResponse.json(
+          { status: "OK", message: "Invoice not found or acknowledged" },
+          { status: 200 }
+        );
+      }
+
+      if (invoice.status === "PAID") {
+        return NextResponse.json(
+          {
+            status: "OK",
+            message: "Invoice already marked as PAID (Idempotent OK)",
+          },
+          { status: 200 }
+        );
+      }
+
+      const evaluatedStatus = evaluateMidtransStatus(
+        transaction_status,
+        fraud_status
+      );
+
+      if (evaluatedStatus === "PAID") {
+        await prisma.invoice.update({
+          where: { id: invoice.id },
+          data: {
+            status: "PAID",
+            paid_at: new Date(),
+            payment_method: payment_type || "MIDTRANS",
+            payment_gateway_ref: transaction_id || null,
+          },
+        });
+
+        if (invoice.booking?.student_whatsapp) {
+          try {
+            await sendWhatsAppMessage({
+              to: invoice.booking.student_whatsapp,
+              message: `[KosPasti] Pembayaran sewa kos bulan ke-${invoice.month_period} untuk ${invoice.booking.property?.name || "Kos"} sebesar Rp ${invoice.total_amount.toLocaleString("id-ID")} telah berhasil diverifikasi. Terima kasih!`,
+            });
+          } catch (waErr) {
+            console.warn("[MIDTRANS WEBHOOK INVOICE WA ERROR]:", waErr);
+          }
+        }
+
+        return NextResponse.json(
+          { status: "OK", message: "Invoice payment processed successfully" },
+          { status: 200 }
+        );
+      } else if (evaluatedStatus === "CANCELLED") {
+        await prisma.invoice.update({
+          where: { id: invoice.id },
+          data: { status: "CANCELLED" },
+        });
+        return NextResponse.json(
+          { status: "OK", message: "Invoice marked as CANCELLED" },
+          { status: 200 }
+        );
+      }
+
+      return NextResponse.json(
+        {
+          status: "OK",
+          message: `Invoice status updated to ${evaluatedStatus}`,
+        },
+        { status: 200 }
+      );
+    }
+
+    // 3. Ambil data booking dari database beserta relasi terkait
     const cleanBookingId = rawOrderId.includes("__")
       ? rawOrderId.split("__")[0]
       : rawOrderId;

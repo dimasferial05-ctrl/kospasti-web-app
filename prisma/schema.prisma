@@ -25,6 +25,7 @@ model Owner {
   payouts         Payout[]
   notifications   Notification[]
   chat_rooms      ChatRoom[]
+  invoices        Invoice[]
 }
 
 model Property {
@@ -153,6 +154,7 @@ model Booking {
   review                 Review?
   payout                 Payout?
   chat_rooms             ChatRoom[]
+  invoices               Invoice[]
 
   @@index([property_id])
   @@index([user_id])
@@ -178,6 +180,7 @@ model User {
   notifications    Notification[]
   visits           VisitSchedule[]
   chat_rooms       ChatRoom[]
+  invoices         Invoice[]
 }
 
 model SavedProperty {
@@ -358,6 +361,47 @@ model ChatMessage {
   created_at  DateTime  @default(now())
 
   @@index([room_id, created_at])
+}
+
+model Invoice {
+  id                  String    @id @default(uuid())
+  invoice_number      String    @unique
+  booking_id          String
+  booking             Booking   @relation(fields: [booking_id], references: [id], onDelete: Cascade)
+  owner_id            String
+  owner               Owner     @relation(fields: [owner_id], references: [id], onDelete: Cascade)
+  user_id             String?
+  user                User?     @relation(fields: [user_id], references: [id], onDelete: SetNull)
+
+  month_period        Int       @default(2) // Bulan sewa ke-2, ke-3, dst.
+  billing_date        DateTime  @default(now())
+  due_date            DateTime  // Tanggal jatuh tempo pembayaran
+
+  amount              Int       // Tarif sewa bulanan
+  platform_fee        Int       @default(0) // Komisi 3% KosPasti
+  service_fee         Int       @default(5000) // Biaya layanan KosPasti
+  total_amount        Int       // amount + service_fee
+  net_owner_amount    Int       @default(0) // amount - platform_fee
+
+  status              String    @default("PENDING") // PENDING, PAID, OVERDUE, CANCELLED
+  snap_token          String?
+  snap_redirect_url   String?   // Direct Snap Pay URL
+  paid_at             DateTime?
+  payment_method      String?
+  payment_gateway_ref String?
+
+  reminder_h7_sent_at DateTime?
+  reminder_h3_sent_at DateTime?
+
+  created_at          DateTime  @default(now())
+  updated_at          DateTime  @updatedAt
+
+  @@index([booking_id])
+  @@index([owner_id])
+  @@index([user_id])
+  @@index([status])
+  @@index([due_date])
+  @@index([status, due_date])
 }
 
 
