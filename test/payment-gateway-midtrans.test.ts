@@ -323,7 +323,7 @@ describe("Integrasi Payment Gateway Midtrans, Monetisasi & Webhook (Issue #394)"
       expect(data.message).toBe("Payment processed successfully");
     });
 
-    it("memproses cancel/expire: mengubah status booking jadi CANCELLED", async () => {
+    it("memproses cancel/expire: mengubah status booking jadi CANCELLED dan mengembalikan kuota kamar", async () => {
       const orderId = "BKG-EXPIRED-001";
       const statusCode = "202";
       const grossAmount = "1505000";
@@ -336,12 +336,32 @@ describe("Integrasi Payment Gateway Midtrans, Monetisasi & Webhook (Issue #394)"
       vi.spyOn(prisma.booking, "findUnique").mockResolvedValueOnce({
         id: orderId,
         status: "PENDING",
+        property_id: "prop-1",
+        room_type_id: "room-type-1",
       } as unknown as never);
 
-      const updateSpy = vi.spyOn(prisma.booking, "update").mockResolvedValueOnce({
-        id: orderId,
-        status: "CANCELLED",
-      } as unknown as never);
+      const propertyUpdateSpy = vi.fn().mockResolvedValue({});
+      const roomTypeUpdateSpy = vi.fn().mockResolvedValue({});
+      const magicLinkUpdateSpy = vi.fn().mockResolvedValue({ count: 1 });
+      const bookingUpdateManySpy = vi.fn().mockResolvedValue({ count: 1 });
+
+      vi.spyOn(prisma, "$transaction").mockImplementation(async (callback) => {
+        const txMock = {
+          booking: {
+            updateMany: bookingUpdateManySpy,
+          },
+          property: {
+            update: propertyUpdateSpy,
+          },
+          roomType: {
+            update: roomTypeUpdateSpy,
+          },
+          magicLink: {
+            updateMany: magicLinkUpdateSpy,
+          },
+        };
+        return await (callback as any)(txMock);
+      });
 
       const payload = {
         order_id: orderId,
@@ -365,12 +385,137 @@ describe("Integrasi Payment Gateway Midtrans, Monetisasi & Webhook (Issue #394)"
       expect(res.status).toBe(200);
       expect(data.status).toBe("OK");
       expect(data.message).toContain("CANCELLED");
-      expect(updateSpy).toHaveBeenCalledWith(
-        expect.objectContaining({
-          where: { id: orderId },
-          data: expect.objectContaining({ status: "CANCELLED" }),
-        })
-      );
+      expect(data.message).toContain("room inventory restored");
+
+      expect(bookingUpdateManySpy).toHaveBeenCalledWith({
+        where: { id: orderId, status: "PENDING" },
+        data: expect.objectContaining({
+          status: "CANCELLED",
+          cancellation_reason: "Midtrans payment expire",
+        }),
+      });
+
+      expect(propertyUpdateSpy).toHaveBeenCalledWith({
+        where: { id: "prop-1" },
+        data: { available_rooms: { increment: 1 } },
+      });
+
+      expect(roomTypeUpdateSpy).toHaveBeenCalledWith({
+        where: { id: "room-type-1" },
+        data: { available_rooms: { increment: 1 } },
+      });
+
+      expect(magicLinkUpdateSpy).toHaveBeenCalledWith({
+        where: { booking_id: orderId, is_used: false },
+        data: { is_used: true },
+      });
+    });
+
+    it("idempotency check cancel: mengembalikan 200 OK langsung jika booking sudah berstatus CANCELLED sebelumnya", async () => {
+      const orderId = "BKG-ALREADY-CANCELLED-001";
+      const statusCode = "202";
+      const grossAmount = "1505000";
+
+      const validSignature = crypto
+        .createHash("sha512")
+        .update(`${orderId}${statusCode}${grossAmount}${mockServerKey}`)
+        .digest("hex");
+
+      vi.spyOn(prisma.booking, "findUnique").mockResolvedValueOnce({
+        id: orderId,
+        status: "CANCELLED",
+        property_id: "prop-1",
+      } as unknown as never);
+
+      const transactionSpy = vi.spyOn(prisma, "$transaction");
+
+      const payload = {
+        order_id: orderId,
+        status_code: statusCode,
+        gross_amount: grossAmount,
+        signature_key: validSignature,
+        transaction_status: "cancel",
+        payment_type: "qris",
+        transaction_id: "trx-midtrans-cancel-1",
+      };
+
+      const req = new Request("http://localhost:3000/api/webhooks/payment", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      const res = await handleWebhook(req);
+      const data = await res.json();
+
+      expect(res.status).toBe(200);
+      expect(data.status).toBe("OK");
+      expect(data.message).toContain("already marked as CANCELLED (Idempotent OK)");
+      expect(transactionSpy).not.toHaveBeenCalled();
+    });
+
+    it("idempotency check cancel: tidak menambah stok kamar jika booking status berubah di tengah jalan (updateMany count = 0)", async () => {
+      const orderId = "BKG-RACE-CANCEL-001";
+      const statusCode = "202";
+      const grossAmount = "1505000";
+
+      const validSignature = crypto
+        .createHash("sha512")
+        .update(`${orderId}${statusCode}${grossAmount}${mockServerKey}`)
+        .digest("hex");
+
+      vi.spyOn(prisma.booking, "findUnique").mockResolvedValueOnce({
+        id: orderId,
+        status: "PENDING",
+        property_id: "prop-1",
+        room_type_id: "room-type-1",
+      } as unknown as never);
+
+      const propertyUpdateSpy = vi.fn();
+      const roomTypeUpdateSpy = vi.fn();
+      const bookingUpdateManySpy = vi.fn().mockResolvedValue({ count: 0 });
+
+      vi.spyOn(prisma, "$transaction").mockImplementation(async (callback) => {
+        const txMock = {
+          booking: {
+            updateMany: bookingUpdateManySpy,
+          },
+          property: {
+            update: propertyUpdateSpy,
+          },
+          roomType: {
+            update: roomTypeUpdateSpy,
+          },
+          magicLink: {
+            updateMany: vi.fn(),
+          },
+        };
+        return await (callback as any)(txMock);
+      });
+
+      const payload = {
+        order_id: orderId,
+        status_code: statusCode,
+        gross_amount: grossAmount,
+        signature_key: validSignature,
+        transaction_status: "expire",
+        payment_type: "qris",
+        transaction_id: "trx-midtrans-expire-2",
+      };
+
+      const req = new Request("http://localhost:3000/api/webhooks/payment", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      const res = await handleWebhook(req);
+      const data = await res.json();
+
+      expect(res.status).toBe(200);
+      expect(data.status).toBe("OK");
+      expect(propertyUpdateSpy).not.toHaveBeenCalled();
+      expect(roomTypeUpdateSpy).not.toHaveBeenCalled();
     });
   });
 });

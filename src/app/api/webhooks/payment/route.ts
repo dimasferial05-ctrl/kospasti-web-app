@@ -85,12 +85,22 @@ export async function POST(request: Request) {
       );
     }
 
-    // 3. Idempotency Check: Jika status pesanan sudah lunas (PAID/COMPLETED), hentikan pemrosesan
+    // 3. Idempotency Check: Jika status pesanan sudah lunas (PAID/COMPLETED) atau sudah CANCELLED, hentikan pemrosesan
     if (booking.status === "PAID" || booking.status === "COMPLETED") {
       return NextResponse.json(
         {
           status: "OK",
           message: "Transaction already fulfilled and marked as PAID (Idempotent OK)",
+        },
+        { status: 200 }
+      );
+    }
+
+    if (booking.status === "CANCELLED") {
+      return NextResponse.json(
+        {
+          status: "OK",
+          message: "Transaction already marked as CANCELLED (Idempotent OK)",
         },
         { status: 200 }
       );
@@ -121,17 +131,62 @@ export async function POST(request: Request) {
         { status: 200 }
       );
     } else if (evaluatedStatus === "CANCELLED") {
-      // Pembayaran dibatalkan atau kedaluwarsa
-      await prisma.booking.update({
-        where: { id: booking.id },
-        data: {
-          status: "CANCELLED",
-          cancellation_reason: `Midtrans payment ${transaction_status}`,
-        },
+      // Pembayaran dibatalkan atau kedaluwarsa oleh Midtrans:
+      // Jalankan dalam Database Transaction atomik untuk memastikan status pesanan diperbarui
+      // dan kuota kamar (Property & RoomType) dipulihkan ke inventaris.
+      await prisma.$transaction(async (tx) => {
+        // Pembaruan bersyarat: hanya update jika status saat ini masih PENDING
+        // Mencegah double-increment jika notifikasi webhook diterima berulang kali
+        const updated = await tx.booking.updateMany({
+          where: {
+            id: booking.id,
+            status: "PENDING",
+          },
+          data: {
+            status: "CANCELLED",
+            cancellation_reason: `Midtrans payment ${transaction_status}`,
+          },
+        });
+
+        // Kembalikan kuota kamar HANYA jika status berhasil diubah dari PENDING ke CANCELLED
+        if (updated.count > 0) {
+          if (booking.property_id) {
+            await tx.property.update({
+              where: { id: booking.property_id },
+              data: {
+                available_rooms: {
+                  increment: 1,
+                },
+              },
+            });
+          }
+
+          if (booking.room_type_id) {
+            await tx.roomType.update({
+              where: { id: booking.room_type_id },
+              data: {
+                available_rooms: {
+                  increment: 1,
+                },
+              },
+            });
+          }
+
+          // Nonaktifkan magic link verifikasi yang belum terpakai
+          await tx.magicLink.updateMany({
+            where: {
+              booking_id: booking.id,
+              is_used: false,
+            },
+            data: {
+              is_used: true,
+            },
+          });
+        }
       });
 
       return NextResponse.json(
-        { status: "OK", message: "Booking marked as CANCELLED" },
+        { status: "OK", message: "Booking marked as CANCELLED and room inventory restored" },
         { status: 200 }
       );
     }
