@@ -34,6 +34,8 @@ KosPasti menghadirkan ekosistem menyeluruh yang terdiri dari:
 ### 1. 🔍 Portal Pencari Kos (Penyewa / Mahasiswa)
 - **Pencarian Cerdas & Peta Interaktif:** Pencarian berbasis radius jarak (*Haversine Formula*), nama kos, gender (Putra/Putri/Campur), dan harga sewa. Terintegrasi langsung dengan Google Maps interaktif.
 - **299 Titik Master Lokasi Subang:** Pencarian akurat berdasarkan kampus, sekolah, rumah sakit, landmark, pabrik, dan kecamatan di seluruh wilayah Subang.
+- **Perbandingan Kos Interaktif (`/compare`):** Fitur pembanding hingga 3 kos sekaligus secara berdampingan (harga, fasilitas, tipe kamar, kebijakan hewan/jam malam, dan jarak ke kampus).
+- **Penjadwalan Survei Kos Langsung (`/survey`):** Formulir janji temu survei kos offline dengan pemilik kos, pemilihan slot waktu kunjungan, dan sinkronisasi otomatis via WhatsApp Magic Link.
 - **Verifikasi Identitas Cerdas (AI-Assisted Tenant KYC):**
   - Unggah foto KTP / Kartu Tanda Mahasiswa (KTM).
   - Ekstraksi OCR otomatis dan pencocokan nama berbasis AI Gemini Multimodal Vision (`@google/genai`).
@@ -44,14 +46,22 @@ KosPasti menghadirkan ekosistem menyeluruh yang terdiri dari:
   - Galeri media foto dan video interaktif lengkap dengan penampil layar penuh (*Lightbox Modal*).
   - Aturan kos, tata tertib, fasilitas lengkap, dan simulasi estimasi jarak ke tempat kuliah/kerja.
 - **Sistem Ulasan & Rating Nyata:** Transparansi ulasan penyewa pasca-booking, rating bintang, dan balasan resmi dari pemilik kos.
-- **Pemesanan Mudah (Instant Booking) & Escrow Deposit:** Formulir pemesanan kamar cepat dengan pilihan tanggal masuk fleksibel, simulasi pembayaran instan (QRIS), dan penahanan deposit jaminan kerusakan (Escrow).
-- **Berita Acara Digital Serah Terima Kamar (Check-in BAST):**
-  - Tampilan dokumen BAST resmi digital siap cetak (*print-friendly* / PDF) di `/inspection/[bookingId]`.
+- **Pemesanan Mudah (Instant Booking) & Escrow Deposit:** 
+  - Formulir pemesanan kamar cepat dengan pilihan tanggal masuk fleksibel.
+  - Pembayaran online terintegrasi Midtrans Snap (QRIS, Virtual Account, GoPay/ShopeePay).
+  - Penahanan dana sewa dan deposit jaminan kerusakan aman dalam rekening penampung (*Escrow System*).
+- **Surat Perjanjian Sewa Digital (SPK Digital di `/contract/[bookingId]`):** Dokumen kontrak sewa resmi digital dengan tanda tangan digital sistem, hak & kewajiban penghuni, dan klausul deposit.
+- **Berita Acara Digital Serah Terima Kamar (Check-in BAST di `/inspection/[bookingId]`):**
+  - Tampilan dokumen BAST resmi digital siap cetak (*print-friendly* / PDF).
   - Dokumentasi kondisi fisik awal fasilitas kamar (AC, Kasur, Dinding, Kamar Mandi) dengan bukti foto yang dikunci permanen (*baseline*).
   - Konfirmasi digital kesepakatan kondisi kamar antara mahasiswa dan pemilik kos.
-- **Wishlist & Kos Tersimpan:** Simpan kos idaman untuk perbandingan cepat tanpa kehilangan jejak.
+- **Kuitansi Pembayaran Digital (`/receipt/[bookingId]`):** Invoice & bukti pelunasan sewa resmi yang tersimpan secara offline-ready di browser pengguna.
+- **Tagihan Sewa Berulang (Recurring Invoices):** Otomatisasi penerbitan invoice perpanjangan sewa bulanan dengan pengingat H-7 dan H-3 via WhatsApp Fonnte.
+- **Obrolan Langsung & Masking Privasi (`/chat`):** Obrolan *real-time* via Supabase Realtime dengan masking nomor HP/kontak sebelum booking resmi disetujui.
+- **Pusat Bantuan & Edukasi Transaksi (`/bantuan`):** Dokumentasi FAQ lengkap untuk penyewa dan pemilik kos mengenai tata cara sewa, garansi ketersediaan, dan pengembalian dana.
+- **Wishlist & Kos Tersimpan (`/favorit`):** Simpan kos idaman untuk perbandingan cepat tanpa kehilangan jejak.
 - **Dukungan Tema Gelap & Terang:** Tampilan dinamis dan nyaman di mata dengan dukungan *Dark Mode* otomatis berbasis `next-themes`.
-- **Progressive Web App (PWA):** Dapat diinstal langsung di layar utama smartphone Android/iOS maupun desktop tanpa melalui toko aplikasi.
+- **Progressive Web App (PWA & Offline Cache):** Dapat diinstal langsung di layar utama smartphone Android/iOS maupun desktop dengan dukungan cache offline IndexedDB/LocalStorage.
 
 ### 2. 🤝 Portal Mitra KosPasti (`/partner`)
 - **Dashboard Statistik & Okupansi:** Metrik *real-time* mengenai total kamar disewa, tingkat hunian (*occupancy rate*), dan estimasi pendapatan bulanan.
@@ -63,25 +73,36 @@ KosPasti menghadirkan ekosistem menyeluruh yang terdiri dari:
   - Penyimpanan foto ke Supabase Storage dan penguncian baseline otomatis.
   - Akses perbandingan bukti foto awal saat checkout ketika terjadi klaim kerusakan deposit jaminan.
 - **Badge Keamanan Penyewa Terverifikasi:** Indikator badge terverifikasi pada calon penyewa di daftar pesanan masuk dan ruang obrolan (*Chat*).
+- **Manajemen Jadwal Survei Masuk (`/partner/dashboard/visits`):** Persetujuan atau penjadwalan ulang janji temu survei calon penyewa.
+- **Pelepasan Deposit & Checkout Kamar:** Evaluasi kondisi kamar pasca-sewa, opsi pengembalian 100% deposit ke penyewa atau klaim biaya perbaikan fisik.
+- **Ekspor Laporan Keuangan:** Unduh rekapitulasi data pesanan dan rincian transaksi keuangan ke format CSV/Excel atau PDF siap cetak.
 - **Manajemen Properti & Tipe Kamar:** Kontrol penuh atas ketersediaan kamar, deskripsi fasilitas, harga per bulan, foto galeri, dan aturan hunian.
+- **Generator Deskripsi AI Otomatis:** Pembuatan deskripsi promosi kos otomatis berbasis Gemini AI hanya dengan 1 klik.
 - **Interaksi Ulasan Penghuni:** Pemilik kos dapat membalas ulasan dan masukan penyewa secara langsung dengan tanda akun resmi pemilik.
 - **Manajemen Profil & Foto Avatar:** 
-  - Unggah dan ubah foto profil pengelola / logo kos resmi (tersimpan di server media lokal aman).
+  - Unggah dan ubah foto profil pengelola / logo kos resmi (tersimpan di Supabase Storage / storage lokal aman).
   - Edit nama pengelola dan nomor WhatsApp aktif untuk jalur komunikasi calon penyewa.
 - **Pusat Keamanan & Kata Sandi:** Form pembaruan kata sandi mandiri berenkripsi *bcrypt* dengan visibilitas intip sandi.
 - **Rekening Pencairan Dana (Payout Method):** Pendaftaran rekening bank (BCA, Mandiri, BRI, BNI) atau dompet digital (GoPay, OVO, DANA) untuk penarikan hasil sewa pasca verifikasi admin.
 
 ### 3. 🛡️ Portal Admin KosPasti (`/admin`)
-- **Pusat Analitik Operasional:** Ringkasan jumlah transaksi, status properti aktif, total mitra, dan antrean ulasan ulasan.
+- **Pusat Analitik Operasional:** Ringkasan jumlah transaksi, status properti aktif, total mitra, dan antrean ulasan.
 - **Moderasi & Approval Properti:** Meninjau kos baru (*PENDING_REVIEW*), menyetujui publikasi (*PUBLISHED*), atau menolak (*REJECTED*) dengan catatan alasan perbaikan.
 - **Manajemen Pemilik Kos & Magic Link:** Kontrol seluruh data mitra serta pembuatan *Magic Link* WhatsApp instan untuk akses cepat tanpa kata sandi.
 - **Master Lokasi Wilayah (299 Titik):** Pencarian, filter kategori, penambahan lokasi baru, serta sakelar toggle aktif/nonaktif lokasi.
-- **Verifikasi & Pencairan Dana (Payouts):** Validasi nomor rekening mitra dan eksekusi pembayaran hasil sewa kamar.
+- **Verifikasi & Pencairan Dana Otomatis (Midtrans Iris):** Validasi nomor rekening mitra dan eksekusi transfer dana sewa via payment gateway Iris Disbursement API.
+- **Moderasi Ulasan & Pelaporan:** Sembunyikan atau tindaklanjuti ulasan yang melanggar ketentuan komunitas.
 
 ### 4. 🤖 Asisten AI & Visi Cerdas (Gemini Multimodal)
-- **Rekomendasi Cerdas Kos:** Membantu pencari kos menemukan hunian terbaik berdasarkan preferensi anggaran, fasilitas, dan lokasi.
-- **Generator Deskripsi Properti AI:** Membantu pemilik kos membuat deskripsi properti menarik dan profesional secara otomatis.
-- **AI-Assisted Tenant KYC (Vision OCR):** Membaca kartu KTP/KTM secara multimodal, mengekstrak NIK/NIM dan nama, serta mencocokkan identitas secara otomatis dan privat.
+- **Rekomendasi Cerdas Kos (`/api/ai-search`):** Membantu pencari kos menemukan hunian terbaik berdasarkan preferensi anggaran, fasilitas, dan lokasi.
+- **Generator Deskripsi Properti AI (`/api/ai/generate-description`):** Membantu pemilik kos membuat deskripsi properti menarik dan profesional secara otomatis.
+- **AI-Assisted Tenant KYC (Vision OCR di `/api/user/kyc`):** Membaca kartu KTP/KTM secara multimodal, mengekstrak NIK/NIM dan nama, serta mencocokkan identitas secara otomatis dan privat.
+
+### 5. ⏰ Background Automation (Cron Jobs)
+- **Tagihan Sewa Bulanan (`/api/cron/billing-invoices`):** Pembuatan otomatis tagihan sewa bulan ke-2, ke-3, dst. untuk penyewa aktif.
+- **Pengingat Jatuh Tempo (`/api/cron/payment-reminder`):** Pengiriman pesan WhatsApp pengingat otomatis pada H-7 dan H-3 sebelum tanggal jatuh tempo sewa.
+- **Siklus Hidup Booking (`/api/cron/booking-lifecycle`):** Pembatalan otomatis pesanan yang kedaluwarsa atau belum dibayar dalam batas waktu pembayaran.
+- **Pembaruan Bulanan Mitra (`/api/cron/monthly-update`):** Pengiriman notifikasi WhatsApp berkala kepada pemilik kos untuk memastikan ketersediaan kamar selalu akurat.
 
 ---
 
@@ -134,11 +155,15 @@ Database menggunakan **PostgreSQL (Neon Serverless)** yang terhubung via Prisma 
 - **`RoomUnit`**: Inventaris nomor kamar fisik (misal: "101", "204"), nomor lantai, dan status ketersediaan (`VACANT`, `OCCUPIED`, `MAINTENANCE`).
 - **`CheckinInspection`**: Berita acara digital serah terima kondisi kamar saat check-in (AC, Kasur, Dinding, Kamar Mandi) dengan bukti foto baseline terkunci.
 - **`TenantIdentityVerification`**: Rekam jejak verifikasi identitas cerdas penyewa (KTP/KTM OCR) berbasis Gemini AI dengan skor kemiripan nama dan status verifikasi.
+- **`Invoice`**: Tagihan sewa berulang bulanan (*recurring billing*) terintegrasi Midtrans Snap URL dan pengingat jatuh tempo H-7 & H-3.
+- **`VisitSchedule`**: Penjadwalan survei kunjungan fisik kos antara pencari kos dan pemilik.
+- **`ChatRoom` & `ChatMessage`**: Ruang obrolan langsung penyewa-pemilik terintegrasi Supabase Realtime dengan *masking* privasi kontak.
+- **`Notification`**: Pusat notifikasi In-App untuk pembaruan booking, pembayaran, dan sistem.
 - **`Review`**: Ulasan bintang, komentar penghuni, dan balasan resmi mitra (`reply`, `replied_at`).
-- **`PayoutMethod` & `Payout`**: Rekening pencairan dana mitra dan riwayat transfer bagi hasil sewa.
+- **`PayoutMethod` & `Payout`**: Rekening pencairan dana mitra dan riwayat transfer bagi hasil sewa via Midtrans Iris.
 - **`Location`**: 299 koordinat landmark, sekolah, universitas, dan pusat aktivitas di Subang.
 - **`SavedProperty`**: Daftar kos favorit yang disimpan oleh pengguna (Wishlist).
-- **`MagicLink`**: Autentikasi token sekali pakai via tautan WhatsApp.
+- **`MagicLink`**: Autentikasi token sekali pakai via tautan WhatsApp (update sisa kamar & verifikasi survei).
 - **`User`**: Akun penyewa / mahasiswa pencari kos (dengan status `is_identity_verified`).
 
 ---
@@ -153,7 +178,10 @@ Database menggunakan **PostgreSQL (Neon Serverless)** yang terhubung via Prisma 
 | **Database** | PostgreSQL via Neon | Serverless PostgreSQL Database |
 | **ORM** | Prisma v6 | Type-safe Database Client & Schema Migration |
 | **Peta Interaktif** | `@vis.gl/react-google-maps` | Google Maps Platform API SDK |
-| **AI Intelligence**| `@google/genai` | Gemini AI SDK untuk rekomendasi cerdas |
+| **AI Intelligence**| `@google/genai` | Gemini AI Multimodal SDK (Vision OCR, search, deskripsi) |
+| **Media & Storage** | Supabase Storage (`@supabase/supabase-js`) | Penyimpanan cloud publik aman untuk media & dokumen KYC |
+| **Payment Gateway** | Midtrans Snap & Iris API | Pembayaran QRIS/VA & pencairan dana otomatis (Disbursement) |
+| **WhatsApp Gateway**| Fonnte API (`/api/send`) | Otomasi notifikasi pesan & Magic Link WhatsApp |
 | **Keamanan** | `bcryptjs` & `jose` | Hashing kata sandi aman & HTTP-only JWT Cookie Session |
 | **PWA** | `@ducanh2912/next-pwa` | Service worker & instalabilitas aplikasi offline-ready |
 | **Ikonografi** | `lucide-react` | Set ikon antarmuka SVG modern & konsisten |
@@ -185,8 +213,23 @@ ADMIN_PIN="123456"
 # Kunci Google Maps API
 NEXT_PUBLIC_GOOGLE_MAPS_API_KEY="AIzaSyYourGoogleMapsApiKey"
 
-# Kunci Gemini AI (Opsional)
+# Kunci Gemini AI (Untuk rekomendasi cerdas, generator deskripsi, & KYC OCR)
 GEMINI_API_KEY="AIzaSyYourGeminiApiKey"
+
+# Supabase Storage (Penyimpanan foto media, berita acara, & dokumen identitas)
+NEXT_PUBLIC_SUPABASE_URL="https://your-project.supabase.co"
+NEXT_PUBLIC_SUPABASE_ANON_KEY="your-anon-key"
+SUPABASE_SERVICE_ROLE_KEY="your-service-role-key"
+
+# WhatsApp Fonnte Gateway (Pengiriman notifikasi otomatis & Magic Link)
+FONNTE_TOKEN="your-fonnte-token"
+
+# Midtrans Payment Gateway & Iris Disbursement
+MIDTRANS_SERVER_KEY="SB-Mid-server-xxxx"
+MIDTRANS_CLIENT_KEY="SB-Mid-client-xxxx"
+MIDTRANS_IRIS_API_KEY="IRIS-xxxx"
+MIDTRANS_IS_PRODUCTION="false"
+NEXT_PUBLIC_MIDTRANS_CLIENT_KEY="SB-Mid-client-xxxx"
 ```
 
 ### 4. Sinkronisasi Skema Database
