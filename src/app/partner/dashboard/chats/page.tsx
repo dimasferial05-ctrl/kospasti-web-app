@@ -26,6 +26,7 @@ interface ChatRoomItem {
   property_price: number;
   other_party_name: string;
   other_party_avatar: string | null;
+  other_party_is_verified?: boolean;
   last_message_at: string;
   last_message_preview: string | null;
   unread_count: number;
@@ -324,9 +325,17 @@ export default function PartnerChatsPage() {
                   </div>
 
                   <div>
-                    <h3 className="font-extrabold text-sm text-slate-900 dark:text-white leading-tight">
-                      {selectedRoomDetails?.other_party_name || "Calon Penyewa"}
-                    </h3>
+                    <div className="flex items-center gap-1.5">
+                      <h3 className="font-extrabold text-sm text-slate-900 dark:text-white leading-tight">
+                        {selectedRoomDetails?.other_party_name || "Calon Penyewa"}
+                      </h3>
+                      {selectedRoomDetails?.other_party_is_verified && (
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
+                          <ShieldCheck className="w-3 h-3 text-emerald-600 dark:text-emerald-400" />
+                          <span>Terverifikasi</span>
+                        </span>
+                      )}
+                    </div>
                     <p className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 flex items-center gap-1 mt-0.5">
                       <Building className="w-3 h-3 text-slate-400" />
                       <span>{selectedRoomDetails?.property_name || "Properti Kos"}</span>

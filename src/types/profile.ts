@@ -8,6 +8,8 @@ export interface UserProfile {
   created_at: string;
   hasPassword?: boolean;
   isGoogleLinked?: boolean;
+  is_identity_verified?: boolean;
+  verified_at?: string | null;
 }
 
 export interface BookingProperty {

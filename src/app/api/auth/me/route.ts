@@ -35,6 +35,8 @@ export async function GET() {
         whatsapp: true,
         avatar: true,
         bio: true,
+        is_identity_verified: true,
+        verified_at: true,
       },
     });
 
@@ -57,6 +59,8 @@ export async function GET() {
           whatsapp: dbUser.whatsapp ?? null,
           avatar: dbUser.avatar ?? null,
           bio: dbUser.bio ?? null,
+          is_identity_verified: Boolean(dbUser.is_identity_verified),
+          verified_at: dbUser.verified_at ?? null,
         },
       },
       { status: 200 }
