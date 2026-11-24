@@ -27,8 +27,9 @@ import { ProfileInfoTab } from "@/components/profile/ProfileInfoTab";
 import { BookingsTab } from "@/components/profile/BookingsTab";
 import { VisitsTab } from "@/components/profile/VisitsTab";
 import { SecurityTab } from "@/components/profile/SecurityTab";
+import { KycTab } from "@/components/profile/KycTab";
 
-type TabKey = "profile" | "bookings" | "visits" | "security";
+type TabKey = "profile" | "bookings" | "visits" | "kyc" | "security";
 
 function ProfileContent() {
   const router = useRouter();
@@ -41,6 +42,8 @@ function ProfileContent() {
       ? "bookings"
       : rawTab === "visits"
       ? "visits"
+      : rawTab === "kyc"
+      ? "kyc"
       : rawTab === "security"
       ? "security"
       : "profile";
@@ -475,6 +478,23 @@ function ProfileContent() {
               <button
                 type="button"
                 role="tab"
+                id="tab-kyc"
+                aria-selected={activeTab === "kyc"}
+                aria-controls="panel-kyc"
+                onClick={() => setActiveTab("kyc")}
+                className={`flex-1 lg:flex-none flex items-center justify-center lg:justify-start gap-2.5 px-4 py-3 rounded-xl text-sm font-semibold transition-colors cursor-pointer whitespace-nowrap focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 ${
+                  activeTab === "kyc"
+                    ? "bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800"
+                    : "text-slate-650 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white"
+                }`}
+              >
+                <ShieldCheck className="w-4 h-4 text-emerald-600" />
+                <span>Verifikasi Identitas</span>
+              </button>
+
+              <button
+                type="button"
+                role="tab"
                 id="tab-security"
                 aria-selected={activeTab === "security"}
                 aria-controls="panel-security"
@@ -581,7 +601,23 @@ function ProfileContent() {
               </div>
             )}
 
-            {/* TAB 4: KEAMANAN & KATA SANDI */}
+            {/* TAB 4: VERIFIKASI IDENTITAS CERDAS (KYC) */}
+            {activeTab === "kyc" && (
+              <div
+                role="tabpanel"
+                id="panel-kyc"
+                aria-labelledby="tab-kyc"
+                tabIndex={0}
+                className="focus:outline-none"
+              >
+                <KycTab
+                  userName={user?.name || ""}
+                  onVerificationSuccess={fetchProfile}
+                />
+              </div>
+            )}
+
+            {/* TAB 5: KEAMANAN & KATA SANDI */}
             {activeTab === "security" && (
               <div
                 role="tabpanel"

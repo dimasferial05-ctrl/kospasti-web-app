@@ -89,6 +89,7 @@ interface Booking {
     name: string;
     email: string;
     whatsapp: string | null;
+    is_identity_verified?: boolean;
   } | null;
 }
 
@@ -577,9 +578,17 @@ export default function PartnerBookingsPage() {
                 <div className="flex items-start justify-between gap-2">
                   <div>
                     {getStatusBadge(b.status)}
-                    <h3 className="font-extrabold text-slate-900 dark:text-white text-base">
-                      {b.student_name || "Penyewa"}
-                    </h3>
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      <h3 className="font-extrabold text-slate-900 dark:text-white text-base">
+                        {b.student_name || "Penyewa"}
+                      </h3>
+                      {b.user?.is_identity_verified && (
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
+                          <ShieldCheck className="w-3 h-3 text-emerald-600 dark:text-emerald-400" />
+                          <span>Penyewa Terverifikasi</span>
+                        </span>
+                      )}
+                    </div>
                     <p className="text-[11px] text-slate-400 mt-0.5">
                       Dipesan pada{" "}
                       {new Date(b.created_at).toLocaleDateString("id-ID", {

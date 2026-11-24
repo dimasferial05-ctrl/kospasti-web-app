@@ -38,6 +38,7 @@ export async function GET(
             id: true,
             name: true,
             avatar: true,
+            is_identity_verified: true,
           },
         },
         owner: {
@@ -120,6 +121,7 @@ export async function GET(
         property_price: room.property.price_per_month,
         other_party_name: otherPartyName,
         other_party_avatar: otherPartyAvatar,
+        other_party_is_verified: !isUserParticipant ? Boolean(room.user.is_identity_verified) : true,
         current_actor_type: actor.type,
       },
       messages: messages.map((m) => ({

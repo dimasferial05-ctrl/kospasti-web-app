@@ -41,6 +41,7 @@ export async function GET(request: NextRequest) {
             id: true,
             name: true,
             avatar: true,
+            is_identity_verified: true,
           },
         },
         owner: {
@@ -71,6 +72,7 @@ export async function GET(request: NextRequest) {
         property_price: room.property.price_per_month,
         other_party_name: otherPartyName,
         other_party_avatar: otherPartyAvatar,
+        other_party_is_verified: isOwnerViewer ? Boolean(room.user.is_identity_verified) : true, // Owner selalu tervalidasi propertinya
         last_message_at: room.last_message_at,
         last_message_preview: room.last_message_preview,
         unread_count: unreadCount,

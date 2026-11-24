@@ -178,8 +178,11 @@ model User {
   avatar           String?
   bio              String?
   google_id        String?         @unique
+  is_identity_verified Boolean      @default(false)
+  verified_at          DateTime?
   created_at       DateTime        @default(now())
   updated_at       DateTime        @updatedAt
+  identity_verification TenantIdentityVerification?
   bookings         Booking[]
   saved_properties SavedProperty[]
   reviews          Review[]
@@ -475,6 +478,35 @@ model CheckinInspection {
 
   @@index([booking_id])
   @@index([inspected_at])
+}
+
+model TenantIdentityVerification {
+  id                   String    @id @default(uuid())
+  user_id              String    @unique
+  user                 User      @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  document_type        String    // "KTP" | "KTM"
+  document_photo_url   String    // URL foto di Supabase Storage
+
+  // Hasil Ekstraksi AI Gemini
+  extracted_name       String?   // Nama lengkap hasil OCR
+  extracted_id_number  String?   // NIK (16 digit) atau NIM mahasiswa
+  extracted_institution String?  // Nama Universitas/Kampus (untuk KTM)
+
+  // Verifikasi & Kecocokan
+  match_confidence     Float     @default(0.0) // 0.0 - 1.0 (Skor kemiripan nama)
+  verification_status   String    @default("PENDING") // "VERIFIED" | "REJECTED" | "NEEDS_MANUAL_REVIEW"
+  rejection_reason     String?
+
+  // Metadata Audit & Privasi
+  ai_raw_response      String?   // JSON ringkas hasil evaluasi Gemini
+  verified_at          DateTime?
+
+  created_at           DateTime  @default(now())
+  updated_at           DateTime  @updatedAt
+
+  @@index([user_id])
+  @@index([verification_status])
 }
 
 

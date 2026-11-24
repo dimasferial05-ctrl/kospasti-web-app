@@ -63,6 +63,7 @@ export async function GET() {
             name: true,
             email: true,
             whatsapp: true,
+            is_identity_verified: true,
           },
         },
         payout: {
