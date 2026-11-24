@@ -34,18 +34,35 @@ KosPasti menghadirkan ekosistem menyeluruh yang terdiri dari:
 ### 1. 🔍 Portal Pencari Kos (Penyewa / Mahasiswa)
 - **Pencarian Cerdas & Peta Interaktif:** Pencarian berbasis radius jarak (*Haversine Formula*), nama kos, gender (Putra/Putri/Campur), dan harga sewa. Terintegrasi langsung dengan Google Maps interaktif.
 - **299 Titik Master Lokasi Subang:** Pencarian akurat berdasarkan kampus, sekolah, rumah sakit, landmark, pabrik, dan kecamatan di seluruh wilayah Subang.
+- **Verifikasi Identitas Cerdas (AI-Assisted Tenant KYC):**
+  - Unggah foto KTP / Kartu Tanda Mahasiswa (KTM).
+  - Ekstraksi OCR otomatis dan pencocokan nama berbasis AI Gemini Multimodal Vision (`@google/genai`).
+  - Lencana centang hijau **"Penyewa Terverifikasi"** pada profil, pesan obrolan (*Chat*), dan formulir booking.
+  - Penyamaran (*masking*) nomor NIK/NIM sesuai regulasi kepatuhan privasi (UU Perlindungan Data Pribadi / PDP).
 - **Detail Kos Komprehensif:** 
   - Multi-tipe kamar (*Standard*, *Deluxe*, *Suite*) beserta spesifikasi dimensi dan sisa ketersediaan kamar.
   - Galeri media foto dan video interaktif lengkap dengan penampil layar penuh (*Lightbox Modal*).
   - Aturan kos, tata tertib, fasilitas lengkap, dan simulasi estimasi jarak ke tempat kuliah/kerja.
 - **Sistem Ulasan & Rating Nyata:** Transparansi ulasan penyewa pasca-booking, rating bintang, dan balasan resmi dari pemilik kos.
-- **Pemesanan Mudah (Instant Booking):** Formulir pemesanan kamar cepat dengan pilihan tanggal masuk fleksibel dan simulasi pembayaran instan (QRIS).
+- **Pemesanan Mudah (Instant Booking) & Escrow Deposit:** Formulir pemesanan kamar cepat dengan pilihan tanggal masuk fleksibel, simulasi pembayaran instan (QRIS), dan penahanan deposit jaminan kerusakan (Escrow).
+- **Berita Acara Digital Serah Terima Kamar (Check-in BAST):**
+  - Tampilan dokumen BAST resmi digital siap cetak (*print-friendly* / PDF) di `/inspection/[bookingId]`.
+  - Dokumentasi kondisi fisik awal fasilitas kamar (AC, Kasur, Dinding, Kamar Mandi) dengan bukti foto yang dikunci permanen (*baseline*).
+  - Konfirmasi digital kesepakatan kondisi kamar antara mahasiswa dan pemilik kos.
 - **Wishlist & Kos Tersimpan:** Simpan kos idaman untuk perbandingan cepat tanpa kehilangan jejak.
 - **Dukungan Tema Gelap & Terang:** Tampilan dinamis dan nyaman di mata dengan dukungan *Dark Mode* otomatis berbasis `next-themes`.
 - **Progressive Web App (PWA):** Dapat diinstal langsung di layar utama smartphone Android/iOS maupun desktop tanpa melalui toko aplikasi.
 
 ### 2. 🤝 Portal Mitra KosPasti (`/partner`)
 - **Dashboard Statistik & Okupansi:** Metrik *real-time* mengenai total kamar disewa, tingkat hunian (*occupancy rate*), dan estimasi pendapatan bulanan.
+- **Manajemen Nomor Kamar & Inventaris Fisik (Room Units):**
+  - Penetapan nomor kamar fisik spesifik (misal: "101", "204") dan lantai saat menyetujui pesanan sewa.
+  - Pelacakan status unit fisik secara langsung (`VACANT`, `OCCUPIED`, `MAINTENANCE`).
+- **Pencatatan Berita Acara Digital (Check-in Inspection Modal):**
+  - Form serah terima kamar digital saat hari *check-in* penyewa: ambil foto kondisi fasilitas (AC, Kasur, Dinding, Kamar Mandi) langsung dari kamera HP.
+  - Penyimpanan foto ke Supabase Storage dan penguncian baseline otomatis.
+  - Akses perbandingan bukti foto awal saat checkout ketika terjadi klaim kerusakan deposit jaminan.
+- **Badge Keamanan Penyewa Terverifikasi:** Indikator badge terverifikasi pada calon penyewa di daftar pesanan masuk dan ruang obrolan (*Chat*).
 - **Manajemen Properti & Tipe Kamar:** Kontrol penuh atas ketersediaan kamar, deskripsi fasilitas, harga per bulan, foto galeri, dan aturan hunian.
 - **Interaksi Ulasan Penghuni:** Pemilik kos dapat membalas ulasan dan masukan penyewa secara langsung dengan tanda akun resmi pemilik.
 - **Manajemen Profil & Foto Avatar:** 
@@ -61,8 +78,10 @@ KosPasti menghadirkan ekosistem menyeluruh yang terdiri dari:
 - **Master Lokasi Wilayah (299 Titik):** Pencarian, filter kategori, penambahan lokasi baru, serta sakelar toggle aktif/nonaktif lokasi.
 - **Verifikasi & Pencairan Dana (Payouts):** Validasi nomor rekening mitra dan eksekusi pembayaran hasil sewa kamar.
 
-### 4. 🤖 Asisten AI Rekomendasi
-- Terintegrasi dengan **Gemini AI** (`@google/genai`) untuk membantu pencari kos menemukan rekomendasi hunian yang paling sesuai dengan anggaran, preferensi fasilitas, dan lokasi aktivitas pengguna.
+### 4. 🤖 Asisten AI & Visi Cerdas (Gemini Multimodal)
+- **Rekomendasi Cerdas Kos:** Membantu pencari kos menemukan hunian terbaik berdasarkan preferensi anggaran, fasilitas, dan lokasi.
+- **Generator Deskripsi Properti AI:** Membantu pemilik kos membuat deskripsi properti menarik dan profesional secara otomatis.
+- **AI-Assisted Tenant KYC (Vision OCR):** Membaca kartu KTP/KTM secara multimodal, mengekstrak NIK/NIM dan nama, serta mencocokkan identitas secara otomatis dan privat.
 
 ---
 
@@ -111,13 +130,16 @@ Database menggunakan **PostgreSQL (Neon Serverless)** yang terhubung via Prisma 
 - **`Owner`**: Akun mitra pemilik kos (Nama, WhatsApp, Email, Password Terenkripsi, URL Avatar).
 - **`Property`**: Data kos (Nama, Harga, Kamar Tersedia, Tipe Gender, Fasilitas, Titik Koordinat, Status Moderasi, Aturan, Syarat Sewa).
 - **`RoomType`**: Varian tipe kamar kos beserta fasilitas dan tarif per bulan.
-- **`Booking`**: Transaksi pemesanan kamar oleh pengguna (Status: `PENDING`, `CONFIRMED`, `REJECTED`, `CANCELLED`).
+- **`Booking`**: Transaksi pemesanan kamar oleh pengguna (Status: `PENDING`, `APPROVED`, `ACCEPTED`, `COMPLETED`, `REJECTED`, `CANCELLED`).
+- **`RoomUnit`**: Inventaris nomor kamar fisik (misal: "101", "204"), nomor lantai, dan status ketersediaan (`VACANT`, `OCCUPIED`, `MAINTENANCE`).
+- **`CheckinInspection`**: Berita acara digital serah terima kondisi kamar saat check-in (AC, Kasur, Dinding, Kamar Mandi) dengan bukti foto baseline terkunci.
+- **`TenantIdentityVerification`**: Rekam jejak verifikasi identitas cerdas penyewa (KTP/KTM OCR) berbasis Gemini AI dengan skor kemiripan nama dan status verifikasi.
 - **`Review`**: Ulasan bintang, komentar penghuni, dan balasan resmi mitra (`reply`, `replied_at`).
 - **`PayoutMethod` & `Payout`**: Rekening pencairan dana mitra dan riwayat transfer bagi hasil sewa.
 - **`Location`**: 299 koordinat landmark, sekolah, universitas, dan pusat aktivitas di Subang.
 - **`SavedProperty`**: Daftar kos favorit yang disimpan oleh pengguna (Wishlist).
 - **`MagicLink`**: Autentikasi token sekali pakai via tautan WhatsApp.
-- **`User`**: Akun penyewa / mahasiswa pencari kos.
+- **`User`**: Akun penyewa / mahasiswa pencari kos (dengan status `is_identity_verified`).
 
 ---
 
