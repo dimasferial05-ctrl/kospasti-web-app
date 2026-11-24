@@ -159,6 +159,7 @@ model Booking {
   invoices               Invoice[]
   room_unit_id           String?
   room_unit              RoomUnit?       @relation(fields: [room_unit_id], references: [id], onDelete: SetNull)
+  checkin_inspection     CheckinInspection?
 
   @@index([property_id])
   @@index([user_id])
@@ -431,6 +432,49 @@ model RoomUnit {
   @@index([property_id])
   @@index([status])
   @@index([property_id, status])
+}
+
+model CheckinInspection {
+  id                    String    @id @default(uuid())
+  booking_id            String    @unique
+  booking               Booking   @relation(fields: [booking_id], references: [id], onDelete: Cascade)
+
+  inspector_role        String    @default("PARTNER") // "PARTNER" | "TENANT" | "ADMIN"
+  inspected_at          DateTime  @default(now())
+
+  // 1. Kondisi Air Conditioner (AC)
+  ac_condition          String    @default("GOOD") // "GOOD" | "DAMAGED" | "NOT_AVAILABLE"
+  ac_notes              String?
+  ac_photo_url          String?
+
+  // 2. Kondisi Kasur & Springbed
+  bed_condition         String    @default("GOOD") // "GOOD" | "DAMAGED" | "NOT_AVAILABLE"
+  bed_notes             String?
+  bed_photo_url         String?
+
+  // 3. Kondisi Dinding, Cat & Plafon
+  walls_condition       String    @default("GOOD") // "GOOD" | "DAMAGED" | "NOT_AVAILABLE"
+  walls_notes           String?
+  walls_photo_url       String?
+
+  // 4. Kondisi Kamar Mandi & Sanitasi
+  bathroom_condition    String    @default("GOOD") // "GOOD" | "DAMAGED" | "NOT_AVAILABLE"
+  bathroom_notes        String?
+  bathroom_photo_url    String?
+
+  // Catatan & Ringkasan Umum
+  general_notes         String?
+  additional_photos     String?   // JSON string: array URL foto tambahan ["url1", "url2"]
+
+  // Status Kunci Baseline
+  is_locked             Boolean   @default(true) // Dikunci agar tidak dapat direvisi sepihak setelah check-in
+  tenant_confirmed_at   DateTime? // Tanggal mahasiswa memverifikasi / menyetujui BAST digital
+
+  created_at            DateTime  @default(now())
+  updated_at            DateTime  @updatedAt
+
+  @@index([booking_id])
+  @@index([inspected_at])
 }
 
 
