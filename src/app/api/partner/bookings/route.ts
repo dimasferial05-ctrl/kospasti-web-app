@@ -75,6 +75,22 @@ export async function GET() {
             notes: true,
           },
         },
+        checkin_inspection: {
+          select: {
+            id: true,
+            is_locked: true,
+            ac_condition: true,
+            bed_condition: true,
+            walls_condition: true,
+            bathroom_condition: true,
+            ac_photo_url: true,
+            bed_photo_url: true,
+            walls_photo_url: true,
+            bathroom_photo_url: true,
+            inspected_at: true,
+            tenant_confirmed_at: true,
+          },
+        },
       },
       orderBy: { created_at: "desc" },
     });

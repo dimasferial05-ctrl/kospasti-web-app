@@ -23,9 +23,13 @@ import {
   ShieldCheck,
   AlertTriangle,
   DoorOpen,
+  ClipboardCheck,
+  FileText,
+  ExternalLink,
 } from "lucide-react";
 import { HelpTooltip } from "@/components/ui/Tooltip";
 import { ExportFinancialModal } from "@/components/partner/ExportFinancialModal";
+import { CheckinInspectionModal } from "@/components/partner/CheckinInspectionModal";
 
 interface Booking {
   id: string;
@@ -48,6 +52,20 @@ interface Booking {
   deposit_claimed_amount?: number | null;
   deposit_claim_reason?: string | null;
   checkout_confirmed_at?: string | null;
+  checkin_inspection?: {
+    id: string;
+    is_locked: boolean;
+    ac_condition: string;
+    bed_condition: string;
+    walls_condition: string;
+    bathroom_condition: string;
+    ac_photo_url?: string | null;
+    bed_photo_url?: string | null;
+    walls_photo_url?: string | null;
+    bathroom_photo_url?: string | null;
+    inspected_at: string;
+    tenant_confirmed_at?: string | null;
+  } | null;
   property: {
     id: string;
     name: string;
@@ -90,6 +108,7 @@ export default function PartnerBookingsPage() {
   const [claimReason, setClaimReason] = useState<string>("");
   const [checkoutLoading, setCheckoutLoading] = useState(false);
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
+  const [inspectionModalBooking, setInspectionModalBooking] = useState<Booking | null>(null);
 
   // Modal Penetapan Unit Kamar Fisik saat Approve
   const [approvingBooking, setApprovingBooking] = useState<Booking | null>(null);
@@ -358,19 +377,32 @@ export default function PartnerBookingsPage() {
     }
 
     return (
-      <button
-        type="button"
-        onClick={() => {
-          setConfirmCheckoutBooking(b);
-          setCheckoutCondition("GOOD");
-          setClaimAmount("");
-          setClaimReason("");
-        }}
-        className="w-full mt-2 py-2 px-3 rounded-xl bg-sky-600 hover:bg-sky-700 text-white font-bold text-xs flex items-center justify-center gap-1.5 transition-all shadow-sm shadow-sky-600/20 cursor-pointer"
-      >
-        <ShieldCheck className="w-3.5 h-3.5" />
-        <span>Konfirmasi Checkout & Pelepasan Deposit</span>
-      </button>
+      <div className="space-y-1.5 mt-2">
+        <button
+          type="button"
+          onClick={() => {
+            setConfirmCheckoutBooking(b);
+            setCheckoutCondition("GOOD");
+            setClaimAmount("");
+            setClaimReason("");
+          }}
+          className="w-full py-2 px-3 rounded-xl bg-sky-600 hover:bg-sky-700 text-white font-bold text-xs flex items-center justify-center gap-1.5 transition-all shadow-sm shadow-sky-600/20 cursor-pointer"
+        >
+          <ShieldCheck className="w-3.5 h-3.5" />
+          <span>Konfirmasi Checkout & Pelepasan Deposit</span>
+        </button>
+
+        {b.checkin_inspection && (
+          <Link
+            href={`/inspection/${b.id}`}
+            target="_blank"
+            className="w-full py-1.5 px-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-semibold text-[11px] flex items-center justify-center gap-1.5 transition-colors"
+          >
+            <FileText className="w-3.5 h-3.5 text-emerald-600" />
+            <span>Lihat BAST Baseline Kamar</span>
+          </Link>
+        )}
+      </div>
     );
   };
 
@@ -711,14 +743,36 @@ export default function PartnerBookingsPage() {
                       const isDateReady = today >= moveIn;
 
                       return isDateReady ? (
-                        <button
-                          type="button"
-                          onClick={() => setConfirmCheckinBooking(b)}
-                          className="w-full py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex items-center justify-center gap-1.5 transition-all shadow-sm shadow-emerald-600/20 cursor-pointer"
-                        >
-                          <CheckCircle2 className="w-4 h-4" />
-                          <span>Konfirmasi Check-In</span>
-                        </button>
+                        <div className="space-y-1.5">
+                          <button
+                            type="button"
+                            onClick={() => setConfirmCheckinBooking(b)}
+                            className="w-full py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex items-center justify-center gap-1.5 transition-all shadow-sm shadow-emerald-600/20 cursor-pointer"
+                          >
+                            <CheckCircle2 className="w-4 h-4" />
+                            <span>Konfirmasi Check-In</span>
+                          </button>
+
+                          {b.checkin_inspection ? (
+                            <Link
+                              href={`/inspection/${b.id}`}
+                              target="_blank"
+                              className="w-full py-1.5 px-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-semibold text-[11px] flex items-center justify-center gap-1.5 transition-colors"
+                            >
+                              <FileText className="w-3.5 h-3.5 text-emerald-600" />
+                              <span>Lihat BAST Kamar (Baseline Terkunci)</span>
+                            </Link>
+                          ) : (
+                            <button
+                              type="button"
+                              onClick={() => setInspectionModalBooking(b)}
+                              className="w-full py-1.5 px-2 rounded-xl border border-dashed border-emerald-300 dark:border-emerald-700 hover:bg-emerald-50 dark:hover:bg-emerald-950/30 text-emerald-700 dark:text-emerald-400 font-semibold text-[11px] flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                            >
+                              <ClipboardCheck className="w-3.5 h-3.5 text-emerald-600" />
+                              <span>Catat Berita Acara Kamar (BAST)</span>
+                            </button>
+                          )}
+                        </div>
                       ) : (
                         <div className="py-2 px-3 text-center rounded-xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-800 text-xs text-slate-400 font-medium">
                           Belum waktunya (Tersedia mulai {new Date(b.move_in_date).toLocaleDateString("id-ID")})
@@ -1004,6 +1058,19 @@ export default function PartnerBookingsPage() {
                       className="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-rose-500"
                     />
                   </div>
+
+                  {confirmCheckoutBooking.checkin_inspection && (
+                    <div className="pt-2 border-t border-rose-200/60 dark:border-rose-800/40">
+                      <Link
+                        href={`/inspection/${confirmCheckoutBooking.id}`}
+                        target="_blank"
+                        className="inline-flex items-center gap-1.5 text-xs text-rose-700 dark:text-rose-300 hover:underline font-bold"
+                      >
+                        <ExternalLink className="w-3.5 h-3.5" />
+                        <span>Bandingkan dengan Bukti Foto Baseline Check-In</span>
+                      </Link>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
@@ -1161,6 +1228,22 @@ export default function PartnerBookingsPage() {
         onClose={() => setIsExportModalOpen(false)}
         bookings={bookings}
       />
+
+      {/* Modal Form Berita Acara Digital Serah Terima Kamar (Check-in Inspection) */}
+      {inspectionModalBooking && (
+        <CheckinInspectionModal
+          bookingId={inspectionModalBooking.id}
+          propertyName={inspectionModalBooking.property.name}
+          studentName={inspectionModalBooking.student_name}
+          roomUnitNumber={inspectionModalBooking.room_unit?.unit_number}
+          isOpen={Boolean(inspectionModalBooking)}
+          onClose={() => setInspectionModalBooking(null)}
+          onSuccess={() => {
+            setSuccessMsg("Berita acara serah terima kamar berhasil disimpan dan dikunci sebagai baseline.");
+            fetchBookings();
+          }}
+        />
+      )}
     </div>
   );
 }
